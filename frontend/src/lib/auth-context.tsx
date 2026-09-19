@@ -83,7 +83,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("Firebase direct auth note:", fbErr.message);
       }
 
-      // 2. Attempt FastAPI backend if available
+      // 2. Attempt FastAPI backend if available with short timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1200);
+
       try {
         const formData = new URLSearchParams();
         formData.append("username", email);
@@ -92,8 +95,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await fetch(`${API_BASE_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formData.toString()
+          body: formData.toString(),
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           const data = await res.json();
@@ -113,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
       } catch {
+        clearTimeout(timeoutId);
         // Backend FastAPI not running
       }
 
@@ -145,20 +152,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email.includes("admin") ? "admin" : "guidance_counselor"
       );
       const profile = DEMO_PROFILES[fallbackRole];
-      setUser({
+      const demoUser: UserProfile = {
         id: 1,
         email: email || profile.email,
         full_name: profile.name,
         role: fallbackRole,
         student_id: profile.student_id || null
-      });
+      };
 
-      const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-      setServerError(
-        isLocal
-          ? "FastAPI backend at http://localhost:8000 is offline. Run 'npm run dev' to start both servers."
-          : "Cloud Demo Mode: Running with embedded client simulation. Connect a production FastAPI backend via NEXT_PUBLIC_API_URL."
-      );
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_token", `demo_token_${fallbackRole}_${Date.now()}`);
+        localStorage.setItem("sapc_custom_profile", JSON.stringify(demoUser));
+      }
+
+      setUser(demoUser);
+      setToken(`demo_token_${fallbackRole}_${Date.now()}`);
+      setServerError(null);
     } finally {
       setIsLoading(false);
     }
