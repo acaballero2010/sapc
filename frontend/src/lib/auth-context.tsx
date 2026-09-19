@@ -42,7 +42,7 @@ const DEMO_PROFILES: Record<RoleType, { email: string; pass: string; name: strin
   teacher: { 
     email: "teacher@sapc.edu.ph", 
     pass: "teacher123", 
-    name: "Mr. Roberto Santos (STEM Adviser)" 
+    name: "Prof. Ernesto Bautista (Class Adviser)" 
   },
   admin: { 
     email: "admin@sapc.edu.ph", 

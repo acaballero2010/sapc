@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   X, 
   ShieldCheck, 
@@ -47,8 +47,8 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const logoInputRef = useRef<HTMLInputElement>(null);
   
   // Editable form fields
-  const [fullName, setFullName] = useState(user?.full_name || "Maria Theresa Cruz, RGC");
-  const [email] = useState(user?.email || "counselor@sapc.edu.ph");
+  const [fullName, setFullName] = useState(user?.full_name || "");
+  const [email, setEmail] = useState(user?.email || "user@sapc.edu.ph");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
   const [customLogo, setCustomLogo] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
@@ -57,13 +57,54 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
     return null;
   });
   const [lrn, setLrn] = useState("109482719283");
-  const [strand, setStrand] = useState("Grade 11 - STEM (Science, Technology, Engineering, and Mathematics)");
-  const [section, setSection] = useState("Section A - St. Thomas Aquinas");
+  const [strand, setStrand] = useState("Senior High STEM Strand Faculty");
+  const [section, setSection] = useState("Grade 11 - St. Augustine (Adviser)");
   const [guardianName, setGuardianName] = useState("Mrs. Elena Dimaculangan");
   const [guardianContact, setGuardianContact] = useState("+63 917 555 0192");
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Sync state whenever modal opens or active user changes
+  useEffect(() => {
+    if (user) {
+      setFullName(user.full_name || "");
+      setEmail(user.email || "user@sapc.edu.ph");
+      setAvatarUrl(user.avatar_url || null);
+
+      if (user.role === "teacher") {
+        setLrn("FAC-2026-STEM-04");
+        setStrand("Senior High STEM Strand Faculty");
+        setSection("Grade 11 - St. Augustine (Class Adviser)");
+        setGuardianName("SAPC Academic Affairs Office");
+        setGuardianContact("+63 (049) 559-0192");
+      } else if (user.role === "guidance_counselor") {
+        setLrn("PRC-RGC-094821");
+        setStrand("Guidance & Counseling Department");
+        setSection("Central Guidance Office (Room 204)");
+        setGuardianName("Dean of Student Affairs");
+        setGuardianContact("+63 (049) 559-0193");
+      } else if (user.role === "admin") {
+        setLrn("ADM-2026-001");
+        setStrand("Institutional Administration & IT");
+        setSection("SAPC IT & Academic Affairs");
+        setGuardianName("Office of the President");
+        setGuardianContact("+63 (049) 559-0100");
+      } else if (user.role === "student") {
+        setLrn("109482719283");
+        setStrand("Grade 11 - STEM (Science, Technology, Engineering, and Mathematics)");
+        setSection("Grade 11 - St. Augustine");
+        setGuardianName("Mrs. Elena Dimaculangan");
+        setGuardianContact("+63 917 555 0192");
+      } else if (user.role === "parent") {
+        setLrn("PRNT-10948271");
+        setStrand("Parent of Joshua Dimaculangan (Grade 11 STEM)");
+        setSection("Parent-Teacher Community Association (PTCA)");
+        setGuardianName("Mrs. Elena Dimaculangan (Self)");
+        setGuardianContact("+63 917 555 0192");
+      }
+    }
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
