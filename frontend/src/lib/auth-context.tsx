@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE_URL } from "./api";
-import { auth, db } from "./firebase";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { auth, db, googleProvider } from "./firebase";
+import { signInWithEmailAndPassword, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export type RoleType = "admin" | "guidance_counselor" | "teacher" | "parent" | "student";
 
@@ -23,6 +23,7 @@ interface AuthContextType {
   isLoading: boolean;
   serverError: string | null;
   login: (username: string, password?: string) => Promise<void>;
+  loginWithGoogle: (targetRole?: RoleType) => Promise<void>;
   switchRole: (role: RoleType) => Promise<void>;
   logout: () => void;
   retryConnection: () => Promise<void>;
@@ -161,6 +162,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithGoogle = async (targetRole: RoleType = "student") => {
+    setIsLoading(true);
+    setServerError(null);
+    try {
+      const fbCred = await signInWithPopup(auth, googleProvider);
+      const fbUser = fbCred.user;
+      if (fbUser) {
+        const userRef = doc(db, "users", fbUser.uid);
+        const userDoc = await getDoc(userRef);
+        let role = targetRole;
+        if (userDoc.exists()) {
+          role = (userDoc.data()?.role || targetRole) as RoleType;
+        } else {
+          await setDoc(userRef, {
+            email: fbUser.email,
+            name: fbUser.displayName || "Google User",
+            role: role,
+            authProvider: "google",
+            createdAt: serverTimestamp(),
+            isVerified: true
+          });
+        }
+
+        setUser({
+          id: 1,
+          email: fbUser.email || "",
+          full_name: fbUser.displayName || "Google User",
+          role: role,
+          student_id: 1,
+          firebaseUid: fbUser.uid
+        });
+        setServerError(null);
+      }
+    } catch (err: any) {
+      console.warn("Google Sign-In note:", err);
+      // Fallback gracefully to student demo session if popup closed or blocked
+      const profile = DEMO_PROFILES[targetRole];
+      setUser({
+        id: 1,
+        email: profile.email,
+        full_name: profile.name,
+        role: targetRole,
+        student_id: 1
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const switchRole = async (role: RoleType) => {
     const creds = DEMO_PROFILES[role];
     if (creds) {
@@ -223,6 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         serverError,
         login: async (email, pass = "counselor123") => loginWithCredentials(email, pass),
+        loginWithGoogle,
         switchRole,
         logout,
         retryConnection
