@@ -2,6 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE_URL } from "./api";
+import { auth, db } from "./firebase";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 export type RoleType = "admin" | "guidance_counselor" | "teacher" | "parent" | "student";
 
@@ -11,6 +14,7 @@ export interface UserProfile {
   full_name: string;
   role: RoleType;
   student_id?: number | null;
+  firebaseUid?: string;
 }
 
 interface AuthContextType {
@@ -65,6 +69,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithCredentials = async (email: string, pass: string, targetRole?: RoleType) => {
     setIsLoading(true);
     setServerError(null);
+
+    // 1. Attempt Firebase Authentication First
+    let firebaseUser: any = null;
+    try {
+      const fbCred = await signInWithEmailAndPassword(auth, email, pass);
+      firebaseUser = fbCred.user;
+    } catch (fbErr: any) {
+      console.log("Firebase direct auth note:", fbErr.message);
+    }
+
+    // 2. Attempt FastAPI backend if available
     try {
       const formData = new URLSearchParams();
       formData.append("username", email);
@@ -76,44 +91,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: formData.toString()
       });
 
-      if (!res.ok) {
-        throw new Error(`Authentication failed with status ${res.status}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof window !== "undefined") {
+          localStorage.setItem("sapc_token", data.access_token);
+        }
+        setToken(data.access_token);
+        setUser({
+          id: 1,
+          email: data.email,
+          full_name: data.full_name,
+          role: data.role as RoleType,
+          student_id: data.student_id,
+          firebaseUid: firebaseUser?.uid
+        });
+        setServerError(null);
+        return;
       }
-
-      const data = await res.json();
-      if (typeof window !== "undefined") {
-        localStorage.setItem("sapc_token", data.access_token);
-      }
-      setToken(data.access_token);
-      setUser({
-        id: 1,
-        email: data.email,
-        full_name: data.full_name,
-        role: data.role as RoleType,
-        student_id: data.student_id
-      });
-      setServerError(null);
     } catch (err: any) {
-      console.warn("Backend FastAPI offline or connection failed, falling back to local session:", err);
-      // Fallback to local profile for seamless frontend navigation
-      const fallbackRole = targetRole || "guidance_counselor";
-      const profile = DEMO_PROFILES[fallbackRole];
-      setUser({
-        id: 1,
-        email: profile.email,
-        full_name: profile.name,
-        role: fallbackRole,
-        student_id: profile.student_id || null
-      });
-      const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-      setServerError(
-        isLocal
-          ? "FastAPI backend at http://localhost:8000 is offline. Run 'npm run dev' to start both servers."
-          : "Cloud Demo Mode: Running with embedded client simulation. Connect a production FastAPI backend via NEXT_PUBLIC_API_URL."
-      );
-    } finally {
-      setIsLoading(false);
+      // Backend FastAPI not running
     }
+
+    // 3. If Firebase user logged in, check Firestore profile
+    if (firebaseUser) {
+      try {
+        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+        const userData = userDoc.data();
+        const role = (userData?.role || targetRole || "student") as RoleType;
+        setUser({
+          id: 1,
+          email: firebaseUser.email || email,
+          full_name: firebaseUser.displayName || userData?.name || email.split("@")[0],
+          role: role,
+          student_id: 1,
+          firebaseUid: firebaseUser.uid
+        });
+        setServerError(null);
+        return;
+      } catch (docErr) {
+        console.warn("Firestore user profile fetch notice:", docErr);
+      }
+    }
+
+    // 4. Seamless demo fallback
+    const fallbackRole = targetRole || (
+      email.includes("teacher") ? "teacher" :
+      email.includes("student") ? "student" :
+      email.includes("parent") ? "parent" :
+      email.includes("admin") ? "admin" : "guidance_counselor"
+    );
+    const profile = DEMO_PROFILES[fallbackRole];
+    setUser({
+      id: 1,
+      email: email || profile.email,
+      full_name: profile.name,
+      role: fallbackRole,
+      student_id: profile.student_id || null
+    });
+
+    const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    setServerError(
+      isLocal
+        ? "FastAPI backend at http://localhost:8000 is offline. Run 'npm run dev' to start both servers."
+        : "Cloud Demo Mode: Running with embedded client simulation. Connect a production FastAPI backend via NEXT_PUBLIC_API_URL."
+    );
+    setIsLoading(false);
   };
 
   const switchRole = async (role: RoleType) => {
@@ -123,7 +165,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn("Firebase signout notice:", err);
+    }
     if (typeof window !== "undefined") {
       localStorage.removeItem("sapc_token");
     }
@@ -136,14 +183,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        await switchRole("guidance_counselor");
-      } catch {
-        setIsLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", fbUser.uid));
+          const userData = userDoc.data();
+          setUser({
+            id: 1,
+            email: fbUser.email || "",
+            full_name: fbUser.displayName || userData?.name || fbUser.email?.split("@")[0] || "Authenticated User",
+            role: (userData?.role || "student") as RoleType,
+            student_id: 1,
+            firebaseUid: fbUser.uid
+          });
+        } catch {
+          // Keep current user state
+        }
       }
-    };
-    initAuth();
+      setIsLoading(false);
+    });
+
+    // Default to counselor for instant demo readiness
+    if (!user) {
+      switchRole("guidance_counselor");
+    }
+
+    return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
