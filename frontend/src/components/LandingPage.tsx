@@ -128,11 +128,15 @@ export const LandingPage: React.FC = () => {
       {/* Navigation Header */}
       <header className="sticky top-1.5 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
+          <Link 
+            href="/"
+            className="flex items-center gap-3.5 hover:opacity-90 transition group cursor-pointer"
+            title="Return to Home"
+          >
             <SapcLogo size={44} />
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xl text-slate-900 tracking-tight">
+                <span className="font-extrabold text-xl text-slate-900 tracking-tight group-hover:text-[#8B0014] transition-colors">
                   SAPC <span className="text-[#8B0014]">IntellySys</span>
                 </span>
                 <span className="px-2.5 py-0.5 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 rounded-full shadow-xs">
@@ -143,13 +147,11 @@ export const LandingPage: React.FC = () => {
                 San Antonio de Padua College • &quot;A College for the Family&quot;
               </p>
             </div>
-          </div>
+          </Link>
 
-          <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
-            <a href="#about" className="hover:text-[#8B0014] transition">About SAPC</a>
-            <a href="#features" className="hover:text-[#8B0014] transition">5 Domains</a>
-            <a href="#benefits" className="hover:text-[#8B0014] transition">Efficacy</a>
-            <a href="#how-it-works" className="hover:text-[#8B0014] transition">AHP Model</a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600">
+            <a href="#about" className="hover:text-[#8B0014] transition">About</a>
+            <a href="#features" className="hover:text-[#8B0014] transition">Features</a>
             <a href="#contact" className="hover:text-[#8B0014] transition">Contact</a>
           </nav>
 
@@ -610,10 +612,10 @@ export const LandingPage: React.FC = () => {
 
       {/* Core Features Section (6 Cards) */}
       <section id="features" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-20 space-y-16">
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-bold text-[#8B0014] uppercase tracking-wider bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-[#8B0014] border border-rose-200 shadow-2xs mb-2">
             Engine Architecture
-          </span>
+          </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
             Comprehensive Decision Support Capabilities
           </h2>
@@ -846,14 +848,14 @@ export const LandingPage: React.FC = () => {
 
       {/* How It Works (4 Steps) */}
       <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-20 space-y-16">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold text-[#8B0014] uppercase tracking-wider bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+        <div className="text-center max-w-2xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-50 text-[#8B0014] border border-rose-200 shadow-2xs mb-2">
             Operational Workflow
-          </span>
+          </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
             How IntellySys Works
           </h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm sm:text-base text-slate-600">
             From data ingestion to collaborative remediation in 4 structured phases.
           </p>
         </div>
