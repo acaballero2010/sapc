@@ -346,7 +346,7 @@ export default function LoginPage() {
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-[#8B0014] transition"
             >
               <GraduationCap className="h-4 w-4 text-[#8B0014]" />
-              <span>New student, parent, or faculty? <strong className="text-[#8B0014] underline">Claim Account & Register →</strong></span>
+              <span>New student, parent, or faculty? <strong className="text-[#8B0014] underline">Create Account →</strong></span>
             </Link>
           </div>
         </div>

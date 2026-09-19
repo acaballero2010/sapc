@@ -40,7 +40,7 @@ const TABS: Array<{
     label: "Student",
     icon: <GraduationCap className="h-4 w-4 text-[#8B0014]" />,
     activeColor: "text-[#8B0014] border-[#8B0014]",
-    badge: "Student Claim"
+    badge: "Student Registration"
   },
   {
     id: "teacher",
@@ -324,7 +324,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
               <span className="text-xs text-rose-200">• 5 Institutional Roles</span>
             </div>
             <h3 className="text-xl font-black text-white">
-              {step === "form" && "Claim Account & Registration"}
+              {step === "form" && "Create Account / Registration"}
               {step === "otp" && "Verify SMS / Email OTP Token"}
               {step === "success" && "Account Verified & Activated!"}
             </h3>
@@ -383,7 +383,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                   </svg>
                   <span>
-                    {activeTab === "student" && "1-Click Claim Student Account with Google"}
+                    {activeTab === "student" && "1-Click Student Sign Up with Google"}
                     {activeTab === "teacher" && "1-Click Teacher Verification with Google"}
                     {activeTab === "guidance_counselor" && "1-Click Counselor Access with Google"}
                     {activeTab === "parent" && "1-Click Link Parent Account with Google"}
@@ -393,8 +393,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
                 <div className="relative flex items-center justify-center my-2">
                   <div className="border-t border-slate-200 w-full" />
-                  <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    or manual institutional form
+                  <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+                    or institutional credentials
                   </span>
                 </div>
               </div>
@@ -464,9 +464,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                   <button
                     type="submit"
                     disabled={isSubmitting || lrn.length < 5}
-                    className="w-full py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                    className="w-full py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2 cursor-pointer"
                   >
-                    {isSubmitting ? "Matching LRN Records..." : "Claim Student Account →"}
+                    {isSubmitting ? "Matching LRN Records..." : "Create Student Account →"}
                   </button>
                 </form>
               )}

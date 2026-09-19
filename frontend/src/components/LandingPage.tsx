@@ -104,7 +104,7 @@ export const LandingPage: React.FC = () => {
         { label: "Parent Progress", sub: "SMS & Consultation", icon: <HeartHandshake className="h-4.5 w-4.5 text-emerald-600" />, bg: "bg-emerald-50 border-emerald-200" },
         { label: "Longitudinal Trends", sub: "Multi-Term Analytics", icon: <Layers className="h-4.5 w-4.5 text-purple-600" />, bg: "bg-purple-50 border-purple-200" }
       ],
-      primaryCta: { label: "Claim / Register Account", href: "/register" },
+      primaryCta: { label: "Create Account", href: "/register" },
       secondaryCta: { label: "Sign In to Portal", href: "/login" },
       previewType: "roles_grid"
     }
@@ -160,7 +160,7 @@ export const LandingPage: React.FC = () => {
               className="hidden sm:flex px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold text-xs sm:text-sm border border-amber-300 transition items-center gap-1.5 shadow-2xs"
             >
               <Users className="h-4 w-4 text-[#8B0014]" />
-              <span>Claim / Register</span>
+              <span>Create Account</span>
             </Link>
             <Link
               href="/login"
@@ -520,7 +520,7 @@ export const LandingPage: React.FC = () => {
                       href="/register"
                       className="w-full py-2.5 px-4 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
                     >
-                      <span>Claim New Student or Faculty Account</span>
+                      <span>Create New Student or Faculty Account</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   </div>
