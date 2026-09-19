@@ -122,11 +122,11 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900">
-      {/* Top Gold-Maroon Header Accent */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-[#D97706] via-[#F59E0B] to-[#8B0014] fixed top-0 left-0 right-0 z-50 shadow-sm" />
+      {/* Fixed Sticky Navigation Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-slate-200/90 bg-white/95 backdrop-blur-md shadow-xs transition-all">
+        {/* Top Gold-Maroon Header Accent Strip */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#D97706] via-[#F59E0B] to-[#8B0014]" />
 
-      {/* Navigation Header */}
-      <header className="sticky top-1.5 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link 
             href="/"
@@ -174,11 +174,11 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Hero Carousel Section */}
+      {/* Hero Carousel Section with Header Offset */}
       <section 
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        className="relative overflow-hidden pt-8 pb-16 lg:pt-12 lg:pb-20 bg-gradient-to-b from-white via-slate-50/70 to-white"
+        className="relative overflow-hidden pt-28 pb-16 lg:pt-32 lg:pb-20 bg-gradient-to-b from-white via-slate-50/70 to-white"
       >
         {/* Ambient Glows */}
         <div className="absolute top-10 left-1/4 -translate-x-1/2 w-96 h-96 bg-amber-200/20 rounded-full blur-3xl pointer-events-none" />

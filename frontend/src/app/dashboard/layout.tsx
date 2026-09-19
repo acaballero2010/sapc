@@ -70,7 +70,7 @@ export default function DashboardLayout({
         <div className={`flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? "lg:pl-20" : "lg:pl-72"}`}>
           
           {/* Top Global Dashboard Header Bar */}
-          <header className="sticky top-1.5 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs gap-3">
+          <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <span className="px-3 py-1.5 rounded-xl text-xs font-black bg-rose-50 text-[#8B0014] border border-rose-200 capitalize flex items-center gap-1.5 shadow-2xs shrink-0">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
