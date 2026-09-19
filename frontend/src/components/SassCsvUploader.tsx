@@ -81,30 +81,30 @@ export const SassCsvUploader: React.FC<SassCsvUploaderProps> = ({ onSuccess }) =
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 font-sans">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-[#8B0014]">
-            <FileSpreadsheet className="h-7 w-7" />
+    <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6 font-sans min-w-0 overflow-hidden">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-[#8B0014] shrink-0">
+            <FileSpreadsheet className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-slate-900">SASS Academic CSV Ingestion Pipeline</h3>
+          <div className="min-w-0">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 truncate">SASS Academic CSV Ingestion Pipeline</h3>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
               Parses quarterly GPA, attendance & failing counts to compute deterministic Academic Risk (S_AC)
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <a
             href="/samples/sapc_500_students_sass_cohort.csv"
             download="SAPC_500_Students_Cohort_SASS.csv"
-            className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold text-xs shadow-2xs transition flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold text-xs shadow-2xs transition flex items-center gap-1.5 whitespace-nowrap"
           >
-            <span>📥 Download 500-Student SASS Cohort (.csv)</span>
+            <span>📥 Download 500-Student Cohort (.csv)</span>
           </a>
           <button
             onClick={downloadSampleTemplate}
-            className="text-xs font-bold text-[#8B0014] hover:text-[#6D0010] underline underline-offset-4 px-2"
+            className="text-xs font-bold text-[#8B0014] hover:text-[#6D0010] underline underline-offset-4 px-2 whitespace-nowrap"
           >
             Sample Template
           </button>

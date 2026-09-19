@@ -51,11 +51,11 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans overflow-x-hidden">
       {/* Top Accent Strip */}
       <div className="h-1.5 w-full bg-gradient-to-r from-[#D97706] via-[#F59E0B] to-[#8B0014] fixed top-0 left-0 right-0 z-50 shadow-xs" />
 
-      <div className="flex flex-1 pt-1.5">
+      <div className="flex flex-1 pt-1.5 min-w-0">
         {/* Sidebar Component */}
         <Sidebar
           onOpenChat={() => setIsChatOpen(true)}
@@ -67,16 +67,16 @@ export default function DashboardLayout({
         />
 
         {/* Main Content Area offset by Sidebar width on lg screens */}
-        <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? "lg:pl-20" : "lg:pl-72"}`}>
+        <div className={`flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? "lg:pl-20" : "lg:pl-72"}`}>
           
           {/* Top Global Dashboard Header Bar */}
-          <header className="sticky top-1.5 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs">
+          <header className="sticky top-1.5 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               {/* Desktop Sidebar Toggle in Header */}
               <button
                 type="button"
                 onClick={toggleCollapse}
-                className="hidden lg:flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition shadow-2xs"
+                className="hidden lg:flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition shadow-2xs shrink-0"
                 title={isCollapsed ? "Expand Sidebar (Widescreen Mode)" : "Collapse Sidebar"}
                 aria-label="Toggle Sidebar"
               >
@@ -92,7 +92,7 @@ export default function DashboardLayout({
               </span>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsChatOpen(true)}
@@ -139,7 +139,7 @@ export default function DashboardLayout({
             </div>
           </header>
 
-          <main className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <main className="flex-1 min-w-0 max-w-full w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {children}
           </main>
 

@@ -115,9 +115,9 @@ export const TeacherDashboard: React.FC = () => {
   );
 
   return (
-    <div className="space-y-8 pb-12 font-sans">
+    <div className="space-y-8 pb-12 font-sans min-w-0">
       {/* Teacher Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#8B0014] via-[#6D0010] to-[#4A000A] p-8 shadow-lg text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#8B0014] via-[#6D0010] to-[#4A000A] p-6 sm:p-8 shadow-lg text-white">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2.5 mb-2.5">
@@ -138,12 +138,12 @@ export const TeacherDashboard: React.FC = () => {
       </div>
 
       {/* SASS Ingestion Component */}
-      <div id="uploader" className="scroll-mt-24">
+      <div id="uploader" className="scroll-mt-24 min-w-0">
         <SassCsvUploader onSuccess={loadData} />
       </div>
 
       {/* Advisory Class Roster */}
-      <div id="roster" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
+      <div id="roster" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6 scroll-mt-24 min-w-0 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-xl font-bold text-slate-900">Assigned Advisory Students</h3>

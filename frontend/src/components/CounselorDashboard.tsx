@@ -205,9 +205,9 @@ export const CounselorDashboard: React.FC = () => {
   const paginatedStudents = filteredStudents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
-    <div className="space-y-8 pb-12 font-sans">
+    <div className="space-y-8 pb-12 font-sans min-w-0">
       {/* Top Banner - Institutional Maroon & Gold */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] p-8 sm:p-9 shadow-md text-white border-t-4 border-amber-400">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] p-6 sm:p-9 shadow-md text-white border-t-4 border-amber-400">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="max-w-3xl space-y-2.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -442,7 +442,7 @@ export const CounselorDashboard: React.FC = () => {
       )}
 
       {/* Main Student Roster & Risk Table */}
-      <div id="students-roster" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
+      <div id="students-roster" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6 scroll-mt-24 min-w-0 overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-3">
