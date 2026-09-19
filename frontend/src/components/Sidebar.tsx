@@ -13,7 +13,8 @@ import {
   Menu, 
   X,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Settings
 } from "lucide-react";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { SapcLogo } from "./SapcLogo";
@@ -22,9 +23,10 @@ interface SidebarProps {
   onOpenChat?: () => void;
   onOpenSimulator?: () => void;
   onOpenOnboarding?: () => void;
+  onOpenAccount?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onOpenChat, onOpenSimulator, onOpenOnboarding }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onOpenChat, onOpenSimulator, onOpenOnboarding, onOpenAccount }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, switchRole } = useAuth();
@@ -215,15 +217,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenChat, onOpenSimulator, o
 
         {/* User Profile & Footer Security Note */}
         <div className="p-4 border-t border-slate-200 bg-slate-50 space-y-3">
-          <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/70 flex items-center justify-center font-extrabold text-white text-sm shadow-2xs shrink-0">
-              {user?.full_name ? user.full_name.charAt(0) : "U"}
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenAccount) onOpenAccount();
+              setIsOpen(false);
+            }}
+            className="w-full flex items-center justify-between gap-3 bg-white hover:bg-rose-50/70 p-3 rounded-2xl border border-slate-200 hover:border-[#8B0014]/40 shadow-2xs transition group text-left"
+            title="Click to manage account settings"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/70 flex items-center justify-center font-extrabold text-white text-sm shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+                {user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
+              </div>
+              <div className="overflow-hidden min-w-0">
+                <p className="text-sm font-bold text-slate-900 group-hover:text-[#8B0014] truncate transition-colors">
+                  {user?.full_name || "User Account"}
+                </p>
+                <p className="text-xs text-slate-500 font-medium capitalize truncate">
+                  {user?.role?.replace("_", " ")}
+                </p>
+              </div>
             </div>
-            <div className="overflow-hidden">
-              <p className="text-sm font-bold text-slate-900 truncate">{user?.full_name?.split(" ")[0]}</p>
-              <p className="text-xs text-slate-500 font-medium capitalize truncate">{user?.role?.replace("_", " ")}</p>
+
+            <div className="p-1.5 rounded-lg bg-slate-100 group-hover:bg-[#8B0014]/10 text-slate-400 group-hover:text-[#8B0014] transition shrink-0">
+              <Settings className="h-4 w-4" />
             </div>
-          </div>
+          </button>
 
           <div className="flex items-center gap-2 text-[11px] text-slate-500 px-1 font-medium">
             <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />

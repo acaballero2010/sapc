@@ -5,8 +5,9 @@ import { Sidebar } from "@/components/Sidebar";
 import { ChatbotModal } from "@/components/ChatbotModal";
 import { SensitivitySimulator } from "@/components/SensitivitySimulator";
 import { RoleOnboardingWizard } from "@/components/RoleOnboardingWizard";
+import { AccountManagementModal } from "@/components/AccountManagementModal";
 import { useAuth } from "@/lib/auth-context";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, User, Sparkles, Bot } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -17,6 +18,7 @@ export default function DashboardLayout({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -39,17 +41,70 @@ export default function DashboardLayout({
           onOpenChat={() => setIsChatOpen(true)}
           onOpenSimulator={() => setIsSimulatorOpen(true)}
           onOpenOnboarding={() => setIsOnboardingOpen(true)}
+          onOpenAccount={() => setIsAccountOpen(true)}
         />
 
         {/* Main Content Area offset by Sidebar width on lg screens */}
         <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          
+          {/* Top Global Dashboard Header Bar */}
+          <header className="sticky top-1.5 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-10 py-3.5 flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-[#8B0014] border border-rose-200 capitalize flex items-center gap-1.5 shadow-2xs shrink-0">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                {user?.role ? `${user.role.replace("_", " ")} Portal` : "SAPC Portal"}
+              </span>
+              <span className="text-xs text-slate-400 hidden md:inline font-medium">
+                San Antonio de Padua College • IntellySys DSS
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setIsChatOpen(true)}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition shadow-2xs"
+              >
+                <Bot className="h-3.5 w-3.5 text-[#8B0014]" />
+                <span>AI Guidance</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsOnboardingOpen(true)}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-[#8B0014]" />
+                <span>Tour</span>
+              </button>
+
+              {/* Clickable Profile Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsAccountOpen(true)}
+                className="flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-xl bg-slate-50 hover:bg-rose-50/70 border border-slate-200 hover:border-[#8B0014]/40 transition group shadow-2xs"
+                title="Click to manage account settings"
+              >
+                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/80 flex items-center justify-center text-white text-xs font-extrabold shadow-xs shrink-0">
+                  {user?.full_name ? user.full_name.charAt(0).toUpperCase() : <User className="h-3.5 w-3.5" />}
+                </div>
+                <div className="text-left hidden sm:block">
+                  <p className="text-xs font-bold text-slate-900 group-hover:text-[#8B0014] leading-tight truncate max-w-[120px]">
+                    {user?.full_name || "Account"}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-medium">Manage Profile →</p>
+                </div>
+              </button>
+            </div>
+          </header>
+
+          <main className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-8">
             {children}
           </main>
 
           {/* Institutional Footer */}
           <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs sm:text-sm text-slate-500 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-10 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p>© 2026 San Antonio de Padua College (SAPC) — IntellySys Decision Support System</p>
               <div className="flex items-center gap-2 text-slate-600 font-medium">
                 <ShieldCheck className="h-4 w-4 text-emerald-600" />
@@ -78,6 +133,11 @@ export default function DashboardLayout({
           onClose={() => setIsOnboardingOpen(false)}
         />
       )}
+
+      <AccountManagementModal
+        isOpen={isAccountOpen}
+        onClose={() => setIsAccountOpen(false)}
+      />
     </div>
   );
 }
