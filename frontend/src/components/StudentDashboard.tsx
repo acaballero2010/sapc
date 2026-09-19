@@ -16,7 +16,8 @@ import {
   CheckCircle2,
   Clock,
   Send,
-  X
+  X,
+  Camera
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -24,6 +25,7 @@ import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
 import { DailyMoodCheckin } from "./DailyMoodCheckin";
+import { AccountManagementModal } from "./AccountManagementModal";
 
 interface StudentDashboardProps {
   onOpenChat: () => void;
@@ -32,6 +34,7 @@ interface StudentDashboardProps {
 export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }) => {
   const { user } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [student, setStudent] = useState<any | null>(null);
   const [riskData, setRiskData] = useState<any | null>(null);
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
@@ -275,21 +278,44 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
         <div className="lg:col-span-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-5">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              {user?.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={displayName}
-                  className="h-14 w-14 rounded-2xl object-cover border-2 border-amber-400/80 shadow-xs shrink-0"
-                />
-              ) : (
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border-2 border-amber-400/80 flex items-center justify-center text-white font-black text-2xl shadow-xs shrink-0">
-                  {displayName.charAt(0).toUpperCase()}
+              <div 
+                className="relative group cursor-pointer shrink-0"
+                onClick={() => setIsAccountModalOpen(true)}
+                title="Click to update profile photo or manage account"
+              >
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={displayName}
+                    className="h-14 w-14 rounded-2xl object-cover border-2 border-amber-400/80 shadow-xs group-hover:ring-2 group-hover:ring-[#8B0014] transition"
+                  />
+                ) : (
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border-2 border-amber-400/80 flex items-center justify-center text-white font-black text-2xl shadow-xs group-hover:ring-2 group-hover:ring-amber-500 transition">
+                    {displayName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                  <Camera className="h-5 w-5" />
                 </div>
-              )}
-              <div className="min-w-0">
-                <h3 className="text-lg font-black text-slate-900 truncate">
-                  {displayName}
-                </h3>
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1">
+                  <h3 
+                    onClick={() => setIsAccountModalOpen(true)}
+                    className="text-lg font-black text-slate-900 truncate cursor-pointer hover:text-[#8B0014] transition"
+                  >
+                    {displayName}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsAccountModalOpen(true)}
+                    className="text-[11px] font-bold text-[#8B0014] hover:underline flex items-center gap-0.5 shrink-0"
+                  >
+                    <Camera className="h-3 w-3" />
+                    <span>Photo</span>
+                  </button>
+                </div>
                 <p className="text-xs text-slate-500 font-mono mt-0.5">LRN: {displayLrn}</p>
               </div>
             </div>
@@ -314,13 +340,23 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsConsultationOpen(true)}
-            className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-800 hover:text-[#8B0014] font-bold text-xs border border-slate-200 transition text-center"
-          >
-            Request Guidance Consultation →
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setIsAccountModalOpen(true)}
+              className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition text-center flex items-center justify-center gap-1.5"
+            >
+              <Camera className="h-3.5 w-3.5 text-[#8B0014]" />
+              <span>Edit Photo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsConsultationOpen(true)}
+              className="py-2.5 px-3 rounded-xl bg-[#8B0014]/10 hover:bg-[#8B0014] text-[#8B0014] hover:text-white font-bold text-xs border border-[#8B0014]/20 transition text-center"
+            >
+              Guidance →
+            </button>
+          </div>
         </div>
 
         {/* 5-Domain Wellness Radar (4 cols on wide) */}
@@ -532,6 +568,12 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
           </div>
         </div>
       )}
+
+      {/* Account Management & Photo Upload Modal */}
+      <AccountManagementModal 
+        isOpen={isAccountModalOpen} 
+        onClose={() => setIsAccountModalOpen(false)} 
+      />
 
     </div>
   );
