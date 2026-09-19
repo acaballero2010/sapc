@@ -1,17 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, BookOpen } from "lucide-react";
+import { Search, BookOpen, HeartHandshake, Eye } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
 import { SassCsvUploader } from "./SassCsvUploader";
 import { StudentDetailModal } from "./StudentDetailModal";
+import { TeacherReferralModal } from "./TeacherReferralModal";
 
 export const TeacherDashboard: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [students, setStudents] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [referralStudent, setReferralStudent] = useState<any | null>(null);
+  const [isReferralOpen, setIsReferralOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [_isLoading, setIsLoading] = useState(true);
 
@@ -123,15 +126,32 @@ export const TeacherDashboard: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-4 px-5 text-right">
-                    <button
-                      onClick={() => {
-                        setSelectedStudentId(s.id);
-                        setIsDetailOpen(true);
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white transition font-bold text-xs shadow-xs"
-                    >
-                      View Academic Profile
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReferralStudent(s);
+                          setIsReferralOpen(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-rose-50 text-slate-800 hover:text-[#8B0014] border border-amber-300 hover:border-rose-300 transition font-bold text-xs flex items-center gap-1.5 shadow-2xs"
+                        title="Submit formal referral ticket to Guidance Counselor"
+                      >
+                        <HeartHandshake className="h-3.5 w-3.5 text-[#8B0014]" />
+                        <span>Refer to Guidance</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedStudentId(s.id);
+                          setIsDetailOpen(true);
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white transition font-bold text-xs shadow-xs flex items-center gap-1.5"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>View Profile</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -144,6 +164,13 @@ export const TeacherDashboard: React.FC = () => {
         studentId={selectedStudentId}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
+      />
+
+      <TeacherReferralModal
+        student={referralStudent}
+        isOpen={isReferralOpen}
+        onClose={() => setIsReferralOpen(false)}
+        onSuccess={loadData}
       />
     </div>
   );

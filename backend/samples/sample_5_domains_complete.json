@@ -1,0 +1,166 @@
+[
+  {
+    "student_id": "109238475612",
+    "student_name": "Joshua Dimaculangan",
+    "grade_section": "Grade 11 - St. Augustine (STEM)",
+    "domain_scores": {
+      "academic": 78.5,
+      "mental_health": 85.0,
+      "financial": 50.0,
+      "family": 75.0,
+      "health": 35.0
+    },
+    "composite_risk_score": 69.8,
+    "risk_tier": "high",
+    "domain_details": {
+      "academic": {
+        "quarter_gpa": 71.5,
+        "failing_subjects": 2,
+        "failed_courses": ["General Chemistry 1", "Pre-Calculus"],
+        "days_absent": 11,
+        "incomplete_requirements": 3
+      },
+      "mental_health": {
+        "screening_instrument": "PHQ-9 & GAD-7",
+        "phq9_score": 14,
+        "gad7_score": 12,
+        "severity": "Moderate to Severe Distress",
+        "intake_notes": "Student expressed feeling overwhelmed by STEM lab workload and severe anxiety prior to periodic examinations."
+      },
+      "financial": {
+        "tuition_status": "Installment Plan B (30 days overdue)",
+        "promissory_notes_count": 1,
+        "allowance_stability": "Moderate"
+      },
+      "family": {
+        "living_arrangement": "Living with aging grandmother (Mother is OFW in Dubai)",
+        "guardian_involvement": "Low",
+        "household_stress_indicator": "High separation distress & lack of at-home academic tutoring"
+      },
+      "physical_health": {
+        "clinic_visits_this_term": 4,
+        "recorded_complaints": "Tension headaches, recurring migraine, insomnia"
+      }
+    }
+  },
+  {
+    "student_id": "109238475613",
+    "student_name": "Angelica Dela Cruz",
+    "grade_section": "Grade 11 - St. Augustine (STEM)",
+    "domain_scores": {
+      "academic": 32.0,
+      "mental_health": 40.0,
+      "financial": 82.0,
+      "family": 65.0,
+      "health": 20.0
+    },
+    "composite_risk_score": 45.2,
+    "risk_tier": "moderate",
+    "domain_details": {
+      "academic": {
+        "quarter_gpa": 78.0,
+        "failing_subjects": 0,
+        "days_absent": 5,
+        "incomplete_requirements": 1
+      },
+      "mental_health": {
+        "screening_instrument": "GAD-7",
+        "severity": "Mild Situational Anxiety",
+        "intake_notes": "Anxious about pending tuition payment and potential exam permit hold."
+      },
+      "financial": {
+        "tuition_status": "Promissory Note Issued (Trimester 2)",
+        "promissory_notes_count": 2,
+        "scholarship_applied": "ESC DepEd Voucher Pending"
+      },
+      "family": {
+        "living_arrangement": "Nuclear family (Single-income earner affected by seasonal work)",
+        "guardian_involvement": "High"
+      },
+      "physical_health": {
+        "clinic_visits_this_term": 1,
+        "recorded_complaints": "Mild fatigue"
+      }
+    }
+  },
+  {
+    "student_id": "109238475614",
+    "student_name": "Mark Anthony Reyes",
+    "grade_section": "Grade 12 - St. Thomas (ABM)",
+    "domain_scores": {
+      "academic": 8.0,
+      "mental_health": 12.0,
+      "financial": 10.0,
+      "family": 15.0,
+      "health": 5.0
+    },
+    "composite_risk_score": 9.8,
+    "risk_tier": "low",
+    "domain_details": {
+      "academic": {
+        "quarter_gpa": 94.5,
+        "failing_subjects": 0,
+        "days_absent": 1,
+        "incomplete_requirements": 0
+      },
+      "mental_health": {
+        "screening_instrument": "Wellness Intake Questionnaire",
+        "severity": "Positive Mental Well-being",
+        "intake_notes": "Active in extracurricular student council and peer tutoring."
+      },
+      "financial": {
+        "tuition_status": "Fully Paid (Annual Discount)",
+        "promissory_notes_count": 0
+      },
+      "family": {
+        "living_arrangement": "Nuclear family in Pila, Laguna",
+        "guardian_involvement": "Very High"
+      },
+      "physical_health": {
+        "clinic_visits_this_term": 0,
+        "recorded_complaints": "None"
+      }
+    }
+  },
+  {
+    "student_id": "109238475617",
+    "student_name": "Samantha Mae Alcantara",
+    "grade_section": "Grade 11 - St. Lorenzo (HUMSS)",
+    "domain_scores": {
+      "academic": 88.0,
+      "mental_health": 92.0,
+      "financial": 45.0,
+      "family": 80.0,
+      "health": 60.0
+    },
+    "composite_risk_score": 79.4,
+    "risk_tier": "critical",
+    "domain_details": {
+      "academic": {
+        "quarter_gpa": 68.5,
+        "failing_subjects": 3,
+        "failed_courses": ["Reading and Writing", "Komunikasyon", "Creative Nonfiction"],
+        "days_absent": 14,
+        "incomplete_requirements": 4
+      },
+      "mental_health": {
+        "screening_instrument": "PHQ-9 Clinical Screener",
+        "phq9_score": 19,
+        "severity": "Severe Depressive Symptoms with High Risk Flag",
+        "intake_notes": "Reported chronic unmotivation, difficulty getting out of bed, and feelings of worthlessness. Immediate counselor intervention scheduled."
+      },
+      "financial": {
+        "tuition_status": "Current",
+        "promissory_notes_count": 0
+      },
+      "family": {
+        "living_arrangement": "Recent parental separation; ongoing domestic disputes",
+        "guardian_involvement": "Very Low / Hostile communication"
+      },
+      "physical_health": {
+        "clinic_visits_this_term": 6,
+        "recorded_complaints": "Nutritional deficiency, chronic fatigue, dizzy spells"
+      }
+    }
+  }
+]

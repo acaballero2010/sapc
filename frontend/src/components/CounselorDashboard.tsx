@@ -10,7 +10,9 @@ import {
   Eye, 
   CheckCircle,
   GraduationCap,
-  Award
+  Award,
+  HeartHandshake,
+  Clock
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
@@ -26,6 +28,7 @@ export const CounselorDashboard: React.FC = () => {
   const [students, setStudents] = useState<any[]>([]);
   const [flaggedSessions, setFlaggedSessions] = useState<any[]>([]);
   const [interventions, setInterventions] = useState<any[]>([]);
+  const [teacherReferrals, setTeacherReferrals] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [filterTier, setFilterTier] = useState<string>("all");
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
@@ -50,6 +53,38 @@ export const CounselorDashboard: React.FC = () => {
       setStudents(studentsRes);
       setFlaggedSessions(flaggedRes);
       setInterventions(interventionsRes);
+
+      // Load Teacher Referrals
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem("sapc_teacher_referrals");
+        if (stored) {
+          try {
+            setTeacherReferrals(JSON.parse(stored));
+          } catch {
+            setTeacherReferrals([]);
+          }
+        } else {
+          // Default initial teacher referral for demonstration
+          const initialReferral = [
+            {
+              id: "ref-seed-01",
+              student_id: 1,
+              student_name: "Joshua Dimaculangan",
+              lrn: "109238475612",
+              section: "Grade 11 - St. Augustine (STEM)",
+              referring_teacher: "Mr. Roberto Santos, LPT (Class Adviser)",
+              concern_type: "Academic Deterioration & Multiple Failing Marks",
+              urgency: "priority",
+              observations: "Student missed 11 classes this quarter and has failing marks in Chemistry and Pre-Calculus. Appeared distressed and isolated during group project meetings.",
+              attempted_interventions: ["1-on-1 Teacher-Student Conference", "Peer Tutoring Offered"],
+              created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+              status: "pending_review"
+            }
+          ];
+          setTeacherReferrals(initialReferral);
+          localStorage.setItem("sapc_teacher_referrals", JSON.stringify(initialReferral));
+        }
+      }
     } catch (err) {
       console.error("Failed to load counselor data:", err);
     } finally {
@@ -236,6 +271,84 @@ export const CounselorDashboard: React.FC = () => {
                   >
                     <Eye className="h-4 w-4" />
                     <span>Open Case File</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Teacher Guidance Referrals Queue */}
+      {teacherReferrals.length > 0 && (
+        <div className="bg-white border-l-4 border-l-amber-500 border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
+                <HeartHandshake className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-extrabold text-slate-900">Class Adviser & Faculty Referral Queue</h3>
+                <p className="text-xs text-slate-500">Direct student referrals submitted by subject teachers and advisers for guidance intervention</p>
+              </div>
+            </div>
+            <span className="px-3 py-1 text-xs font-black bg-amber-500 text-white rounded-full shadow-xs self-start sm:self-auto">
+              {teacherReferrals.length} Pending Referrals
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {teacherReferrals.map((ref) => (
+              <div
+                key={ref.id}
+                className="bg-amber-50/40 border border-amber-200/90 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:shadow-xs transition"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h4 className="font-black text-slate-900 text-base">
+                        {ref.student_name}
+                      </h4>
+                      <p className="text-xs text-slate-500 font-mono">
+                        LRN: {ref.lrn} • {ref.section}
+                      </p>
+                    </div>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      ref.urgency === "crisis"
+                        ? "bg-rose-600 text-white"
+                        : ref.urgency === "priority"
+                        ? "bg-amber-500 text-white"
+                        : "bg-emerald-600 text-white"
+                    }`}>
+                      {ref.urgency === "crisis" ? "🔴 Urgent / Crisis" : ref.urgency === "priority" ? "🟡 Priority" : "🟢 Routine"}
+                    </span>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-amber-200/60 text-xs text-slate-700 space-y-1">
+                    <strong className="text-amber-900 font-bold block">Reason: {ref.concern_type}</strong>
+                    <p className="text-slate-600 leading-relaxed italic">
+                      &quot;{ref.observations}&quot;
+                    </p>
+                    <div className="pt-1 flex items-center justify-between text-[11px] text-slate-400">
+                      <span>Adviser: <strong className="text-slate-700">{ref.referring_teacher}</strong></span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {new Date(ref.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-1 border-t border-amber-200/40">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedStudentId(ref.student_id);
+                      setIsDetailOpen(true);
+                    }}
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#8B0014] hover:bg-[#6D0010] text-white flex items-center gap-1.5 transition shadow-xs"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>Open Case & Intake</span>
                   </button>
                 </div>
               </div>
