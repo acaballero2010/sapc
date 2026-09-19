@@ -8,6 +8,8 @@
     "build": "npm --prefix frontend run build",
     "start": "npm --prefix frontend run start",
     "lint": "npm --prefix frontend run lint",
+    "typescript": "tsc --project frontend/tsconfig.json --noEmit",
+    "typecheck": "tsc --project frontend/tsconfig.json --noEmit",
     "backend": "cd backend && .\\venv\\Scripts\\uvicorn app.main:app --reload --port 8000",
     "test:backend": "cd backend && .\\venv\\Scripts\\pytest"
   },
