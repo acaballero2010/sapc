@@ -323,14 +323,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Section 1: Role Workspace Navigation */}
           <div>
             {!isCollapsed ? (
-              <div className="flex items-center justify-between px-3 mb-2.5">
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
-                  Workspace Navigation
-                </span>
-                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                  Role Verified
-                </span>
-              </div>
+              <span className="px-3 text-[11px] font-black text-slate-400 uppercase tracking-wider block mb-2">
+                Workspace Navigation
+              </span>
             ) : (
               <div className="w-full h-px bg-slate-200 my-2" />
             )}
@@ -347,20 +342,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     className={`w-full flex items-center rounded-xl transition group text-left ${
                       isCollapsed 
                         ? "justify-center p-2.5 text-slate-700 hover:text-[#8B0014] hover:bg-rose-50/80" 
-                        : "justify-between px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-800 hover:text-slate-950 hover:bg-slate-100/90"
+                        : "px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-800 hover:text-slate-950 hover:bg-slate-100/90"
                     }`}
                   >
-                    <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-2.5"}`}>
-                      <Icon className={`h-4 w-4 text-[#8B0014] group-hover:scale-110 transition-transform shrink-0`} />
+                    <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
+                      <Icon className="h-4 w-4 text-[#8B0014] group-hover:scale-110 transition-transform shrink-0" />
                       {!isCollapsed && (
-                        <span className="truncate font-bold text-slate-800 group-hover:text-slate-950">{item.name}</span>
+                        <span className="font-bold text-slate-800 group-hover:text-slate-950 leading-snug">{item.name}</span>
                       )}
                     </div>
-                    {!isCollapsed && item.badge && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 group-hover:bg-amber-100 text-slate-600 group-hover:text-amber-900 border border-slate-200 transition shrink-0 ml-1">
-                        {item.badge}
-                      </span>
-                    )}
                   </button>
                 );
               })}

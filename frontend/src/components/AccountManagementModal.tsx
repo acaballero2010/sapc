@@ -43,8 +43,8 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Editable form fields
-  const [fullName, setFullName] = useState(user?.full_name || "Kalye");
-  const [email] = useState(user?.email || "kalye@sapc.edu.ph");
+  const [fullName, setFullName] = useState(user?.full_name || "Maria Theresa Cruz, RGC");
+  const [email] = useState(user?.email || "counselor@sapc.edu.ph");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
   const [lrn, setLrn] = useState("109482719283");
   const [strand, setStrand] = useState("Grade 11 - STEM (Science, Technology, Engineering, and Mathematics)");
