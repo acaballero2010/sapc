@@ -26,6 +26,7 @@ import { useAuth } from "@/lib/auth-context";
 import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
+import { SAPC_500_STUDENTS } from "@/data/students500";
 
 interface StudentDetailModalProps {
   studentId: number | null;
@@ -166,40 +167,42 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       } catch (err) {
         console.warn("Using fallback mock data for student modal:", err);
         
-        // Comprehensive fallback data for cloud static demo
+        // Find student in 500-student dataset
+        const found = SAPC_500_STUDENTS.find(s => s.id === studentId) || SAPC_500_STUDENTS[0];
+        
         const mockStudent = {
-          id: studentId,
-          first_name: studentId === 1 ? "Joshua" : studentId === 2 ? "Angelica" : studentId === 4 ? "Samantha" : "Student",
-          last_name: studentId === 1 ? "Dimaculangan" : studentId === 2 ? "Dela Cruz" : studentId === 4 ? "Reyes" : "SAPC",
-          lrn: studentId === 1 ? "109238475612" : studentId === 2 ? "109238475613" : studentId === 4 ? "109238475615" : "109238475699",
-          section_name: studentId === 4 ? "Grade 11 - St. Lorenzo (HUMSS)" : "Grade 11 - St. Augustine (STEM)",
-          adviser_name: studentId === 4 ? "Mr. Carlos Dizon, LPT" : "Mr. Roberto Santos, LPT",
-          email: "student.sapc@example.edu.ph"
+          id: found.id,
+          first_name: found.first_name,
+          last_name: found.last_name,
+          lrn: found.lrn,
+          section_name: found.section_name,
+          adviser_name: found.adviser_name,
+          email: found.email
         };
 
         const mockRisk = {
-          composite_risk_score: studentId === 1 ? 69.8 : studentId === 2 ? 45.2 : studentId === 4 ? 74.2 : 25.0,
-          risk_tier: studentId === 1 || studentId === 4 ? "high" : studentId === 2 ? "medium" : "low",
-          academic_score: studentId === 1 ? 78.5 : studentId === 2 ? 32.0 : studentId === 4 ? 65.0 : 20.0,
-          mental_health_score: studentId === 1 ? 85.0 : studentId === 2 ? 40.0 : studentId === 4 ? 88.0 : 15.0,
-          financial_score: studentId === 1 ? 50.0 : studentId === 2 ? 82.0 : studentId === 4 ? 45.0 : 10.0,
-          family_score: studentId === 1 ? 75.0 : studentId === 2 ? 65.0 : studentId === 4 ? 90.0 : 15.0,
-          health_score: studentId === 1 ? 35.0 : studentId === 2 ? 20.0 : studentId === 4 ? 30.0 : 10.0,
-          calculation_summary: studentId === 1 
-            ? "AHP Decision Engine synthesized High Composite Risk (69.80/100). Elevated risk is driven predominantly by Mental Health Distress (85/100) and Academic SASS Deficits (78.5/100)."
-            : "AHP Decision Engine evaluated multi-criteria risk indicators across 5 weighted institutional domains."
+          composite_risk_score: found.latest_risk_score,
+          risk_tier: found.latest_risk_tier,
+          academic_score: found.domain_scores.academic,
+          mental_health_score: found.domain_scores.mental_health,
+          financial_score: found.domain_scores.financial,
+          family_score: found.domain_scores.family,
+          health_score: found.domain_scores.health,
+          calculation_summary: `AHP Decision Engine synthesized ${found.latest_risk_tier.toUpperCase()} Composite Risk (${found.latest_risk_score}/100). Primary factor: ${found.primary_risk_driver}.`
         };
 
         const mockBreakdown = {
-          dominant_domain: studentId === 1 ? "mental_health" : studentId === 2 ? "financial" : "academic",
+          dominant_domain: found.domain_scores.mental_health > 60 ? "mental_health" : found.domain_scores.academic > 60 ? "academic" : found.domain_scores.financial > 60 ? "financial" : "academic",
           consistency_ratio: 0.042,
           primary_recommendation: {
-            title: studentId === 1 
-              ? "Immediate 1-on-1 Guidance Counseling & Academic Care Plan"
-              : "Financial Aid Endorsement & Academic Remediation",
-            description: studentId === 1
-              ? "Schedule urgent face-to-face intake to address exam anxiety and formulate a 4-week peer tutoring schedule in Chemistry & Pre-Calculus."
-              : "Endorse student to SAPC Alumni Foundation grant and arrange modular assignment catch-up.",
+            title: found.latest_risk_tier === "high"
+              ? "Immediate 1-on-1 Guidance Counseling & Priority Care Plan"
+              : found.latest_risk_tier === "medium"
+              ? "Active Academic Remediation & Adviser Check-in"
+              : "Standard Guidance Progress & Honors Tracking",
+            description: found.latest_risk_tier === "high"
+              ? "Schedule urgent clinical intake to address multi-domain stress and formulate a structured tutoring & guidance care plan."
+              : "Monitor quarterly attendance and coordinate with class adviser for targeted modular support.",
             action_items: [
               "Conduct confidential clinical intake with registered guidance counselor",
               "Notify subject teachers regarding academic support plan",
@@ -209,7 +212,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           secondary_recommendations: [
             {
               title: "Peer Mentorship Alignment",
-              description: "Pair with Grade 12 STEM honor student for bi-weekly problem-solving sessions."
+              description: "Pair with senior honor student for bi-weekly academic problem-solving sessions."
             },
             {
               title: "Guardian Engagement Protocol",
@@ -222,13 +225,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           {
             id: 1,
             school_year: "2025-2026",
-            quarter: "Quarter 2",
-            gpa: studentId === 1 ? 71.5 : studentId === 2 ? 82.4 : 88.5,
-            failed_subjects_count: studentId === 1 ? 2 : 0,
-            incomplete_subjects_count: studentId === 1 ? 1 : 0,
-            attendance_rate: studentId === 1 ? 78.5 : 92.0,
-            absences_count: studentId === 1 ? 11 : 3,
-            normalized_academic_risk: studentId === 1 ? 78.5 : 32.0
+            semester: "2nd",
+            gpa: found.sass_metrics.gpa,
+            attendance_rate: Math.max(75, 100 - found.sass_metrics.days_absent * 2),
+            absences_count: found.sass_metrics.days_absent,
+            incomplete_subjects_count: found.sass_metrics.incomplete_requirements_count
           },
           {
             id: 2,

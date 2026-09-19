@@ -21,105 +21,11 @@ import { InterventionModal } from "./InterventionModal";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { ParentAlertModal } from "./ParentAlertModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
+import { SAPC_500_STUDENTS, SAPC_COHORT_SUMMARY } from "@/data/students500";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const DEFAULT_ANALYTICS = {
-  total_students: 1250,
-  high_risk_count: 48,
-  medium_risk_count: 185,
-  low_risk_count: 1017,
-  average_composite_score: 24.2
-};
-
-const DEFAULT_STUDENTS = [
-  {
-    id: 1,
-    first_name: "Joshua",
-    last_name: "Dimaculangan",
-    lrn: "109238475612",
-    section_name: "Grade 11 - St. Augustine (STEM)",
-    adviser_name: "Mr. Roberto Santos, LPT",
-    latest_risk_score: 69.8,
-    latest_risk_tier: "high",
-    primary_risk_driver: "Mental Health & Academic"
-  },
-  {
-    id: 2,
-    first_name: "Angelica",
-    last_name: "Dela Cruz",
-    lrn: "109238475613",
-    section_name: "Grade 11 - St. Augustine (STEM)",
-    adviser_name: "Mr. Roberto Santos, LPT",
-    latest_risk_score: 45.2,
-    latest_risk_tier: "medium",
-    primary_risk_driver: "Financial Overdue"
-  },
-  {
-    id: 3,
-    first_name: "Mark Kenneth",
-    last_name: "Bautista",
-    lrn: "109238475614",
-    section_name: "Grade 12 - St. Thomas (ABM)",
-    adviser_name: "Ms. Jennifer Lim, LPT",
-    latest_risk_score: 18.4,
-    latest_risk_tier: "low",
-    primary_risk_driver: "Academic Stability"
-  },
-  {
-    id: 4,
-    first_name: "Samantha Nicole",
-    last_name: "Reyes",
-    lrn: "109238475615",
-    section_name: "Grade 11 - St. Lorenzo (HUMSS)",
-    adviser_name: "Mr. Carlos Dizon, LPT",
-    latest_risk_score: 74.2,
-    latest_risk_tier: "high",
-    primary_risk_driver: "Family Crisis & Absenteeism"
-  },
-  {
-    id: 5,
-    first_name: "John Carlo",
-    last_name: "Mendoza",
-    lrn: "109238475616",
-    section_name: "Grade 12 - St. Thomas (ABM)",
-    adviser_name: "Ms. Jennifer Lim, LPT",
-    latest_risk_score: 38.6,
-    latest_risk_tier: "low",
-    primary_risk_driver: "General Stability"
-  },
-  {
-    id: 6,
-    first_name: "Bea Patricia",
-    last_name: "Ramos",
-    lrn: "109238475617",
-    section_name: "Grade 11 - St. Lorenzo (HUMSS)",
-    adviser_name: "Mr. Carlos Dizon, LPT",
-    latest_risk_score: 58.0,
-    latest_risk_tier: "medium",
-    primary_risk_driver: "Physical Health / Migraines"
-  },
-  {
-    id: 7,
-    first_name: "Christian Dave",
-    last_name: "Villanueva",
-    lrn: "109238475618",
-    section_name: "Grade 11 - San Pedro Calungsod (GAS)",
-    adviser_name: "Ms. Ma. Teresa Garcia, LPT",
-    latest_risk_score: 63.5,
-    latest_risk_tier: "medium",
-    primary_risk_driver: "Academic Deficit"
-  },
-  {
-    id: 8,
-    first_name: "Princess Mae",
-    last_name: "Alcantara",
-    lrn: "109238475619",
-    section_name: "Grade 11 - San Pedro Calungsod (GAS)",
-    adviser_name: "Ms. Ma. Teresa Garcia, LPT",
-    latest_risk_score: 22.1,
-    latest_risk_tier: "low",
-    primary_risk_driver: "Academic Stability"
-  }
-];
+const DEFAULT_ANALYTICS = SAPC_COHORT_SUMMARY;
+const DEFAULT_STUDENTS = SAPC_500_STUDENTS;
 
 const DEFAULT_FLAGGED = [
   {
@@ -179,6 +85,9 @@ export const CounselorDashboard: React.FC = () => {
   const [teacherReferrals, setTeacherReferrals] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [filterTier, setFilterTier] = useState<string>("all");
+  const [filterStrand, setFilterStrand] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const pageSize = 15;
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [interventionStudent, setInterventionStudent] = useState<any | null>(null);
@@ -269,8 +178,12 @@ export const CounselorDashboard: React.FC = () => {
       s.last_name.toLowerCase().includes(search.toLowerCase()) ||
       s.lrn.includes(search);
     const matchesTier = filterTier === "all" || s.latest_risk_tier?.toLowerCase() === filterTier;
-    return matchesSearch && matchesTier;
+    const matchesStrand = filterStrand === "all" || s.strand === filterStrand;
+    return matchesSearch && matchesTier && matchesStrand;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / pageSize));
+  const paginatedStudents = filteredStudents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div className="space-y-8 pb-12 font-sans">
@@ -525,11 +438,33 @@ export const CounselorDashboard: React.FC = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {/* Filter */}
+            {/* Strand Filter */}
+            <div className="relative">
+              <select
+                value={filterStrand}
+                onChange={(e) => {
+                  setFilterStrand(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full sm:w-auto bg-slate-50 border border-slate-300 text-xs sm:text-sm text-slate-900 font-semibold rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:bg-white focus:border-[#8B0014] transition cursor-pointer"
+              >
+                <option value="all">All Academic Strands</option>
+                <option value="STEM">STEM (Senior High)</option>
+                <option value="HUMSS">HUMSS (Senior High)</option>
+                <option value="ABM">ABM (Senior High)</option>
+                <option value="TVL">TVL (Senior High)</option>
+                <option value="JHS">Junior High (Grades 7-10)</option>
+              </select>
+            </div>
+
+            {/* Risk Tier Filter */}
             <div className="relative">
               <select
                 value={filterTier}
-                onChange={(e) => setFilterTier(e.target.value)}
+                onChange={(e) => {
+                  setFilterTier(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full sm:w-auto bg-slate-50 border border-slate-300 text-xs sm:text-sm text-slate-900 font-semibold rounded-xl px-4 py-2.5 pr-8 focus:outline-none focus:bg-white focus:border-[#8B0014] transition cursor-pointer"
               >
                 <option value="all">All Risk Tiers</option>
@@ -546,7 +481,10 @@ export const CounselorDashboard: React.FC = () => {
                 type="text"
                 placeholder="Search name or LRN..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition w-full sm:w-64"
               />
             </div>
@@ -567,58 +505,99 @@ export const CounselorDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredStudents.map((s) => (
-                <tr key={s.id} className="text-slate-800 hover:bg-slate-50/80 transition">
-                  <td className="py-4 px-5 font-bold text-slate-900 text-base">
-                    {s.first_name} {s.last_name}
-                  </td>
-                  <td className="py-4 px-5 font-mono text-slate-600 text-xs sm:text-sm font-semibold">{s.lrn}</td>
-                  <td className="py-4 px-5 text-slate-700">
-                    <div className="font-semibold text-sm text-slate-900">{s.section_name}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{s.adviser_name}</div>
-                  </td>
-                  <td className="py-4 px-5">
-                    <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="md" />
-                  </td>
-                  <td className="py-4 px-5">
-                    <span className="px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold">
-                      {s.primary_risk_driver || "Academic"}
-                    </span>
-                  </td>
-                  <td className="py-4 px-5 text-right space-x-2 whitespace-nowrap">
-                    <button
-                      onClick={() => {
-                        setSelectedStudentId(s.id);
-                        setIsDetailOpen(true);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white transition font-bold text-xs shadow-xs"
-                    >
-                      View Profile
-                    </button>
-                    <button
-                      onClick={() => {
-                        setParentAlertStudent(s);
-                        setIsParentAlertOpen(true);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition font-bold text-xs"
-                      title="Send instant SMS/Email meeting invite to parent"
-                    >
-                      ✉ Notify Parent
-                    </button>
-                    <button
-                      onClick={() => {
-                        setInterventionStudent(s);
-                        setIsInterventionOpen(true);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition font-bold text-xs"
-                    >
-                      + Care Plan
-                    </button>
+              {paginatedStudents.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-500 font-medium">
+                    No students match the selected filter criteria.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                paginatedStudents.map((s) => (
+                  <tr key={s.id} className="text-slate-800 hover:bg-slate-50/80 transition">
+                    <td className="py-4 px-5 font-bold text-slate-900 text-base">
+                      {s.first_name} {s.last_name}
+                    </td>
+                    <td className="py-4 px-5 font-mono text-slate-600 text-xs sm:text-sm font-semibold">{s.lrn}</td>
+                    <td className="py-4 px-5 text-slate-700">
+                      <div className="font-semibold text-sm text-slate-900">{s.section_name}</div>
+                      <div className="text-xs text-slate-500 mt-0.5">{s.adviser_name}</div>
+                    </td>
+                    <td className="py-4 px-5">
+                      <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="md" />
+                    </td>
+                    <td className="py-4 px-5">
+                      <span className="px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold">
+                        {s.primary_risk_driver || "Academic"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-5 text-right space-x-2 whitespace-nowrap">
+                      <button
+                        onClick={() => {
+                          setSelectedStudentId(s.id);
+                          setIsDetailOpen(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white transition font-bold text-xs shadow-xs"
+                      >
+                        View Profile
+                      </button>
+                      <button
+                        onClick={() => {
+                          setParentAlertStudent(s);
+                          setIsParentAlertOpen(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition font-bold text-xs"
+                        title="Send instant SMS/Email meeting invite to parent"
+                      >
+                        ✉ Notify Parent
+                      </button>
+                      <button
+                        onClick={() => {
+                          setInterventionStudent(s);
+                          setIsInterventionOpen(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition font-bold text-xs"
+                      >
+                        + Care Plan
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+          <p className="text-xs sm:text-sm text-slate-600 font-medium">
+            Showing <strong className="text-slate-900">{filteredStudents.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to <strong className="text-slate-900">{Math.min(currentPage * pageSize, filteredStudents.length)}</strong> of <strong className="text-slate-900">{filteredStudents.length}</strong> Students Monitored
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs flex items-center gap-1 transition shadow-2xs"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span>Previous</span>
+            </button>
+
+            <span className="px-3 py-1.5 rounded-xl bg-slate-100 font-bold text-xs text-slate-800 border border-slate-200">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs flex items-center gap-1 transition shadow-2xs"
+            >
+              <span>Next</span>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 

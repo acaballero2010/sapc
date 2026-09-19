@@ -94,12 +94,21 @@ export const SassCsvUploader: React.FC<SassCsvUploaderProps> = ({ onSuccess }) =
             </p>
           </div>
         </div>
-        <button
-          onClick={downloadSampleTemplate}
-          className="text-sm font-bold text-[#8B0014] hover:text-[#6D0010] underline underline-offset-4 self-start sm:self-auto"
-        >
-          Download SASS CSV Template
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <a
+            href="/samples/sapc_500_students_sass_cohort.csv"
+            download="SAPC_500_Students_Cohort_SASS.csv"
+            className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold text-xs shadow-2xs transition flex items-center gap-1.5"
+          >
+            <span>📥 Download 500-Student SASS Cohort (.csv)</span>
+          </a>
+          <button
+            onClick={downloadSampleTemplate}
+            className="text-xs font-bold text-[#8B0014] hover:text-[#6D0010] underline underline-offset-4 px-2"
+          >
+            Sample Template
+          </button>
+        </div>
       </div>
 
       {/* Target Academic Period Selectors */}
