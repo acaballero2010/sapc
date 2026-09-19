@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Layers, Sliders, RefreshCw, CheckCircle, AlertTriangle } from "lucide-react";
+import { X, Layers } from "lucide-react";
 import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
 

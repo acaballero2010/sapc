@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, Search, Clock, RefreshCw, FileText } from "lucide-react";
+import { ShieldCheck, Search, RefreshCw } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
 export const AuditLogViewer: React.FC = () => {

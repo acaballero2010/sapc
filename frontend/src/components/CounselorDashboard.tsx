@@ -4,17 +4,11 @@ import React, { useState, useEffect } from "react";
 import { 
   Users, 
   AlertTriangle, 
-  Brain, 
   TrendingUp, 
   ShieldAlert, 
   Search, 
-  Plus, 
   Eye, 
-  Clock, 
-  CheckCircle,
-  FileSpreadsheet,
-  Layers,
-  Sparkles
+  CheckCircle
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
@@ -32,7 +26,7 @@ export const CounselorDashboard: React.FC = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [interventionStudent, setInterventionStudent] = useState<any | null>(null);
   const [isInterventionOpen, setIsInterventionOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
 
   const loadData = async () => {
     setIsLoading(true);

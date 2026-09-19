@@ -14,8 +14,6 @@ import {
   Clock,
   Sparkles,
   ShieldCheck,
-  CheckCircle2,
-  ArrowRight,
   Award
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
@@ -41,7 +39,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const [riskData, setRiskData] = useState<any | null>(null);
   const [riskBreakdown, setRiskBreakdown] = useState<any | null>(null);
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
-  const [assessments, setAssessments] = useState<any[]>([]);
+  const [_assessments, setAssessments] = useState<any[]>([]);
   const [counselorNotes, setCounselorNotes] = useState<any[]>([]);
   const [newNote, setNewNote] = useState({
     observation_summary: "",

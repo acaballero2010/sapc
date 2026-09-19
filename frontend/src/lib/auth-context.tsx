@@ -98,12 +98,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initAuth = async () => {
       try {
         await switchRole("guidance_counselor");
-      } catch (e: any) {
+      } catch {
         setServerError("Could not reach backend API. Ensure FastAPI is running on port 8000.");
         setIsLoading(false);
       }
     };
     initAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

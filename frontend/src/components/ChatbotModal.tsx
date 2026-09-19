@@ -89,7 +89,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       };
       setMessages((prev) => [...prev, botMsg]);
-    } catch (err: any) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {

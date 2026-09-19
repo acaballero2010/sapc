@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, PlusCircle, CheckCircle2, RefreshCw, Calendar, Target, AlertTriangle } from "lucide-react";
+import { X, RefreshCw, Target, AlertTriangle } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
 interface InterventionModalProps {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { BookOpen, Users, AlertCircle, FileSpreadsheet, Search, Eye, PlusCircle } from "lucide-react";
+import { Search } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
 import { SassCsvUploader } from "./SassCsvUploader";
@@ -12,7 +12,7 @@ export const TeacherDashboard: React.FC = () => {
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
 
   const loadData = async () => {
     setIsLoading(true);

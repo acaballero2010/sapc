@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { UploadCloud, CheckCircle2, AlertCircle, FileSpreadsheet, RefreshCw, Calendar, AlertTriangle } from "lucide-react";
+import { UploadCloud, CheckCircle2, AlertCircle, FileSpreadsheet, RefreshCw } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
 interface SassCsvUploaderProps {

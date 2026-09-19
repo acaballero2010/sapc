@@ -4,29 +4,20 @@ import React from "react";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { 
   GraduationCap, 
-  ShieldCheck, 
-  UserCheck, 
-  Sparkles, 
-  LogOut, 
   Bot,
-  Layers,
-  BookOpen
+  Layers
 } from "lucide-react";
 
 interface NavbarProps {
   onOpenChat?: () => void;
   onOpenSimulator?: () => void;
-  activeTab?: string;
-  setActiveTab?: (tab: string) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   onOpenChat, 
-  onOpenSimulator,
-  activeTab = "dashboard",
-  setActiveTab
+  onOpenSimulator
 }) => {
-  const { user, switchRole, logout } = useAuth();
+  const { user, switchRole } = useAuth();
 
   const rolesList: { role: RoleType; label: string; icon: string }[] = [
     { role: "guidance_counselor", label: "Counselor", icon: "🧠" },

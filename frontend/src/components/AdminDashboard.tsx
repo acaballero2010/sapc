@@ -1,7 +1,5 @@
-"use client";
-
-import React, { useState } from "react";
-import { Settings, ShieldCheck, Database, Sliders, Layers, UserCheck } from "lucide-react";
+import React from "react";
+import { Sliders, ShieldCheck } from "lucide-react";
 import { AuditLogViewer } from "./AuditLogViewer";
 
 export const AdminDashboard: React.FC = () => {

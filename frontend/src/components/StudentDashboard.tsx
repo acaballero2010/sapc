@@ -2,15 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { 
-  GraduationCap, 
   Bot, 
   BookOpen, 
-  Calendar, 
   HeartHandshake, 
-  Sparkles, 
-  CheckCircle,
-  PhoneCall,
-  Clock
+  PhoneCall
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -26,8 +21,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
   const [student, setStudent] = useState<any | null>(null);
   const [riskData, setRiskData] = useState<any | null>(null);
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
-  const [interventions, setInterventions] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_interventions, setInterventions] = useState<any[]>([]);
+  const [_isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadProfile = async () => {
