@@ -448,20 +448,20 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
                     SY {r.school_year} ({r.semester} Semester)
                   </td>
                   <td className="py-4 px-5">
-                    <span className={`text-base font-extrabold ${r.gpa < 75 ? "text-rose-600" : "text-emerald-600"}`}>
-                      {r.gpa.toFixed(1)}
+                    <span className={`text-base font-extrabold ${(r.gpa || 0) < 75 ? "text-rose-600" : "text-emerald-600"}`}>
+                      {Number(r.gpa ?? 0).toFixed(1)}
                     </span>
                   </td>
-                  <td className="py-4 px-5 font-semibold text-slate-800">{r.attendance_rate}%</td>
-                  <td className="py-4 px-5 text-slate-600">{r.absences_count} days</td>
-                  <td className="py-4 px-5 text-slate-600">{r.incomplete_subjects_count}</td>
+                  <td className="py-4 px-5 font-semibold text-slate-800">{r.attendance_rate ?? 100}%</td>
+                  <td className="py-4 px-5 text-slate-600">{r.absences_count ?? 0} days</td>
+                  <td className="py-4 px-5 text-slate-600">{r.incomplete_subjects_count ?? 0}</td>
                   <td className="py-4 px-5 text-right">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      r.gpa >= 75 
+                      (r.gpa || 0) >= 75 
                         ? "bg-emerald-50 text-emerald-800 border border-emerald-200" 
                         : "bg-rose-50 text-rose-800 border border-rose-200"
                     }`}>
-                      {r.gpa >= 75 ? "Passing Standing" : "Subject Remediation Recommended"}
+                      {(r.gpa || 0) >= 75 ? "Passing Standing" : "Subject Remediation Recommended"}
                     </span>
                   </td>
                 </tr>

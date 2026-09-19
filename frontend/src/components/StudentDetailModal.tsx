@@ -225,22 +225,24 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           {
             id: 1,
             school_year: "2025-2026",
-            semester: "2nd",
+            semester: "Quarter 2 (Current)",
             gpa: found.sass_metrics.gpa,
-            attendance_rate: Math.max(75, 100 - found.sass_metrics.days_absent * 2),
+            failed_subjects_count: found.sass_metrics.failing_subjects_count,
+            incomplete_subjects_count: found.sass_metrics.incomplete_requirements_count,
+            attendance_rate: Math.max(70, 100 - found.sass_metrics.days_absent * 2.5),
             absences_count: found.sass_metrics.days_absent,
-            incomplete_subjects_count: found.sass_metrics.incomplete_requirements_count
+            normalized_academic_risk: found.domain_scores.academic
           },
           {
             id: 2,
             school_year: "2025-2026",
-            quarter: "Quarter 1",
-            gpa: studentId === 1 ? 74.0 : studentId === 2 ? 84.0 : 89.0,
-            failed_subjects_count: studentId === 1 ? 1 : 0,
+            semester: "Quarter 1",
+            gpa: Math.min(100, parseFloat((found.sass_metrics.gpa + 1.8).toFixed(1))),
+            failed_subjects_count: Math.max(0, found.sass_metrics.failing_subjects_count - 1),
             incomplete_subjects_count: 0,
-            attendance_rate: studentId === 1 ? 84.0 : 95.0,
-            absences_count: studentId === 1 ? 7 : 2,
-            normalized_academic_risk: studentId === 1 ? 65.0 : 28.0
+            attendance_rate: Math.min(100, Math.max(75, 100 - Math.max(0, found.sass_metrics.days_absent - 1) * 2.5)),
+            absences_count: Math.max(0, found.sass_metrics.days_absent - 1),
+            normalized_academic_risk: Math.max(5, parseFloat((found.domain_scores.academic - 3.2).toFixed(1)))
           }
         ];
 
@@ -398,31 +400,31 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       <span className="flex items-center gap-2 text-slate-700 font-medium">
                         <BookOpen className="h-4 w-4 text-[#8B0014]" /> Academic (w_AC = 0.4017)
                       </span>
-                      <span className="font-extrabold text-slate-900 text-base">{domainScores.academic.toFixed(1)} / 100</span>
+                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.academic || 0).toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
                       <span className="flex items-center gap-2 text-slate-700 font-medium">
                         <Brain className="h-4 w-4 text-rose-600" /> Mental Health (w_MH = 0.2442)
                       </span>
-                      <span className="font-extrabold text-slate-900 text-base">{domainScores.mental_health.toFixed(1)} / 100</span>
+                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.mental_health || 0).toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
                       <span className="flex items-center gap-2 text-slate-700 font-medium">
                         <DollarSign className="h-4 w-4 text-amber-600" /> Financial (w_FI = 0.1373)
                       </span>
-                      <span className="font-extrabold text-slate-900 text-base">{domainScores.financial.toFixed(1)} / 100</span>
+                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.financial || 0).toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
                       <span className="flex items-center gap-2 text-slate-700 font-medium">
                         <Users className="h-4 w-4 text-amber-600" /> Family (w_FA = 0.1373)
                       </span>
-                      <span className="font-extrabold text-slate-900 text-base">{domainScores.family.toFixed(1)} / 100</span>
+                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.family || 0).toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
                       <span className="flex items-center gap-2 text-slate-700 font-medium">
                         <HeartPulse className="h-4 w-4 text-rose-600" /> Health (w_HE = 0.0794)
                       </span>
-                      <span className="font-extrabold text-slate-900 text-base">{domainScores.health.toFixed(1)} / 100</span>
+                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.health || 0).toFixed(1)} / 100</span>
                     </div>
                   </div>
 
@@ -448,7 +450,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     <div className="flex items-center gap-2.5">
                       <Award className="h-5 w-5 text-[#8B0014]" />
                       <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                        AHP Targeted Decision Recommendation (Dominant: {riskBreakdown.dominant_domain.replace("_", " ").toUpperCase()})
+                        AHP Targeted Decision Recommendation (Dominant: {riskBreakdown.dominant_domain ? riskBreakdown.dominant_domain.replace("_", " ").toUpperCase() : "ACADEMIC"})
                       </h4>
                     </div>
                     <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#8B0014] text-white">
@@ -517,19 +519,19 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         {academicRecords.map((r) => (
                           <tr key={r.id} className="text-slate-800 hover:bg-slate-50 transition">
                             <td className="py-3.5 px-4 font-bold text-slate-900">
-                              SY {r.school_year} ({r.quarter || r.semester})
+                              SY {r.school_year} ({r.quarter || r.semester || "Semester"})
                             </td>
                             <td className="py-3.5 px-4">
-                              <span className={`font-extrabold text-base ${r.gpa < 75 ? "text-rose-600" : r.gpa < 80 ? "text-amber-700" : "text-emerald-700"}`}>
-                                {r.gpa.toFixed(1)}
+                              <span className={`font-extrabold text-base ${(r.gpa || 0) < 75 ? "text-rose-600" : (r.gpa || 0) < 80 ? "text-amber-700" : "text-emerald-700"}`}>
+                                {Number(r.gpa ?? 0).toFixed(1)}
                               </span>
                             </td>
-                            <td className="py-3.5 px-4">{r.failed_subjects_count}</td>
-                            <td className="py-3.5 px-4">{r.incomplete_subjects_count}</td>
-                            <td className="py-3.5 px-4">{r.attendance_rate}%</td>
-                            <td className="py-3.5 px-4">{r.absences_count} days</td>
+                            <td className="py-3.5 px-4 font-semibold text-slate-800">{r.failed_subjects_count ?? r.failing_subjects_count ?? 0}</td>
+                            <td className="py-3.5 px-4 text-slate-600">{r.incomplete_subjects_count ?? r.incomplete_requirements_count ?? 0}</td>
+                            <td className="py-3.5 px-4 font-semibold text-slate-800">{r.attendance_rate ?? 100}%</td>
+                            <td className="py-3.5 px-4 text-slate-600">{r.absences_count ?? r.days_absent ?? 0} days</td>
                             <td className="py-3.5 px-4 text-right font-black text-[#8B0014] text-base">
-                              {r.normalized_academic_risk.toFixed(1)} / 100
+                              {Number(r.normalized_academic_risk ?? 0).toFixed(1)} / 100
                             </td>
                           </tr>
                         ))}
