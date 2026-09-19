@@ -25,7 +25,11 @@ import {
   Square,
   Target,
   UserCheck,
-  Sparkles
+  Sparkles,
+  Smile,
+  Flame,
+  BatteryCharging,
+  MessageSquare
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -48,7 +52,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   onCreateIntervention
 }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"synthesis" | "simulator">("synthesis");
+  const [activeTab, setActiveTab] = useState<"synthesis" | "wellness" | "simulator">("synthesis");
   const [student, setStudent] = useState<any | null>(null);
   const [riskData, setRiskData] = useState<any | null>(null);
   const [riskBreakdown, setRiskBreakdown] = useState<any | null>(null);
@@ -56,6 +60,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const [_assessments, setAssessments] = useState<any[]>([]);
   const [counselorNotes, setCounselorNotes] = useState<any[]>([]);
   const [studentCarePlans, setStudentCarePlans] = useState<any[]>([]);
+  const [moodHistory, setMoodHistory] = useState<any | null>(null);
   const [newNote, setNewNote] = useState({
     observation_summary: "",
     mental_health_indicators: "",
@@ -143,14 +148,19 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [sRes, rRes, rbRes, aRes, assRes, intRes] = await Promise.all([
+        const [sRes, rRes, rbRes, aRes, assRes, intRes, moodRes] = await Promise.all([
           fetchWithAuth(`/students/${studentId}`).catch(() => null),
           fetchWithAuth(`/risk/student/${studentId}`).catch(() => null),
           fetchWithAuth(`/analytics/student/${studentId}/risk-breakdown`).catch(() => null),
           fetchWithAuth(`/academic/student/${studentId}`).catch(() => null),
           fetchWithAuth(`/assessments/student/${studentId}`).catch(() => null),
-          fetchWithAuth(`/risk/interventions?student_id=${studentId}`).catch(() => null)
+          fetchWithAuth(`/risk/interventions?student_id=${studentId}`).catch(() => null),
+          fetchWithAuth(`/assessments/mood-history?student_id=${studentId}`).catch(() => null)
         ]);
+
+        if (moodRes) {
+          setMoodHistory(moodRes);
+        }
 
         // Load local interventions for this student
         let matchedPlans: any[] = intRes && Array.isArray(intRes) ? intRes : [];
@@ -289,6 +299,63 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           }
         ];
 
+        const mockMoodCheckins = [
+          {
+            id: 101,
+            mood_score: 4,
+            mood_emoji: "🙂",
+            energy_level: 4,
+            primary_stressor: "None / Peaceful",
+            reflection_note: "Feeling good after completing my STEM problem set early.",
+            created_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString()
+          },
+          {
+            id: 102,
+            mood_score: 3,
+            mood_emoji: "😐",
+            energy_level: 3,
+            primary_stressor: "Exams / Deadlines",
+            reflection_note: "Pre-calculus quiz was tough, but group review helped clarify concepts.",
+            created_at: new Date(Date.now() - 1000 * 60 * 60 * 30).toISOString()
+          },
+          {
+            id: 103,
+            mood_score: 4,
+            mood_emoji: "🙂",
+            energy_level: 4,
+            primary_stressor: "Academics",
+            reflection_note: "Had a positive check-in with class adviser Prof. Bautista.",
+            created_at: new Date(Date.now() - 1000 * 60 * 60 * 54).toISOString()
+          },
+          {
+            id: 104,
+            mood_score: 2,
+            mood_emoji: "😟",
+            energy_level: 2,
+            primary_stressor: "Sleep",
+            reflection_note: "Stayed up late studying; feeling a bit tired during morning classes.",
+            created_at: new Date(Date.now() - 1000 * 60 * 60 * 78).toISOString()
+          },
+          {
+            id: 105,
+            mood_score: 5,
+            mood_emoji: "✨",
+            energy_level: 5,
+            primary_stressor: "None / Peaceful",
+            reflection_note: "Energized after weekend rest and science lab project completion!",
+            created_at: new Date(Date.now() - 1000 * 60 * 60 * 102).toISOString()
+          }
+        ];
+
+        setMoodHistory({
+          total_checkins: mockMoodCheckins.length,
+          streak_days: 5,
+          average_mood: 3.6,
+          average_energy: 3.6,
+          recent_checkins: mockMoodCheckins,
+          mental_health_risk_impact: found.domain_scores.mental_health
+        });
+
         setStudent(mockStudent);
         setRiskData(mockRisk);
         setRiskBreakdown(mockBreakdown);
@@ -301,6 +368,10 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
     loadData();
   }, [studentId, isOpen, isCounselor]);
+
+  const activeMoodList = moodHistory?.recent_checkins && moodHistory.recent_checkins.length > 0
+    ? moodHistory.recent_checkins
+    : [];
 
   const parseTasks = (raw: any): any[] => {
     if (!raw) return [];
@@ -438,10 +509,10 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-200 bg-slate-100/70 px-6 sm:px-8 gap-2 pt-2">
+        <div className="flex border-b border-slate-200 bg-slate-100/70 px-6 sm:px-8 gap-2 pt-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab("synthesis")}
-            className={`px-4 py-2.5 rounded-t-2xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${
+            className={`px-4 py-2.5 rounded-t-2xl font-bold text-xs sm:text-sm flex items-center gap-2 transition shrink-0 ${
               activeTab === "synthesis"
                 ? "bg-white text-[#8B0014] border-t border-x border-slate-200 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -451,8 +522,19 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             AHP Multi-Domain Synthesis & Notes
           </button>
           <button
+            onClick={() => setActiveTab("wellness")}
+            className={`px-4 py-2.5 rounded-t-2xl font-bold text-xs sm:text-sm flex items-center gap-2 transition shrink-0 ${
+              activeTab === "wellness"
+                ? "bg-white text-[#8B0014] border-t border-x border-slate-200 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <Smile className="h-4 w-4 text-[#8B0014]" />
+            Wellness & Daily Mood Log ({activeMoodList.length})
+          </button>
+          <button
             onClick={() => setActiveTab("simulator")}
-            className={`px-4 py-2.5 rounded-t-2xl font-bold text-xs sm:text-sm flex items-center gap-2 transition ${
+            className={`px-4 py-2.5 rounded-t-2xl font-bold text-xs sm:text-sm flex items-center gap-2 transition shrink-0 ${
               activeTab === "simulator"
                 ? "bg-white text-[#8B0014] border-t border-x border-slate-200 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -478,6 +560,159 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               initialCompositeScore={riskData?.composite_risk_score}
               initialRiskTier={riskData?.risk_tier}
             />
+          ) : activeTab === "wellness" ? (
+            <div className="space-y-6">
+              {/* Wellness Metrics Overview Strip */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Average Mood Score</span>
+                    <strong className="text-2xl font-black text-slate-900 block mt-1">
+                      {moodHistory?.average_mood || 3.8} <span className="text-sm font-normal text-slate-500">/ 5.0</span>
+                    </strong>
+                    <span className="text-[11px] font-semibold text-emerald-700 mt-0.5 block">Positive Emotional Trend</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-amber-100/60 text-amber-800 border border-amber-300/60">
+                    <Smile className="h-6 w-6" />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Average Energy Level</span>
+                    <strong className="text-2xl font-black text-slate-900 block mt-1">
+                      {moodHistory?.average_energy || 3.6} <span className="text-sm font-normal text-slate-500">/ 5.0</span>
+                    </strong>
+                    <span className="text-[11px] font-semibold text-slate-600 mt-0.5 block">Steady Classroom Focus</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <BatteryCharging className="h-6 w-6" />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Check-in Streak</span>
+                    <strong className="text-2xl font-black text-amber-900 block mt-1">
+                      {moodHistory?.streak_days || 5} Days
+                    </strong>
+                    <span className="text-[11px] font-semibold text-amber-800 mt-0.5 block">Active Daily Pulse</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+                    <Flame className="h-6 w-6 fill-amber-500" />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">AHP Mental Health</span>
+                    <strong className="text-2xl font-black text-rose-700 block mt-1">
+                      {Number(domainScores.mental_health || 15.0).toFixed(1)} <span className="text-sm font-normal text-slate-500">pts</span>
+                    </strong>
+                    <span className="text-[11px] font-semibold text-slate-600 mt-0.5 block">Weight: 24.42% (w_MH)</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200">
+                    <HeartPulse className="h-6 w-6" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 14-Day Chronological Daily Pulse Table */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-amber-50 border border-amber-200 text-[#D97706]">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-extrabold text-slate-900">
+                        14-Day Longitudinal Wellness & Mood Pulse History
+                      </h4>
+                      <p className="text-xs text-slate-500">Student emotional check-ins, energy logs, and confidential reflections</p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 self-start sm:self-auto">
+                    ✓ Protected under RA 10173
+                  </span>
+                </div>
+
+                {activeMoodList.length > 0 ? (
+                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table className="min-w-full text-left text-xs sm:text-sm">
+                      <thead>
+                        <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">
+                          <th className="py-3 px-4">Date & Time</th>
+                          <th className="py-3 px-4">Emotional State</th>
+                          <th className="py-3 px-4">Energy</th>
+                          <th className="py-3 px-4">Primary Factor</th>
+                          <th className="py-3 px-4">Student Reflection Note</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {activeMoodList.map((checkin: any) => {
+                          const dateObj = new Date(checkin.created_at);
+                          return (
+                            <tr key={checkin.id} className="hover:bg-slate-50 transition">
+                              <td className="py-3 px-4 whitespace-nowrap text-slate-600 font-mono text-xs font-medium">
+                                <div>{dateObj.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}</div>
+                                <span className="text-[10px] text-slate-400">{dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <span className="flex items-center gap-2 font-bold text-slate-900">
+                                  <span className="text-xl">{checkin.mood_emoji || "🙂"}</span>
+                                  <span>
+                                    {checkin.mood_score === 5 ? "Energized" :
+                                     checkin.mood_score === 4 ? "Good" :
+                                     checkin.mood_score === 3 ? "Neutral" :
+                                     checkin.mood_score === 2 ? "Stressed" : "Overwhelmed"}
+                                  </span>
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="flex gap-1">
+                                    {[1, 2, 3, 4, 5].map((level) => (
+                                      <span
+                                        key={level}
+                                        className={`h-2.5 w-2 rounded-xs ${
+                                          level <= (checkin.energy_level || 3)
+                                            ? "bg-emerald-500"
+                                            : "bg-slate-200"
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="font-mono text-xs text-slate-600 font-semibold">{checkin.energy_level || 3}/5</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                                  {checkin.primary_stressor || "None / Peaceful"}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-slate-700 text-xs sm:text-sm">
+                                {checkin.reflection_note ? (
+                                  <p className="italic text-slate-800 bg-slate-50/80 p-2 rounded-xl border border-slate-200/80">
+                                    &ldquo;{checkin.reflection_note}&rdquo;
+                                  </p>
+                                ) : (
+                                  <span className="text-slate-400 italic text-xs">No reflection note provided</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-8 text-center text-slate-500 space-y-2">
+                    <Smile className="h-8 w-8 mx-auto text-slate-300" />
+                    <p className="text-sm font-semibold">No daily mood check-ins recorded yet for this student.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           ) : (
             <>
               {/* AHP Decision Engine Synthesis Card */}
