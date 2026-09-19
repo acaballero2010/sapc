@@ -23,9 +23,7 @@ import {
   Check,
   Compass,
   PanelLeftClose,
-  PanelLeftOpen,
-  ChevronLeft,
-  ChevronRight
+  PanelLeftOpen
 } from "lucide-react";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { SapcLogo } from "./SapcLogo";
@@ -51,7 +49,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const router = useRouter();
   const { user, switchRole } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [showRolePreview, setShowRolePreview] = useState(true);
 
   const currentRole: RoleType = user?.role || "guidance_counselor";
 

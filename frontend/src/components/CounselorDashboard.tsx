@@ -16,14 +16,11 @@ import {
   PlusCircle,
   CheckCircle2,
   Target,
-  Layers,
-  Sparkles,
   Filter,
   CheckSquare,
   Square,
   ChevronDown,
-  ChevronUp,
-  UserCheck
+  ChevronUp
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";

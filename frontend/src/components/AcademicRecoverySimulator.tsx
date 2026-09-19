@@ -8,10 +8,6 @@ import {
   BookOpen, 
   ShieldCheck, 
   HeartPulse, 
-  Sparkles,
-  Award,
-  Coins,
-  Target,
   X 
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";

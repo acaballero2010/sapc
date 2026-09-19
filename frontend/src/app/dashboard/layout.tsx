@@ -8,7 +8,7 @@ import { SensitivitySimulator } from "@/components/SensitivitySimulator";
 import { RoleOnboardingWizard } from "@/components/RoleOnboardingWizard";
 import { AccountManagementModal } from "@/components/AccountManagementModal";
 import { useAuth } from "@/lib/auth-context";
-import { ShieldCheck, User, Compass, Bot, PanelLeft, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ShieldCheck, User, Compass, Bot } from "lucide-react";
 
 export default function DashboardLayout({
   children,

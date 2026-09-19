@@ -118,8 +118,6 @@ export const LandingPage: React.FC = () => {
     return () => clearInterval(timer);
   }, [isPaused, slides.length]);
 
-  const activeSlide = slides[currentSlide];
-
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900">
       {/* Fixed Sticky Navigation Header */}

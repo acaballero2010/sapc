@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   X, 
   RefreshCw, 
@@ -333,6 +333,27 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const applyTemplate = useCallback((tmpl: typeof PROTOCOL_TEMPLATES[0]) => {
+    if (!student) return;
+    setSelectedTemplate(tmpl.id);
+    setFormData({
+      title: `${tmpl.title} (${student.first_name})`,
+      target_domain: tmpl.domain,
+      custom_domain: "",
+      description: tmpl.description,
+      followup_days: tmpl.followup_days,
+      status: tmpl.status,
+      confidentiality: "guidance_only"
+    });
+    const baseId = Date.now();
+    setTasks(
+      tmpl.tasks.map((t, idx) => ({
+        ...t,
+        id: `task-${baseId}-${idx}`
+      })) as CarePlanTask[]
+    );
+  }, [student]);
+
   // Initialize or reset when opened
   useEffect(() => {
     if (isOpen && student) {
@@ -351,33 +372,12 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
 
       applyTemplate(matchedTemplate);
     }
-  }, [isOpen, student]);
-
-  if (!isOpen || !student) return null;
-
-  const applyTemplate = (tmpl: typeof PROTOCOL_TEMPLATES[0]) => {
-    setSelectedTemplate(tmpl.id);
-    setFormData({
-      title: `${tmpl.title} (${student.first_name})`,
-      target_domain: tmpl.domain,
-      custom_domain: "",
-      description: tmpl.description,
-      followup_days: tmpl.followup_days,
-      status: tmpl.status,
-      confidentiality: "guidance_only"
-    });
-    setTasks(
-      tmpl.tasks.map((t, idx) => ({
-        ...t,
-        id: `task-${Date.now()}-${idx}`
-      })) as CarePlanTask[]
-    );
-  };
+  }, [isOpen, student, applyTemplate]);
 
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
     const newTask: CarePlanTask = {
-      id: `task-${Date.now()}`,
+      id: `task-${tasks.length + 1}-${newTaskText.substring(0, 10).replace(/\s+/g, "_")}`,
       text: newTaskText.trim(),
       assignee: newTaskAssignee,
       priority: newTaskPriority,
@@ -390,7 +390,7 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
 
   const handleAddQuickTask = (sug: typeof QUICK_SUGGESTIONS[0]) => {
     const newTask: CarePlanTask = {
-      id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: `task-${tasks.length + 1}-${sug.text.substring(0, 10).replace(/\s+/g, "_")}`,
       text: sug.text,
       assignee: sug.assignee,
       priority: sug.priority as any,
@@ -412,7 +412,7 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.description.trim()) {
+    if (!student || !formData.title.trim() || !formData.description.trim()) {
       setError("Please provide a valid Plan Title and Clinical Objective description.");
       return;
     }
@@ -490,6 +490,8 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
       setIsSubmitting(false);
     }
   };
+
+  if (!isOpen || !student) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm animate-in fade-in font-sans overflow-y-auto">

@@ -44,7 +44,7 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
     } else if (students.length > 0 && !selectedStudentId) {
       setSelectedStudentId(students[0].id);
     }
-  }, [student, students]);
+  }, [student, students, selectedStudentId]);
 
   const activeStudent = (students.length > 0 && selectedStudentId)
     ? students.find((s) => s.id === selectedStudentId) || student || students[0]

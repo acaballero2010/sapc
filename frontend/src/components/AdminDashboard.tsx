@@ -9,18 +9,10 @@ import {
   Users, 
   Search, 
   CheckCircle2, 
-  Clock, 
   Database, 
   Activity, 
   Eye, 
   X, 
-  BookOpen, 
-  Brain, 
-  HeartPulse, 
-  FileText,
-  UserCheck,
-  Lock,
-  Key,
   Check
 } from "lucide-react";
 import { AuditLogViewer } from "./AuditLogViewer";

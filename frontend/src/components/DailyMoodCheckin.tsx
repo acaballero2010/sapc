@@ -11,8 +11,7 @@ import {
   BatteryCharging,
   ShieldCheck,
   X,
-  Calendar,
-  Sparkles
+  Calendar
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 

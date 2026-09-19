@@ -10,8 +10,7 @@ import {
   Eye, 
   EyeOff, 
   GraduationCap,
-  ShieldCheck,
-  CheckCircle2
+  ShieldCheck
 } from "lucide-react";
 import { SapcLogo } from "@/components/SapcLogo";
 import { useAuth, RoleType } from "@/lib/auth-context";

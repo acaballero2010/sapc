@@ -10,8 +10,6 @@ import {
   Clock, 
   HeartHandshake,
   MessageSquare,
-  Smile,
-  Flame,
   ShieldCheck
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";

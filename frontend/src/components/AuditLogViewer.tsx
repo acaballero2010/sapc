@@ -7,18 +7,9 @@ import {
   RefreshCw, 
   ShieldAlert, 
   Filter, 
-  Calendar, 
-  UserCheck, 
-  SlidersHorizontal, 
   X, 
-  FileText, 
   Lock, 
-  Key, 
-  CheckCircle2, 
-  ExternalLink,
-  Eye,
-  Hash,
-  Download
+  Eye
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -153,6 +144,7 @@ export const AuditLogViewer: React.FC = () => {
   const [actionCategoryFilter, setActionCategoryFilter] = useState("all");
   const [timeWindowFilter, setTimeWindowFilter] = useState("all");
   const [selectedRecord, setSelectedRecord] = useState<AuditLogEntry | null>(null);
+  const [referenceTime, setReferenceTime] = useState<number>(() => Date.now());
   const [accessError, setAccessError] = useState<string | null>(null);
 
   const isAuthorized = user?.role === "admin" || user?.role === "guidance_counselor";
@@ -165,6 +157,7 @@ export const AuditLogViewer: React.FC = () => {
 
     setIsLoading(true);
     setAccessError(null);
+    setReferenceTime(Date.now());
     try {
       const data = await fetchWithAuth("/audit/logs?limit=50");
       if (Array.isArray(data) && data.length > 0) {
@@ -186,7 +179,7 @@ export const AuditLogViewer: React.FC = () => {
       } else {
         setLogs(DEFAULT_AUDIT_LOGS);
       }
-    } catch (err: any) {
+    } catch {
       // Fallback to institutional default logs for demonstration
       setLogs(DEFAULT_AUDIT_LOGS);
     } finally {
@@ -223,7 +216,7 @@ export const AuditLogViewer: React.FC = () => {
       // 3. Time window filter
       if (timeWindowFilter !== "all") {
         const logTime = new Date(log.timestamp).getTime();
-        const now = Date.now();
+        const now = referenceTime;
         if (timeWindowFilter === "24h" && now - logTime > 24 * 3600 * 1000) return false;
         if (timeWindowFilter === "7d" && now - logTime > 7 * 24 * 3600 * 1000) return false;
         if (timeWindowFilter === "30d" && now - logTime > 30 * 24 * 3600 * 1000) return false;
@@ -244,7 +237,7 @@ export const AuditLogViewer: React.FC = () => {
 
       return true;
     });
-  }, [logs, search, roleFilter, actionCategoryFilter, timeWindowFilter]);
+  }, [logs, search, roleFilter, actionCategoryFilter, timeWindowFilter, referenceTime]);
 
   const hasActiveFilters = search.trim() !== "" || roleFilter !== "all" || actionCategoryFilter !== "all" || timeWindowFilter !== "all";
 
