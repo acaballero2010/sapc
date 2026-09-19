@@ -8,7 +8,7 @@ import { SensitivitySimulator } from "@/components/SensitivitySimulator";
 import { RoleOnboardingWizard } from "@/components/RoleOnboardingWizard";
 import { AccountManagementModal } from "@/components/AccountManagementModal";
 import { useAuth } from "@/lib/auth-context";
-import { ShieldCheck, User, Compass, Bot } from "lucide-react";
+import { ShieldCheck, User, Compass, Bot, PanelLeft, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -20,6 +20,7 @@ export default function DashboardLayout({
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -28,8 +29,26 @@ export default function DashboardLayout({
         setIsOnboardingOpen(true);
         sessionStorage.removeItem("sapc_show_tour");
       }
+
+      // Check saved sidebar state or auto-collapse for 1024px viewports
+      const saved = localStorage.getItem("sapc_sidebar_collapsed");
+      if (saved !== null) {
+        setIsCollapsed(saved === "true");
+      } else if (window.innerWidth >= 1024 && window.innerWidth < 1280) {
+        setIsCollapsed(true);
+      }
     }
   }, []);
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_sidebar_collapsed", String(next));
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
@@ -43,19 +62,32 @@ export default function DashboardLayout({
           onOpenSimulator={() => setIsSimulatorOpen(true)}
           onOpenOnboarding={() => setIsOnboardingOpen(true)}
           onOpenAccount={() => setIsAccountOpen(true)}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={toggleCollapse}
         />
 
         {/* Main Content Area offset by Sidebar width on lg screens */}
-        <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
+        <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? "lg:pl-20" : "lg:pl-72"}`}>
           
           {/* Top Global Dashboard Header Bar */}
-          <header className="sticky top-1.5 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-10 py-3.5 flex items-center justify-between shadow-2xs">
-            <div className="flex items-center gap-3 min-w-0">
+          <header className="sticky top-1.5 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {/* Desktop Sidebar Toggle in Header */}
+              <button
+                type="button"
+                onClick={toggleCollapse}
+                className="hidden lg:flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition shadow-2xs"
+                title={isCollapsed ? "Expand Sidebar (Widescreen Mode)" : "Collapse Sidebar"}
+                aria-label="Toggle Sidebar"
+              >
+                {isCollapsed ? <PanelLeftOpen className="h-4 w-4 text-[#8B0014]" /> : <PanelLeftClose className="h-4 w-4" />}
+              </button>
+
               <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-[#8B0014] border border-rose-200 capitalize flex items-center gap-1.5 shadow-2xs shrink-0">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 {user?.role ? `${user.role.replace("_", " ")} Portal` : "SAPC Portal"}
               </span>
-              <span className="text-xs text-slate-400 hidden md:inline font-medium">
+              <span className="text-xs text-slate-400 hidden xl:inline font-medium truncate">
                 San Antonio de Padua College • IntellySys DSS
               </span>
             </div>
@@ -107,7 +139,7 @@ export default function DashboardLayout({
             </div>
           </header>
 
-          <main className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-8">
+          <main className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {children}
           </main>
 

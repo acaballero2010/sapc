@@ -591,15 +591,15 @@ export const CounselorDashboard: React.FC = () => {
 
         {/* Table */}
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
+          <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-extrabold text-xs uppercase tracking-wider">
-                <th className="py-4 px-5">Student Name</th>
-                <th className="py-4 px-5">LRN</th>
-                <th className="py-4 px-5">Section / Adviser</th>
-                <th className="py-4 px-5">AHP Composite Risk</th>
-                <th className="py-4 px-5">Primary Factor</th>
-                <th className="py-4 px-5 text-right">Actions</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Student Name</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">LRN</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Section / Adviser</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">AHP Composite Risk</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Primary Factor</th>
+                <th className="py-3.5 px-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -612,29 +612,29 @@ export const CounselorDashboard: React.FC = () => {
               ) : (
                 paginatedStudents.map((s) => (
                   <tr key={s.id} className="text-slate-800 hover:bg-slate-50/80 transition">
-                    <td className="py-4 px-5 font-bold text-slate-900 text-base">
+                    <td className="py-3.5 px-4 font-bold text-slate-900 text-sm sm:text-base whitespace-nowrap">
                       {s.first_name} {s.last_name}
                     </td>
-                    <td className="py-4 px-5 font-mono text-slate-600 text-xs sm:text-sm font-semibold">{s.lrn}</td>
-                    <td className="py-4 px-5 text-slate-700">
-                      <div className="font-semibold text-sm text-slate-900">{s.section_name}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">{s.adviser_name}</div>
+                    <td className="py-3.5 px-4 font-mono text-slate-600 text-xs sm:text-sm font-semibold whitespace-nowrap">{s.lrn}</td>
+                    <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap">
+                      <div className="font-semibold text-xs sm:text-sm text-slate-900">{s.section_name}</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">{s.adviser_name}</div>
                     </td>
-                    <td className="py-4 px-5">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="md" />
                     </td>
-                    <td className="py-4 px-5">
-                      <span className="px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span className="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold whitespace-nowrap inline-block">
                         {s.primary_risk_driver || "Academic"}
                       </span>
                     </td>
-                    <td className="py-4 px-5 text-right space-x-2 whitespace-nowrap">
+                    <td className="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
                       <button
                         onClick={() => {
                           setSelectedStudentId(s.id);
                           setIsDetailOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white transition font-bold text-xs shadow-xs"
+                        className="px-2.5 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white transition font-bold text-xs shadow-xs"
                       >
                         View Profile
                       </button>
@@ -643,17 +643,17 @@ export const CounselorDashboard: React.FC = () => {
                           setParentAlertStudent(s);
                           setIsParentAlertOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition font-bold text-xs"
+                        className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 transition font-bold text-xs"
                         title="Send instant SMS/Email meeting invite to parent"
                       >
-                        ✉ Notify Parent
+                        ✉ Notify
                       </button>
                       <button
                         onClick={() => {
                           setInterventionStudent(s);
                           setIsInterventionOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition font-bold text-xs"
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition font-bold text-xs"
                       >
                         + Care Plan
                       </button>

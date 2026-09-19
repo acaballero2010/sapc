@@ -42,7 +42,7 @@ export const RiskBadge: React.FC<RiskBadgeProps> = ({ score, tier, size = "md" }
   };
 
   return (
-    <span className={`inline-flex items-center gap-2 rounded-full border ${badgeColor} ${sizeClasses[size]}`}>
+    <span className={`inline-flex items-center gap-2 rounded-full border whitespace-nowrap shrink-0 ${badgeColor} ${sizeClasses[size]}`}>
       <span className={`w-2 h-2 rounded-full ${dotColor} shrink-0`} />
       <span className="tracking-tight">{score !== undefined && score !== null ? `${score.toFixed(1)} / 100` : label}</span>
       {score !== undefined && score !== null && (

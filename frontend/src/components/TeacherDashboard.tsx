@@ -163,34 +163,34 @@ export const TeacherDashboard: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
+          <table className="min-w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">
-                <th className="py-4 px-5">Student</th>
-                <th className="py-4 px-5">LRN</th>
-                <th className="py-4 px-5">Section</th>
-                <th className="py-4 px-5">Composite Risk</th>
-                <th className="py-4 px-5">Primary Factor</th>
-                <th className="py-4 px-5 text-right">Actions</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Student</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">LRN</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Section</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Composite Risk</th>
+                <th className="py-3.5 px-4 whitespace-nowrap">Primary Factor</th>
+                <th className="py-3.5 px-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredStudents.map((s) => (
                 <tr key={s.id} className="text-slate-800 hover:bg-slate-50 transition">
-                  <td className="py-4 px-5 font-bold text-slate-900 text-base">
+                  <td className="py-3.5 px-4 font-bold text-slate-900 text-sm sm:text-base whitespace-nowrap">
                     {s.first_name} {s.last_name}
                   </td>
-                  <td className="py-4 px-5 font-mono text-slate-600 text-xs sm:text-sm font-semibold">{s.lrn}</td>
-                  <td className="py-4 px-5 text-slate-700 font-medium">{s.section_name}</td>
-                  <td className="py-4 px-5">
+                  <td className="py-3.5 px-4 font-mono text-slate-600 text-xs sm:text-sm font-semibold whitespace-nowrap">{s.lrn}</td>
+                  <td className="py-3.5 px-4 text-slate-700 font-medium text-xs sm:text-sm whitespace-nowrap">{s.section_name}</td>
+                  <td className="py-3.5 px-4 whitespace-nowrap">
                     <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="md" />
                   </td>
-                  <td className="py-4 px-5">
-                    <span className="px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold">
+                  <td className="py-3.5 px-4 whitespace-nowrap">
+                    <span className="px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold whitespace-nowrap inline-block">
                       {s.primary_risk_driver || "Academic"}
                     </span>
                   </td>
-                  <td className="py-4 px-5 text-right">
+                  <td className="py-3.5 px-4 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         type="button"
@@ -198,7 +198,7 @@ export const TeacherDashboard: React.FC = () => {
                           setReferralStudent(s);
                           setIsReferralOpen(true);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-rose-50 text-slate-800 hover:text-[#8B0014] border border-amber-300 hover:border-rose-300 transition font-bold text-xs flex items-center gap-1.5 shadow-2xs"
+                        className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 hover:border-amber-400 transition font-bold text-xs flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
                         title="Submit formal referral ticket to Guidance Counselor"
                       >
                         <HeartHandshake className="h-3.5 w-3.5 text-[#8B0014]" />
@@ -211,7 +211,7 @@ export const TeacherDashboard: React.FC = () => {
                           setSelectedStudentId(s.id);
                           setIsDetailOpen(true);
                         }}
-                        className="px-3.5 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white transition font-bold text-xs shadow-xs flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white transition font-bold text-xs shadow-xs flex items-center gap-1.5 whitespace-nowrap"
                       >
                         <Eye className="h-3.5 w-3.5" />
                         <span>View Profile</span>
