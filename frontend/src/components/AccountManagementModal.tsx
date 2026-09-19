@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { 
   X, 
   ShieldCheck, 
@@ -8,13 +9,16 @@ import {
   GraduationCap, 
   LogOut, 
   Save, 
-  Sparkles,
-  CheckCircle2,
-  Lock,
-  Calendar,
-  Building,
-  KeyRound,
-  FileText
+  Sparkles, 
+  CheckCircle2, 
+  Lock, 
+  Calendar, 
+  Building, 
+  KeyRound, 
+  FileText, 
+  Camera, 
+  Upload, 
+  Trash2 
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
@@ -24,14 +28,24 @@ interface AccountManagementModalProps {
   onClose: () => void;
 }
 
+const AVATAR_PRESETS = [
+  { id: "stem", label: "STEM Scholar", emoji: "🔬", bg: "from-blue-600 to-indigo-800" },
+  { id: "grad", label: "Academic Achiever", emoji: "🎓", bg: "from-[#8B0014] to-[#4A000A]" },
+  { id: "lion", label: "SAPC Lion", emoji: "🦁", bg: "from-amber-500 to-amber-700" },
+  { id: "star", label: "Excellence", emoji: "🌟", bg: "from-purple-600 to-rose-600" },
+  { id: "creative", label: "Arts & Culture", emoji: "🎨", bg: "from-emerald-600 to-teal-800" }
+];
+
 export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUserProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<"profile" | "academic" | "privacy">("profile");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Editable form fields
   const [fullName, setFullName] = useState(user?.full_name || "Kalye");
   const [email] = useState(user?.email || "kalye@sapc.edu.ph");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
   const [lrn, setLrn] = useState("109482719283");
   const [strand, setStrand] = useState("Grade 11 - STEM (Science, Technology, Engineering, and Mathematics)");
   const [section, setSection] = useState("Section A - St. Thomas Aquinas");
@@ -39,12 +53,71 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const [guardianContact, setGuardianContact] = useState("+63 917 555 0192");
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size (max 4MB)
+    if (file.size > 4 * 1024 * 1024) {
+      setUploadError("Image size must be less than 4MB.");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please upload a valid image file (JPG, PNG, WebP).");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        setAvatarUrl(result);
+        updateUserProfile({ avatar_url: result });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSelectPreset = (preset: typeof AVATAR_PRESETS[0]) => {
+    // Generate a quick SVG/canvas preset avatar URL or emoji marker
+    const canvas = document.createElement("canvas");
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.fillStyle = preset.id === "grad" ? "#8B0014" : preset.id === "lion" ? "#D97706" : preset.id === "stem" ? "#2563EB" : preset.id === "star" ? "#9333EA" : "#059669";
+      ctx.beginPath();
+      ctx.arc(64, 64, 64, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.font = "60px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(preset.emoji, 64, 70);
+      const dataUrl = canvas.toDataURL();
+      setAvatarUrl(dataUrl);
+      updateUserProfile({ avatar_url: dataUrl });
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setAvatarUrl(null);
+    updateUserProfile({ avatar_url: null });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    updateUserProfile({
+      full_name: fullName,
+      avatar_url: avatarUrl
+    });
     setTimeout(() => {
       setIsSaving(false);
       setSaveSuccess(true);
@@ -65,8 +138,18 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
         {/* Top Header */}
         <div className="p-6 bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] text-white flex items-center justify-between border-t-4 border-amber-400">
           <div className="flex items-center gap-3.5">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-400 to-[#D97706] text-[#7B0012] flex items-center justify-center font-black text-xl shadow-md">
-              {user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
+            <div className="relative">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={fullName}
+                  className="h-13 w-13 rounded-2xl object-cover border-2 border-amber-400 shadow-md"
+                />
+              ) : (
+                <div className="h-13 w-13 rounded-2xl bg-gradient-to-br from-amber-400 to-[#D97706] text-[#7B0012] flex items-center justify-center font-black text-2xl shadow-md">
+                  {fullName ? fullName.charAt(0).toUpperCase() : "U"}
+                </div>
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2 mb-0.5">
@@ -76,11 +159,12 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                 </span>
                 <span className="text-xs text-rose-200 capitalize">• {user?.role?.replace("_", " ")}</span>
               </div>
-              <h3 className="text-xl font-black text-white">{user?.full_name || "User Account"}</h3>
+              <h3 className="text-xl font-black text-white">{fullName || "User Account"}</h3>
             </div>
           </div>
 
           <button
+            type="button"
             onClick={onClose}
             className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
           >
@@ -100,7 +184,7 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
             }`}
           >
             <GraduationCap className="h-4 w-4 text-[#8B0014]" />
-            <span>Profile Details</span>
+            <span>Profile & Photo</span>
           </button>
           <button
             type="button"
@@ -134,13 +218,110 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
           {saveSuccess && (
             <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span>Your institutional profile preferences have been successfully updated and saved.</span>
+              <span>Your profile preferences and photo have been successfully updated.</span>
             </div>
           )}
 
-          {/* TAB 1: Profile Details */}
+          {uploadError && (
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] flex items-center gap-2.5">
+              <X className="h-4 w-4 text-[#8B0014] shrink-0" />
+              <span>{uploadError}</span>
+            </div>
+          )}
+
+          {/* TAB 1: Profile Details & Photo Upload */}
           {activeTab === "profile" && (
-            <form onSubmit={handleSave} className="space-y-4">
+            <form onSubmit={handleSave} className="space-y-5">
+              
+              {/* Profile Photo Uploader Section */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800">Student Profile Photo</label>
+                    <p className="text-[11px] text-slate-500">Upload a custom headshot or pick an institutional avatar</p>
+                  </div>
+                  <span className="text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full">
+                    PNG, JPG, WebP ≤ 4MB
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
+                  <div className="relative group shrink-0">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="Profile preview"
+                        className="h-20 w-20 rounded-2xl object-cover border-2 border-[#8B0014] shadow-sm"
+                      />
+                    ) : (
+                      <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border-2 border-amber-400 flex items-center justify-center text-white text-3xl font-black shadow-sm">
+                        {fullName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold"
+                    >
+                      <Camera className="h-5 w-5 mb-0.5" />
+                      <span>Change</span>
+                    </button>
+                  </div>
+
+                  <div className="flex-1 space-y-2 text-center sm:text-left w-full">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold text-xs shadow-2xs transition flex items-center gap-1.5"
+                      >
+                        <Upload className="h-3.5 w-3.5 text-[#8B0014]" />
+                        <span>Upload Photo</span>
+                      </button>
+
+                      {avatarUrl && (
+                        <button
+                          type="button"
+                          onClick={handleRemovePhoto}
+                          className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#8B0014] border border-rose-200 font-bold text-xs transition flex items-center gap-1"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Reset</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Avatar Presets Strip */}
+                    <div className="pt-1">
+                      <span className="text-[11px] font-semibold text-slate-400 block mb-1">Or choose a quick preset:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {AVATAR_PRESETS.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => handleSelectPreset(p)}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#8B0014] hover:bg-rose-50/60 transition text-xs flex items-center gap-1 shadow-2xs"
+                            title={p.label}
+                          >
+                            <span>{p.emoji}</span>
+                            <span className="font-bold text-[10px] text-slate-700">{p.label.split(" ")[0]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Text Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5">Full Name</label>
@@ -186,7 +367,7 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                 </div>
               </div>
 
-              <div className="pt-3 flex justify-end">
+              <div className="pt-2 flex justify-end">
                 <button
                   type="submit"
                   disabled={isSaving}

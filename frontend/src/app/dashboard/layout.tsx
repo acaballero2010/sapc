@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -85,9 +86,17 @@ export default function DashboardLayout({
                 className="flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-xl bg-slate-50 hover:bg-rose-50/70 border border-slate-200 hover:border-[#8B0014]/40 transition group shadow-2xs"
                 title="Click to manage account settings"
               >
-                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/80 flex items-center justify-center text-white text-xs font-extrabold shadow-xs shrink-0">
-                  {user?.full_name ? user.full_name.charAt(0).toUpperCase() : <User className="h-3.5 w-3.5" />}
-                </div>
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user.full_name}
+                    className="h-7 w-7 rounded-lg object-cover border border-amber-400/80 shadow-xs shrink-0"
+                  />
+                ) : (
+                  <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/80 flex items-center justify-center text-white text-xs font-extrabold shadow-xs shrink-0">
+                    {user?.full_name ? user.full_name.charAt(0).toUpperCase() : <User className="h-3.5 w-3.5" />}
+                  </div>
+                )}
                 <div className="text-left hidden sm:block">
                   <p className="text-xs font-bold text-slate-900 group-hover:text-[#8B0014] leading-tight truncate max-w-[120px]">
                     {user?.full_name || "Account"}

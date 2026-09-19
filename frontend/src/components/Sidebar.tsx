@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
@@ -227,9 +228,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenChat, onOpenSimulator, o
             title="Click to manage account settings"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/70 flex items-center justify-center font-extrabold text-white text-sm shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
-                {user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
-              </div>
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user.full_name}
+                  className="h-10 w-10 rounded-xl object-cover border border-amber-400/80 shadow-2xs shrink-0 group-hover:scale-105 transition-transform"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/70 flex items-center justify-center font-extrabold text-white text-sm shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+                  {user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
+                </div>
+              )}
               <div className="overflow-hidden min-w-0">
                 <p className="text-sm font-bold text-slate-900 group-hover:text-[#8B0014] truncate transition-colors">
                   {user?.full_name || "User Account"}

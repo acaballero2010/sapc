@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -274,9 +275,17 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
         <div className="lg:col-span-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-5">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border-2 border-amber-400/80 flex items-center justify-center text-white font-black text-2xl shadow-xs shrink-0">
-                {displayName.charAt(0).toUpperCase()}
-              </div>
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={displayName}
+                  className="h-14 w-14 rounded-2xl object-cover border-2 border-amber-400/80 shadow-xs shrink-0"
+                />
+              ) : (
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border-2 border-amber-400/80 flex items-center justify-center text-white font-black text-2xl shadow-xs shrink-0">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+              )}
               <div className="min-w-0">
                 <h3 className="text-lg font-black text-slate-900 truncate">
                   {displayName}

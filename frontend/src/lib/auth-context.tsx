@@ -15,6 +15,7 @@ export interface UserProfile {
   role: RoleType;
   student_id?: number | null;
   firebaseUid?: string;
+  avatar_url?: string | null;
 }
 
 interface AuthContextType {
@@ -25,6 +26,7 @@ interface AuthContextType {
   login: (username: string, password?: string) => Promise<void>;
   loginWithGoogle: (targetRole?: RoleType) => Promise<void>;
   switchRole: (role: RoleType) => Promise<void>;
+  updateUserProfile: (updates: Partial<UserProfile>) => Promise<void> | void;
   logout: () => void;
   retryConnection: () => Promise<void>;
 }
@@ -191,7 +193,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           full_name: fbUser.displayName || "Google User",
           role: role,
           student_id: 1,
-          firebaseUid: fbUser.uid
+          firebaseUid: fbUser.uid,
+          avatar_url: fbUser.photoURL || null
         });
         setServerError(null);
       }
@@ -204,10 +207,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: profile.email,
         full_name: profile.name,
         role: targetRole,
-        student_id: 1
+        student_id: 1,
+        avatar_url: null
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const updateUserProfile = async (updates: Partial<UserProfile>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updates };
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_custom_profile", JSON.stringify(updated));
+      }
+      return updated;
+    });
+
+    if (auth.currentUser && db) {
+      try {
+        await setDoc(doc(db, "users", auth.currentUser.uid), {
+          ...updates,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      } catch (err) {
+        console.warn("Firestore profile update notice:", err);
+      }
     }
   };
 
@@ -226,6 +252,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     if (typeof window !== "undefined") {
       localStorage.removeItem("sapc_token");
+      localStorage.removeItem("sapc_custom_profile");
     }
     setToken(null);
     setUser(null);
@@ -241,13 +268,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const userDoc = await getDoc(doc(db, "users", fbUser.uid));
           const userData = userDoc.data();
+          const customSaved = typeof window !== "undefined" ? localStorage.getItem("sapc_custom_profile") : null;
+          const parsed = customSaved ? JSON.parse(customSaved) : null;
+
           setUser({
             id: 1,
             email: fbUser.email || "",
-            full_name: fbUser.displayName || userData?.name || fbUser.email?.split("@")[0] || "Authenticated User",
+            full_name: parsed?.full_name || userData?.name || fbUser.displayName || fbUser.email?.split("@")[0] || "Authenticated User",
             role: (userData?.role || "student") as RoleType,
             student_id: 1,
-            firebaseUid: fbUser.uid
+            firebaseUid: fbUser.uid,
+            avatar_url: parsed?.avatar_url || userData?.avatar_url || fbUser.photoURL || null
           });
         } catch {
           // Keep current user state
@@ -275,6 +306,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login: async (email, pass = "counselor123") => loginWithCredentials(email, pass),
         loginWithGoogle,
         switchRole,
+        updateUserProfile,
         logout,
         retryConnection
       }}
