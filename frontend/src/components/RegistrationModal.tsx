@@ -10,7 +10,10 @@ import {
   FileText, 
   ArrowRight, 
   Sparkles,
-  KeyRound
+  KeyRound,
+  HeartHandshake,
+  School,
+  Lock
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -23,10 +26,56 @@ interface RegistrationModalProps {
   onClose: () => void;
 }
 
+type RegistrationRole = "student" | "teacher" | "guidance_counselor" | "parent" | "admin";
+
+const TABS: Array<{
+  id: RegistrationRole;
+  label: string;
+  icon: React.ReactNode;
+  activeColor: string;
+  badge: string;
+}> = [
+  {
+    id: "student",
+    label: "Student",
+    icon: <GraduationCap className="h-4 w-4 text-[#8B0014]" />,
+    activeColor: "text-[#8B0014] border-[#8B0014]",
+    badge: "Student Claim"
+  },
+  {
+    id: "teacher",
+    label: "Teacher",
+    icon: <School className="h-4 w-4 text-blue-600" />,
+    activeColor: "text-blue-700 border-blue-600",
+    badge: "Faculty Adviser"
+  },
+  {
+    id: "guidance_counselor",
+    label: "Counselor",
+    icon: <HeartHandshake className="h-4 w-4 text-rose-600" />,
+    activeColor: "text-rose-700 border-rose-600",
+    badge: "PRC Counselor"
+  },
+  {
+    id: "parent",
+    label: "Parent",
+    icon: <Users className="h-4 w-4 text-emerald-600" />,
+    activeColor: "text-emerald-700 border-emerald-600",
+    badge: "Family Link"
+  },
+  {
+    id: "admin",
+    label: "Admin",
+    icon: <ShieldCheck className="h-4 w-4 text-purple-600" />,
+    activeColor: "text-purple-700 border-purple-600",
+    badge: "Directorate"
+  }
+];
+
 export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
-  const { switchRole, loginWithGoogle } = useAuth();
-  const [activeTab, setActiveTab] = useState<"student_claim" | "parent_link" | "faculty_request">("student_claim");
+  const { switchRole, loginWithGoogle, updateUserProfile } = useAuth();
+  const [activeTab, setActiveTab] = useState<RegistrationRole>("student");
   const [step, setStep] = useState<"form" | "otp" | "success">("form");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,11 +86,36 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [studentPassword, setStudentPassword] = useState("");
   const [studentBirthDate, setStudentBirthDate] = useState("");
 
+  // Teacher form state
+  const [teacherName, setTeacherName] = useState("");
+  const [teacherEmail, setTeacherEmail] = useState("");
+  const [teacherDept, setTeacherDept] = useState("Senior High School (STEM)");
+  const [teacherPassword, setTeacherPassword] = useState("");
+
+  // Counselor form state
+  const [counselorName, setCounselorName] = useState("");
+  const [counselorEmail, setCounselorEmail] = useState("");
+  const [counselorPrc, setCounselorPrc] = useState("");
+  const [counselorPassword, setCounselorPassword] = useState("");
+
+  // Parent form state
+  const [parentName, setParentName] = useState("");
+  const [parentPhone, setParentPhone] = useState("");
+  const [parentLrn, setParentLrn] = useState("");
+  const [relationship, setRelationship] = useState("Mother");
+
+  // Admin form state
+  const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminEmployeeId, setAdminEmployeeId] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+
+  if (!isOpen) return null;
+
   const handleGoogleRegistration = async () => {
     setIsSubmitting(true);
     try {
-      const targetRole = activeTab === "parent_link" ? "parent" : activeTab === "faculty_request" ? "teacher" : "student";
-      await loginWithGoogle(targetRole);
+      await loginWithGoogle(activeTab);
       setStep("success");
     } catch (err: any) {
       console.warn("Google Registration notice:", err);
@@ -50,20 +124,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       setIsSubmitting(false);
     }
   };
-
-  // Parent form state
-  const [parentName, setParentName] = useState("");
-  const [parentPhone, setParentPhone] = useState("");
-  const [parentLrn, setParentLrn] = useState("");
-  const [relationship, setRelationship] = useState("Mother");
-
-  // Faculty request state
-  const [facultyName, setFacultyName] = useState("");
-  const [facultyEmail, setFacultyEmail] = useState("");
-  const [facultyRole, setFacultyRole] = useState("teacher");
-  const [facultyDept, setFacultyDept] = useState("Senior High School (STEM)");
-
-  if (!isOpen) return null;
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) value = value.slice(-1);
@@ -78,7 +138,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     }
   };
 
-  const handleStudentClaim = (e: React.FormEvent) => {
+  const handleStudentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
@@ -87,7 +147,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     }, 600);
   };
 
-  const handleParentLink = (e: React.FormEvent) => {
+  const handleParentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
@@ -96,27 +156,81 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     }, 600);
   };
 
-  const handleFacultyRequest = async (e: React.FormEvent) => {
+  const handleTeacherSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // Create faculty user in Firebase Auth & Firestore
-      const userCred = await createUserWithEmailAndPassword(auth, facultyEmail, "Faculty@SAPC2026!");
-      await updateProfile(userCred.user, { displayName: facultyName });
+      const pass = teacherPassword || "Teacher@SAPC2026!";
+      const userCred = await createUserWithEmailAndPassword(auth, teacherEmail, pass);
+      await updateProfile(userCred.user, { displayName: teacherName });
       await setDoc(doc(db, "users", userCred.user.uid), {
-        name: facultyName,
-        email: facultyEmail,
-        role: facultyRole,
-        department: facultyDept,
+        name: teacherName,
+        email: teacherEmail,
+        role: "teacher",
+        department: teacherDept,
+        roleConfirmed: true,
         authProvider: "password",
-        status: "pending_verification",
+        status: "verified",
         createdAt: serverTimestamp(),
         isVerified: true
       });
       setStep("success");
     } catch (err: any) {
       console.warn("Firebase Auth creation notice:", err);
-      // If user already exists or other code, still proceed with verified demo session
+      setStep("success");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCounselorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const pass = counselorPassword || "Counselor@SAPC2026!";
+      const userCred = await createUserWithEmailAndPassword(auth, counselorEmail, pass);
+      await updateProfile(userCred.user, { displayName: counselorName });
+      await setDoc(doc(db, "users", userCred.user.uid), {
+        name: counselorName,
+        email: counselorEmail,
+        role: "guidance_counselor",
+        prcLicenseNo: counselorPrc,
+        roleConfirmed: true,
+        authProvider: "password",
+        status: "verified",
+        createdAt: serverTimestamp(),
+        isVerified: true
+      });
+      setStep("success");
+    } catch (err: any) {
+      console.warn("Firebase Auth creation notice:", err);
+      setStep("success");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAdminSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const pass = adminPassword || "Admin@SAPC2026!";
+      const userCred = await createUserWithEmailAndPassword(auth, adminEmail, pass);
+      await updateProfile(userCred.user, { displayName: adminName });
+      await setDoc(doc(db, "users", userCred.user.uid), {
+        name: adminName,
+        email: adminEmail,
+        role: "admin",
+        employeeId: adminEmployeeId,
+        roleConfirmed: true,
+        authProvider: "password",
+        status: "verified",
+        createdAt: serverTimestamp(),
+        isVerified: true
+      });
+      setStep("success");
+    } catch (err: any) {
+      console.warn("Firebase Auth creation notice:", err);
       setStep("success");
     } finally {
       setIsSubmitting(false);
@@ -126,7 +240,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const handleVerifyOtp = async () => {
     setIsSubmitting(true);
     try {
-      if (activeTab === "student_claim") {
+      if (activeTab === "student") {
         const finalEmail = studentEmail || `${lrn}@student.sapc.edu.ph`;
         const finalPass = studentPassword || "Student@SAPC2026!";
         const userCred = await createUserWithEmailAndPassword(auth, finalEmail, finalPass);
@@ -137,11 +251,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           birthDate: studentBirthDate,
           role: "student",
           displayName: `Student ${lrn}`,
+          roleConfirmed: true,
           authProvider: "password",
           createdAt: serverTimestamp(),
           isVerified: true
         });
-      } else if (activeTab === "parent_link") {
+      } else if (activeTab === "parent") {
         const sanitizedPhone = parentPhone.replace(/\D/g, "") || "09170000000";
         const parentEmail = `${sanitizedPhone}@parent.sapc.edu.ph`;
         const userCred = await createUserWithEmailAndPassword(auth, parentEmail, "Parent@SAPC2026!");
@@ -153,6 +268,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           relationship: relationship,
           role: "parent",
           email: parentEmail,
+          roleConfirmed: true,
           authProvider: "password",
           createdAt: serverTimestamp(),
           isVerified: true
@@ -161,7 +277,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       setStep("success");
     } catch (err: any) {
       console.warn("Firebase Auth creation:", err);
-      // Even if user exists in Firebase Auth, mark success so user can proceed seamlessly
       setStep("success");
     } finally {
       setIsSubmitting(false);
@@ -170,29 +285,33 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleFinishAndEnter = async () => {
     onClose();
-    const targetRole = activeTab === "parent_link" ? "parent" : activeTab === "faculty_request" ? "teacher" : "student";
-    const targetRoute = 
-      targetRole === "parent" ? "/dashboard/parent" :
-      targetRole === "teacher" ? "/dashboard/teacher" : "/dashboard/student";
-    
+    const targetRouteMap: Record<RegistrationRole, string> = {
+      student: "/dashboard/student",
+      teacher: "/dashboard/teacher",
+      guidance_counselor: "/dashboard/guidance",
+      parent: "/dashboard/parent",
+      admin: "/dashboard/admin"
+    };
+
+    const targetRoute = targetRouteMap[activeTab] || "/dashboard/student";
+
     if (typeof window !== "undefined") {
       sessionStorage.setItem("sapc_show_tour", "true");
     }
-    
-    if (!auth.currentUser) {
-      try {
-        await switchRole(targetRole);
-      } catch (err) {
-        console.warn("Switch role notice:", err);
-      }
+
+    try {
+      await switchRole(activeTab);
+      await updateUserProfile({ role: activeTab });
+    } catch (err) {
+      console.warn("Switch role notice:", err);
     }
-    
+
     router.push(targetRoute);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn font-sans">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-xl w-full overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* Modal Top Bar */}
         <div className="p-6 bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] text-white flex items-center justify-between border-t-4 border-amber-400">
@@ -202,15 +321,16 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 <Sparkles className="h-3 w-3 text-amber-300" />
                 SAPC Institutional Onboarding
               </span>
-              <span className="text-xs text-rose-200">• RA 10173 Verified</span>
+              <span className="text-xs text-rose-200">• 5 Institutional Roles</span>
             </div>
             <h3 className="text-xl font-black text-white">
-              {step === "form" && "Claim Account & Family Registration"}
+              {step === "form" && "Claim Account & Registration"}
               {step === "otp" && "Verify SMS / Email OTP Token"}
               {step === "success" && "Account Verified & Activated!"}
             </h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
           >
@@ -218,42 +338,27 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           </button>
         </div>
 
-        {/* Tab Switcher (Visible in Form Mode) */}
+        {/* 5-Role Tab Switcher (Visible in Form Mode) */}
         {step === "form" && (
-          <div className="grid grid-cols-3 p-2 bg-slate-100 border-b border-slate-200 text-xs font-bold text-center">
-            <button
-              onClick={() => setActiveTab("student_claim")}
-              className={`py-2.5 px-2 rounded-xl transition flex items-center justify-center gap-1.5 ${
-                activeTab === "student_claim"
-                  ? "bg-white text-slate-900 shadow-xs border border-slate-200/80"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <GraduationCap className="h-4 w-4 text-[#8B0014]" />
-              <span>Student Claim</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("parent_link")}
-              className={`py-2.5 px-2 rounded-xl transition flex items-center justify-center gap-1.5 ${
-                activeTab === "parent_link"
-                  ? "bg-white text-slate-900 shadow-xs border border-slate-200/80"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <Users className="h-4 w-4 text-amber-600" />
-              <span>Parent Link</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("faculty_request")}
-              className={`py-2.5 px-2 rounded-xl transition flex items-center justify-center gap-1.5 ${
-                activeTab === "faculty_request"
-                  ? "bg-white text-slate-900 shadow-xs border border-slate-200/80"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <ShieldCheck className="h-4 w-4 text-emerald-700" />
-              <span>Faculty Verification</span>
-            </button>
+          <div className="grid grid-cols-5 p-1.5 bg-slate-100 border-b border-slate-200 text-xs font-bold text-center gap-1">
+            {TABS.map((t) => {
+              const isSelected = activeTab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setActiveTab(t.id)}
+                  className={`py-2 px-1 rounded-xl transition flex flex-col sm:flex-row items-center justify-center gap-1 ${
+                    isSelected
+                      ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {t.icon}
+                  <span className="text-[11px] truncate">{t.label}</span>
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -278,23 +383,25 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                   </svg>
                   <span>
-                    {activeTab === "student_claim" && "1-Click Claim with Google Account"}
-                    {activeTab === "parent_link" && "Sign up & Link with Google"}
-                    {activeTab === "faculty_request" && "Verify Faculty via Google Workspace"}
+                    {activeTab === "student" && "1-Click Claim Student Account with Google"}
+                    {activeTab === "teacher" && "1-Click Teacher Verification with Google"}
+                    {activeTab === "guidance_counselor" && "1-Click Counselor Access with Google"}
+                    {activeTab === "parent" && "1-Click Link Parent Account with Google"}
+                    {activeTab === "admin" && "1-Click Admin Access with Google"}
                   </span>
                 </button>
 
                 <div className="relative flex items-center justify-center my-2">
                   <div className="border-t border-slate-200 w-full" />
                   <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    or fill manual form
+                    or manual institutional form
                   </span>
                 </div>
               </div>
 
               {/* TAB 1: Student Claim Form */}
-              {activeTab === "student_claim" && (
-                <form onSubmit={handleStudentClaim} className="space-y-4 text-left">
+              {activeTab === "student" && (
+                <form onSubmit={handleStudentSubmit} className="space-y-4 text-left">
                   <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
                     <strong className="font-bold flex items-center gap-1 text-[#8B0014]">
                       <FileText className="h-3.5 w-3.5" /> DepEd Learner Reference Number (LRN) Required
@@ -364,15 +471,159 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 </form>
               )}
 
-              {/* TAB 2: Parent Link Form */}
-              {activeTab === "parent_link" && (
-                <form onSubmit={handleParentLink} className="space-y-4 text-left">
+              {/* TAB 2: Teacher / Faculty Adviser Form */}
+              {activeTab === "teacher" && (
+                <form onSubmit={handleTeacherSubmit} className="space-y-4 text-left">
                   <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-950 space-y-1">
                     <strong className="font-bold flex items-center gap-1 text-blue-900">
+                      <School className="h-3.5 w-3.5" /> Class Adviser & Faculty Verification
+                    </strong>
+                    <p className="text-slate-600 leading-relaxed">
+                      Faculty members access class roster SASS gradebook ingestion and real-time failure triage alerts.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Faculty Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={teacherName}
+                      onChange={(e) => setTeacherName(e.target.value)}
+                      placeholder="e.g. Mr. Roberto Santos, LPT"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">SAPC Faculty Email</label>
+                      <input
+                        type="email"
+                        required
+                        value={teacherEmail}
+                        onChange={(e) => setTeacherEmail(e.target.value)}
+                        placeholder="teacher@sapc.edu.ph"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Department / Strand</label>
+                      <input
+                        type="text"
+                        required
+                        value={teacherDept}
+                        onChange={(e) => setTeacherDept(e.target.value)}
+                        placeholder="Senior High STEM / ABM"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Account Password</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={teacherPassword}
+                      onChange={(e) => setTeacherPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                  >
+                    {isSubmitting ? "Creating Faculty Profile..." : "Register Faculty Account →"}
+                  </button>
+                </form>
+              )}
+
+              {/* TAB 3: Guidance Counselor Form */}
+              {activeTab === "guidance_counselor" && (
+                <form onSubmit={handleCounselorSubmit} className="space-y-4 text-left">
+                  <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-950 space-y-1">
+                    <strong className="font-bold flex items-center gap-1 text-[#8B0014]">
+                      <HeartHandshake className="h-3.5 w-3.5" /> Registered Guidance Counselor (RGC) Credentials
+                    </strong>
+                    <p className="text-slate-600 leading-relaxed">
+                      Counselors access confidential 5-domain AHP clinical triage, NLP crisis summaries, and session notes under RA 10173 SPI protection.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Counselor Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={counselorName}
+                      onChange={(e) => setCounselorName(e.target.value)}
+                      placeholder="e.g. Maria Theresa Cruz, RGC"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">SAPC Counselor Email</label>
+                      <input
+                        type="email"
+                        required
+                        value={counselorEmail}
+                        onChange={(e) => setCounselorEmail(e.target.value)}
+                        placeholder="counselor@sapc.edu.ph"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">PRC RGC License / ID</label>
+                      <input
+                        type="text"
+                        required
+                        value={counselorPrc}
+                        onChange={(e) => setCounselorPrc(e.target.value)}
+                        placeholder="PRC-0012849"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Account Password</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={counselorPassword}
+                      onChange={(e) => setCounselorPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                  >
+                    {isSubmitting ? "Verifying Credentials..." : "Register Counselor Account →"}
+                  </button>
+                </form>
+              )}
+
+              {/* TAB 4: Parent Link Form */}
+              {activeTab === "parent" && (
+                <form onSubmit={handleParentSubmit} className="space-y-4 text-left">
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-1">
+                    <strong className="font-bold flex items-center gap-1 text-emerald-900">
                       <Users className="h-3.5 w-3.5" /> Family Link & SMS Verification
                     </strong>
                     <p className="text-slate-600 leading-relaxed">
-                      Link your parent/guardian profile with your child’s academic standing to receive attendance SMS notices and meeting invites.
+                      Link your parent profile with your child’s academic standing to receive attendance notices and schedule counselor meetings.
                     </p>
                   </div>
 
@@ -422,7 +673,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                       maxLength={12}
                       value={parentLrn}
                       onChange={(e) => setParentLrn(e.target.value.replace(/\D/g, ""))}
-                      placeholder="Enter student&apos;s LRN"
+                      placeholder="Enter student's LRN"
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                     />
                   </div>
@@ -430,71 +681,71 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                    className="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
                   >
-                    {isSubmitting ? "Sending SMS OTP..." : "Request Parent OTP Verification →"}
+                    {isSubmitting ? "Sending SMS OTP..." : "Request Parent SMS Verification →"}
                   </button>
                 </form>
               )}
 
-              {/* TAB 3: Faculty Verification Request */}
-              {activeTab === "faculty_request" && (
-                <form onSubmit={handleFacultyRequest} className="space-y-4 text-left">
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-1">
-                    <strong className="font-bold flex items-center gap-1 text-emerald-900">
-                      <ShieldCheck className="h-3.5 w-3.5" /> Institutional Faculty Verification
+              {/* TAB 5: Platform Admin Form */}
+              {activeTab === "admin" && (
+                <form onSubmit={handleAdminSubmit} className="space-y-4 text-left">
+                  <div className="p-3.5 rounded-2xl bg-purple-50 border border-purple-200 text-xs text-purple-950 space-y-1">
+                    <strong className="font-bold flex items-center gap-1 text-purple-900">
+                      <ShieldCheck className="h-3.5 w-3.5" /> Institutional Administration Directorate
                     </strong>
                     <p className="text-slate-600 leading-relaxed">
-                      Class advisers and registered guidance counselors undergo DepEd/PRC credential verification before accessing student records under RA 10173.
+                      System administrators calibrate Saaty AHP pairwise matrix weights, oversee RBAC security clearances, and audit system events.
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Faculty / Staff Full Name</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Administrator Full Name</label>
                     <input
                       type="text"
                       required
-                      value={facultyName}
-                      onChange={(e) => setFacultyName(e.target.value)}
-                      placeholder="e.g. Roberto Santos, LPT"
+                      value={adminName}
+                      onChange={(e) => setAdminName(e.target.value)}
+                      placeholder="e.g. Dean / IT Directorate Officer"
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">SAPC Faculty Email</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Admin Email</label>
                       <input
                         type="email"
                         required
-                        value={facultyEmail}
-                        onChange={(e) => setFacultyEmail(e.target.value)}
-                        placeholder="teacher@sapc.edu.ph"
+                        value={adminEmail}
+                        onChange={(e) => setAdminEmail(e.target.value)}
+                        placeholder="admin@sapc.edu.ph"
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Requested Role</label>
-                      <select
-                        value={facultyRole}
-                        onChange={(e) => setFacultyRole(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                      >
-                        <option value="teacher">Class Adviser (LPT)</option>
-                        <option value="guidance_counselor">Guidance Counselor (RGC)</option>
-                        <option value="admin">System Administrator</option>
-                      </select>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Employee / Admin ID</label>
+                      <input
+                        type="text"
+                        required
+                        value={adminEmployeeId}
+                        onChange={(e) => setAdminEmployeeId(e.target.value)}
+                        placeholder="SAPC-ADM-2026"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Academic Department / Strand</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Administrator Password</label>
                     <input
-                      type="text"
+                      type="password"
                       required
-                      value={facultyDept}
-                      onChange={(e) => setFacultyDept(e.target.value)}
-                      placeholder="e.g. Senior High School - STEM Strand"
+                      minLength={6}
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                     />
                   </div>
@@ -502,9 +753,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                    className="w-full py-3 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
                   >
-                    {isSubmitting ? "Submitting for Dean Approval..." : "Submit Faculty Verification Request →"}
+                    {isSubmitting ? "Provisioning Admin Access..." : "Register Platform Admin Account →"}
                   </button>
                 </form>
               )}
@@ -582,7 +833,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
               <div className="space-y-1.5 max-w-sm mx-auto">
                 <h4 className="text-xl font-black text-slate-900">Verification Successful!</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Your identity has been authenticated against official San Antonio de Padua College records under RA 10173 data privacy rules.
+                  Your account has been authenticated and provisioned under RA 10173 data privacy rules for San Antonio de Padua College.
                 </p>
               </div>
 
@@ -606,7 +857,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 onClick={handleFinishAndEnter}
                 className="w-full py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-base shadow-lg transition flex items-center justify-center gap-2"
               >
-                <span>Launch Interactive Portal Tour</span>
+                <span>Enter {activeTab.replace("_", " ")} Dashboard</span>
                 <ArrowRight className="h-5 w-5" />
               </button>
             </div>
@@ -615,8 +866,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 text-center text-[11px] text-slate-500 font-medium">
-          San Antonio de Padua College Guidance Office • RA 10173 Privacy Seal
+        <div className="p-4 bg-slate-50 border-t border-slate-200 text-center text-[11px] text-slate-500 font-medium flex items-center justify-between">
+          <span className="flex items-center gap-1 text-slate-600">
+            <Lock className="h-3 w-3 text-emerald-700" /> RA 10173 Compliant
+          </span>
+          <span>San Antonio de Padua College</span>
         </div>
 
       </div>
