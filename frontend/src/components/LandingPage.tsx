@@ -184,366 +184,357 @@ export const LandingPage: React.FC = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
-          {/* Carousel Slide Tabs */}
-          <div className="flex items-center justify-between gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none border-b border-slate-200/80">
-            <div className="flex items-center gap-2 min-w-max">
-              {slides.map((s, idx) => (
-                <button
-                  key={s.id}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
-                    currentSlide === idx
-                      ? "bg-[#8B0014] text-white shadow-sm"
-                      : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300"
-                  }`}
+          {/* Sliding Track Viewport */}
+          <div className="overflow-hidden w-full">
+            <div 
+              className="flex transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] will-change-transform"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {slides.map((slide) => (
+                <div 
+                  key={slide.id}
+                  className="w-full shrink-0 min-w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center min-h-[460px] px-1"
                 >
-                  <span>0{idx + 1}.</span>
-                  <span>{s.tag.split("•")[0].replace(/"/g, "").trim()}</span>
-                </button>
+                  {/* Left Hero Text */}
+                  <div className="lg:col-span-7 space-y-6 text-left">
+                    
+                    {/* Slide Badge */}
+                    <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-extrabold shadow-xs ${slide.tagColor}`}>
+                      {slide.tagIcon}
+                      <span>{slide.tag}</span>
+                    </div>
+
+                    {/* Main Headline */}
+                    <div className="space-y-2">
+                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-[1.14]">
+                        {slide.headline.split(" ").slice(0, 3).join(" ")}{" "}
+                        <span className={`text-transparent bg-clip-text bg-gradient-to-r ${slide.headlineGradient} block sm:inline`}>
+                          {slide.headline.split(" ").slice(3).join(" ")}
+                        </span>
+                      </h1>
+                      <p className="text-sm sm:text-base font-bold text-[#8B0014]">
+                        {slide.subhead}
+                      </p>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm sm:text-base text-slate-700 leading-relaxed max-w-2xl font-normal">
+                      {slide.description}
+                    </p>
+
+                    {/* 3 Pillar Feature Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                      {slide.pillars.map((pil, pIdx) => (
+                        <div 
+                          key={pIdx}
+                          className={`flex items-center gap-3 bg-white p-3.5 rounded-2xl border shadow-2xs transition hover:shadow-xs ${pil.bg}`}
+                        >
+                          <div className="p-2 rounded-xl bg-white/80 border border-slate-200/80 shrink-0 shadow-2xs">
+                            {pil.icon}
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 block leading-tight">{pil.label}</span>
+                            <span className="text-[11px] text-slate-500 font-medium">{pil.sub}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="pt-2 flex flex-wrap items-center gap-3.5">
+                      <Link
+                        href={slide.primaryCta.href}
+                        className="px-6 py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm sm:text-base shadow-md transition active:scale-95 flex items-center gap-2.5 group"
+                      >
+                        <span>{slide.primaryCta.label}</span>
+                        <ChevronRight className="h-4 w-4 text-white group-hover:translate-x-0.5 transition-transform" />
+                      </Link>
+
+                      <Link
+                        href={slide.secondaryCta.href}
+                        className="px-5 py-3.5 rounded-xl bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200 font-semibold text-sm sm:text-base transition shadow-xs"
+                      >
+                        {slide.secondaryCta.label}
+                      </Link>
+                    </div>
+
+                    {/* Live Metric Stats Strip */}
+                    <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-slate-200/80">
+                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Monitored</span>
+                        <strong className="text-base sm:text-lg font-black text-slate-900 block mt-0.5">1,250+ Students</strong>
+                      </div>
+                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Intervention SLA</span>
+                        <strong className="text-base sm:text-lg font-black text-emerald-700 block mt-0.5">98.4% Resolution</strong>
+                      </div>
+                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Saaty AHP CR</span>
+                        <strong className="text-base sm:text-lg font-black text-amber-700 block mt-0.5">0.048 ≤ 0.10</strong>
+                      </div>
+                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Data Privacy</span>
+                        <strong className="text-base sm:text-lg font-black text-[#8B0014] block mt-0.5">RA 10173 SPI</strong>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Right Showcase Card */}
+                  <div className="lg:col-span-5 w-full">
+                    <div className="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xl space-y-5 relative overflow-hidden">
+                      
+                      {/* Decorative Top Accent Bar */}
+                      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#D97706] via-[#8B0014] to-amber-400" />
+
+                      {/* SHOWCASE 1: AHP Multi-Domain Matrix */}
+                      {slide.previewType === "ahp_matrix" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-2 rounded-xl bg-amber-100 text-amber-900">
+                                <Layers className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <h3 className="font-extrabold text-sm text-slate-900">AHP Calibrated Criteria Weights</h3>
+                                <span className="text-[11px] text-slate-500">Saaty Eigenvector Vector Synthesis</span>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              CR: 0.048
+                            </span>
+                          </div>
+
+                          <div className="space-y-2 text-xs">
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <BookOpen className="h-3.5 w-3.5 text-[#8B0014]" /> Academic Domain (w_AC)
+                              </span>
+                              <strong className="text-[#8B0014] font-black">40.17% (0.4017)</strong>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <Brain className="h-3.5 w-3.5 text-rose-600" /> Mental Health Domain (w_MH)
+                              </span>
+                              <strong className="text-rose-700 font-black">24.42% (0.2442)</strong>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <Activity className="h-3.5 w-3.5 text-amber-600" /> Financial Overdue Domain (w_FI)
+                              </span>
+                              <strong className="text-amber-800 font-black">13.73% (0.1373)</strong>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <Users className="h-3.5 w-3.5 text-blue-600" /> Family Support Domain (w_FA)
+                              </span>
+                              <strong className="text-blue-800 font-black">13.73% (0.1373)</strong>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <Activity className="h-3.5 w-3.5 text-emerald-600" /> Physical Wellness Domain (w_HE)
+                              </span>
+                              <strong className="text-emerald-800 font-black">7.94% (0.0794)</strong>
+                            </div>
+                          </div>
+
+                          <Link
+                            href="/login"
+                            className="w-full py-2.5 px-4 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
+                          >
+                            <span>Simulate AHP What-If Scenarios</span>
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </Link>
+                        </div>
+                      )}
+
+                      {/* SHOWCASE 2: NLP Crisis Triage */}
+                      {slide.previewType === "nlp_triage" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-2 rounded-xl bg-rose-100 text-rose-800">
+                                <Bot className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <h3 className="font-extrabold text-sm text-slate-900">Taglish Guidance Dialogue</h3>
+                                <span className="text-[11px] text-slate-500">Clinical Screener & Crisis Detection</span>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                              Distress: 88/100
+                            </span>
+                          </div>
+
+                          <div className="space-y-2.5 text-xs">
+                            <div className="p-3 rounded-2xl bg-slate-100 text-slate-800 self-start max-w-[90%]">
+                              <span className="font-bold text-slate-900 block mb-0.5">Student (Joshua):</span>
+                              &quot;Sobrang nahihirapan na po ako sa Chemistry at Pre-Cal. Hindi na po ako makatulog sa gabi.&quot;
+                            </div>
+                            <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-950 self-end">
+                              <span className="font-bold text-[#8B0014] block mb-0.5">SAPC Guidance AI:</span>
+                              &quot;Naiintindihan ko, Joshua. Normal makaramdam ng overwhelm. Naka-flag na ito sa guidance counselor para matulungan ka sa academic support plan.&quot;
+                            </div>
+                          </div>
+
+                          <Link
+                            href="/login"
+                            className="w-full py-2.5 px-4 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
+                          >
+                            <span>Open Counselor Triage Queue</span>
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </Link>
+                        </div>
+                      )}
+
+                      {/* SHOWCASE 3: Teacher Advisory & Ingestion */}
+                      {slide.previewType === "teacher_roster" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
+                                <School className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <h3 className="font-extrabold text-sm text-slate-900">Advisory Class Roster</h3>
+                                <span className="text-[11px] text-slate-500">Grade 11 - St. Augustine (STEM)</span>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                              42 Students
+                            </span>
+                          </div>
+
+                          <div className="space-y-2 text-xs">
+                            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <div>
+                                <strong className="text-slate-900 block">Joshua Dimaculangan</strong>
+                                <span className="text-[11px] text-slate-500">LRN: 109238475612 • 2 Failing Marks</span>
+                              </div>
+                              <span className="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-200">
+                                High Risk (69.8)
+                              </span>
+                            </div>
+                            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <div>
+                                <strong className="text-slate-900 block">Angelica Dela Cruz</strong>
+                                <span className="text-[11px] text-slate-500">LRN: 109238475613 • Tuition Overdue</span>
+                              </div>
+                              <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] border border-amber-200">
+                                Medium Risk (45.2)
+                              </span>
+                            </div>
+                          </div>
+
+                          <Link
+                            href="/login"
+                            className="w-full py-2.5 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
+                          >
+                            <span>Ingest SASS CSV & Refer Students</span>
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </Link>
+                        </div>
+                      )}
+
+                      {/* SHOWCASE 4: 5 Roles Grid */}
+                      {slide.previewType === "roles_grid" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-2.5">
+                              <div className="p-2 rounded-xl bg-blue-100 text-blue-800">
+                                <Users className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <h3 className="font-extrabold text-sm text-slate-900">5 Institutional Role Portals</h3>
+                                <span className="text-[11px] text-slate-500">Select any role to explore live</span>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300">
+                              Live Access
+                            </span>
+                          </div>
+
+                          <div className="space-y-2 text-xs">
+                            <Link 
+                              href="/login"
+                              className="p-2.5 rounded-xl bg-rose-50/70 hover:bg-rose-100/80 border border-rose-200 flex items-center justify-between transition group"
+                            >
+                              <span className="font-extrabold text-slate-900">🧠 Guidance Counselor (Crisis Triage)</span>
+                              <span className="text-[#8B0014] font-bold group-hover:translate-x-0.5 transition">Login →</span>
+                            </Link>
+                            <Link 
+                              href="/login"
+                              className="p-2.5 rounded-xl bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200 flex items-center justify-between transition group"
+                            >
+                              <span className="font-extrabold text-slate-900">📚 Class Adviser (SASS Ingestion)</span>
+                              <span className="text-amber-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
+                            </Link>
+                            <Link 
+                              href="/login"
+                              className="p-2.5 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/80 border border-emerald-200 flex items-center justify-between transition group"
+                            >
+                              <span className="font-extrabold text-slate-900">🎓 Student Portal (Wellness Radar)</span>
+                              <span className="text-emerald-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
+                            </Link>
+                            <Link 
+                              href="/login"
+                              className="p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200 flex items-center justify-between transition group"
+                            >
+                              <span className="font-extrabold text-slate-900">👨‍👩‍👦 Parent / Guardian (Progress Alerts)</span>
+                              <span className="text-blue-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
+                            </Link>
+                          </div>
+
+                          <Link
+                            href="/register"
+                            className="w-full py-2.5 px-4 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
+                          >
+                            <span>Create New Student or Faculty Account</span>
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </Link>
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Carousel Dot Indicators & Controls */}
+          <div className="flex items-center justify-center gap-4 mt-8 pt-2">
+            <button
+              onClick={() => setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))}
+              aria-label="Previous Slide"
+              className="p-2.5 rounded-xl bg-white hover:bg-rose-50 text-slate-700 hover:text-[#8B0014] border border-slate-200 hover:border-rose-200 transition shadow-2xs cursor-pointer active:scale-95"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-2">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    currentSlide === idx
+                      ? "w-8 bg-[#8B0014] shadow-xs"
+                      : "w-2.5 bg-slate-300 hover:bg-slate-400"
+                  }`}
+                />
               ))}
             </div>
 
-            {/* Arrows */}
-            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-              <button
-                onClick={() => setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))}
-                aria-label="Previous Slide"
-                className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
-                aria-label="Next Slide"
-                className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Active Slide Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center min-h-[480px]">
-            
-            {/* Left Hero Text */}
-            <div className="lg:col-span-7 space-y-6 text-left animate-fadeIn">
-              
-              {/* Slide Badge */}
-              <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-extrabold shadow-xs ${activeSlide.tagColor}`}>
-                {activeSlide.tagIcon}
-                <span>{activeSlide.tag}</span>
-              </div>
-
-              {/* Main Headline */}
-              <div className="space-y-2">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-[1.14]">
-                  {activeSlide.headline.split(" ").slice(0, 3).join(" ")}{" "}
-                  <span className={`text-transparent bg-clip-text bg-gradient-to-r ${activeSlide.headlineGradient} block sm:inline`}>
-                    {activeSlide.headline.split(" ").slice(3).join(" ")}
-                  </span>
-                </h1>
-                <p className="text-sm sm:text-base font-bold text-[#8B0014]">
-                  {activeSlide.subhead}
-                </p>
-              </div>
-
-              {/* Description */}
-              <p className="text-sm sm:text-base text-slate-700 leading-relaxed max-w-2xl font-normal">
-                {activeSlide.description}
-              </p>
-
-              {/* 3 Pillar Feature Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                {activeSlide.pillars.map((pil, pIdx) => (
-                  <div 
-                    key={pIdx}
-                    className={`flex items-center gap-3 bg-white p-3.5 rounded-2xl border shadow-2xs transition hover:shadow-xs ${pil.bg}`}
-                  >
-                    <div className="p-2 rounded-xl bg-white/80 border border-slate-200/80 shrink-0 shadow-2xs">
-                      {pil.icon}
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-slate-900 block leading-tight">{pil.label}</span>
-                      <span className="text-[11px] text-slate-500 font-medium">{pil.sub}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-2 flex flex-wrap items-center gap-3.5">
-                <Link
-                  href={activeSlide.primaryCta.href}
-                  className="px-6 py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm sm:text-base shadow-md transition active:scale-95 flex items-center gap-2.5 group"
-                >
-                  <span>{activeSlide.primaryCta.label}</span>
-                  <ChevronRight className="h-4 w-4 text-white group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-
-                <Link
-                  href={activeSlide.secondaryCta.href}
-                  className="px-5 py-3.5 rounded-xl bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200 font-semibold text-sm sm:text-base transition shadow-xs"
-                >
-                  {activeSlide.secondaryCta.label}
-                </Link>
-              </div>
-
-              {/* Live Metric Stats Strip */}
-              <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-slate-200/80">
-                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Monitored</span>
-                  <strong className="text-base sm:text-lg font-black text-slate-900 block mt-0.5">1,250+ Students</strong>
-                </div>
-                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Intervention SLA</span>
-                  <strong className="text-base sm:text-lg font-black text-emerald-700 block mt-0.5">98.4% Resolution</strong>
-                </div>
-                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Saaty AHP CR</span>
-                  <strong className="text-base sm:text-lg font-black text-amber-700 block mt-0.5">0.048 ≤ 0.10</strong>
-                </div>
-                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Data Privacy</span>
-                  <strong className="text-base sm:text-lg font-black text-[#8B0014] block mt-0.5">RA 10173 SPI</strong>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Right Showcase Card */}
-            <div className="lg:col-span-5 w-full">
-              <div className="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xl space-y-5 relative overflow-hidden">
-                
-                {/* Decorative Top Accent Bar */}
-                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#D97706] via-[#8B0014] to-amber-400" />
-
-                {/* SHOWCASE 1: AHP Multi-Domain Matrix */}
-                {activeSlide.previewType === "ahp_matrix" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-xl bg-amber-100 text-amber-900">
-                          <Layers className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h3 className="font-extrabold text-sm text-slate-900">AHP Calibrated Criteria Weights</h3>
-                          <span className="text-[11px] text-slate-500">Saaty Eigenvector Vector Synthesis</span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        CR: 0.048
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
-                          <BookOpen className="h-3.5 w-3.5 text-[#8B0014]" /> Academic Domain (w_AC)
-                        </span>
-                        <strong className="text-[#8B0014] font-black">40.17% (0.4017)</strong>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
-                          <Brain className="h-3.5 w-3.5 text-rose-600" /> Mental Health Domain (w_MH)
-                        </span>
-                        <strong className="text-rose-700 font-black">24.42% (0.2442)</strong>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
-                          <Activity className="h-3.5 w-3.5 text-amber-600" /> Financial Overdue Domain (w_FI)
-                        </span>
-                        <strong className="text-amber-800 font-black">13.73% (0.1373)</strong>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
-                          <Users className="h-3.5 w-3.5 text-blue-600" /> Family Support Domain (w_FA)
-                        </span>
-                        <strong className="text-blue-800 font-black">13.73% (0.1373)</strong>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
-                          <Activity className="h-3.5 w-3.5 text-emerald-600" /> Physical Wellness Domain (w_HE)
-                        </span>
-                        <strong className="text-emerald-800 font-black">7.94% (0.0794)</strong>
-                      </div>
-                    </div>
-
-                    <Link
-                      href="/login"
-                      className="w-full py-2.5 px-4 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
-                    >
-                      <span>Simulate AHP What-If Scenarios</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                )}
-
-                {/* SHOWCASE 2: NLP Crisis Triage */}
-                {activeSlide.previewType === "nlp_triage" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-xl bg-rose-100 text-rose-800">
-                          <Bot className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h3 className="font-extrabold text-sm text-slate-900">Taglish Guidance Dialogue</h3>
-                          <span className="text-[11px] text-slate-500">Clinical Screener & Crisis Detection</span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
-                        Distress: 88/100
-                      </span>
-                    </div>
-
-                    <div className="space-y-2.5 text-xs">
-                      <div className="p-3 rounded-2xl bg-slate-100 text-slate-800 self-start max-w-[90%]">
-                        <span className="font-bold text-slate-900 block mb-0.5">Student (Joshua):</span>
-                        &quot;Sobrang nahihirapan na po ako sa Chemistry at Pre-Cal. Hindi na po ako makatulog sa gabi.&quot;
-                      </div>
-                      <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-950 self-end">
-                        <span className="font-bold text-[#8B0014] block mb-0.5">SAPC Guidance AI:</span>
-                        &quot;Naiintindihan ko, Joshua. Normal makaramdam ng overwhelm. Naka-flag na ito sa guidance counselor para matulungan ka sa academic support plan.&quot;
-                      </div>
-                    </div>
-
-                    <Link
-                      href="/login"
-                      className="w-full py-2.5 px-4 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
-                    >
-                      <span>Open Counselor Triage Queue</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                )}
-
-                {/* SHOWCASE 3: Teacher Advisory & Ingestion */}
-                {activeSlide.previewType === "teacher_roster" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
-                          <School className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h3 className="font-extrabold text-sm text-slate-900">Advisory Class Roster</h3>
-                          <span className="text-[11px] text-slate-500">Grade 11 - St. Augustine (STEM)</span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
-                        42 Students
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                        <div>
-                          <strong className="text-slate-900 block">Joshua Dimaculangan</strong>
-                          <span className="text-[11px] text-slate-500">LRN: 109238475612 • 2 Failing Marks</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-200">
-                          High Risk (69.8)
-                        </span>
-                      </div>
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                        <div>
-                          <strong className="text-slate-900 block">Angelica Dela Cruz</strong>
-                          <span className="text-[11px] text-slate-500">LRN: 109238475613 • Tuition Overdue</span>
-                        </div>
-                        <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] border border-amber-200">
-                          Medium Risk (45.2)
-                        </span>
-                      </div>
-                    </div>
-
-                    <Link
-                      href="/login"
-                      className="w-full py-2.5 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
-                    >
-                      <span>Ingest SASS CSV & Refer Students</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                )}
-
-                {/* SHOWCASE 4: 5 Roles Grid */}
-                {activeSlide.previewType === "roles_grid" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-xl bg-blue-100 text-blue-800">
-                          <Users className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h3 className="font-extrabold text-sm text-slate-900">5 Institutional Role Portals</h3>
-                          <span className="text-[11px] text-slate-500">Select any role to explore live</span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300">
-                        Live Access
-                      </span>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      <Link 
-                        href="/login"
-                        className="p-2.5 rounded-xl bg-rose-50/70 hover:bg-rose-100/80 border border-rose-200 flex items-center justify-between transition group"
-                      >
-                        <span className="font-extrabold text-slate-900">🧠 Guidance Counselor (Crisis Triage)</span>
-                        <span className="text-[#8B0014] font-bold group-hover:translate-x-0.5 transition">Login →</span>
-                      </Link>
-                      <Link 
-                        href="/login"
-                        className="p-2.5 rounded-xl bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200 flex items-center justify-between transition group"
-                      >
-                        <span className="font-extrabold text-slate-900">📚 Class Adviser (SASS Ingestion)</span>
-                        <span className="text-amber-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
-                      </Link>
-                      <Link 
-                        href="/login"
-                        className="p-2.5 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/80 border border-emerald-200 flex items-center justify-between transition group"
-                      >
-                        <span className="font-extrabold text-slate-900">🎓 Student Portal (Wellness Radar)</span>
-                        <span className="text-emerald-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
-                      </Link>
-                      <Link 
-                        href="/login"
-                        className="p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200 flex items-center justify-between transition group"
-                      >
-                        <span className="font-extrabold text-slate-900">👨‍👩‍👦 Parent / Guardian (Progress Alerts)</span>
-                        <span className="text-blue-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
-                      </Link>
-                    </div>
-
-                    <Link
-                      href="/register"
-                      className="w-full py-2.5 px-4 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
-                    >
-                      <span>Create New Student or Faculty Account</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                )}
-
-              </div>
-            </div>
-
-          </div>
-
-          {/* Carousel Dot Indicators */}
-          <div className="flex items-center justify-center gap-2 mt-8">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                className={`h-2.5 rounded-full transition-all cursor-pointer ${
-                  currentSlide === idx
-                    ? "w-8 bg-[#8B0014]"
-                    : "w-2.5 bg-slate-300 hover:bg-slate-400"
-                }`}
-              />
-            ))}
+            <button
+              onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
+              aria-label="Next Slide"
+              className="p-2.5 rounded-xl bg-white hover:bg-rose-50 text-slate-700 hover:text-[#8B0014] border border-slate-200 hover:border-rose-200 transition shadow-2xs cursor-pointer active:scale-95"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
 
         </div>
