@@ -20,9 +20,7 @@ import {
   TrendingUp,
   Activity,
   Eye,
-  Repeat,
   Compass,
-  MessageSquare,
   PanelLeftClose,
   PanelLeftOpen,
   ChevronLeft,
@@ -366,7 +364,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             ) : (
               <div className="w-8 h-px bg-slate-200 mx-auto my-1" />
             )}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {onOpenSimulator && (
                 <button
                   onClick={() => {
@@ -377,18 +375,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={`w-full flex items-center rounded-xl transition shadow-2xs ${
                     isCollapsed
                       ? "justify-center h-11 w-11 mx-auto bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300"
-                      : "justify-between px-3 py-2 text-xs sm:text-sm font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200"
+                      : "px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200"
                   }`}
                 >
-                  <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-2.5"}`}>
-                    <Layers className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-[#D97706]`} />
-                    {!isCollapsed && <span>AHP Simulator</span>}
+                  <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
+                    <Layers className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-[#D97706] shrink-0`} />
+                    {!isCollapsed && <span className="truncate font-bold">AHP Simulator</span>}
                   </div>
-                  {!isCollapsed && (
-                    <span className="text-[10px] bg-amber-50 text-amber-900 border border-amber-200 px-1.5 py-0.5 rounded font-bold">
-                      What-If
-                    </span>
-                  )}
                 </button>
               )}
 
@@ -400,14 +393,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }}
                   title="AI Counselor & Guidance Assistant"
                   className={`w-full flex items-center rounded-xl text-white bg-[#8B0014] hover:bg-[#6D0010] shadow-2xs transition ${
-                    isCollapsed ? "justify-center h-11 w-11 mx-auto" : "justify-between px-3 py-2 text-xs sm:text-sm font-bold"
+                    isCollapsed 
+                      ? "justify-center h-11 w-11 mx-auto" 
+                      : "px-3 py-2.5 text-xs sm:text-sm font-bold"
                   }`}
                 >
-                  <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-2.5"}`}>
-                    <Bot className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-white`} />
-                    {!isCollapsed && <span>AI Counselor</span>}
+                  <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
+                    <Bot className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-white shrink-0`} />
+                    {!isCollapsed && <span className="truncate font-bold">AI Counselor</span>}
                   </div>
-                  {!isCollapsed && <MessageSquare className="h-3.5 w-3.5 text-amber-300" />}
                 </button>
               )}
 
@@ -418,17 +412,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     setIsOpen(false);
                   }}
                   title="Role Tour & Walkthrough Guide"
-                  className={`w-full flex items-center rounded-xl transition ${
+                  className={`w-full flex items-center rounded-xl transition shadow-2xs ${
                     isCollapsed
                       ? "justify-center h-11 w-11 mx-auto bg-amber-50 hover:bg-amber-100 border border-amber-300 text-[#8B0014]"
-                      : "justify-between px-3 py-2 text-xs font-bold text-slate-700 bg-amber-50/70 hover:bg-amber-100 border border-amber-300/80"
+                      : "px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-700 bg-amber-50/70 hover:bg-amber-100 border border-amber-300/80"
                   }`}
                 >
-                  <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-2"} text-amber-950 font-bold`}>
-                    <Compass className={`${isCollapsed ? "h-5 w-5" : "h-3.5 w-3.5"} text-[#8B0014]`} />
-                    {!isCollapsed && <span>Role Tour & Guide</span>}
+                  <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"} text-amber-950 font-bold`}>
+                    <Compass className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-[#8B0014] shrink-0`} />
+                    {!isCollapsed && <span className="truncate font-bold">Role Tour & Guide</span>}
                   </div>
-                  {!isCollapsed && <span className="text-[10px] text-amber-800 font-extrabold">3-Step</span>}
                 </button>
               )}
             </div>
@@ -436,16 +429,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Section 3: Role Preview (Evaluator Switcher for Demos) */}
           <div className="pt-2 border-t border-slate-200">
-            <div className={`bg-slate-50 border border-slate-200/90 rounded-2xl ${isCollapsed ? "p-1.5 space-y-1.5 text-center" : "p-3 space-y-2.5"}`}>
+            <div className={`bg-slate-50 border border-slate-200/90 rounded-2xl ${isCollapsed ? "p-1.5 space-y-1.5 text-center" : "p-3 space-y-2"}`}>
               {!isCollapsed && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-slate-800">
-                    <Eye className="h-3.5 w-3.5 text-[#8B0014]" />
-                    <span>Role Preview</span>
-                  </div>
-                  <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-400 text-amber-950 shadow-2xs">
-                    Demo Switcher
-                  </span>
+                <div className="flex items-center gap-2 text-xs font-black text-slate-800 px-1 mb-1">
+                  <Eye className="h-3.5 w-3.5 text-[#8B0014]" />
+                  <span>Role Preview</span>
                 </div>
               )}
 
@@ -465,25 +453,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       className={`w-full flex items-center rounded-xl transition ${
                         isCollapsed
                           ? `justify-center h-10 w-10 mx-auto text-base ${isCurrent ? "bg-[#8B0014] text-white shadow-xs" : "hover:bg-white text-slate-700 border border-transparent hover:border-slate-200"}`
-                          : `justify-between px-2.5 py-1.5 text-xs font-bold ${
+                          : `px-3 py-2 text-xs sm:text-sm font-bold ${
                               isCurrent
                                 ? "bg-[#8B0014] text-white shadow-2xs"
                                 : "text-slate-700 hover:bg-white hover:text-slate-950 border border-transparent hover:border-slate-200"
                             }`
                       }`}
                     >
-                      <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-2 min-w-0"}`}>
-                        <span className={`${isCollapsed ? "text-base" : "text-xs"} shrink-0`}>{item.icon}</span>
-                        {!isCollapsed && <span className="truncate">{item.name}</span>}
+                      <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
+                        <span className={`${isCollapsed ? "text-base" : "text-sm"} shrink-0`}>{item.icon}</span>
+                        {!isCollapsed && <span className="truncate font-bold">{item.name}</span>}
                       </div>
-                      {!isCollapsed && isCurrent && (
-                        <span className="text-[9px] font-black uppercase bg-amber-400 text-slate-950 px-1.5 py-0.2 rounded shrink-0">
-                          Active
-                        </span>
-                      )}
-                      {!isCollapsed && !isCurrent && (
-                        <Repeat className="h-3 w-3 text-slate-400 shrink-0" />
-                      )}
                     </button>
                   );
                 })}
