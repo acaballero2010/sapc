@@ -30,12 +30,58 @@ import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { ParentAlertModal } from "./ParentAlertModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { SAPC_500_STUDENTS, SAPC_COHORT_SUMMARY } from "@/data/students500";
+import type { StudentRecord } from "@/data/students500";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+interface FlaggedAlert {
+  id: number;
+  student_id: number;
+  student_name: string;
+  aggregate_distress_score: number;
+  flag_reason: string;
+  started_at: string;
+}
+
+interface ActionItem {
+  id: string;
+  text: string;
+  assignee: string;
+  priority: "high" | "medium" | "routine" | string;
+  due_timeline: string;
+  completed: boolean;
+}
+
+interface InterventionCarePlan {
+  id: number;
+  student_id: number;
+  student_name: string;
+  title: string;
+  description: string;
+  target_domain: string;
+  status: string;
+  action_items: string;
+  scheduled_followup?: string;
+}
+
+interface TeacherReferralItem {
+  id: string;
+  student_id: number;
+  student_name: string;
+  lrn: string;
+  section: string;
+  referring_teacher: string;
+  concern_type: string;
+  urgency: "crisis" | "priority" | "routine" | string;
+  observations: string;
+  attempted_interventions: string[];
+  created_at: string;
+  status: string;
+}
 
 const DEFAULT_ANALYTICS = SAPC_COHORT_SUMMARY;
 const DEFAULT_STUDENTS = SAPC_500_STUDENTS;
 
-const DEFAULT_FLAGGED = [
+const DEFAULT_FLAGGED: FlaggedAlert[] = [
   {
     id: 101,
     student_id: 1,
@@ -54,7 +100,7 @@ const DEFAULT_FLAGGED = [
   }
 ];
 
-const DEFAULT_INTERVENTIONS = [
+const DEFAULT_INTERVENTIONS: InterventionCarePlan[] = [
   {
     id: 201,
     student_id: 1,
@@ -106,10 +152,10 @@ const DEFAULT_INTERVENTIONS = [
 export const CounselorDashboard: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [analytics, setAnalytics] = useState<any | null>(DEFAULT_ANALYTICS);
-  const [students, setStudents] = useState<any[]>(DEFAULT_STUDENTS);
-  const [flaggedSessions, setFlaggedSessions] = useState<any[]>(DEFAULT_FLAGGED);
-  const [interventions, setInterventions] = useState<any[]>(DEFAULT_INTERVENTIONS);
-  const [teacherReferrals, setTeacherReferrals] = useState<any[]>([]);
+  const [students, setStudents] = useState<StudentRecord[]>(DEFAULT_STUDENTS);
+  const [flaggedSessions, setFlaggedSessions] = useState<FlaggedAlert[]>(DEFAULT_FLAGGED);
+  const [interventions, setInterventions] = useState<InterventionCarePlan[]>(DEFAULT_INTERVENTIONS);
+  const [teacherReferrals, setTeacherReferrals] = useState<TeacherReferralItem[]>([]);
   const [search, setSearch] = useState("");
   const [filterTier, setFilterTier] = useState<string>("all");
   const [filterStrand, setFilterStrand] = useState<string>("all");
@@ -118,10 +164,10 @@ export const CounselorDashboard: React.FC = () => {
   const pageSize = 15;
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [interventionStudent, setInterventionStudent] = useState<any | null>(null);
+  const [interventionStudent, setInterventionStudent] = useState<StudentRecord | null>(null);
   const [isInterventionOpen, setIsInterventionOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const [parentAlertStudent, setParentAlertStudent] = useState<any | null>(null);
+  const [parentAlertStudent, setParentAlertStudent] = useState<StudentRecord | null>(null);
   const [isParentAlertOpen, setIsParentAlertOpen] = useState(false);
   const [_isLoading, setIsLoading] = useState(true);
 
@@ -146,16 +192,16 @@ export const CounselorDashboard: React.FC = () => {
     }, 50);
   };
 
-  const parseActionItems = (raw: any): any[] => {
+  const parseActionItems = (raw: unknown): ActionItem[] => {
     if (!raw) return [];
-    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw)) return raw as ActionItem[];
     if (typeof raw === "string") {
       try {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) return parsed as ActionItem[];
       } catch {
         // Fallback: parse lines into tasks
-        return raw.split("\n").filter(l => l.trim()).map((line, idx) => ({
+        return raw.split("\n").filter((l: string) => l.trim()).map((line: string, idx: number) => ({
           id: `task-${idx}`,
           text: line.replace(/^-\s*(\[[ xX]\]\s*)?/, ""),
           assignee: "Guidance Counselor",
@@ -192,8 +238,8 @@ export const CounselorDashboard: React.FC = () => {
           try {
             const localList = JSON.parse(storedPlans);
             if (Array.isArray(localList) && localList.length > 0) {
-              const existingIds = new Set(localList.map((p: any) => p.id));
-              combinedInterventions = [...localList, ...combinedInterventions.filter((p: any) => !existingIds.has(p.id))];
+              const existingIds = new Set(localList.map((p: InterventionCarePlan) => p.id));
+              combinedInterventions = [...localList, ...combinedInterventions.filter((p: InterventionCarePlan) => !existingIds.has(p.id))];
             }
           } catch {
             // Ignore parse error
@@ -213,7 +259,7 @@ export const CounselorDashboard: React.FC = () => {
           }
         } else {
           // Default initial teacher referral for demonstration
-          const initialReferral = [
+          const initialReferral: TeacherReferralItem[] = [
             {
               id: "ref-seed-01",
               student_id: 1,
@@ -245,11 +291,11 @@ export const CounselorDashboard: React.FC = () => {
   };
 
   const handleTogglePlanTask = async (planId: number, taskId: string) => {
-    setInterventions((prev) => {
-      const updated = prev.map((plan) => {
+    setInterventions((prev: InterventionCarePlan[]) => {
+      const updated = prev.map((plan: InterventionCarePlan) => {
         if (plan.id !== planId) return plan;
         const currentTasks = parseActionItems(plan.action_items);
-        const updatedTasks = currentTasks.map((t) =>
+        const updatedTasks = currentTasks.map((t: ActionItem) =>
           t.id === taskId ? { ...t, completed: !t.completed } : t
         );
         const serialized = JSON.stringify(updatedTasks);
@@ -271,8 +317,8 @@ export const CounselorDashboard: React.FC = () => {
   };
 
   const handleUpdatePlanStatus = async (planId: number, newStatus: string) => {
-    setInterventions((prev) => {
-      const updated = prev.map((plan) =>
+    setInterventions((prev: InterventionCarePlan[]) => {
+      const updated = prev.map((plan: InterventionCarePlan) =>
         plan.id === planId ? { ...plan, status: newStatus } : plan
       );
       fetchWithAuth(`/risk/interventions/${planId}`, {
@@ -292,12 +338,12 @@ export const CounselorDashboard: React.FC = () => {
     loadData();
 
     const handleCarePlanUpdate = (e: any) => {
-      const newOrUpdatedPlan = e.detail;
+      const newOrUpdatedPlan = e.detail as InterventionCarePlan;
       if (newOrUpdatedPlan) {
-        setInterventions((prev) => {
-          const exists = prev.some((p) => p.id === newOrUpdatedPlan.id);
+        setInterventions((prev: InterventionCarePlan[]) => {
+          const exists = prev.some((p: InterventionCarePlan) => p.id === newOrUpdatedPlan.id);
           if (exists) {
-            return prev.map((p) => (p.id === newOrUpdatedPlan.id ? newOrUpdatedPlan : p));
+            return prev.map((p: InterventionCarePlan) => (p.id === newOrUpdatedPlan.id ? newOrUpdatedPlan : p));
           }
           return [newOrUpdatedPlan, ...prev];
         });
@@ -307,12 +353,12 @@ export const CounselorDashboard: React.FC = () => {
     };
 
     if (typeof window !== "undefined") {
-      window.addEventListener("sapc_interventions_updated", handleCarePlanUpdate);
+      window.addEventListener("sapc_interventions_updated", handleCarePlanUpdate as EventListener);
     }
 
     return () => {
       if (typeof window !== "undefined") {
-        window.removeEventListener("sapc_interventions_updated", handleCarePlanUpdate);
+        window.removeEventListener("sapc_interventions_updated", handleCarePlanUpdate as EventListener);
       }
     };
   }, []);
@@ -331,12 +377,12 @@ export const CounselorDashboard: React.FC = () => {
     );
   }
 
-  const filteredStudents = students.filter((s) => {
+  const filteredStudents = students.filter((s: StudentRecord) => {
     const matchesSearch =
       s.first_name.toLowerCase().includes(search.toLowerCase()) ||
       s.last_name.toLowerCase().includes(search.toLowerCase()) ||
       s.lrn.includes(search) ||
-      (s.section_name && s.section_name.toLowerCase().includes(search.toLowerCase()));
+      (Boolean(s.section_name) && s.section_name.toLowerCase().includes(search.toLowerCase()));
     const matchesTier = filterTier === "all" || s.latest_risk_tier?.toLowerCase() === filterTier;
     const matchesStrand = filterStrand === "all" || s.strand === filterStrand;
     const matchesSection = filterSection === "all" || s.section_name === filterSection;
@@ -468,7 +514,7 @@ export const CounselorDashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-            {flaggedSessions.map((session) => (
+            {flaggedSessions.map((session: FlaggedAlert) => (
               <div
                 key={session.id}
                 className="bg-rose-50/50 border border-rose-200 rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-rose-300 transition shadow-2xs"
@@ -524,7 +570,7 @@ export const CounselorDashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {teacherReferrals.map((ref) => (
+            {teacherReferrals.map((ref: TeacherReferralItem) => (
               <div
                 key={ref.id}
                 className="bg-amber-50/40 border border-amber-200/90 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:shadow-xs transition"
@@ -603,7 +649,7 @@ export const CounselorDashboard: React.FC = () => {
             <div className="relative">
               <select
                 value={filterSection}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setFilterSection(e.target.value);
                   setCurrentPage(1);
                 }}
@@ -633,7 +679,7 @@ export const CounselorDashboard: React.FC = () => {
             <div className="relative">
               <select
                 value={filterStrand}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setFilterStrand(e.target.value);
                   setCurrentPage(1);
                 }}
@@ -652,7 +698,7 @@ export const CounselorDashboard: React.FC = () => {
             <div className="relative">
               <select
                 value={filterTier}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setFilterTier(e.target.value);
                   setCurrentPage(1);
                 }}
@@ -672,7 +718,7 @@ export const CounselorDashboard: React.FC = () => {
                 type="text"
                 placeholder="Search name or LRN..."
                 value={search}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setSearch(e.target.value);
                   setCurrentPage(1);
                 }}
@@ -752,7 +798,7 @@ export const CounselorDashboard: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                paginatedStudents.map((s) => (
+                paginatedStudents.map((s: StudentRecord) => (
                   <tr key={s.id} className="text-slate-800 hover:bg-slate-50/80 transition">
                     <td className="py-3.5 px-4 font-bold text-slate-900 text-sm sm:text-base whitespace-nowrap">
                       {s.first_name} {s.last_name}
@@ -817,7 +863,7 @@ export const CounselorDashboard: React.FC = () => {
             <button
               type="button"
               disabled={currentPage <= 1}
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage((prev: number) => Math.max(1, prev - 1))}
               className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs flex items-center gap-1 transition shadow-2xs"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -831,7 +877,7 @@ export const CounselorDashboard: React.FC = () => {
             <button
               type="button"
               disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() => setCurrentPage((prev: number) => Math.min(totalPages, prev + 1))}
               className="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold text-xs flex items-center gap-1 transition shadow-2xs"
             >
               <span>Next</span>
@@ -870,7 +916,7 @@ export const CounselorDashboard: React.FC = () => {
               type="button"
               onClick={() => {
                 // Open for first high-risk student or first available student
-                const highRiskStudent = students.find(s => s.latest_risk_tier === "high") || students[0];
+                const highRiskStudent = students.find((s: StudentRecord) => s.latest_risk_tier === "high") || students[0];
                 if (highRiskStudent) {
                   setInterventionStudent(highRiskStudent);
                   setIsInterventionOpen(true);
@@ -896,7 +942,7 @@ export const CounselorDashboard: React.FC = () => {
 
             <select
               value={carePlanFilterStatus}
-              onChange={(e) => setCarePlanFilterStatus(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCarePlanFilterStatus(e.target.value)}
               className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-[#8B0014]"
             >
               <option value="all">All Statuses ({interventions.length})</option>
@@ -908,7 +954,7 @@ export const CounselorDashboard: React.FC = () => {
 
             <select
               value={carePlanFilterDomain}
-              onChange={(e) => setCarePlanFilterDomain(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCarePlanFilterDomain(e.target.value)}
               className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-[#8B0014]"
             >
               <option value="all">All Target Domains</option>
@@ -936,13 +982,13 @@ export const CounselorDashboard: React.FC = () => {
 
         {/* Care Plans Grid */}
         {(() => {
-          const filteredPlans = interventions.filter((p) => {
+          const filteredPlans = interventions.filter((p: InterventionCarePlan) => {
             const matchesStatus =
               carePlanFilterStatus === "all" ||
               p.status?.toLowerCase() === carePlanFilterStatus.toLowerCase();
             const matchesDomain =
               carePlanFilterDomain === "all" ||
-              (p.target_domain && p.target_domain.toLowerCase().includes(carePlanFilterDomain.toLowerCase()));
+              (Boolean(p.target_domain) && p.target_domain.toLowerCase().includes(carePlanFilterDomain.toLowerCase()));
             return matchesStatus && matchesDomain;
           });
 
@@ -958,9 +1004,9 @@ export const CounselorDashboard: React.FC = () => {
 
           return (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {filteredPlans.map((p) => {
+              {filteredPlans.map((p: InterventionCarePlan) => {
                 const planTasks = parseActionItems(p.action_items);
-                const completedCount = planTasks.filter((t) => t.completed).length;
+                const completedCount = planTasks.filter((t: ActionItem) => t.completed).length;
                 const totalTasks = planTasks.length;
                 const progressPct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
                 const isExpanded = expandedPlanIds[p.id] ?? true;
@@ -1000,7 +1046,7 @@ export const CounselorDashboard: React.FC = () => {
                         <div className="relative">
                           <select
                             value={p.status}
-                            onChange={(e) => handleUpdatePlanStatus(p.id, e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleUpdatePlanStatus(p.id, e.target.value)}
                             className={`text-xs font-black rounded-xl px-3 py-1.5 border focus:outline-none transition cursor-pointer shadow-2xs ${
                               p.status === "resolved"
                                 ? "bg-emerald-50 text-emerald-800 border-emerald-300"
@@ -1063,7 +1109,7 @@ export const CounselorDashboard: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setExpandedPlanIds((prev) => ({
+                                  setExpandedPlanIds((prev: Record<number, boolean>) => ({
                                     ...prev,
                                     [p.id]: !isExpanded
                                   }))
@@ -1086,7 +1132,7 @@ export const CounselorDashboard: React.FC = () => {
                           </div>
 
                           <div className="space-y-1.5">
-                            {(isExpanded ? planTasks : planTasks.slice(0, 2)).map((task: any) => (
+                            {(isExpanded ? planTasks : planTasks.slice(0, 2)).map((task: ActionItem) => (
                               <div
                                 key={task.id}
                                 onClick={() => handleTogglePlanTask(p.id, task.id)}
@@ -1169,7 +1215,7 @@ export const CounselorDashboard: React.FC = () => {
         studentId={selectedStudentId}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        onCreateIntervention={(s) => {
+        onCreateIntervention={(s: any) => {
           setIsDetailOpen(false);
           setInterventionStudent(s);
           setIsInterventionOpen(true);
