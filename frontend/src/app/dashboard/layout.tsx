@@ -72,19 +72,6 @@ export default function DashboardLayout({
           {/* Top Global Dashboard Header Bar */}
           <header className="sticky top-1.5 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              {/* Desktop Sidebar Expand Toggle in Header (only visible when sidebar is collapsed) */}
-              {isCollapsed && (
-                <button
-                  type="button"
-                  onClick={toggleCollapse}
-                  className="hidden lg:flex items-center justify-center h-9 w-9 rounded-xl text-slate-600 hover:text-[#8B0014] hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition shadow-2xs shrink-0"
-                  title="Expand Sidebar (Widescreen Mode)"
-                  aria-label="Expand Sidebar"
-                >
-                  <PanelLeftOpen className="h-4 w-4 text-[#8B0014]" />
-                </button>
-              )}
-
               <span className="px-3 py-1.5 rounded-xl text-xs font-black bg-rose-50 text-[#8B0014] border border-rose-200 capitalize flex items-center gap-1.5 shadow-2xs shrink-0">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 {user?.role ? `${user.role.replace("_", " ")} Portal` : "SAPC Portal"}

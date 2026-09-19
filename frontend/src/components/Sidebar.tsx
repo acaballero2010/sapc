@@ -309,17 +309,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="hidden lg:flex items-center justify-center h-8 w-8 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-[#8B0014] text-slate-600 border border-slate-200 transition shadow-2xs mt-1"
+              className="hidden lg:flex items-center justify-center h-9 w-9 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-[#8B0014] text-slate-600 border border-slate-200 transition shadow-2xs"
               title="Expand Sidebar"
               aria-label="Expand Sidebar"
             >
-              <PanelLeftOpen className="h-4 w-4" />
+              <PanelLeftOpen className="h-4.5 w-4.5" />
             </button>
           )}
         </div>
 
         {/* Scrollable Navigation Body */}
-        <div className={`flex-1 overflow-y-auto space-y-6 ${isCollapsed ? "px-2 py-4" : "px-4 py-5"}`}>
+        <div className={`flex-1 overflow-y-auto space-y-5 ${isCollapsed ? "px-2.5 py-4" : "px-4 py-5"}`}>
           {/* Section 1: Role Workspace Navigation */}
           <div>
             {!isCollapsed ? (
@@ -327,10 +327,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 Workspace Navigation
               </span>
             ) : (
-              <div className="w-full h-px bg-slate-200 my-2" />
+              <div className="w-8 h-px bg-slate-200 mx-auto my-1" />
             )}
 
-            <nav className="space-y-1">
+            <nav className="space-y-1.5">
               {currentWorkspaceItems.map((item, idx) => {
                 const Icon = item.icon;
                 return (
@@ -341,12 +341,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     title={item.name}
                     className={`w-full flex items-center rounded-xl transition group text-left ${
                       isCollapsed 
-                        ? "justify-center p-2.5 text-slate-700 hover:text-[#8B0014] hover:bg-rose-50/80" 
+                        ? "justify-center h-11 w-11 mx-auto text-slate-700 hover:text-[#8B0014] hover:bg-rose-50 border border-transparent hover:border-rose-200 shadow-2xs" 
                         : "px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-800 hover:text-slate-950 hover:bg-slate-100/90"
                     }`}
                   >
                     <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
-                      <Icon className="h-4 w-4 text-[#8B0014] group-hover:scale-110 transition-transform shrink-0" />
+                      <Icon className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-[#8B0014] group-hover:scale-110 transition-transform shrink-0`} />
                       {!isCollapsed && (
                         <span className="font-bold text-slate-800 group-hover:text-slate-950 leading-snug">{item.name}</span>
                       )}
@@ -359,12 +359,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Section 2: DSS Tools & Support */}
           <div>
-            {!isCollapsed && (
+            {!isCollapsed ? (
               <span className="px-3 text-[11px] font-black text-slate-400 uppercase tracking-wider block mb-2.5">
                 DSS Tools & Support
               </span>
+            ) : (
+              <div className="w-8 h-px bg-slate-200 mx-auto my-1" />
             )}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {onOpenSimulator && (
                 <button
                   onClick={() => {
@@ -374,12 +376,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title="AHP Academic Simulator"
                   className={`w-full flex items-center rounded-xl transition shadow-2xs ${
                     isCollapsed
-                      ? "justify-center p-2.5 bg-amber-50/80 hover:bg-amber-100 text-amber-900 border border-amber-300"
+                      ? "justify-center h-11 w-11 mx-auto bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300"
                       : "justify-between px-3 py-2 text-xs sm:text-sm font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200"
                   }`}
                 >
                   <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-2.5"}`}>
-                    <Layers className="h-4 w-4 text-[#D97706]" />
+                    <Layers className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-[#D97706]`} />
                     {!isCollapsed && <span>AHP Simulator</span>}
                   </div>
                   {!isCollapsed && (
@@ -398,11 +400,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }}
                   title="AI Counselor & Guidance Assistant"
                   className={`w-full flex items-center rounded-xl text-white bg-[#8B0014] hover:bg-[#6D0010] shadow-2xs transition ${
-                    isCollapsed ? "justify-center p-2.5" : "justify-between px-3 py-2 text-xs sm:text-sm font-bold"
+                    isCollapsed ? "justify-center h-11 w-11 mx-auto" : "justify-between px-3 py-2 text-xs sm:text-sm font-bold"
                   }`}
                 >
                   <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-2.5"}`}>
-                    <Bot className="h-4 w-4 text-white" />
+                    <Bot className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-white`} />
                     {!isCollapsed && <span>AI Counselor</span>}
                   </div>
                   {!isCollapsed && <MessageSquare className="h-3.5 w-3.5 text-amber-300" />}
@@ -418,12 +420,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title="Role Tour & Walkthrough Guide"
                   className={`w-full flex items-center rounded-xl transition ${
                     isCollapsed
-                      ? "justify-center p-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-[#8B0014]"
+                      ? "justify-center h-11 w-11 mx-auto bg-amber-50 hover:bg-amber-100 border border-amber-300 text-[#8B0014]"
                       : "justify-between px-3 py-2 text-xs font-bold text-slate-700 bg-amber-50/70 hover:bg-amber-100 border border-amber-300/80"
                   }`}
                 >
                   <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-2"} text-amber-950 font-bold`}>
-                    <Compass className="h-3.5 w-3.5 text-[#8B0014]" />
+                    <Compass className={`${isCollapsed ? "h-5 w-5" : "h-3.5 w-3.5"} text-[#8B0014]`} />
                     {!isCollapsed && <span>Role Tour & Guide</span>}
                   </div>
                   {!isCollapsed && <span className="text-[10px] text-amber-800 font-extrabold">3-Step</span>}
@@ -434,7 +436,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Section 3: Role Preview (Evaluator Switcher for Demos) */}
           <div className="pt-2 border-t border-slate-200">
-            <div className={`bg-slate-50 border border-slate-200/90 rounded-2xl ${isCollapsed ? "p-2 space-y-1.5 text-center" : "p-3 space-y-2.5"}`}>
+            <div className={`bg-slate-50 border border-slate-200/90 rounded-2xl ${isCollapsed ? "p-1.5 space-y-1.5 text-center" : "p-3 space-y-2.5"}`}>
               {!isCollapsed && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-xs font-black text-slate-800">
@@ -460,9 +462,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         setIsOpen(false);
                         router.push(item.path);
                       }}
-                      className={`w-full flex items-center rounded-lg transition ${
+                      className={`w-full flex items-center rounded-xl transition ${
                         isCollapsed
-                          ? `justify-center p-2 text-sm ${isCurrent ? "bg-[#8B0014] text-white shadow-xs" : "hover:bg-white text-slate-700"}`
+                          ? `justify-center h-10 w-10 mx-auto text-base ${isCurrent ? "bg-[#8B0014] text-white shadow-xs" : "hover:bg-white text-slate-700 border border-transparent hover:border-slate-200"}`
                           : `justify-between px-2.5 py-1.5 text-xs font-bold ${
                               isCurrent
                                 ? "bg-[#8B0014] text-white shadow-2xs"
@@ -471,7 +473,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       }`}
                     >
                       <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-2 min-w-0"}`}>
-                        <span className="text-xs shrink-0">{item.icon}</span>
+                        <span className={`${isCollapsed ? "text-base" : "text-xs"} shrink-0`}>{item.icon}</span>
                         {!isCollapsed && <span className="truncate">{item.name}</span>}
                       </div>
                       {!isCollapsed && isCurrent && (
@@ -500,7 +502,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             title={isCollapsed ? `Manage ${user?.full_name || "Account"}` : "Click to manage account settings"}
             className={`w-full flex items-center rounded-2xl border border-slate-200 hover:border-[#8B0014]/40 shadow-2xs transition group text-left ${
-              isCollapsed ? "justify-center p-2 bg-white hover:bg-rose-50/70" : "justify-between gap-3 bg-white hover:bg-rose-50/70 p-3"
+              isCollapsed ? "justify-center h-12 w-12 mx-auto bg-white hover:bg-rose-50/70 p-0" : "justify-between gap-3 bg-white hover:bg-rose-50/70 p-3"
             }`}
           >
             <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-3 min-w-0"}`}>
@@ -508,10 +510,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <img
                   src={user.avatar_url}
                   alt={user.full_name}
-                  className="h-9 w-9 rounded-xl object-cover border border-amber-400/80 shadow-2xs shrink-0 group-hover:scale-105 transition-transform"
+                  className={`${isCollapsed ? "h-9 w-9" : "h-9 w-9"} rounded-xl object-cover border border-amber-400/80 shadow-2xs shrink-0 group-hover:scale-105 transition-transform`}
                 />
               ) : (
-                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/70 flex items-center justify-center font-extrabold text-white text-xs shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+                <div className={`${isCollapsed ? "h-9 w-9" : "h-9 w-9"} rounded-xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/70 flex items-center justify-center font-extrabold text-white text-xs shadow-2xs shrink-0 group-hover:scale-105 transition-transform`}>
                   {user?.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
                 </div>
               )}
