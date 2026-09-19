@@ -6,11 +6,8 @@ import {
   Printer, 
   Download, 
   ShieldCheck, 
-  FileText, 
-  Building2, 
   GraduationCap, 
   CheckCircle2, 
-  Clock, 
   AlertTriangle,
   Award,
   Lock

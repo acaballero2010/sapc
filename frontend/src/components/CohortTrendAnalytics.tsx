@@ -4,16 +4,10 @@ import React, { useState, useEffect } from "react";
 import { 
   TrendingUp, 
   TrendingDown, 
-  Award, 
   ShieldCheck, 
-  Users, 
   BarChart3, 
-  Calendar, 
-  ArrowUpRight, 
   Sparkles,
-  ChevronRight,
   GraduationCap,
-  Layers,
   Activity
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";

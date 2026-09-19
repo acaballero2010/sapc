@@ -1,30 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
   Brain, 
   BookOpen, 
   Users, 
   GraduationCap, 
-  Sliders, 
   ShieldCheck, 
   Bot, 
   Sparkles, 
   Layers, 
   ArrowRight, 
   CheckCircle2, 
-  AlertTriangle, 
-  PhoneCall, 
   Lock, 
   Mail, 
   FileSpreadsheet, 
   HeartHandshake,
-  Activity,
   ChevronRight,
-  School,
-  Check
+  School
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
 import { useAuth, RoleType } from "@/lib/auth-context";
@@ -32,7 +26,7 @@ import { RegistrationModal } from "./RegistrationModal";
 
 export const LandingPage: React.FC = () => {
   const router = useRouter();
-  const { login, loginWithGoogle, switchRole, serverError, retryConnection } = useAuth();
+  const { login, loginWithGoogle, switchRole } = useAuth();
   const [email, setEmail] = useState("counselor@sapc.edu.ph");
   const [password, setPassword] = useState("counselor123");
   const [showPassword, setShowPassword] = useState(false);
@@ -182,7 +176,7 @@ export const LandingPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-500 hidden sm:block font-medium">
-                San Antonio de Padua College • "A College for the Family"
+                San Antonio de Padua College • &quot;A College for the Family&quot;
               </p>
             </div>
           </div>
@@ -229,7 +223,7 @@ export const LandingPage: React.FC = () => {
               {/* Institution Tagline Badge */}
               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200/90 text-[#8B0014] text-xs sm:text-sm font-extrabold shadow-xs">
                 <Sparkles className="h-4 w-4 text-[#8B0014]" />
-                <span>"A College for the Family" • Pila, Laguna</span>
+                <span>&quot;A College for the Family&quot; • Pila, Laguna</span>
                 <span className="hidden sm:inline text-rose-300">•</span>
                 <span className="hidden sm:inline text-xs font-semibold text-rose-900/80">Est. 1979</span>
               </div>
@@ -562,7 +556,7 @@ export const LandingPage: React.FC = () => {
               <p className="text-base text-slate-700 leading-relaxed">
                 San Antonio de Padua College (SAPC) is a premier educational institution in Pila, Laguna, 
                 founded in 1979 by the Foundation of Pila, Laguna, Inc. Committed to the motto 
-                <em className="font-semibold text-slate-900"> "Humilitas, Caritas et Patiens"</em>, SAPC strives to nurture well-rounded, morally upright, 
+                <em className="font-semibold text-slate-900"> &quot;Humilitas, Caritas et Patiens&quot;</em>, SAPC strives to nurture well-rounded, morally upright, 
                 and globally competitive learners.
               </p>
               <div className="space-y-3 pt-2">

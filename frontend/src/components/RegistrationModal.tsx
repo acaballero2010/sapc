@@ -7,14 +7,10 @@ import {
   GraduationCap, 
   Users, 
   ShieldCheck, 
-  Mail, 
-  Phone, 
-  Lock, 
   FileText, 
   ArrowRight, 
   Sparkles,
-  KeyRound,
-  AlertCircle
+  KeyRound
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -34,7 +30,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [step, setStep] = useState<"form" | "otp" | "success">("form");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [registrationError, setRegistrationError] = useState<string | null>(null);
 
   // Student form state
   const [lrn, setLrn] = useState("");
@@ -44,7 +39,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleGoogleRegistration = async () => {
     setIsSubmitting(true);
-    setRegistrationError(null);
     try {
       const targetRole = activeTab === "parent_link" ? "parent" : activeTab === "faculty_request" ? "teacher" : "student";
       await loginWithGoogle(targetRole);
@@ -86,7 +80,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleStudentClaim = (e: React.FormEvent) => {
     e.preventDefault();
-    setRegistrationError(null);
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
@@ -96,7 +89,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleParentLink = (e: React.FormEvent) => {
     e.preventDefault();
-    setRegistrationError(null);
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
@@ -106,7 +98,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleFacultyRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRegistrationError(null);
     setIsSubmitting(true);
     try {
       // Create faculty user in Firebase Auth & Firestore
@@ -134,7 +125,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleVerifyOtp = async () => {
     setIsSubmitting(true);
-    setRegistrationError(null);
     try {
       if (activeTab === "student_claim") {
         const finalEmail = studentEmail || `${lrn}@student.sapc.edu.ph`;
@@ -415,14 +405,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Student's 12-Digit LRN</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Student&apos;s 12-Digit LRN</label>
                     <input
                       type="text"
                       required
                       maxLength={12}
                       value={parentLrn}
                       onChange={(e) => setParentLrn(e.target.value.replace(/\D/g, ""))}
-                      placeholder="Enter student's LRN"
+                      placeholder="Enter student&apos;s LRN"
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                     />
                   </div>
@@ -521,7 +511,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
               <div className="space-y-1 max-w-sm mx-auto">
                 <h4 className="text-lg font-black text-slate-900">Enter 6-Digit One-Time PIN</h4>
                 <p className="text-xs text-slate-500">
-                  We've sent a 6-digit verification code to your registered mobile number / email for authentication.
+                  We&apos;ve sent a 6-digit verification code to your registered mobile number / email for authentication.
                 </p>
               </div>
 

@@ -110,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setServerError(null);
           return;
         }
-      } catch (err: any) {
+      } catch {
         // Backend FastAPI not running
       }
 

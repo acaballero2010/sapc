@@ -267,7 +267,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             }`}
           >
             <Calculator className="h-4 w-4 text-[#8B0014]" />
-            "What-If" Academic Recovery Simulator
+            &quot;What-If&quot; Academic Recovery Simulator
           </button>
         </div>
 

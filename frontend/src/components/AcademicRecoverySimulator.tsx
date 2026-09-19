@@ -1,23 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   Calculator, 
   TrendingDown, 
-  Sparkles, 
   CheckCircle2, 
-  AlertCircle, 
-  Target, 
   BookOpen, 
-  Calendar, 
-  Award, 
-  RotateCcw,
-  Zap,
-  ArrowRight,
-  ShieldCheck,
-  HeartPulse,
-  DollarSign,
-  X
+  ShieldCheck, 
+  HeartPulse, 
+  DollarSign, 
+  X 
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
@@ -35,7 +27,7 @@ interface AcademicRecoverySimulatorProps {
 export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps> = ({
   studentId,
   studentName,
-  initialAcademicScore = 65.0,
+  initialAcademicScore: _initialAcademicScore = 65.0,
   initialCompositeScore = 52.4,
   initialRiskTier = "medium",
   isOpen = true,
@@ -52,10 +44,8 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
 
   // Live simulation results
   const [simulationResult, setSimulationResult] = useState<any | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const runSimulation = async () => {
-    setLoading(true);
+  const runSimulation = useCallback(async () => {
     try {
       const payload: any = {
         student_id: studentId || undefined,
@@ -74,14 +64,12 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
       setSimulationResult(res);
     } catch (err) {
       console.error("Simulation failed:", err);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [studentId, targetGpa, targetAbsences, targetFailing, targetIncomplete, mentalHealthBoost, financialAidBoost]);
 
   useEffect(() => {
     runSimulation();
-  }, [targetGpa, targetAbsences, targetFailing, targetIncomplete, mentalHealthBoost, financialAidBoost, studentId]);
+  }, [runSimulation]);
 
   const applyPreset = (preset: "pass" | "honors" | "balanced") => {
     if (preset === "pass") {
@@ -141,7 +129,7 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                "What-If" Academic Recovery & Goal Simulator
+                &quot;What-If&quot; Academic Recovery &amp; Goal Simulator
               </h3>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-300">
                 AHP DSS
@@ -248,7 +236,7 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
             <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
               <span>65.0 (Remedial)</span>
               <span>75.0 (Passing)</span>
-              <span>85.0 (Dean's List)</span>
+              <span>85.0 (Dean&apos;s List)</span>
               <span>98.0 (Highest)</span>
             </div>
           </div>

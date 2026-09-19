@@ -10,9 +10,6 @@ import {
   Eye, 
   CheckCircle,
   GraduationCap,
-  Sparkles,
-  ArrowUpRight,
-  Filter,
   Award
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";

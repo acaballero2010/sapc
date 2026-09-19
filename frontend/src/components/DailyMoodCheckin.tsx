@@ -1,19 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   Smile, 
-  Sparkles, 
   Flame, 
   Send, 
   CheckCircle2, 
-  Heart, 
   Wind, 
   Clock, 
-  TrendingUp,
   BatteryCharging,
-  ShieldCheck,
-  AlertCircle
+  ShieldCheck
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
@@ -52,7 +48,7 @@ export const DailyMoodCheckin: React.FC<DailyMoodCheckinProps> = ({
   const [showBreathing, setShowBreathing] = useState<boolean>(false);
   const [breathPhase, setBreathPhase] = useState<"Inhale" | "Hold" | "Exhale">("Inhale");
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       const url = studentId ? `/assessments/mood-history?student_id=${studentId}` : "/assessments/mood-history";
       const data = await fetchWithAuth(url);
@@ -68,11 +64,11 @@ export const DailyMoodCheckin: React.FC<DailyMoodCheckinProps> = ({
     } catch (err) {
       console.error("Failed to load mood history:", err);
     }
-  };
+  }, [studentId]);
 
   useEffect(() => {
     loadHistory();
-  }, [studentId]);
+  }, [loadHistory]);
 
   // Breathing timer loop
   useEffect(() => {
@@ -189,7 +185,7 @@ export const DailyMoodCheckin: React.FC<DailyMoodCheckinProps> = ({
             <CheckCircle2 className="h-6 w-6 text-emerald-700" />
           </div>
           <div>
-            <h4 className="text-base font-bold text-emerald-950">You're checked in for today!</h4>
+            <h4 className="text-base font-bold text-emerald-950">You&apos;re checked in for today!</h4>
             <p className="text-xs text-emerald-800 mt-1 max-w-md mx-auto leading-relaxed">
               Thank you for sharing your daily pulse. Your guidance support team and personal wellness meter have been synchronized.
             </p>
@@ -198,7 +194,7 @@ export const DailyMoodCheckin: React.FC<DailyMoodCheckinProps> = ({
             onClick={() => setIsSubmittedToday(false)}
             className="text-xs font-bold text-emerald-800 hover:text-emerald-950 underline underline-offset-4"
           >
-            Update Today's Response
+            Update Today&apos;s Response
           </button>
         </div>
       ) : (

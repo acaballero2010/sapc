@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ShieldCheck, Search, RefreshCw, ShieldAlert } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -14,7 +14,7 @@ export const AuditLogViewer: React.FC = () => {
 
   const isAuthorized = user?.role === "admin" || user?.role === "guidance_counselor";
 
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     if (!isAuthorized) {
       setIsLoading(false);
       return;
@@ -30,7 +30,7 @@ export const AuditLogViewer: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isAuthorized]);
 
   useEffect(() => {
     if (isAuthorized) {
@@ -38,7 +38,7 @@ export const AuditLogViewer: React.FC = () => {
     } else {
       setIsLoading(false);
     }
-  }, [user?.role, isAuthorized]);
+  }, [isAuthorized, loadLogs]);
 
   const filteredLogs = logs.filter((l) =>
     l.action.toLowerCase().includes(search.toLowerCase()) ||

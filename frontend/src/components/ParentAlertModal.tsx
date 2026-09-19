@@ -4,21 +4,15 @@ import React, { useState, useEffect } from "react";
 import { 
   X, 
   Send, 
-  MessageSquare, 
   Mail, 
   Smartphone, 
   Calendar, 
-  Clock, 
   MapPin, 
   CheckCircle2, 
   ShieldCheck, 
-  AlertCircle,
-  FileText,
-  User,
   Sparkles
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
-import { SapcLogo } from "./SapcLogo";
 import { RiskBadge } from "./RiskBadge";
 
 interface ParentAlertModalProps {
@@ -36,8 +30,8 @@ export const ParentAlertModal: React.FC<ParentAlertModalProps> = ({
 }) => {
   const [channel, setChannel] = useState<"both" | "sms" | "email">("both");
   const [templateId, setTemplateId] = useState<string>("case_conference_taglish");
-  const [parentContact, setParentContact] = useState<string>("+63 917 555 0192");
-  const [parentEmail, setParentEmail] = useState<string>("parent.dimaculangan@gmail.com");
+  const [parentContact] = useState<string>("+63 917 555 0192");
+  const [parentEmail] = useState<string>("parent.dimaculangan@gmail.com");
   const [subject, setSubject] = useState<string>("SAPC Guidance Office: Parent-Counselor Case Conference Invitation");
   const [messageBody, setMessageBody] = useState<string>("");
   const [meetingDate, setMeetingDate] = useState<string>("");
