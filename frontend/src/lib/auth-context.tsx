@@ -105,7 +105,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: fallbackRole,
         student_id: profile.student_id || null
       });
-      setServerError("FastAPI backend at http://localhost:8000 is offline. Run 'npm run dev' to start both servers.");
+      const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      setServerError(
+        isLocal
+          ? "FastAPI backend at http://localhost:8000 is offline. Run 'npm run dev' to start both servers."
+          : "Cloud Demo Mode: Running with embedded client simulation. Connect a production FastAPI backend via NEXT_PUBLIC_API_URL."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -156,17 +161,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }}
     >
       {serverError && (
-        <div className="bg-[#3D0A11] border-b border-[#70000D] text-amber-200 px-4 py-2 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shadow-md">
+        <div className="bg-gradient-to-r from-[#7B0012] to-[#380008] border-b border-amber-400/40 text-rose-100 px-4 py-2 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shadow-md">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[#F5B800]">⚡ Backend Notice:</span>
-            <span>{serverError}</span>
+            <span className="font-extrabold text-amber-300">⚡ SAPC IntellySys:</span>
+            <span className="text-rose-50">{serverError}</span>
           </div>
-          <button
-            onClick={retryConnection}
-            className="px-2.5 py-1 rounded bg-[#70000D] hover:bg-[#8E0F1E] text-white font-bold text-[11px] transition shadow"
-          >
-            Retry Connection
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={retryConnection}
+              className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-[11px] transition shadow-xs"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => setServerError(null)}
+              className="px-2 py-1 rounded-lg bg-black/20 hover:bg-black/40 text-rose-200 hover:text-white font-bold text-[11px] transition"
+              title="Dismiss banner"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
       {children}
