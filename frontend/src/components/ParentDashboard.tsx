@@ -119,7 +119,7 @@ export const ParentDashboard: React.FC = () => {
       </div>
 
       {/* Linked Child Summary Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div id="child-profile" className="grid grid-cols-1 lg:grid-cols-3 gap-6 scroll-mt-24">
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -184,7 +184,7 @@ export const ParentDashboard: React.FC = () => {
 
       {/* Guidance Meeting Invitations & Notices */}
       {notifications.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
+        <div id="guidance-notices" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5 scroll-mt-24">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
               <Calendar className="h-6 w-6 text-[#8B0014]" />

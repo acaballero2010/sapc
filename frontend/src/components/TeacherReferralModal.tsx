@@ -15,6 +15,7 @@ interface TeacherReferralModalProps {
   isOpen: boolean;
   onClose: () => void;
   student: any | null;
+  students?: any[];
   onSuccess?: () => void;
 }
 
@@ -22,9 +23,11 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
   isOpen,
   onClose,
   student,
+  students = [],
   onSuccess
 }) => {
   const { user } = useAuth();
+  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(student?.id || null);
   const [concernType, setConcernType] = useState("Academic Deterioration & Multiple Failing Marks");
   const [urgency, setUrgency] = useState<"routine" | "priority" | "crisis">("priority");
   const [observations, setObservations] = useState("");
@@ -34,7 +37,20 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  if (!isOpen || !student) return null;
+  // Sync selected student when prop changes
+  React.useEffect(() => {
+    if (student?.id) {
+      setSelectedStudentId(student.id);
+    } else if (students.length > 0 && !selectedStudentId) {
+      setSelectedStudentId(students[0].id);
+    }
+  }, [student, students]);
+
+  const activeStudent = (students.length > 0 && selectedStudentId)
+    ? students.find((s) => s.id === selectedStudentId) || student || students[0]
+    : student || (students.length > 0 ? students[0] : null);
+
+  if (!isOpen || !activeStudent) return null;
 
   const toggleIntervention = (item: string) => {
     setAttemptedInterventions((prev) =>
@@ -48,10 +64,10 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
 
     const referralPayload = {
       id: `ref-${Date.now()}`,
-      student_id: student.id,
-      student_name: `${student.first_name} ${student.last_name}`,
-      lrn: student.lrn,
-      section: student.section_name || "Senior High STEM",
+      student_id: activeStudent.id,
+      student_name: `${activeStudent.first_name} ${activeStudent.last_name}`,
+      lrn: activeStudent.lrn,
+      section: activeStudent.section_name || "Senior High STEM",
       referring_teacher: user?.full_name || "Prof. Ernesto Bautista (Class Adviser)",
       concern_type: concernType,
       urgency: urgency,
@@ -126,18 +142,37 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               
-              {/* Student Target Chip */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Referred Student</span>
-                  <h4 className="text-base font-black text-slate-900 truncate">
-                    {student.first_name} {student.last_name}
-                  </h4>
-                  <p className="text-xs text-slate-500 font-mono">LRN: {student.lrn} • {student.section_name || "Grade 11 STEM"}</p>
+              {/* Student Target Chip / Selector */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Referred Student</span>
+                    <h4 className="text-base font-black text-slate-900 truncate">
+                      {activeStudent.first_name} {activeStudent.last_name}
+                    </h4>
+                    <p className="text-xs text-slate-500 font-mono">LRN: {activeStudent.lrn} • {activeStudent.section_name || "Grade 11 STEM"}</p>
+                  </div>
+                  <div className="shrink-0">
+                    <RiskBadge score={activeStudent.latest_risk_score || 78.5} tier={activeStudent.latest_risk_tier || "high"} size="sm" />
+                  </div>
                 </div>
-                <div className="shrink-0">
-                  <RiskBadge score={student.latest_risk_score || 78.5} tier={student.latest_risk_tier || "high"} size="sm" />
-                </div>
+
+                {students.length > 1 && (
+                  <div className="pt-2 border-t border-slate-200">
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1">Switch Student to Refer:</label>
+                    <select
+                      value={activeStudent.id}
+                      onChange={(e) => setSelectedStudentId(Number(e.target.value))}
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-[#8B0014]"
+                    >
+                      {students.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.first_name} {s.last_name} ({s.latest_risk_tier?.toUpperCase()} Risk — Score: {s.latest_risk_score})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* Primary Concern Dropdown */}

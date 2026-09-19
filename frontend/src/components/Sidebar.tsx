@@ -107,19 +107,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     teacher: [
       {
         name: "Class Roster & SASS Grades",
-        href: "/dashboard/teacher",
+        href: "/dashboard/teacher#roster",
         icon: BookOpen,
         badge: "Advisory"
       },
       {
         name: "1-Click Guidance Referral",
-        href: "/dashboard/teacher",
+        href: "/dashboard/teacher#referral-action",
         icon: HeartHandshake,
         badge: "Submit Case"
       },
       {
         name: "SASS CSV Batch Ingestion",
-        href: "/dashboard/teacher",
+        href: "/dashboard/teacher#uploader",
         icon: Layers,
         badge: "DepEd SASS"
       }
@@ -127,25 +127,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
     student: [
       {
         name: "My Holistic Wellness",
-        href: "/dashboard/student",
+        href: "/dashboard/student#wellness-radar",
         icon: GraduationCap,
         badge: "5 Domains"
       },
       {
         name: "Academic Standing & GPA",
-        href: "/dashboard/student",
+        href: "/dashboard/student#academic-records",
         icon: BookOpen,
         badge: "Quarter 2"
       },
       {
         name: "Daily Mood Check-in",
-        href: "/dashboard/student",
+        href: "/dashboard/student#daily-mood",
         icon: HeartHandshake,
         badge: "Daily"
       },
       {
         name: "AHP Academic Simulator",
-        href: "/dashboard/student",
+        href: "/dashboard/student#academic-simulator",
         icon: Layers,
         badge: "What-If"
       }
@@ -153,19 +153,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     parent: [
       {
         name: "Child Academic Progress",
-        href: "/dashboard/parent",
+        href: "/dashboard/parent#child-profile",
         icon: Users,
         badge: "SASS Live"
       },
       {
         name: "Attendance & Health Tracking",
-        href: "/dashboard/parent",
+        href: "/dashboard/parent#child-profile",
         icon: Activity,
         badge: "Quarter 1"
       },
       {
         name: "Guidance Advisories",
-        href: "/dashboard/parent",
+        href: "/dashboard/parent#guidance-notices",
         icon: Brain,
         badge: "Counselor"
       }
@@ -173,20 +173,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     admin: [
       {
         name: "AHP Pairwise Criteria Matrix",
-        href: "/dashboard/admin",
+        href: "/dashboard/admin#ahp-matrix",
         icon: Sliders,
         badge: "Weight Engine"
       },
       {
         name: "System Audit & RA 10173 Logs",
-        href: "/dashboard/admin",
+        href: "/dashboard/admin#audit-logs",
         icon: ShieldCheck,
         badge: "Compliance"
       },
       {
-        name: "Campus User Accounts",
-        href: "/dashboard/admin",
-        icon: Users,
+        name: "Longitudinal Cohort Analytics",
+        href: "/dashboard/admin#trend-analytics",
+        icon: TrendingUp,
         badge: "5 Roles"
       }
     ]
@@ -207,10 +207,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleNavigation = (item: { href: string }) => {
     setIsOpen(false);
     const [targetPath, hash] = item.href.split("#");
-    if (pathname === targetPath && hash) {
-      const el = document.getElementById(hash);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
+    if (pathname === targetPath) {
+      if (hash) {
+        if (hash === "referral-action") {
+          window.dispatchEvent(new CustomEvent("sapc:open-teacher-referral"));
+          const el = document.getElementById("roster");
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+        const el = document.getElementById(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
     }

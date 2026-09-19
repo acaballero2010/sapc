@@ -96,7 +96,32 @@ export const TeacherDashboard: React.FC = () => {
   useEffect(() => {
     setIsMounted(true);
     loadData();
-  }, []);
+
+    const handleOpenReferral = () => {
+      setReferralStudent(students[0] || null);
+      setIsReferralOpen(true);
+    };
+
+    const handleHashCheck = () => {
+      if (typeof window !== "undefined") {
+        const hash = window.location.hash;
+        if (hash === "#referral-action" || hash === "#guidance-referral") {
+          handleOpenReferral();
+        }
+      }
+    };
+
+    window.addEventListener("sapc:open-teacher-referral", handleOpenReferral);
+    window.addEventListener("hashchange", handleHashCheck);
+
+    // Initial check
+    setTimeout(handleHashCheck, 100);
+
+    return () => {
+      window.removeEventListener("sapc:open-teacher-referral", handleOpenReferral);
+      window.removeEventListener("hashchange", handleHashCheck);
+    };
+  }, [students]);
 
   if (!isMounted) {
     return (
@@ -134,6 +159,18 @@ export const TeacherDashboard: React.FC = () => {
               Track student academic standings, ingest SASS quarterly grades, and monitor AHP failure risk indicators with full privacy safeguards.
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setReferralStudent(students[0] || null);
+              setIsReferralOpen(true);
+            }}
+            className="px-5 py-3 rounded-2xl bg-[#D97706] hover:bg-[#B45309] text-white font-extrabold text-sm sm:text-base flex items-center gap-2.5 shadow-md transition active:scale-95 shrink-0 self-start md:self-center"
+          >
+            <HeartHandshake className="h-5 w-5 text-white" />
+            <span>1-Click Guidance Referral</span>
+          </button>
         </div>
       </div>
 
@@ -233,6 +270,7 @@ export const TeacherDashboard: React.FC = () => {
 
       <TeacherReferralModal
         student={referralStudent}
+        students={students}
         isOpen={isReferralOpen}
         onClose={() => setIsReferralOpen(false)}
         onSuccess={loadData}

@@ -54,7 +54,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* AHP Model Configuration Card */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      <div id="ahp-matrix" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
         <div className="flex items-center gap-4">
           <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-[#D97706] shadow-xs">
             <Sliders className="h-7 w-7" />
@@ -106,10 +106,14 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Longitudinal Multi-Semester Trends & Retention Health */}
-      <CohortTrendAnalytics />
+      <div id="trend-analytics" className="scroll-mt-24">
+        <CohortTrendAnalytics />
+      </div>
 
       {/* RA 10173 Audit Log Viewer */}
-      <AuditLogViewer />
+      <div id="audit-logs" className="scroll-mt-24">
+        <AuditLogViewer />
+      </div>
 
       <InstitutionalReportModal
         isOpen={isReportOpen}

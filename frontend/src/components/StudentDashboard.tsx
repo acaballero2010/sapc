@@ -273,7 +273,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
       </div>
 
       {/* Main 3-Card Grid for Wide Screens */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <div id="wellness-radar" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch scroll-mt-24">
         
         {/* Profile Card (4 cols on wide) */}
         <div className="lg:col-span-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-5">
@@ -402,18 +402,20 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
       </div>
 
       {/* Daily Student Wellness Pulse */}
-      <DailyMoodCheckin
-        studentId={student?.id}
-        onCheckinSuccess={async () => {
-          if (student?.id) {
-            const rRes = await fetchWithAuth(`/risk/student/${student.id}`).catch(() => null);
-            if (rRes) setRiskData(rRes);
-          }
-        }}
-      />
+      <div id="daily-mood" className="scroll-mt-24">
+        <DailyMoodCheckin
+          studentId={student?.id}
+          onCheckinSuccess={async () => {
+            if (student?.id) {
+              const rRes = await fetchWithAuth(`/risk/student/${student.id}`).catch(() => null);
+              if (rRes) setRiskData(rRes);
+            }
+          }}
+        />
+      </div>
 
       {/* Academic Records Table */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      <div id="academic-records" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-rose-50 text-[#8B0014]">
@@ -472,13 +474,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
       </div>
 
       {/* What-If Academic Recovery Simulator */}
-      <AcademicRecoverySimulator
-        studentId={student?.id}
-        studentName={displayName}
-        initialAcademicScore={riskData?.academic_score || 65.0}
-        initialCompositeScore={riskData?.composite_risk_score || 24.5}
-        initialRiskTier={riskData?.risk_tier || "low"}
-      />
+      <div id="academic-simulator" className="scroll-mt-24">
+        <AcademicRecoverySimulator
+          studentId={student?.id}
+          studentName={displayName}
+          initialAcademicScore={riskData?.academic_score || 65.0}
+          initialCompositeScore={riskData?.composite_risk_score || 24.5}
+          initialRiskTier={riskData?.risk_tier || "low"}
+        />
+      </div>
 
       {/* Consultation Booking Modal */}
       {isConsultationOpen && (
