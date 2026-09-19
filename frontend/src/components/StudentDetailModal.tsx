@@ -10,16 +10,22 @@ import {
   HeartPulse, 
   ShieldAlert, 
   PlusCircle, 
-  RefreshCw,
-  Clock,
-  Sliders,
-  ShieldCheck,
-  Award,
-  Calculator,
-  Mic,
-  MicOff,
-  Wand2,
-  Volume2
+  RefreshCw, 
+  Clock, 
+  Sliders, 
+  ShieldCheck, 
+  Award, 
+  Calculator, 
+  Mic, 
+  MicOff, 
+  Wand2, 
+  Volume2,
+  CheckCircle2,
+  CheckSquare,
+  Square,
+  Target,
+  UserCheck,
+  Sparkles
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -49,6 +55,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
   const [_assessments, setAssessments] = useState<any[]>([]);
   const [counselorNotes, setCounselorNotes] = useState<any[]>([]);
+  const [studentCarePlans, setStudentCarePlans] = useState<any[]>([]);
   const [newNote, setNewNote] = useState({
     observation_summary: "",
     mental_health_indicators: "",
@@ -136,13 +143,29 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [sRes, rRes, rbRes, aRes, assRes] = await Promise.all([
+        const [sRes, rRes, rbRes, aRes, assRes, intRes] = await Promise.all([
           fetchWithAuth(`/students/${studentId}`).catch(() => null),
           fetchWithAuth(`/risk/student/${studentId}`).catch(() => null),
           fetchWithAuth(`/analytics/student/${studentId}/risk-breakdown`).catch(() => null),
           fetchWithAuth(`/academic/student/${studentId}`).catch(() => null),
-          fetchWithAuth(`/assessments/student/${studentId}`).catch(() => null)
+          fetchWithAuth(`/assessments/student/${studentId}`).catch(() => null),
+          fetchWithAuth(`/risk/interventions?student_id=${studentId}`).catch(() => null)
         ]);
+
+        // Load local interventions for this student
+        let matchedPlans: any[] = intRes && Array.isArray(intRes) ? intRes : [];
+        if (typeof window !== "undefined") {
+          const stored = localStorage.getItem("sapc_interventions");
+          if (stored) {
+            try {
+              const allLocal = JSON.parse(stored);
+              const studentLocal = allLocal.filter((p: any) => p.student_id === studentId);
+              const existingIds = new Set(matchedPlans.map((p: any) => p.id));
+              matchedPlans = [...studentLocal, ...matchedPlans.filter((p: any) => !existingIds.has(p.id))];
+            } catch {}
+          }
+        }
+        setStudentCarePlans(matchedPlans);
 
         if (sRes) {
           setStudent(sRes);
@@ -170,6 +193,19 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         // Find student in 500-student dataset
         const found = SAPC_500_STUDENTS.find(s => s.id === studentId) || SAPC_500_STUDENTS[0];
         
+        // Check if there are local plans for this student
+        let localPlans: any[] = [];
+        if (typeof window !== "undefined") {
+          const stored = localStorage.getItem("sapc_interventions");
+          if (stored) {
+            try {
+              const allLocal = JSON.parse(stored);
+              localPlans = allLocal.filter((p: any) => p.student_id === studentId || p.student_name?.includes(found.first_name));
+            } catch {}
+          }
+        }
+        setStudentCarePlans(localPlans);
+
         const mockStudent = {
           id: found.id,
           first_name: found.first_name,
@@ -192,11 +228,18 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         };
 
         const mockBreakdown = {
-          dominant_domain: found.domain_scores.mental_health > 60 ? "mental_health" : found.domain_scores.academic > 60 ? "academic" : found.domain_scores.financial > 60 ? "financial" : "academic",
-          consistency_ratio: 0.042,
+          dominant_domain: found.primary_risk_driver ? found.primary_risk_driver.toLowerCase().replace(/[^a-z]/g, "_") : "academic",
+          consistency_ratio: "0.042",
+          weights: {
+            academic: 0.4017,
+            mental_health: 0.2442,
+            financial: 0.1373,
+            family: 0.1373,
+            health: 0.0794
+          },
           primary_recommendation: {
-            title: found.latest_risk_tier === "high"
-              ? "Immediate 1-on-1 Guidance Counseling & Priority Care Plan"
+            title: found.latest_risk_tier === "high" 
+              ? "Urgent Clinical Guidance Intake & Remediation" 
               : found.latest_risk_tier === "medium"
               ? "Active Academic Remediation & Adviser Check-in"
               : "Standard Guidance Progress & Honors Tracking",
@@ -258,6 +301,63 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
     loadData();
   }, [studentId, isOpen, isCounselor]);
+
+  const parseTasks = (raw: any): any[] => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === "string") {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        return raw.split("\n").filter(l => l.trim()).map((line, idx) => ({
+          id: `task-${idx}`,
+          text: line.replace(/^-\s*(\[[ xX]\]\s*)?/, ""),
+          assignee: "Guidance Counselor",
+          priority: "medium",
+          due_timeline: "Standard",
+          completed: line.includes("[x]") || line.includes("[X]")
+        }));
+      }
+    }
+    return [];
+  };
+
+  const handleTogglePlanTaskInModal = async (planId: number, taskId: string) => {
+    setStudentCarePlans((prev) => {
+      const updated = prev.map((plan) => {
+        if (plan.id !== planId) return plan;
+        const currentTasks = parseTasks(plan.action_items);
+        const updatedTasks = currentTasks.map((t) =>
+          t.id === taskId ? { ...t, completed: !t.completed } : t
+        );
+        const serialized = JSON.stringify(updatedTasks);
+
+        fetchWithAuth(`/risk/interventions/${planId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ action_items: serialized })
+        }).catch(() => {});
+
+        return { ...plan, action_items: serialized };
+      });
+
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem("sapc_interventions");
+        if (stored) {
+          try {
+            const allLocal = JSON.parse(stored);
+            const merged = allLocal.map((p: any) => {
+              const matching = updated.find((u) => u.id === p.id);
+              return matching || p;
+            });
+            localStorage.setItem("sapc_interventions", JSON.stringify(merged));
+            window.dispatchEvent(new CustomEvent("sapc_interventions_updated", { detail: updated[0] }));
+          } catch {}
+        }
+      }
+      return updated;
+    });
+  };
 
   const handleAddCounselorNote = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -492,6 +592,154 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   )}
                 </div>
               )}
+
+              {/* Active Intervention Care Plans & Action Checklist for this student */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <Target className="h-5 w-5 text-[#8B0014]" />
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                        Active Guidance Care Plans & Action Items
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        {studentCarePlans.length > 0
+                          ? `${studentCarePlans.length} active protocol(s) tracked for this student`
+                          : "No active care plans created yet for this student"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {onCreateIntervention && isCounselor && (
+                    <button
+                      type="button"
+                      onClick={() => onCreateIntervention(student)}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white text-xs font-bold flex items-center gap-1.5 transition shadow-xs self-start sm:self-auto cursor-pointer"
+                    >
+                      <PlusCircle className="h-3.5 w-3.5 text-amber-300" />
+                      <span>+ Create Care Plan</span>
+                    </button>
+                  )}
+                </div>
+
+                {studentCarePlans.length === 0 ? (
+                  <div className="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-slate-500 text-xs space-y-2">
+                    <Sparkles className="h-6 w-6 text-amber-500 mx-auto" />
+                    <p className="font-semibold text-slate-700">No care plan recorded yet for {student?.first_name}.</p>
+                    <p className="text-slate-400 max-w-md mx-auto">
+                      Click &quot;+ Create Care Plan&quot; above to select a protocol template (Academic, Mental Health, Financial, Family, Clinic) and assign tasks.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {studentCarePlans.map((plan) => {
+                      const tasks = parseTasks(plan.action_items);
+                      const completedCount = tasks.filter((t) => t.completed).length;
+                      const totalTasks = tasks.length;
+                      const progressPct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
+
+                      return (
+                        <div key={plan.id} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3.5 shadow-2xs">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-black text-slate-900 text-base">{plan.title}</span>
+                                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-100 text-[#8B0014] border border-rose-200">
+                                  {plan.target_domain}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-600 mt-1 leading-relaxed">{plan.description}</p>
+                            </div>
+
+                            <span className={`px-2.5 py-1 rounded-xl text-xs font-black uppercase ${
+                              plan.status === "resolved"
+                                ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                                : plan.status === "escalated"
+                                ? "bg-rose-100 text-rose-900 border border-rose-300"
+                                : "bg-amber-100 text-amber-900 border border-amber-300"
+                            }`}>
+                              {plan.status?.replace("_", " ") || "In Progress"}
+                            </span>
+                          </div>
+
+                          {/* Progress Bar */}
+                          {totalTasks > 0 && (
+                            <div className="space-y-1 bg-white p-3 rounded-xl border border-slate-200">
+                              <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                                <span className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                  Checklist Execution Progress:
+                                </span>
+                                <span className="text-[11px] text-slate-900">{completedCount} of {totalTasks} ({progressPct}%)</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full transition-all duration-300 ${
+                                    progressPct === 100 ? "bg-emerald-500" : progressPct > 50 ? "bg-amber-500" : "bg-[#8B0014]"
+                                  }`}
+                                  style={{ width: `${progressPct}%` }}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Task list with interactive toggles */}
+                          {totalTasks > 0 && (
+                            <div className="space-y-1.5 pt-1">
+                              <span className="text-[11px] font-black text-slate-600 uppercase tracking-wider block">
+                                Assigned Action Items (Click to toggle completion):
+                              </span>
+                              {tasks.map((t) => (
+                                <div
+                                  key={t.id}
+                                  onClick={() => handleTogglePlanTaskInModal(plan.id, t.id)}
+                                  className={`p-2.5 rounded-xl border transition flex items-start gap-2.5 cursor-pointer shadow-2xs ${
+                                    t.completed
+                                      ? "bg-emerald-50/60 border-emerald-200 text-slate-400"
+                                      : "bg-white border-slate-200 hover:border-slate-300 text-slate-800"
+                                  }`}
+                                >
+                                  <div className="mt-0.5 shrink-0">
+                                    {t.completed ? (
+                                      <CheckSquare className="h-4 w-4 text-emerald-600" />
+                                    ) : (
+                                      <Square className="h-4 w-4 text-slate-400 hover:text-[#8B0014]" />
+                                    )}
+                                  </div>
+                                  <div className="space-y-0.5 min-w-0 flex-1">
+                                    <p className={`text-xs font-semibold leading-tight ${t.completed ? "line-through text-slate-400" : "text-slate-900"}`}>
+                                      {t.text}
+                                    </p>
+                                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] pt-0.5">
+                                      <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold inline-flex items-center gap-1">
+                                        <UserCheck className="h-2.5 w-2.5 text-[#8B0014]" />
+                                        {t.assignee}
+                                      </span>
+                                      <span className={`px-1.5 py-0.2 rounded font-extrabold uppercase ${
+                                        t.priority === "high" ? "bg-rose-100 text-rose-800" : t.priority === "medium" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"
+                                      }`}>
+                                        {t.priority}
+                                      </span>
+                                      <span className="text-slate-400">• {t.due_timeline}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
+                            <span className="flex items-center gap-1 text-[11px]">
+                              <Clock className="h-3 w-3 text-slate-400" />
+                              Follow-up Date: <strong className="text-slate-700">{plan.scheduled_followup ? new Date(plan.scheduled_followup).toLocaleDateString() : "Pending"}</strong>
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               {/* SASS Academic History */}
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">

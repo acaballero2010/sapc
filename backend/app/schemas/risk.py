@@ -48,6 +48,7 @@ class InterventionPlanCreate(BaseModel):
     risk_level_at_creation: RiskTier
     description: str
     action_items: Optional[str] = None
+    status: Optional[InterventionStatus] = InterventionStatus.IN_PROGRESS
     scheduled_followup: Optional[datetime] = None
 
 class InterventionPlanUpdate(BaseModel):

@@ -12,7 +12,18 @@ import {
   GraduationCap,
   Award,
   HeartHandshake,
-  Clock
+  Clock,
+  PlusCircle,
+  CheckCircle2,
+  Target,
+  Layers,
+  Sparkles,
+  Filter,
+  CheckSquare,
+  Square,
+  ChevronDown,
+  ChevronUp,
+  UserCheck
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
@@ -49,29 +60,48 @@ const DEFAULT_FLAGGED = [
 const DEFAULT_INTERVENTIONS = [
   {
     id: 201,
+    student_id: 1,
     student_name: "Joshua Dimaculangan",
     title: "Academic Remediation & Anxiety Management Protocol",
     description: "Peer tutoring in Pre-Calculus with weekly guidance counseling check-ins for test anxiety.",
     target_domain: "Mental Health & Academic",
     status: "in_progress",
+    action_items: JSON.stringify([
+      { id: "task-101", text: "Pre-Calculus diagnostic test with Ms. Santos", assignee: "Subject Teacher", priority: "high", due_timeline: "Within 3 Days", completed: true },
+      { id: "task-102", text: "Bi-weekly 1-on-1 counseling session for test anxiety", assignee: "Guidance Counselor", priority: "high", due_timeline: "Ongoing (Weekly)", completed: false },
+      { id: "task-103", text: "Assigned peer tutor (Kyle Mercado - Grade 12 STEM)", assignee: "Class Adviser", priority: "medium", due_timeline: "Within 1 Week", completed: true },
+      { id: "task-104", text: "Parent consultation on quiet evening study space", assignee: "Parent / Guardian", priority: "routine", due_timeline: "Within 2 Weeks", completed: false }
+    ]),
     scheduled_followup: new Date(Date.now() + 86400000 * 3).toISOString()
   },
   {
     id: 202,
+    student_id: 4,
     student_name: "Samantha Nicole Reyes",
     title: "Family Support & Attendance Recovery Plan",
     description: "Coordination with guardian and flexible modular submission arrangement for missed HUMSS deadlines.",
     target_domain: "Family & Attendance",
     status: "in_progress",
+    action_items: JSON.stringify([
+      { id: "task-201", text: "Formal case conference with guardian at Guidance Center", assignee: "Guidance Counselor", priority: "high", due_timeline: "Within 3 Days", completed: true },
+      { id: "task-202", text: "Execute Attendance Recovery Commitment Contract", assignee: "Parent / Guardian", priority: "high", due_timeline: "Within 5 Days", completed: false },
+      { id: "task-203", text: "Daily morning attendance tracking by adviser", assignee: "Class Adviser", priority: "medium", due_timeline: "Ongoing", completed: false }
+    ]),
     scheduled_followup: new Date(Date.now() + 86400000 * 5).toISOString()
   },
   {
     id: 203,
+    student_id: 3,
     student_name: "Angelica Dela Cruz",
     title: "Emergency Tuition Subsidy & Financial Aid Referral",
     description: "Endorsement to SAPC Alumni Foundation assistance grant for delayed installment payments.",
-    target_domain: "Financial",
-    status: "completed",
+    target_domain: "Financial Assistance",
+    status: "resolved",
+    action_items: JSON.stringify([
+      { id: "task-301", text: "Endorse scholarship application to Alumni Foundation", assignee: "Guidance Counselor", priority: "high", due_timeline: "Completed", completed: true },
+      { id: "task-302", text: "Accounting promissory note approval", assignee: "Scholarship / Finance Office", priority: "high", due_timeline: "Completed", completed: true },
+      { id: "task-303", text: "Final voucher release & enrollment clearance", assignee: "Scholarship / Finance Office", priority: "medium", due_timeline: "Completed", completed: true }
+    ]),
     scheduled_followup: new Date(Date.now() - 86400000 * 2).toISOString()
   }
 ];
@@ -98,6 +128,11 @@ export const CounselorDashboard: React.FC = () => {
   const [isParentAlertOpen, setIsParentAlertOpen] = useState(false);
   const [_isLoading, setIsLoading] = useState(true);
 
+  // Care Plan Interactive States
+  const [carePlanFilterStatus, setCarePlanFilterStatus] = useState<string>("all");
+  const [carePlanFilterDomain, setCarePlanFilterDomain] = useState<string>("all");
+  const [expandedPlanIds, setExpandedPlanIds] = useState<Record<number, boolean>>({ 201: true, 202: true });
+
   const handleSelectSectionFromAnalytics = (sectionName: string, tier: string = "all") => {
     setFilterSection(sectionName);
     setFilterTier(tier);
@@ -114,6 +149,28 @@ export const CounselorDashboard: React.FC = () => {
     }, 50);
   };
 
+  const parseActionItems = (raw: any): any[] => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === "string") {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        // Fallback: parse lines into tasks
+        return raw.split("\n").filter(l => l.trim()).map((line, idx) => ({
+          id: `task-${idx}`,
+          text: line.replace(/^-\s*(\[[ xX]\]\s*)?/, ""),
+          assignee: "Guidance Counselor",
+          priority: "medium",
+          due_timeline: "Standard",
+          completed: line.includes("[x]") || line.includes("[X]")
+        }));
+      }
+    }
+    return [];
+  };
+
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -126,7 +183,27 @@ export const CounselorDashboard: React.FC = () => {
       if (analyticsRes) setAnalytics(analyticsRes);
       if (studentsRes && Array.isArray(studentsRes) && studentsRes.length > 0) setStudents(studentsRes);
       if (flaggedRes && Array.isArray(flaggedRes)) setFlaggedSessions(flaggedRes);
-      if (interventionsRes && Array.isArray(interventionsRes) && interventionsRes.length > 0) setInterventions(interventionsRes);
+
+      // Load Interventions from localStorage merged with API or default mock
+      let combinedInterventions = DEFAULT_INTERVENTIONS;
+      if (interventionsRes && Array.isArray(interventionsRes) && interventionsRes.length > 0) {
+        combinedInterventions = interventionsRes;
+      }
+      if (typeof window !== "undefined") {
+        const storedPlans = localStorage.getItem("sapc_interventions");
+        if (storedPlans) {
+          try {
+            const localList = JSON.parse(storedPlans);
+            if (Array.isArray(localList) && localList.length > 0) {
+              const existingIds = new Set(localList.map((p: any) => p.id));
+              combinedInterventions = [...localList, ...combinedInterventions.filter((p: any) => !existingIds.has(p.id))];
+            }
+          } catch {
+            // Ignore parse error
+          }
+        }
+      }
+      setInterventions(combinedInterventions);
 
       // Load Teacher Referrals
       if (typeof window !== "undefined") {
@@ -170,9 +247,77 @@ export const CounselorDashboard: React.FC = () => {
     }
   };
 
+  const handleTogglePlanTask = async (planId: number, taskId: string) => {
+    setInterventions((prev) => {
+      const updated = prev.map((plan) => {
+        if (plan.id !== planId) return plan;
+        const currentTasks = parseActionItems(plan.action_items);
+        const updatedTasks = currentTasks.map((t) =>
+          t.id === taskId ? { ...t, completed: !t.completed } : t
+        );
+        const serialized = JSON.stringify(updatedTasks);
+
+        // Async sync to backend and localStorage
+        fetchWithAuth(`/risk/interventions/${planId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ action_items: serialized })
+        }).catch(() => {});
+
+        return { ...plan, action_items: serialized };
+      });
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_interventions", JSON.stringify(updated));
+      }
+      return updated;
+    });
+  };
+
+  const handleUpdatePlanStatus = async (planId: number, newStatus: string) => {
+    setInterventions((prev) => {
+      const updated = prev.map((plan) =>
+        plan.id === planId ? { ...plan, status: newStatus } : plan
+      );
+      fetchWithAuth(`/risk/interventions/${planId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus })
+      }).catch(() => {});
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_interventions", JSON.stringify(updated));
+      }
+      return updated;
+    });
+  };
+
   useEffect(() => {
     setIsMounted(true);
     loadData();
+
+    const handleCarePlanUpdate = (e: any) => {
+      const newOrUpdatedPlan = e.detail;
+      if (newOrUpdatedPlan) {
+        setInterventions((prev) => {
+          const exists = prev.some((p) => p.id === newOrUpdatedPlan.id);
+          if (exists) {
+            return prev.map((p) => (p.id === newOrUpdatedPlan.id ? newOrUpdatedPlan : p));
+          }
+          return [newOrUpdatedPlan, ...prev];
+        });
+      } else {
+        loadData();
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("sapc_interventions_updated", handleCarePlanUpdate);
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("sapc_interventions_updated", handleCarePlanUpdate);
+      }
+    };
   }, []);
 
   if (!isMounted) {
@@ -705,41 +850,321 @@ export const CounselorDashboard: React.FC = () => {
       </div>
 
       {/* Active Interventions Board */}
-      <div id="active-interventions" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
-        <div className="flex items-center justify-between">
+      <div id="active-interventions" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24 min-w-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <h3 className="text-xl font-extrabold text-slate-900">Active Intervention Protocols</h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Track student remediation, counseling meetings, and guidance progress
-            </p>
-          </div>
-          <span className="text-xs sm:text-sm font-bold text-[#8B0014] bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
-            {interventions.length} Plans Active
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {interventions.map((p) => (
-            <div key={p.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3 hover:border-slate-300 transition shadow-2xs">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-900 text-sm sm:text-base truncate max-w-[180px]">{p.student_name}</span>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase ${
-                  p.status === "in_progress" 
-                    ? "bg-amber-100 text-amber-900 border border-amber-200" 
-                    : "bg-emerald-100 text-emerald-900 border border-emerald-200"
-                }`}>
-                  {p.status.replace("_", " ")}
-                </span>
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-rose-50 text-[#8B0014] border border-rose-200">
+                <Target className="h-6 w-6" />
               </div>
-              <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{p.title}</h4>
-              <p className="text-xs sm:text-sm text-slate-600 line-clamp-2 leading-relaxed">{p.description}</p>
-              <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-                <span>Domain: <strong className="text-slate-800 font-semibold">{p.target_domain}</strong></span>
-                <span suppressHydrationWarning>Followup: {p.scheduled_followup ? new Date(p.scheduled_followup).toLocaleDateString() : "Pending"}</span>
+              <div>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+                  Active Intervention Care Plans & Protocols
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  Multi-stakeholder task checklists, progress tracking, and scheduled follow-ups
+                </p>
               </div>
             </div>
-          ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                // Open for first high-risk student or first available student
+                const highRiskStudent = students.find(s => s.latest_risk_tier === "high") || students[0];
+                if (highRiskStudent) {
+                  setInterventionStudent(highRiskStudent);
+                  setIsInterventionOpen(true);
+                }
+              }}
+              className="px-4 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 transition shadow-xs"
+            >
+              <PlusCircle className="h-4 w-4 text-amber-300" />
+              <span>+ Create Care Plan</span>
+            </button>
+            <span className="text-xs sm:text-sm font-bold text-[#8B0014] bg-rose-50 px-3 py-2 rounded-xl border border-rose-200">
+              {interventions.length} Plans Active
+            </span>
+          </div>
         </div>
+
+        {/* Filter Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+          <div className="flex flex-wrap items-center gap-2.5 flex-1">
+            <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+              <Filter className="h-3.5 w-3.5 text-[#8B0014]" /> Filter Protocols:
+            </span>
+
+            <select
+              value={carePlanFilterStatus}
+              onChange={(e) => setCarePlanFilterStatus(e.target.value)}
+              className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-[#8B0014]"
+            >
+              <option value="all">All Statuses ({interventions.length})</option>
+              <option value="in_progress">🟡 In Progress</option>
+              <option value="pending">⚪ Pending Intake</option>
+              <option value="resolved">🟢 Resolved</option>
+              <option value="escalated">🔴 Escalated</option>
+            </select>
+
+            <select
+              value={carePlanFilterDomain}
+              onChange={(e) => setCarePlanFilterDomain(e.target.value)}
+              className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-[#8B0014]"
+            >
+              <option value="all">All Target Domains</option>
+              <option value="Academic">Academic Remediation</option>
+              <option value="Mental Health">Mental Health / Counseling</option>
+              <option value="Financial">Financial Assistance</option>
+              <option value="Family">Family / Attendance</option>
+              <option value="Health">Health Clinic Support</option>
+            </select>
+          </div>
+
+          {(carePlanFilterStatus !== "all" || carePlanFilterDomain !== "all") && (
+            <button
+              type="button"
+              onClick={() => {
+                setCarePlanFilterStatus("all");
+                setCarePlanFilterDomain("all");
+              }}
+              className="text-xs text-[#8B0014] font-bold hover:underline"
+            >
+              Reset Filters
+            </button>
+          )}
+        </div>
+
+        {/* Care Plans Grid */}
+        {(() => {
+          const filteredPlans = interventions.filter((p) => {
+            const matchesStatus =
+              carePlanFilterStatus === "all" ||
+              p.status?.toLowerCase() === carePlanFilterStatus.toLowerCase();
+            const matchesDomain =
+              carePlanFilterDomain === "all" ||
+              (p.target_domain && p.target_domain.toLowerCase().includes(carePlanFilterDomain.toLowerCase()));
+            return matchesStatus && matchesDomain;
+          });
+
+          if (filteredPlans.length === 0) {
+            return (
+              <div className="py-12 text-center rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 space-y-2">
+                <Target className="h-8 w-8 text-slate-400 mx-auto" />
+                <p className="font-bold text-sm">No care plans match the selected filters.</p>
+                <p className="text-xs text-slate-400">Try choosing a different status or domain filter above.</p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {filteredPlans.map((p) => {
+                const planTasks = parseActionItems(p.action_items);
+                const completedCount = planTasks.filter((t) => t.completed).length;
+                const totalTasks = planTasks.length;
+                const progressPct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
+                const isExpanded = expandedPlanIds[p.id] ?? true;
+
+                return (
+                  <div
+                    key={p.id}
+                    className="bg-slate-50/70 p-5 sm:p-6 rounded-3xl border border-slate-200 space-y-4 hover:border-slate-300 hover:bg-slate-50 transition shadow-2xs flex flex-col justify-between"
+                  >
+                    <div className="space-y-3.5">
+                      {/* Top Row: Student info, domain & status dropdown */}
+                      <div className="flex flex-wrap items-start justify-between gap-2.5">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (p.student_id) {
+                                  setSelectedStudentId(p.student_id);
+                                  setIsDetailOpen(true);
+                                }
+                              }}
+                              className="font-black text-slate-900 text-base hover:text-[#8B0014] text-left transition"
+                            >
+                              {p.student_name}
+                            </button>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600">
+                              ID #{p.student_id || p.id}
+                            </span>
+                          </div>
+                          <span className="text-xs text-slate-500 block mt-0.5 font-medium">
+                            Domain: <strong className="text-[#8B0014]">{p.target_domain}</strong>
+                          </span>
+                        </div>
+
+                        {/* Interactive Status Selector */}
+                        <div className="relative">
+                          <select
+                            value={p.status}
+                            onChange={(e) => handleUpdatePlanStatus(p.id, e.target.value)}
+                            className={`text-xs font-black rounded-xl px-3 py-1.5 border focus:outline-none transition cursor-pointer shadow-2xs ${
+                              p.status === "resolved"
+                                ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                                : p.status === "escalated"
+                                ? "bg-rose-50 text-rose-800 border-rose-300"
+                                : p.status === "pending"
+                                ? "bg-slate-100 text-slate-800 border-slate-300"
+                                : "bg-amber-50 text-amber-900 border-amber-300"
+                            }`}
+                          >
+                            <option value="in_progress">🟡 In Progress</option>
+                            <option value="pending">⚪ Pending Review</option>
+                            <option value="resolved">🟢 Resolved / Goal Met</option>
+                            <option value="escalated">🔴 Escalated</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Title & Description */}
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-bold text-slate-900 leading-snug">{p.title}</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">{p.description}</p>
+                      </div>
+
+                      {/* Progress Bar */}
+                      {totalTasks > 0 && (
+                        <div className="space-y-1.5 bg-white p-3 rounded-2xl border border-slate-200/90 shadow-2xs">
+                          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                            <span className="flex items-center gap-1.5 text-[11px] text-slate-600">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                              Task Execution Progress:
+                            </span>
+                            <span className="text-[11px] text-slate-900">
+                              {completedCount} of {totalTasks} ({progressPct}%)
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                progressPct === 100
+                                  ? "bg-emerald-500"
+                                  : progressPct > 50
+                                  ? "bg-amber-500"
+                                  : "bg-[#8B0014]"
+                              }`}
+                              style={{ width: `${progressPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Items Checklist */}
+                      {totalTasks > 0 && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-black text-slate-600 uppercase tracking-wider">
+                              Assigned Responsibilities:
+                            </span>
+                            {totalTasks > 2 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedPlanIds((prev) => ({
+                                    ...prev,
+                                    [p.id]: !isExpanded
+                                  }))
+                                }
+                                className="text-[11px] font-bold text-[#8B0014] hover:underline flex items-center gap-0.5"
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <span>Compact View</span>
+                                    <ChevronUp className="h-3 w-3" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>View All ({totalTasks})</span>
+                                    <ChevronDown className="h-3 w-3" />
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="space-y-1.5">
+                            {(isExpanded ? planTasks : planTasks.slice(0, 2)).map((task: any) => (
+                              <div
+                                key={task.id}
+                                onClick={() => handleTogglePlanTask(p.id, task.id)}
+                                className={`p-2.5 rounded-xl border transition flex items-start gap-2.5 cursor-pointer shadow-2xs ${
+                                  task.completed
+                                    ? "bg-emerald-50/50 border-emerald-200 text-slate-400"
+                                    : "bg-white border-slate-200 hover:border-slate-300 text-slate-800"
+                                }`}
+                              >
+                                <div className="mt-0.5 shrink-0">
+                                  {task.completed ? (
+                                    <CheckSquare className="h-4 w-4 text-emerald-600" />
+                                  ) : (
+                                    <Square className="h-4 w-4 text-slate-400 hover:text-[#8B0014]" />
+                                  )}
+                                </div>
+                                <div className="space-y-0.5 min-w-0 flex-1">
+                                  <p className={`text-xs font-semibold leading-tight ${task.completed ? "line-through text-slate-400" : "text-slate-900"}`}>
+                                    {task.text}
+                                  </p>
+                                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] pt-0.5">
+                                    <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold">
+                                      {task.assignee}
+                                    </span>
+                                    <span
+                                      className={`px-1.5 py-0.2 rounded font-extrabold uppercase ${
+                                        task.priority === "high"
+                                          ? "bg-rose-100 text-rose-800"
+                                          : task.priority === "medium"
+                                          ? "bg-amber-100 text-amber-800"
+                                          : "bg-slate-100 text-slate-600"
+                                      }`}
+                                    >
+                                      {task.priority}
+                                    </span>
+                                    <span className="text-slate-400">
+                                      • {task.due_timeline}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer Row */}
+                    <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500">
+                      <div className="flex items-center gap-1.5 text-[11px]">
+                        <Clock className="h-3.5 w-3.5 text-slate-400" />
+                        <span>Follow-up: <strong className="text-slate-700">{p.scheduled_followup ? new Date(p.scheduled_followup).toLocaleDateString() : "Pending"}</strong></span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {p.student_id && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedStudentId(p.student_id);
+                              setIsDetailOpen(true);
+                            }}
+                            className="text-xs font-bold text-[#8B0014] hover:underline"
+                          >
+                            Open Student Case →
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Modals */}

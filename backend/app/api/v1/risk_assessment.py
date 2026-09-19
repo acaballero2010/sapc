@@ -94,7 +94,7 @@ def create_intervention_plan(
         description=data.description,
         action_items=data.action_items,
         scheduled_followup=data.scheduled_followup,
-        status=InterventionStatus.PENDING
+        status=data.status or InterventionStatus.IN_PROGRESS
     )
     db.add(plan)
     db.commit()
