@@ -8,7 +8,10 @@ import {
   BookOpen, 
   ShieldCheck, 
   HeartPulse, 
-  DollarSign, 
+  Sparkles,
+  Award,
+  Coins,
+  Target,
   X 
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
@@ -99,12 +102,12 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
   const getTierColor = (tier: string) => {
     switch (tier?.toLowerCase()) {
       case "high":
-        return { bg: "bg-rose-50 border-rose-200 text-rose-800", badge: "bg-rose-600 text-white" };
+        return { bg: "bg-rose-50/80 border-rose-200 text-rose-900", badge: "bg-rose-600 text-white" };
       case "medium":
-        return { bg: "bg-amber-50 border-amber-200 text-amber-800", badge: "bg-[#D97706] text-white" };
+        return { bg: "bg-amber-50/80 border-amber-200 text-amber-900", badge: "bg-[#D97706] text-white" };
       case "low":
       default:
-        return { bg: "bg-emerald-50 border-emerald-200 text-emerald-800", badge: "bg-emerald-700 text-white" };
+        return { bg: "bg-emerald-50/80 border-emerald-200 text-emerald-900", badge: "bg-emerald-700 text-white" };
     }
   };
 
@@ -131,8 +134,8 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
               <h3 className="text-xl font-black text-slate-900 tracking-tight">
                 &quot;What-If&quot; Academic Recovery &amp; Goal Simulator
               </h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-100 text-amber-900 border border-amber-300">
-                AHP DSS
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-100 text-amber-950 border border-amber-300 shadow-2xs">
+                AHP DSS Engine
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
@@ -142,85 +145,111 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
         </div>
 
         {/* Preset Buttons */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-xs font-bold text-slate-500 mr-1">Presets:</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-bold text-slate-500 mr-0.5">Target Presets:</span>
           <button
+            type="button"
             onClick={() => applyPreset("pass")}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition shadow-xs"
+            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 transition shadow-2xs"
           >
             Pass Standard
           </button>
           <button
+            type="button"
             onClick={() => applyPreset("balanced")}
-            className="px-3 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-xs font-bold text-amber-900 transition shadow-xs"
+            className="px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-xs font-bold text-amber-950 transition shadow-2xs"
           >
             ★ Balanced Goal
           </button>
           <button
+            type="button"
             onClick={() => applyPreset("honors")}
-            className="px-3 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-xs font-bold text-emerald-900 transition shadow-xs"
+            className="px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-xs font-bold text-emerald-950 transition shadow-2xs"
           >
             Academic Honors
           </button>
         </div>
       </div>
 
-      {/* Live Comparison Delta Hero */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+      {/* Live Comparison Delta Hero - Uniform Height and Styling */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 items-stretch">
         {/* Baseline Card */}
-        <div className={`p-5 rounded-2xl border ${currentStyles.bg} text-center space-y-1 relative`}>
-          <span className="text-xs font-bold uppercase tracking-wider block opacity-80">Current Composite Risk</span>
-          <p className="text-3xl sm:text-4xl font-black">{currentComposite.toFixed(1)}%</p>
-          <div className="pt-2">
-            <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase ${currentStyles.badge}`}>
-              {currentTier} Risk
+        <div className={`p-5 sm:p-6 rounded-3xl border ${currentStyles.bg} flex flex-col justify-between text-center relative shadow-xs min-h-[175px]`}>
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider block opacity-75">Current Baseline Risk</span>
+            <p className="text-3xl sm:text-4xl font-black mt-1 text-slate-900">{currentComposite.toFixed(1)}%</p>
+          </div>
+          <div className="py-2">
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase shadow-2xs ${currentStyles.badge}`}>
+              {currentTier} Risk Standing
             </span>
           </div>
-          <span className="text-[11px] opacity-75 block mt-2">Academic Risk S_AC: {simulationResult?.current_academic_score?.toFixed(1) || "65.0"}%</span>
+          <span className="text-[11px] font-semibold opacity-75 block text-slate-700">
+            Academic Sub-score: {simulationResult?.current_academic_score?.toFixed(1) || "65.0"}%
+          </span>
         </div>
 
         {/* Transition Indicator */}
-        <div className="p-4 rounded-2xl bg-slate-900 text-white text-center space-y-2 shadow-lg">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-300 flex items-center justify-center gap-1">
-            <TrendingDown className="h-4 w-4 text-emerald-400" />
-            Projected Impact
-          </span>
-          <p className="text-3xl font-black text-emerald-400">
-            -{pointsDrop.toFixed(1)} <span className="text-sm font-semibold text-slate-300">pts</span>
-          </p>
-          <div className="text-xs font-medium text-slate-300">
-            <strong className="text-white">{pctDrop}%</strong> total risk reduction
+        <div className="p-5 sm:p-6 rounded-3xl bg-slate-900 text-white flex flex-col justify-between text-center shadow-lg min-h-[175px] border border-slate-800 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div>
+            <span className="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center justify-center gap-1.5">
+              <TrendingDown className="h-4 w-4 text-emerald-400" />
+              Projected Impact
+            </span>
+            <p className="text-3xl sm:text-4xl font-black text-emerald-400 mt-1 tracking-tight">
+              -{pointsDrop.toFixed(1)} <span className="text-base font-semibold text-slate-300">pts</span>
+            </p>
           </div>
+          <div className="py-2">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
+              {pctDrop}% Total Risk Reduction
+            </span>
+          </div>
+          <span className="text-[11px] font-medium text-slate-300 block">
+            Trajectory: <strong className="text-white uppercase">{currentTier}</strong> → <strong className="text-emerald-400 uppercase">{simulatedTier}</strong>
+          </span>
         </div>
 
         {/* Simulated Outcome Card */}
-        <div className={`p-5 rounded-2xl border ${simulatedStyles.bg} text-center space-y-1 relative`}>
-          <span className="text-xs font-bold uppercase tracking-wider block opacity-80">Simulated Target Score</span>
-          <p className="text-3xl sm:text-4xl font-black">{simulatedComposite.toFixed(1)}%</p>
-          <div className="pt-2">
-            <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase ${simulatedStyles.badge}`}>
+        <div className={`p-5 sm:p-6 rounded-3xl border ${simulatedStyles.bg} flex flex-col justify-between text-center relative shadow-xs min-h-[175px]`}>
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider block opacity-75">Simulated Target Score</span>
+            <p className="text-3xl sm:text-4xl font-black mt-1 text-slate-900">{simulatedComposite.toFixed(1)}%</p>
+          </div>
+          <div className="py-2">
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase shadow-2xs ${simulatedStyles.badge}`}>
               {simulatedTier} Risk Target
             </span>
           </div>
-          <span className="text-[11px] opacity-75 block mt-2">Projected S_AC: {simulationResult?.simulated_academic_score?.toFixed(1) || "0.0"}%</span>
+          <span className="text-[11px] font-semibold opacity-75 block text-slate-700">
+            Projected Academic: {simulationResult?.simulated_academic_score?.toFixed(1) || "0.0"}%
+          </span>
         </div>
       </div>
 
       {/* Interactive Controls & Target Sliders */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-3xl border border-slate-200">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-slate-50/90 p-5 sm:p-7 rounded-3xl border border-slate-200">
         
         {/* Left: Academic Parameter Sliders */}
-        <div className="space-y-5">
-          <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-[#8B0014]" />
-            1. Target Academic Parameters (S_AC Ingestion)
-          </h4>
+        <div className="space-y-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+          <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100">
+            <div className="p-2 rounded-xl bg-rose-50 text-[#8B0014] border border-rose-200">
+              <BookOpen className="h-4 w-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-extrabold text-slate-900">
+                1. Academic Standing & Attendance Goals
+              </h4>
+              <p className="text-[11px] text-slate-500 font-medium">Set grading targets and attendance parameters</p>
+            </div>
+          </div>
 
           {/* GPA Slider */}
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 pt-1">
             <div className="flex items-center justify-between text-xs font-bold">
-              <label className="text-slate-700">Projected Quarter GPA:</label>
-              <span className="font-mono text-base font-black text-[#8B0014] bg-white px-2.5 py-0.5 rounded-lg border border-slate-200">
+              <label className="text-slate-700">Projected Quarter GPA Target:</label>
+              <span className="font-mono text-base font-black text-[#8B0014] bg-slate-50 px-3 py-0.5 rounded-lg border border-slate-200">
                 {targetGpa.toFixed(1)}
               </span>
             </div>
@@ -237,7 +266,7 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
               <span>65.0 (Remedial)</span>
               <span>75.0 (Passing)</span>
               <span>85.0 (Dean&apos;s List)</span>
-              <span>98.0 (Highest)</span>
+              <span>98.0 (Highest Honors)</span>
             </div>
           </div>
 
@@ -245,7 +274,7 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs font-bold">
               <label className="text-slate-700">Max Projected Absences:</label>
-              <span className="font-mono text-base font-black text-amber-700 bg-white px-2.5 py-0.5 rounded-lg border border-slate-200">
+              <span className="font-mono text-base font-black text-amber-800 bg-slate-50 px-3 py-0.5 rounded-lg border border-slate-200">
                 {targetAbsences} {targetAbsences === 1 ? "day" : "days"}
               </span>
             </div>
@@ -259,33 +288,33 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
               className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
             />
             <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
-              <span>0-2 days (0 penalty)</span>
-              <span>3-5 days (+8 pts)</span>
-              <span>&gt;5 days (+15 pts)</span>
+              <span>0–2 days (Full Credit)</span>
+              <span>3–5 days (Moderate)</span>
+              <span>&gt;5 days (High Risk)</span>
             </div>
           </div>
 
           {/* Failing Subjects */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs font-bold">
-              <label className="text-slate-700">Failing Subjects Count:</label>
-              <span className="font-mono text-base font-black text-rose-700 bg-white px-2.5 py-0.5 rounded-lg border border-slate-200">
+              <label className="text-slate-700">Target Failing Subjects:</label>
+              <span className="font-mono text-base font-black text-rose-700 bg-slate-50 px-3 py-0.5 rounded-lg border border-slate-200">
                 {targetFailing} {targetFailing === 1 ? "subject" : "subjects"}
               </span>
             </div>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {[0, 1, 2, 3].map((num) => (
                 <button
                   key={num}
                   type="button"
                   onClick={() => setTargetFailing(num)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition ${
+                  className={`py-2 rounded-xl text-xs font-bold border transition ${
                     targetFailing === num
                       ? "bg-[#8B0014] text-white border-[#8B0014] shadow-xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                      : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                   }`}
                 >
-                  {num === 0 ? "0 (All Cleared)" : `${num} Failed`}
+                  {num === 0 ? "0 (All Clear)" : `${num} Failed`}
                 </button>
               ))}
             </div>
@@ -293,57 +322,62 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
         </div>
 
         {/* Right: Holistic & Non-Academic Enablers */}
-        <div className="space-y-5">
-          <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-            <HeartPulse className="h-4 w-4 text-[#8B0014]" />
-            2. Pastoral & Guidance Interventions (AHP Factors)
-          </h4>
+        <div className="space-y-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100">
+              <div className="p-2 rounded-xl bg-amber-50 text-[#D97706] border border-amber-200">
+                <HeartPulse className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="text-sm font-extrabold text-slate-900">
+                  2. Guidance &amp; Pastoral Care Enablers
+                </h4>
+                <p className="text-[11px] text-slate-500 font-medium">Holistic counseling and institutional support interventions</p>
+              </div>
+            </div>
 
-          {/* Mental Health Support Toggle */}
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200">
+            {/* Mental Health Support Toggle */}
+            <label className="p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 flex items-center justify-between gap-3 cursor-pointer transition">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
                   <HeartPulse className="h-4 w-4" />
                 </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">Guidance & Counseling Intake</span>
-                  <span className="text-[11px] text-slate-500">Reduces S_MH risk domain from elevated to 15.0 pts</span>
+                <div className="min-w-0">
+                  <span className="text-xs font-bold text-slate-900 block truncate">Guidance Consultation & Stress Coping</span>
+                  <span className="text-[11px] text-slate-500 block">Personal wellness counseling and examination mentorship</span>
                 </div>
               </div>
               <input
                 type="checkbox"
                 checked={mentalHealthBoost}
                 onChange={(e) => setMentalHealthBoost(e.target.checked)}
-                className="h-5 w-5 rounded text-[#8B0014] focus:ring-[#8B0014] cursor-pointer"
+                className="h-5 w-5 rounded text-[#8B0014] focus:ring-[#8B0014] cursor-pointer shrink-0"
               />
-            </div>
-          </div>
+            </label>
 
-          {/* Financial Aid Toggle */}
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
-                  <DollarSign className="h-4 w-4" />
+            {/* Financial Aid Toggle - Philippine Peso Icon */}
+            <label className="p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 flex items-center justify-between gap-3 cursor-pointer transition">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 font-bold flex items-center justify-center text-xs shrink-0">
+                  ₱
                 </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">Scholarship & Staggered Tuition</span>
-                  <span className="text-[11px] text-slate-500">Reduces S_FN financial strain from elevated to 15.0 pts</span>
+                <div className="min-w-0">
+                  <span className="text-xs font-bold text-slate-900 block truncate">Tuition Assistance & Payment Relief</span>
+                  <span className="text-[11px] text-slate-500 block">SAPC scholarship aid and flexible installment plans</span>
                 </div>
               </div>
               <input
                 type="checkbox"
                 checked={financialAidBoost}
                 onChange={(e) => setFinancialAidBoost(e.target.checked)}
-                className="h-5 w-5 rounded text-[#8B0014] focus:ring-[#8B0014] cursor-pointer"
+                className="h-5 w-5 rounded text-[#8B0014] focus:ring-[#8B0014] cursor-pointer shrink-0"
               />
-            </div>
+            </label>
           </div>
 
           {/* Milestone Target Checklists */}
-          <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-2">
-            <span className="text-xs font-extrabold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 space-y-2">
+            <span className="text-xs font-extrabold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-emerald-700" />
               Target Achievement Checklist:
             </span>
@@ -351,9 +385,14 @@ export const AcademicRecoverySimulator: React.FC<AcademicRecoverySimulatorProps>
               {simulationResult?.required_milestones?.map((m: string, idx: number) => (
                 <li key={idx} className="flex items-start gap-2">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0 mt-0.5" />
-                  <span>{m}</span>
+                  <span className="leading-snug">{m}</span>
                 </li>
-              ))}
+              )) || (
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                  <span>Maintain GPA ≥ 75.0 with zero unexcused absences.</span>
+                </li>
+              )}
             </ul>
           </div>
         </div>
