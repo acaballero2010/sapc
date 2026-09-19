@@ -74,13 +74,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         badge: "AHP Synthesis"
       },
       {
-        name: "NLP Crisis Alerts Queue",
+        name: "NLP Crisis Alerts",
         href: "/dashboard/guidance#alerts-queue",
         icon: AlertTriangle,
         badge: "Live Signals"
       },
       {
-        name: "Teacher Referral Queue",
+        name: "Teacher Referrals",
         href: "/dashboard/guidance#teacher-referrals",
         icon: HeartHandshake,
         badge: "Faculty Ingest"
@@ -92,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         badge: "1,250 Monitored"
       },
       {
-        name: "Trend & Retention Analytics",
+        name: "Cohort Retention Trends",
         href: "/dashboard/guidance#trend-analytics",
         icon: TrendingUp,
         badge: "Longitudinal"
@@ -106,7 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ],
     teacher: [
       {
-        name: "Class Roster & SASS Grades",
+        name: "Class Roster & SASS",
         href: "/dashboard/teacher#roster",
         icon: BookOpen,
         badge: "Advisory"
@@ -118,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         badge: "Submit Case"
       },
       {
-        name: "SASS CSV Batch Ingestion",
+        name: "SASS Batch Ingestion",
         href: "/dashboard/teacher#uploader",
         icon: Layers,
         badge: "DepEd SASS"
@@ -126,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ],
     student: [
       {
-        name: "My Holistic Wellness",
+        name: "Holistic Wellness",
         href: "/dashboard/student#wellness-radar",
         icon: GraduationCap,
         badge: "5 Domains"
@@ -144,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         badge: "Daily"
       },
       {
-        name: "AHP Academic Simulator",
+        name: "Academic Simulator",
         href: "/dashboard/student#academic-simulator",
         icon: Layers,
         badge: "What-If"
@@ -152,13 +152,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ],
     parent: [
       {
-        name: "Child Academic Progress",
+        name: "Academic Progress",
         href: "/dashboard/parent#child-profile",
         icon: Users,
         badge: "SASS Live"
       },
       {
-        name: "Attendance & Health Tracking",
+        name: "Attendance Tracking",
         href: "/dashboard/parent#child-profile",
         icon: Activity,
         badge: "Quarter 1"
@@ -172,22 +172,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ],
     admin: [
       {
-        name: "AHP Pairwise Criteria Matrix",
+        name: "AHP Criteria Matrix",
         href: "/dashboard/admin#ahp-matrix",
         icon: Sliders,
-        badge: "Weight Engine"
+        badge: "Weights"
       },
       {
-        name: "System Audit & RA 10173 Logs",
+        name: "Campus User Accounts",
+        href: "/dashboard/admin#campus-users",
+        icon: Users,
+        badge: "Directory"
+      },
+      {
+        name: "Cohort Analytics",
+        href: "/dashboard/admin#trend-analytics",
+        icon: TrendingUp,
+        badge: "Trends"
+      },
+      {
+        name: "RA 10173 Audit Logs",
         href: "/dashboard/admin#audit-logs",
         icon: ShieldCheck,
         badge: "Compliance"
-      },
-      {
-        name: "Longitudinal Cohort Analytics",
-        href: "/dashboard/admin#trend-analytics",
-        icon: TrendingUp,
-        badge: "5 Roles"
       }
     ]
   };
