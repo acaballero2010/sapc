@@ -86,6 +86,7 @@ export const CounselorDashboard: React.FC = () => {
   const [search, setSearch] = useState("");
   const [filterTier, setFilterTier] = useState<string>("all");
   const [filterStrand, setFilterStrand] = useState<string>("all");
+  const [filterSection, setFilterSection] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 15;
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
@@ -96,6 +97,22 @@ export const CounselorDashboard: React.FC = () => {
   const [parentAlertStudent, setParentAlertStudent] = useState<any | null>(null);
   const [isParentAlertOpen, setIsParentAlertOpen] = useState(false);
   const [_isLoading, setIsLoading] = useState(true);
+
+  const handleSelectSectionFromAnalytics = (sectionName: string, tier: string = "all") => {
+    setFilterSection(sectionName);
+    setFilterTier(tier);
+    setFilterStrand("all");
+    setSearch("");
+    setCurrentPage(1);
+
+    // Smooth scroll to the student roster
+    setTimeout(() => {
+      const rosterElement = document.getElementById("students-roster");
+      if (rosterElement) {
+        rosterElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
+  };
 
   const loadData = async () => {
     setIsLoading(true);
@@ -176,10 +193,12 @@ export const CounselorDashboard: React.FC = () => {
     const matchesSearch =
       s.first_name.toLowerCase().includes(search.toLowerCase()) ||
       s.last_name.toLowerCase().includes(search.toLowerCase()) ||
-      s.lrn.includes(search);
+      s.lrn.includes(search) ||
+      (s.section_name && s.section_name.toLowerCase().includes(search.toLowerCase()));
     const matchesTier = filterTier === "all" || s.latest_risk_tier?.toLowerCase() === filterTier;
     const matchesStrand = filterStrand === "all" || s.strand === filterStrand;
-    return matchesSearch && matchesTier && matchesStrand;
+    const matchesSection = filterSection === "all" || s.section_name === filterSection;
+    return matchesSearch && matchesTier && matchesStrand && matchesSection;
   });
 
   const totalPages = Math.max(1, Math.ceil(filteredStudents.length / pageSize));
@@ -437,7 +456,37 @@ export const CounselorDashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Section Filter */}
+            <div className="relative">
+              <select
+                value={filterSection}
+                onChange={(e) => {
+                  setFilterSection(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className={`w-full sm:w-auto text-xs sm:text-sm font-semibold rounded-xl px-4 py-2.5 pr-8 focus:outline-none transition cursor-pointer border ${
+                  filterSection !== "all" 
+                    ? "bg-rose-50 border-rose-300 text-rose-950 font-bold" 
+                    : "bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#8B0014]"
+                }`}
+              >
+                <option value="all">All Sections</option>
+                <option value="Grade 11 - St. Augustine (STEM)">Grade 11 - St. Augustine (STEM)</option>
+                <option value="Grade 11 - St. Lorenzo (HUMSS)">Grade 11 - St. Lorenzo (HUMSS)</option>
+                <option value="Grade 11 - St. Clare (ABM)">Grade 11 - St. Clare (ABM)</option>
+                <option value="Grade 11 - St. Pedro Calungsod (TVL-ICT)">Grade 11 - St. Pedro Calungsod (TVL)</option>
+                <option value="Grade 12 - St. Thomas Aquinas (STEM)">Grade 12 - St. Thomas Aquinas (STEM)</option>
+                <option value="Grade 12 - St. Teresa of Avila (HUMSS)">Grade 12 - St. Teresa of Avila (HUMSS)</option>
+                <option value="Grade 12 - St. Jude (ABM)">Grade 12 - St. Jude (ABM)</option>
+                <option value="Grade 12 - St. Vincent (TVL-HE)">Grade 12 - St. Vincent (TVL)</option>
+                <option value="Grade 10 - St. Francis">Grade 10 - St. Francis (JHS)</option>
+                <option value="Grade 9 - St. Benedict">Grade 9 - St. Benedict (JHS)</option>
+                <option value="Grade 8 - St. Dominic">Grade 8 - St. Dominic (JHS)</option>
+                <option value="Grade 7 - St. Ignatius">Grade 7 - St. Ignatius (JHS)</option>
+              </select>
+            </div>
+
             {/* Strand Filter */}
             <div className="relative">
               <select
@@ -485,11 +534,60 @@ export const CounselorDashboard: React.FC = () => {
                   setSearch(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition w-full sm:w-64"
+                className="bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition w-full sm:w-56"
               />
             </div>
           </div>
         </div>
+
+        {/* Active Filter Banner when redirected from Section Matrix */}
+        {(filterSection !== "all" || filterTier !== "all" || filterStrand !== "all" || search !== "") && (
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-rose-50 via-amber-50 to-rose-50 border border-rose-200/90 rounded-2xl px-4 py-3 text-xs text-slate-800 shadow-2xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-extrabold text-[#8B0014] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse" />
+                Active Table View:
+              </span>
+              {filterSection !== "all" && (
+                <span className="px-2.5 py-1 rounded-lg bg-white border border-rose-300 text-[#8B0014] font-bold shadow-2xs">
+                  Section: {filterSection}
+                </span>
+              )}
+              {filterTier !== "all" && (
+                <span className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-black shadow-2xs uppercase text-[10px]">
+                  {filterTier} Risk
+                </span>
+              )}
+              {filterStrand !== "all" && (
+                <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold">
+                  Strand: {filterStrand}
+                </span>
+              )}
+              {search && (
+                <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold">
+                  Search: &quot;{search}&quot;
+                </span>
+              )}
+              <span className="text-slate-500 font-medium ml-1">
+                ({filteredStudents.length} matching students)
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFilterSection("all");
+                setFilterTier("all");
+                setFilterStrand("all");
+                setSearch("");
+                setCurrentPage(1);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-100 text-rose-800 border border-rose-300 font-black text-xs transition shadow-2xs cursor-pointer flex items-center gap-1 shrink-0"
+            >
+              <span>✕ Reset All Filters</span>
+            </button>
+          </div>
+        )}
 
         {/* Table */}
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
@@ -603,7 +701,7 @@ export const CounselorDashboard: React.FC = () => {
 
       {/* Longitudinal Multi-Term Progression & Retention Matrix */}
       <div id="trend-analytics" className="scroll-mt-24">
-        <CohortTrendAnalytics />
+        <CohortTrendAnalytics onSelectSection={handleSelectSectionFromAnalytics} />
       </div>
 
       {/* Active Interventions Board */}

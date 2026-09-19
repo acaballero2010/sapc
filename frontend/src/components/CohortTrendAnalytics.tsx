@@ -8,9 +8,12 @@ import {
   BarChart3, 
   Clock,
   GraduationCap,
-  Activity
+  Activity,
+  ChevronRight,
+  ArrowUpRight
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
+import { SAPC_500_STUDENTS } from "@/data/students500";
 
 interface TermTrendPoint {
   term: string;
@@ -51,6 +54,43 @@ interface LongitudinalTrendsResponse {
   early_interception_sla_pct: number;
   avg_risk_reduction_pts: number;
 }
+
+// Dynamically compute exact section benchmarks from 500-student cohort
+const buildDynamicSectionBenchmarks = (): SectionComparison[] => {
+  const map = new Map<string, { total: number; high: number; avgSum: number; adviser: string; grade: string }>();
+  SAPC_500_STUDENTS.forEach((s) => {
+    if (!map.has(s.section_name)) {
+      map.set(s.section_name, {
+        total: 0,
+        high: 0,
+        avgSum: 0,
+        adviser: s.adviser_name,
+        grade: s.grade_level >= 11 ? `Grade ${s.grade_level}` : `Grade ${s.grade_level}`
+      });
+    }
+    const stat = map.get(s.section_name)!;
+    stat.total += 1;
+    if (s.latest_risk_tier === "high") stat.high += 1;
+    stat.avgSum += s.latest_risk_score;
+  });
+
+  return Array.from(map.entries()).map(([secName, stat], idx) => {
+    const avgRisk = parseFloat((stat.avgSum / stat.total).toFixed(1));
+    let health = "Optimal";
+    if (avgRisk < 20) health = "Exemplary";
+    else if (avgRisk >= 28 || stat.high >= 5) health = "Monitored";
+    return {
+      section_id: idx + 1,
+      section_name: secName,
+      grade_level: stat.grade,
+      adviser_name: stat.adviser,
+      total_students: stat.total,
+      average_composite_risk: avgRisk,
+      high_risk_count: stat.high,
+      retention_health: health
+    };
+  });
+};
 
 const DEFAULT_TRENDS: LongitudinalTrendsResponse = {
   multi_term_progression: [
@@ -115,11 +155,11 @@ const DEFAULT_TRENDS: LongitudinalTrendsResponse = {
       term: "SY 25-26 Sem 2 (Current)",
       academic_year: "2025-2026",
       quarter: "Q3",
-      total_students: 1250,
-      low_risk_pct: 78.4,
-      medium_risk_pct: 16.8,
-      high_risk_pct: 4.8,
-      average_composite_score: 24.2,
+      total_students: 500,
+      low_risk_pct: 60.0,
+      medium_risk_pct: 28.0,
+      high_risk_pct: 12.0,
+      average_composite_score: 26.2,
       average_gpa: 89.1,
       intervention_resolution_rate: 94.2,
       domain_averages: {
@@ -131,55 +171,18 @@ const DEFAULT_TRENDS: LongitudinalTrendsResponse = {
       }
     }
   ],
-  section_benchmarks: [
-    {
-      section_id: 1,
-      section_name: "Grade 11 - St. Augustine (STEM)",
-      grade_level: "Grade 11",
-      adviser_name: "Mr. Roberto Santos, LPT",
-      total_students: 42,
-      average_composite_risk: 26.4,
-      high_risk_count: 2,
-      retention_health: "Optimal"
-    },
-    {
-      section_id: 2,
-      section_name: "Grade 12 - St. Thomas (ABM)",
-      grade_level: "Grade 12",
-      adviser_name: "Ms. Jennifer Lim, LPT",
-      total_students: 38,
-      average_composite_risk: 18.2,
-      high_risk_count: 0,
-      retention_health: "Exemplary"
-    },
-    {
-      section_id: 3,
-      section_name: "Grade 11 - St. Lorenzo (HUMSS)",
-      grade_level: "Grade 11",
-      adviser_name: "Mr. Carlos Dizon, LPT",
-      total_students: 45,
-      average_composite_risk: 32.5,
-      high_risk_count: 3,
-      retention_health: "Monitored"
-    },
-    {
-      section_id: 4,
-      section_name: "1st Year BS Information Technology",
-      grade_level: "College-1",
-      adviser_name: "Dean Remedios Santos",
-      total_students: 50,
-      average_composite_risk: 22.0,
-      high_risk_count: 1,
-      retention_health: "Optimal"
-    }
-  ],
+  section_benchmarks: buildDynamicSectionBenchmarks(),
   retention_gain_pct: 14.2,
   total_dropouts_prevented: 48,
   early_interception_sla_pct: 98.4,
   avg_risk_reduction_pts: 12.6
 };
 
-export const CohortTrendAnalytics: React.FC = () => {
+interface CohortTrendAnalyticsProps {
+  onSelectSection?: (sectionName: string, tier?: string) => void;
+}
+
+export const CohortTrendAnalytics: React.FC<CohortTrendAnalyticsProps> = ({ onSelectSection }) => {
   const [data, setData] = useState<LongitudinalTrendsResponse>(DEFAULT_TRENDS);
   const [loading, setLoading] = useState(false);
   const [selectedTermIdx, setSelectedTermIdx] = useState<number>(DEFAULT_TRENDS.multi_term_progression.length - 1);
@@ -630,9 +633,20 @@ export const CohortTrendAnalytics: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredSections.map((sec) => (
-                <tr key={sec.section_id} className="text-slate-800 hover:bg-slate-50/80 transition">
-                  <td className="py-3.5 px-4 font-bold text-slate-900">
-                    {sec.section_name}
+                <tr 
+                  key={sec.section_id} 
+                  onClick={() => onSelectSection?.(sec.section_name, sec.high_risk_count > 0 ? "high" : "all")}
+                  className="text-slate-800 hover:bg-rose-50/70 transition cursor-pointer group"
+                  title={`Click to view ${sec.section_name} students (${sec.high_risk_count} high-risk)`}
+                >
+                  <td className="py-3.5 px-4 font-bold text-slate-900 group-hover:text-[#8B0014] transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span>{sec.section_name}</span>
+                      <span className="text-[10px] text-rose-700 font-extrabold bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                        <span>View</span>
+                        <ArrowUpRight className="h-3 w-3" />
+                      </span>
+                    </div>
                   </td>
                   <td className="py-3.5 px-4 font-semibold text-slate-600 text-xs">
                     {sec.grade_level}
@@ -649,24 +663,35 @@ export const CohortTrendAnalytics: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-black ${
-                      sec.high_risk_count > 2 
-                        ? "bg-rose-100 text-rose-800 border border-rose-200" 
-                        : "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                    }`}>
-                      {sec.high_risk_count}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectSection?.(sec.section_name, "high");
+                      }}
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-black transition hover:scale-105 shadow-2xs ${
+                        sec.high_risk_count > 0 
+                          ? "bg-rose-600 hover:bg-rose-700 text-white" 
+                          : "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                      }`}
+                      title="Filter high risk students in this section"
+                    >
+                      {sec.high_risk_count} {sec.high_risk_count > 0 ? "⚠️" : ""}
+                    </button>
                   </td>
                   <td className="py-3.5 px-4 text-right">
-                    <span className={`px-3 py-1 rounded-xl text-xs font-bold ${
-                      sec.retention_health.includes("Excellent")
-                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                        : sec.retention_health.includes("Stable")
-                        ? "bg-slate-100 text-slate-800 border border-slate-200"
-                        : "bg-amber-50 text-amber-900 border border-amber-200"
-                    }`}>
-                      {sec.retention_health}
-                    </span>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${
+                        sec.retention_health === "Exemplary"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          : sec.retention_health === "Optimal"
+                          ? "bg-amber-50 text-amber-900 border border-amber-200"
+                          : "bg-rose-50 text-rose-800 border border-rose-200"
+                      }`}>
+                        {sec.retention_health}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-[#8B0014] group-hover:translate-x-0.5 transition shrink-0" />
+                    </div>
                   </td>
                 </tr>
               ))}
