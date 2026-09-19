@@ -23,6 +23,7 @@ import {
 import { SapcLogo } from "./SapcLogo";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { RegistrationModal } from "./RegistrationModal";
+import { GoogleRoleSelectionModal } from "./GoogleRoleSelectionModal";
 
 export const LandingPage: React.FC = () => {
   const router = useRouter();
@@ -34,6 +35,8 @@ export const LandingPage: React.FC = () => {
   const [portalMode, setPortalMode] = useState<"quick_eval" | "credentials">("quick_eval");
   const [activeTab, setActiveTab] = useState<"counselor" | "teacher" | "student" | "parent">("counselor");
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+  const [isGoogleRoleModalOpen, setIsGoogleRoleModalOpen] = useState(false);
+  const [googleUserName, setGoogleUserName] = useState("SAPC Member");
 
   const quickRoles: { 
     role: RoleType; 
@@ -129,14 +132,23 @@ export const LandingPage: React.FC = () => {
     }
   };
 
-  const handleGoogleSignIn = async (role: RoleType = "student") => {
+  const handleGoogleSignIn = async (role?: RoleType) => {
     setIsSubmitting(true);
     try {
-      await loginWithGoogle(role);
-      router.push(ROLE_ROUTES[role] || "/dashboard/student");
+      const res = await loginWithGoogle(role);
+      if (res && res.isNewUser) {
+        setGoogleUserName(res.user.full_name || "SAPC Member");
+        setIsGoogleRoleModalOpen(true);
+      } else if (res && res.user) {
+        router.push(ROLE_ROUTES[res.user.role] || "/dashboard/student");
+      } else if (role) {
+        router.push(ROLE_ROUTES[role] || "/dashboard/student");
+      }
     } catch (err) {
       console.warn("Google sign-in caught:", err);
-      router.push(ROLE_ROUTES[role] || "/dashboard/student");
+      if (role) {
+        router.push(ROLE_ROUTES[role] || "/dashboard/student");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -420,7 +432,7 @@ export const LandingPage: React.FC = () => {
                     {/* Google Sign-in Option */}
                     <button
                       type="button"
-                      onClick={() => handleGoogleSignIn("student")}
+                      onClick={() => handleGoogleSignIn()}
                       disabled={isSubmitting}
                       className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm border-2 border-slate-200 hover:border-slate-300 shadow-xs transition flex items-center justify-center gap-3 group active:scale-[0.99]"
                     >
@@ -954,6 +966,13 @@ export const LandingPage: React.FC = () => {
       <RegistrationModal
         isOpen={isRegistrationOpen}
         onClose={() => setIsRegistrationOpen(false)}
+      />
+
+      {/* Google Authentication Role Selection Modal */}
+      <GoogleRoleSelectionModal
+        isOpen={isGoogleRoleModalOpen}
+        userName={googleUserName}
+        onClose={() => setIsGoogleRoleModalOpen(false)}
       />
     </div>
   );

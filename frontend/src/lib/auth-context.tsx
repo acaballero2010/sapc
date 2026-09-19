@@ -24,7 +24,7 @@ interface AuthContextType {
   isLoading: boolean;
   serverError: string | null;
   login: (username: string, password?: string) => Promise<void>;
-  loginWithGoogle: (targetRole?: RoleType) => Promise<void>;
+  loginWithGoogle: (targetRole?: RoleType) => Promise<{ user: UserProfile; isNewUser: boolean } | null | void>;
   switchRole: (role: RoleType) => Promise<void>;
   updateUserProfile: (updates: Partial<UserProfile>) => Promise<void> | void;
   logout: () => void;
@@ -164,7 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const loginWithGoogle = async (targetRole: RoleType = "student") => {
+  const loginWithGoogle = async (targetRole?: RoleType): Promise<{ user: UserProfile; isNewUser: boolean } | null> => {
     setIsLoading(true);
     setServerError(null);
     try {
@@ -173,21 +173,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (fbUser) {
         const userRef = doc(db, "users", fbUser.uid);
         const userDoc = await getDoc(userRef);
-        let role = targetRole;
+        let role: RoleType = targetRole || "student";
+        let isNewUser = false;
+
         if (userDoc.exists()) {
-          role = (userDoc.data()?.role || targetRole) as RoleType;
+          const docData = userDoc.data();
+          role = (targetRole || docData?.role || "student") as RoleType;
+          isNewUser = !docData?.roleConfirmed && !targetRole;
+          if (targetRole) {
+            await setDoc(userRef, { role: targetRole, roleConfirmed: true, updatedAt: serverTimestamp() }, { merge: true });
+          }
         } else {
+          isNewUser = !targetRole;
           await setDoc(userRef, {
             email: fbUser.email,
             name: fbUser.displayName || "Google User",
             role: role,
+            roleConfirmed: !!targetRole,
             authProvider: "google",
             createdAt: serverTimestamp(),
             isVerified: true
           });
         }
 
-        setUser({
+        const profile: UserProfile = {
           id: 1,
           email: fbUser.email || "",
           full_name: fbUser.displayName || "Google User",
@@ -195,21 +204,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           student_id: 1,
           firebaseUid: fbUser.uid,
           avatar_url: fbUser.photoURL || null
-        });
+        };
+
+        setUser(profile);
         setServerError(null);
+        return { user: profile, isNewUser };
       }
+      return null;
     } catch (err: any) {
       console.warn("Google Sign-In note:", err);
-      // Fallback gracefully to student demo session if popup closed or blocked
-      const profile = DEMO_PROFILES[targetRole];
-      setUser({
+      const fallbackRole = targetRole || "student";
+      const profileData = DEMO_PROFILES[fallbackRole];
+      const fallbackProfile: UserProfile = {
         id: 1,
-        email: profile.email,
-        full_name: profile.name,
-        role: targetRole,
+        email: profileData.email,
+        full_name: profileData.name,
+        role: fallbackRole,
         student_id: 1,
         avatar_url: null
-      });
+      };
+      setUser(fallbackProfile);
+      return { user: fallbackProfile, isNewUser: false };
     } finally {
       setIsLoading(false);
     }
