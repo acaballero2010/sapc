@@ -109,14 +109,27 @@ export const LandingPage: React.FC = () => {
     }
   ];
 
+  const ROLE_ROUTES: Record<RoleType, string> = {
+    guidance_counselor: "/dashboard/guidance",
+    teacher: "/dashboard/teacher",
+    student: "/dashboard/student",
+    parent: "/dashboard/parent",
+    admin: "/dashboard/admin"
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       await login(email, password);
-      router.push("/dashboard");
+      const targetRole: RoleType = 
+        email.includes("admin") ? "admin" :
+        email.includes("teacher") ? "teacher" :
+        email.includes("student") ? "student" :
+        email.includes("parent") ? "parent" : "guidance_counselor";
+      router.push(ROLE_ROUTES[targetRole] || "/dashboard/guidance");
     } catch {
-      router.push("/dashboard");
+      router.push("/dashboard/guidance");
     } finally {
       setIsSubmitting(false);
     }
@@ -128,9 +141,9 @@ export const LandingPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await switchRole(roleObj.role);
-      router.push("/dashboard");
+      router.push(ROLE_ROUTES[roleObj.role] || "/dashboard/guidance");
     } catch {
-      router.push("/dashboard");
+      router.push(ROLE_ROUTES[roleObj.role] || "/dashboard/guidance");
     } finally {
       setIsSubmitting(false);
     }

@@ -70,92 +70,95 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     setServerError(null);
 
-    // 1. Attempt Firebase Authentication First
-    let firebaseUser: any = null;
     try {
-      const fbCred = await signInWithEmailAndPassword(auth, email, pass);
-      firebaseUser = fbCred.user;
-    } catch (fbErr: any) {
-      console.log("Firebase direct auth note:", fbErr.message);
-    }
+      // 1. Attempt Firebase Authentication First
+      let firebaseUser: any = null;
+      try {
+        const fbCred = await signInWithEmailAndPassword(auth, email, pass);
+        firebaseUser = fbCred.user;
+      } catch (fbErr: any) {
+        console.log("Firebase direct auth note:", fbErr.message);
+      }
 
-    // 2. Attempt FastAPI backend if available
-    try {
-      const formData = new URLSearchParams();
-      formData.append("username", email);
-      formData.append("password", pass);
+      // 2. Attempt FastAPI backend if available
+      try {
+        const formData = new URLSearchParams();
+        formData.append("username", email);
+        formData.append("password", pass);
 
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formData.toString()
+        const res = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formData.toString()
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof window !== "undefined") {
+            localStorage.setItem("sapc_token", data.access_token);
+          }
+          setToken(data.access_token);
+          setUser({
+            id: 1,
+            email: data.email,
+            full_name: data.full_name,
+            role: data.role as RoleType,
+            student_id: data.student_id,
+            firebaseUid: firebaseUser?.uid
+          });
+          setServerError(null);
+          return;
+        }
+      } catch (err: any) {
+        // Backend FastAPI not running
+      }
+
+      // 3. If Firebase user logged in, check Firestore profile
+      if (firebaseUser) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          const userData = userDoc.data();
+          const role = (userData?.role || targetRole || "student") as RoleType;
+          setUser({
+            id: 1,
+            email: firebaseUser.email || email,
+            full_name: firebaseUser.displayName || userData?.name || email.split("@")[0],
+            role: role,
+            student_id: 1,
+            firebaseUid: firebaseUser.uid
+          });
+          setServerError(null);
+          return;
+        } catch (docErr) {
+          console.warn("Firestore user profile fetch notice:", docErr);
+        }
+      }
+
+      // 4. Seamless demo fallback
+      const fallbackRole = targetRole || (
+        email.includes("teacher") ? "teacher" :
+        email.includes("student") ? "student" :
+        email.includes("parent") ? "parent" :
+        email.includes("admin") ? "admin" : "guidance_counselor"
+      );
+      const profile = DEMO_PROFILES[fallbackRole];
+      setUser({
+        id: 1,
+        email: email || profile.email,
+        full_name: profile.name,
+        role: fallbackRole,
+        student_id: profile.student_id || null
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (typeof window !== "undefined") {
-          localStorage.setItem("sapc_token", data.access_token);
-        }
-        setToken(data.access_token);
-        setUser({
-          id: 1,
-          email: data.email,
-          full_name: data.full_name,
-          role: data.role as RoleType,
-          student_id: data.student_id,
-          firebaseUid: firebaseUser?.uid
-        });
-        setServerError(null);
-        return;
-      }
-    } catch (err: any) {
-      // Backend FastAPI not running
+      const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      setServerError(
+        isLocal
+          ? "FastAPI backend at http://localhost:8000 is offline. Run 'npm run dev' to start both servers."
+          : "Cloud Demo Mode: Running with embedded client simulation. Connect a production FastAPI backend via NEXT_PUBLIC_API_URL."
+      );
+    } finally {
+      setIsLoading(false);
     }
-
-    // 3. If Firebase user logged in, check Firestore profile
-    if (firebaseUser) {
-      try {
-        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-        const userData = userDoc.data();
-        const role = (userData?.role || targetRole || "student") as RoleType;
-        setUser({
-          id: 1,
-          email: firebaseUser.email || email,
-          full_name: firebaseUser.displayName || userData?.name || email.split("@")[0],
-          role: role,
-          student_id: 1,
-          firebaseUid: firebaseUser.uid
-        });
-        setServerError(null);
-        return;
-      } catch (docErr) {
-        console.warn("Firestore user profile fetch notice:", docErr);
-      }
-    }
-
-    // 4. Seamless demo fallback
-    const fallbackRole = targetRole || (
-      email.includes("teacher") ? "teacher" :
-      email.includes("student") ? "student" :
-      email.includes("parent") ? "parent" :
-      email.includes("admin") ? "admin" : "guidance_counselor"
-    );
-    const profile = DEMO_PROFILES[fallbackRole];
-    setUser({
-      id: 1,
-      email: email || profile.email,
-      full_name: profile.name,
-      role: fallbackRole,
-      student_id: profile.student_id || null
-    });
-
-    const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-    setServerError(
-      isLocal
-        ? "FastAPI backend at http://localhost:8000 is offline. Run 'npm run dev' to start both servers."
-        : "Cloud Demo Mode: Running with embedded client simulation. Connect a production FastAPI backend via NEXT_PUBLIC_API_URL."
-    );
-    setIsLoading(false);
   };
 
   const switchRole = async (role: RoleType) => {
