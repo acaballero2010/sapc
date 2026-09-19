@@ -1,0 +1,52 @@
+name: Deploy to Firebase Hosting on Push
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Lint and Type Check
+        run: |
+          cd frontend
+          npm run lint
+          npx tsc --noEmit
+
+      - name: Build Next.js Production Bundle
+        run: |
+          cd frontend
+          npm run build
+        env:
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: sapc-intellysys-ph
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: sapc-intellysys-ph.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: sapc-intellysys-ph.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "923880712593"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "1:923880712593:web:942fcdeac9a8e251519230"
+
+      - name: Deploy to Firebase Hosting (Live Channel)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SAPC_INTELLYSYS_PH }}'
+          channelId: live
+          projectId: sapc-intellysys-ph
