@@ -11,7 +11,7 @@ import {
   HeartHandshake, 
   ShieldCheck,
   RefreshCw,
-  Sparkles
+  Activity
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
@@ -119,7 +119,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-slate-900">SAPC Guidance Companion</h3>
                 <span className="px-2.5 py-0.5 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 rounded-full flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> NLP Active
+                  <Activity className="h-3 w-3 text-emerald-600" /> NLP Active
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">San Antonio de Padua College • Confidential Wellness Support</p>

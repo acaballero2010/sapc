@@ -14,14 +14,15 @@ import {
   Menu, 
   X, 
   ShieldCheck, 
-  Sparkles, 
   Settings,
   AlertTriangle,
   HeartHandshake,
   TrendingUp,
   Activity,
   Eye,
-  Repeat
+  Repeat,
+  Compass,
+  MessageSquare
 } from "lucide-react";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { SapcLogo } from "./SapcLogo";
@@ -341,7 +342,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <Bot className="h-4 w-4 text-white" />
                     <span>AI Counselor</span>
                   </div>
-                  <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                  <MessageSquare className="h-3.5 w-3.5 text-amber-300" />
                 </button>
               )}
 
@@ -354,7 +355,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-amber-50/70 hover:bg-amber-100 border border-amber-300/80 transition"
                 >
                   <div className="flex items-center gap-2 text-amber-950 font-bold">
-                    <Sparkles className="h-3.5 w-3.5 text-[#8B0014]" />
+                    <Compass className="h-3.5 w-3.5 text-[#8B0014]" />
                     <span>Role Tour & Guide</span>
                   </div>
                   <span className="text-[10px] text-amber-800 font-extrabold">3-Step</span>

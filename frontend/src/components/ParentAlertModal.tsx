@@ -10,7 +10,7 @@ import {
   MapPin, 
   CheckCircle2, 
   ShieldCheck, 
-  Sparkles
+  SendHorizontal
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
@@ -213,7 +213,7 @@ export const ParentAlertModal: React.FC<ParentAlertModalProps> = ({
                           : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                       }`}
                     >
-                      <Sparkles className="h-3.5 w-3.5" /> Both (SMS + Email)
+                      <SendHorizontal className="h-3.5 w-3.5" /> Both (SMS + Email)
                     </button>
                     <button
                       type="button"

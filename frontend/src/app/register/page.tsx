@@ -8,7 +8,6 @@ import {
   Users, 
   ShieldCheck, 
   ArrowRight, 
-  Sparkles,
   KeyRound,
   HeartHandshake,
   School,
@@ -749,7 +748,7 @@ export default function RegisterPage() {
           {step === "otp" && (
             <div className="mt-6 text-center space-y-6">
               <div className="mx-auto w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-[#8B0014]">
-                <Sparkles className="h-7 w-7 animate-pulse" />
+                <KeyRound className="h-7 w-7 animate-pulse" />
               </div>
 
               <div>

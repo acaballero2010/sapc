@@ -9,7 +9,6 @@ import {
   ShieldCheck, 
   FileText, 
   ArrowRight, 
-  Sparkles,
   KeyRound,
   HeartHandshake,
   School,
@@ -318,7 +317,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400/25 text-amber-200 border border-amber-400/40 flex items-center gap-1">
-                <Sparkles className="h-3 w-3 text-amber-300" />
+                <ShieldCheck className="h-3 w-3 text-amber-300" />
                 SAPC Institutional Onboarding
               </span>
               <span className="text-xs text-rose-200">• 5 Institutional Roles</span>

@@ -10,7 +10,6 @@ import {
   GraduationCap, 
   ShieldCheck, 
   Bot, 
-  Sparkles, 
   Layers, 
   ArrowRight, 
   CheckCircle2, 
@@ -39,7 +38,7 @@ export const LandingPage: React.FC = () => {
     {
       id: "ahp-synthesis",
       tag: '"A College for the Family" • Pila, Laguna • Est. 1979',
-      tagIcon: <Sparkles className="h-4 w-4 text-amber-500" />,
+      tagIcon: <GraduationCap className="h-4 w-4 text-amber-500" />,
       tagColor: "bg-amber-50 text-amber-900 border-amber-300",
       headline: "Intelligent Student Decision Support System",
       headlineGradient: "from-[#8B0014] via-[#B91C1C] to-[#D97706]",

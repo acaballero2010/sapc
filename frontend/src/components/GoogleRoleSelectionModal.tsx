@@ -5,7 +5,6 @@ import {
   GraduationCap, 
   Users, 
   ShieldCheck, 
-  Sparkles, 
   CheckCircle2, 
   ArrowRight, 
   HeartHandshake, 
@@ -126,7 +125,7 @@ export const GoogleRoleSelectionModal: React.FC<GoogleRoleSelectionModalProps> =
             <div>
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-amber-300" />
+                  <ShieldCheck className="h-3 w-3 text-amber-300" />
                   Google Workspace Authentication
                 </span>
               </div>

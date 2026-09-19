@@ -8,7 +8,7 @@ import { SensitivitySimulator } from "@/components/SensitivitySimulator";
 import { RoleOnboardingWizard } from "@/components/RoleOnboardingWizard";
 import { AccountManagementModal } from "@/components/AccountManagementModal";
 import { useAuth } from "@/lib/auth-context";
-import { ShieldCheck, User, Sparkles, Bot } from "lucide-react";
+import { ShieldCheck, User, Compass, Bot } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -75,7 +75,7 @@ export default function DashboardLayout({
                 onClick={() => setIsOnboardingOpen(true)}
                 className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
               >
-                <Sparkles className="h-3.5 w-3.5 text-[#8B0014]" />
+                <Compass className="h-3.5 w-3.5 text-[#8B0014]" />
                 <span>Tour</span>
               </button>
 

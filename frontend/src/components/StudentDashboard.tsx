@@ -8,7 +8,8 @@ import {
   HeartHandshake, 
   PhoneCall,
   GraduationCap,
-  Sparkles,
+  Activity,
+  MessageSquare,
   TrendingUp,
   Award,
   Calendar,
@@ -204,7 +205,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
           >
             <Bot className="h-5 w-5 text-white" />
             <span>AI Guidance Companion</span>
-            <Sparkles className="h-4 w-4 text-amber-200" />
+            <MessageSquare className="h-4 w-4 text-amber-200" />
           </button>
 
           <button
@@ -252,7 +253,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
             <span className="text-[11px] font-semibold text-amber-800 mt-0.5 block">Positive Wellness</span>
           </div>
           <div className="p-3.5 rounded-2xl bg-amber-50 text-[#D97706] border border-amber-200">
-            <Sparkles className="h-6 w-6" />
+            <Activity className="h-6 w-6" />
           </div>
         </div>
 

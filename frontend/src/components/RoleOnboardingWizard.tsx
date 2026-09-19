@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { 
   X, 
-  Sparkles, 
+  Compass, 
   CheckCircle, 
   ChevronRight, 
   ChevronLeft,
@@ -301,7 +301,7 @@ export const RoleOnboardingWizard: React.FC<RoleOnboardingWizardProps> = ({ role
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400/25 text-amber-200 border border-amber-400/40 flex items-center gap-1">
-                <Sparkles className="h-3 w-3 text-amber-300" />
+                <Compass className="h-3 w-3 text-amber-300" />
                 Welcome to SAPC IntellySys
               </span>
               <span className="text-xs text-rose-200 font-semibold">• {roleData.roleBadge}</span>

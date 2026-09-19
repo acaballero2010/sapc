@@ -12,7 +12,7 @@ import {
   PlusCircle, 
   RefreshCw,
   Clock,
-  Sparkles,
+  Sliders,
   ShieldCheck,
   Award,
   Calculator,
@@ -338,7 +338,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Sparkles className="h-4 w-4" />
+            <Brain className="h-4 w-4 text-[#8B0014]" />
             AHP Multi-Domain Synthesis & Notes
           </button>
           <button
@@ -376,7 +376,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-xs sm:text-sm font-bold text-[#8B0014] uppercase tracking-wider flex items-center gap-2">
-                      <Sparkles className="h-4 w-4" />
+                      <Sliders className="h-4 w-4 text-[#8B0014]" />
                       AHP Criteria Weights Breakdown
                     </h4>
                     {riskBreakdown && (

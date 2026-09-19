@@ -6,7 +6,7 @@ import {
   TrendingDown, 
   ShieldCheck, 
   BarChart3, 
-  Sparkles,
+  Clock,
   GraduationCap,
   Activity
 } from "lucide-react";
@@ -320,7 +320,7 @@ export const CohortTrendAnalytics: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold uppercase tracking-wider text-rose-800">Intervention SLA</span>
             <div className="p-2 rounded-xl bg-rose-100 text-rose-700">
-              <Sparkles className="h-4 w-4" />
+              <Clock className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3">

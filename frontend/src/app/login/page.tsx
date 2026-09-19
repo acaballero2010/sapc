@@ -9,7 +9,7 @@ import {
   ArrowRight, 
   Eye, 
   EyeOff, 
-  Sparkles, 
+  KeyRound, 
   GraduationCap,
   Users,
   School,
@@ -291,8 +291,8 @@ export default function LoginPage() {
               <div className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-[11px] uppercase font-black text-slate-500">
-              <span className="bg-white px-3 tracking-wider flex items-center gap-1">
-                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+              <span className="bg-white px-3 tracking-wider flex items-center gap-1.5 text-slate-700">
+                <KeyRound className="h-3.5 w-3.5 text-[#8B0014]" />
                 <span>Instant Evaluator Demo Access</span>
               </span>
             </div>

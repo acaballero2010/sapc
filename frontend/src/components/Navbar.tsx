@@ -5,7 +5,7 @@ import { useAuth, RoleType } from "@/lib/auth-context";
 import { 
   Bot,
   Layers,
-  Sparkles
+  MessageSquare
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
 
@@ -73,8 +73,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-[#8B0014] hover:bg-[#6D0010] text-white shadow-xs transition active:scale-95"
             >
               <Bot className="h-4 w-4 text-white" />
-              <span className="flex items-center gap-1">
-                AI Companion <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+              <span className="flex items-center gap-1.5">
+                AI Companion <MessageSquare className="h-3.5 w-3.5 text-amber-300" />
               </span>
             </button>
           )}

@@ -9,7 +9,7 @@ import {
   GraduationCap, 
   LogOut, 
   Save, 
-  Sparkles, 
+  Settings, 
   CheckCircle2, 
   Lock, 
   Calendar, 
@@ -154,7 +154,7 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
             <div>
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400/20 text-amber-200 border border-amber-400/30 flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-amber-300" />
+                  <Settings className="h-3 w-3 text-amber-300" />
                   SAPC Account Settings
                 </span>
                 <span className="text-xs text-rose-200 capitalize">• {user?.role?.replace("_", " ")}</span>
