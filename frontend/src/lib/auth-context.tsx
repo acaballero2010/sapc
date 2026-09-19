@@ -23,7 +23,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   serverError: string | null;
-  login: (username: string, password?: string) => Promise<void>;
+  login: (username: string, password?: string, targetRole?: RoleType) => Promise<void>;
   loginWithGoogle: (targetRole?: RoleType) => Promise<{ user: UserProfile; isNewUser: boolean } | null | void>;
   switchRole: (role: RoleType) => Promise<void>;
   updateUserProfile: (updates: Partial<UserProfile>) => Promise<void> | void;
@@ -37,28 +37,28 @@ const DEMO_PROFILES: Record<RoleType, { email: string; pass: string; name: strin
   guidance_counselor: { 
     email: "counselor@sapc.edu.ph", 
     pass: "counselor123", 
-    name: "Maria Theresa Cruz, RGC (Guidance Counselor)" 
+    name: "Maria Theresa Cruz, RGC" 
   },
   teacher: { 
     email: "teacher@sapc.edu.ph", 
     pass: "teacher123", 
-    name: "Prof. Ernesto Bautista (Class Adviser)" 
+    name: "Prof. Ernesto Bautista" 
   },
   admin: { 
     email: "admin@sapc.edu.ph", 
     pass: "admin123", 
-    name: "Administrator (SAPC IT & Guidance)" 
+    name: "Dr. Remedios Santos, Ed.D." 
   },
   student: { 
     email: "student@sapc.edu.ph", 
     pass: "student123", 
-    name: "Joshua Dimaculangan (Grade 11 STEM)",
+    name: "Joshua Dimaculangan",
     student_id: 1 
   },
   parent: { 
     email: "parent@sapc.edu.ph", 
     pass: "parent123", 
-    name: "Mrs. Elena Dimaculangan (Parent)",
+    name: "Mrs. Elena Dimaculangan",
     student_id: 1 
   }
 };
@@ -152,10 +152,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email.includes("admin") ? "admin" : "guidance_counselor"
       );
       const profile = DEMO_PROFILES[fallbackRole];
+
+      let storedName = profile.name;
+      if (typeof window !== "undefined") {
+        const savedCustom = localStorage.getItem("sapc_custom_profile");
+        if (savedCustom) {
+          try {
+            const parsed = JSON.parse(savedCustom);
+            if (parsed && (parsed.email === email || parsed.role === fallbackRole)) {
+              storedName = parsed.full_name || storedName;
+            }
+          } catch {
+            // keep fallback
+          }
+        }
+      }
+
+      // If custom non-demo email entered, format from email
+      if (email && !email.includes("student@sapc.edu.ph") && email.includes("@")) {
+        const localPart = email.split("@")[0].replace(/[._-]/g, " ");
+        const capitalized = localPart.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+        if (capitalized.length > 2) {
+          storedName = capitalized;
+        }
+      }
+
       const demoUser: UserProfile = {
         id: 1,
         email: email || profile.email,
-        full_name: profile.name,
+        full_name: storedName,
         role: fallbackRole,
         student_id: profile.student_id || null
       };
@@ -327,7 +352,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
         isLoading,
         serverError,
-        login: async (email, pass = "counselor123") => loginWithCredentials(email, pass),
+        login: async (email, pass = "counselor123", targetRole) => loginWithCredentials(email, pass, targetRole),
         loginWithGoogle,
         switchRole,
         updateUserProfile,

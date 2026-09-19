@@ -54,7 +54,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
       try {
         const studentsList = await fetchWithAuth("/students");
         if (studentsList && studentsList.length > 0) {
-          const s = studentsList[0];
+          const s = studentsList.find((st: any) => 
+            (user?.student_id && st.id === user.student_id) ||
+            (user?.email && st.email?.toLowerCase() === user.email.toLowerCase()) ||
+            (user?.full_name && `${st.first_name} ${st.last_name}`.toLowerCase() === user.full_name.toLowerCase())
+          ) || studentsList[0];
           setStudent(s);
 
           const [rRes, aRes] = await Promise.all([
@@ -132,7 +136,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
     };
 
     loadProfile();
-  }, []);
+  }, [user?.student_id, user?.email, user?.full_name]);
 
   if (!isMounted) {
     return (
@@ -160,7 +164,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
     health: riskData?.health_score || 10
   };
 
-  const displayName = user?.full_name || student?.first_name || "Student";
+  const displayName = user?.full_name || (student ? (student.full_name || `${student.first_name} ${student.last_name}`) : "Student");
   const displayLrn = student?.lrn || "109482719283";
   const displaySection = student?.section_name || "Grade 11 - STEM (St. Thomas Aquinas)";
   const displayAdviser = student?.adviser_name || "Mr. Roberto Santos, LPT";

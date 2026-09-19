@@ -87,6 +87,7 @@ export default function RegisterPage() {
   const [googleUserName, setGoogleUserName] = useState("SAPC Member");
 
   // Student form state
+  const [studentName, setStudentName] = useState("");
   const [lrn, setLrn] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
@@ -150,23 +151,23 @@ export default function RegisterPage() {
       if (activeTab === "student") {
         emailToUse = studentEmail || `student.${lrn}@sapc.edu.ph`;
         passToUse = studentPassword || "student123";
-        nameToUse = "Joshua Dimaculangan";
+        nameToUse = studentName.trim() || (lrn ? `Student ${lrn}` : "SAPC Student");
       } else if (activeTab === "teacher") {
         emailToUse = teacherEmail || "teacher.new@sapc.edu.ph";
         passToUse = teacherPassword || "teacher123";
-        nameToUse = teacherName || "Faculty Member";
+        nameToUse = teacherName.trim() || "Faculty Member";
       } else if (activeTab === "guidance_counselor") {
         emailToUse = counselorEmail || "counselor.new@sapc.edu.ph";
         passToUse = counselorPassword || "counselor123";
-        nameToUse = counselorName || "Registered Guidance Counselor";
+        nameToUse = counselorName.trim() || "Registered Guidance Counselor";
       } else if (activeTab === "parent") {
         emailToUse = parentEmail || "parent.new@sapc.edu.ph";
         passToUse = parentPassword || "parent123";
-        nameToUse = parentName || "Parent / Guardian";
+        nameToUse = parentName.trim() || "Parent / Guardian";
       } else if (activeTab === "admin") {
         emailToUse = adminEmail || "admin.directorate@sapc.edu.ph";
         passToUse = adminPassword || "admin123";
-        nameToUse = adminName || "Administrator";
+        nameToUse = adminName.trim() || "Administrator";
       }
 
       if (auth && db) {
@@ -178,8 +179,10 @@ export default function RegisterPage() {
           await setDoc(doc(db, "users", user.uid), {
             uid: user.uid,
             email: emailToUse,
+            name: nameToUse,
             displayName: nameToUse,
             role: roleToUse,
+            roleConfirmed: true,
             createdAt: serverTimestamp(),
             verified: true,
             metadata: {
@@ -199,6 +202,16 @@ export default function RegisterPage() {
         email: emailToUse,
         role: roleToUse
       });
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_custom_profile", JSON.stringify({
+          id: 1,
+          email: emailToUse,
+          full_name: nameToUse,
+          role: roleToUse,
+          student_id: activeTab === "student" ? 1 : null
+        }));
+      }
 
       await switchRole(roleToUse);
       setIsSubmitting(false);
@@ -364,6 +377,22 @@ export default function RegisterPage() {
               <form onSubmit={handleFormSubmit} className="space-y-4">
                 {activeTab === "student" && (
                   <>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Student Full Name *
+                      </label>
+                      <div className="relative">
+                        <User className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <input
+                          type="text"
+                          required
+                          value={studentName}
+                          onChange={(e) => setStudentName(e.target.value)}
+                          placeholder="e.g. Juan Carlos Dela Cruz"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                        />
+                      </div>
+                    </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         DepEd Learner Reference Number (LRN) *

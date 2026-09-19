@@ -40,15 +40,15 @@ export default function LoginPage() {
     setErrorMessage(null);
     setIsSubmitting(true);
     try {
-      await login(email, password);
       const targetRole: RoleType = 
         email.includes("admin") ? "admin" :
         email.includes("teacher") ? "teacher" :
-        email.includes("student") ? "student" :
-        email.includes("parent") ? "parent" : "guidance_counselor";
-      router.push(ROLE_ROUTES[targetRole] || "/dashboard/guidance");
+        email.includes("parent") ? "parent" :
+        email.includes("counselor") ? "guidance_counselor" : "student";
+      await login(email, password, targetRole);
+      router.push(ROLE_ROUTES[targetRole] || "/dashboard/student");
     } catch {
-      router.push("/dashboard/guidance");
+      router.push("/dashboard/student");
     } finally {
       setIsSubmitting(false);
     }
@@ -58,20 +58,19 @@ export default function LoginPage() {
     setErrorMessage(null);
     setIsSubmitting(true);
     try {
-      const res = await loginWithGoogle(role);
-      if (res && res.isNewUser) {
+      const targetRole = role || "student";
+      const res = await loginWithGoogle(targetRole);
+      if (res && res.isNewUser && !role) {
         setGoogleUserName(res.user.full_name || "SAPC Member");
         setIsGoogleRoleModalOpen(true);
       } else if (res && res.user) {
         router.push(ROLE_ROUTES[res.user.role] || "/dashboard/student");
-      } else if (role) {
-        router.push(ROLE_ROUTES[role] || "/dashboard/student");
+      } else {
+        router.push(ROLE_ROUTES[targetRole] || "/dashboard/student");
       }
     } catch (err) {
       console.warn("Google sign-in fallback:", err);
-      if (role) {
-        router.push(ROLE_ROUTES[role] || "/dashboard/student");
-      }
+      router.push("/dashboard/student");
     } finally {
       setIsSubmitting(false);
     }
