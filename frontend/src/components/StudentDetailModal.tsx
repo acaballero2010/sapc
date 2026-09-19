@@ -136,27 +136,33 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
       setIsLoading(true);
       try {
         const [sRes, rRes, rbRes, aRes, assRes] = await Promise.all([
-          fetchWithAuth(`/students/${studentId}`),
-          fetchWithAuth(`/risk/student/${studentId}`),
-          fetchWithAuth(`/analytics/student/${studentId}/risk-breakdown`),
-          fetchWithAuth(`/academic/student/${studentId}`),
-          fetchWithAuth(`/assessments/student/${studentId}`)
+          fetchWithAuth(`/students/${studentId}`).catch(() => null),
+          fetchWithAuth(`/risk/student/${studentId}`).catch(() => null),
+          fetchWithAuth(`/analytics/student/${studentId}/risk-breakdown`).catch(() => null),
+          fetchWithAuth(`/academic/student/${studentId}`).catch(() => null),
+          fetchWithAuth(`/assessments/student/${studentId}`).catch(() => null)
         ]);
 
-        if (sRes) setStudent(sRes);
-        if (rRes) setRiskData(rRes);
-        if (rbRes) setRiskBreakdown(rbRes);
-        if (aRes) setAcademicRecords(aRes);
-        if (assRes) setAssessments(assRes);
+        if (sRes) {
+          setStudent(sRes);
+          if (rRes) setRiskData(rRes);
+          if (rbRes) setRiskBreakdown(rbRes);
+          if (aRes) setAcademicRecords(aRes);
+          if (assRes) setAssessments(assRes);
 
-        if (isCounselor) {
-          try {
-            const notesRes = await fetchWithAuth(`/assessments/counselor-notes/student/${studentId}`);
-            if (notesRes) setCounselorNotes(notesRes);
-          } catch (e) {
-            console.warn("Could not load counselor notes:", e);
+          if (isCounselor) {
+            try {
+              const notesRes = await fetchWithAuth(`/assessments/counselor-notes/student/${studentId}`).catch(() => null);
+              if (notesRes) setCounselorNotes(notesRes);
+            } catch {
+              // Ignore offline notes
+            }
           }
+          return;
         }
+
+        // If backend is offline, use comprehensive mock data
+        throw new Error("Backend offline; using fallback profile");
       } catch (err) {
         console.warn("Using fallback mock data for student modal:", err);
         

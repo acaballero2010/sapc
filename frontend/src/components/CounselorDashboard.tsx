@@ -192,10 +192,10 @@ export const CounselorDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const [analyticsRes, studentsRes, flaggedRes, interventionsRes] = await Promise.all([
-        fetchWithAuth("/analytics/cohort-summary"),
-        fetchWithAuth("/students"),
-        fetchWithAuth("/chatbot/flagged-alerts"),
-        fetchWithAuth("/risk/interventions")
+        fetchWithAuth("/analytics/cohort-summary").catch(() => null),
+        fetchWithAuth("/students").catch(() => null),
+        fetchWithAuth("/chatbot/flagged-alerts").catch(() => null),
+        fetchWithAuth("/risk/interventions").catch(() => null)
       ]);
       if (analyticsRes) setAnalytics(analyticsRes);
       if (studentsRes && Array.isArray(studentsRes) && studentsRes.length > 0) setStudents(studentsRes);

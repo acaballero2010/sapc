@@ -14,9 +14,15 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
     delete (headers as Record<string, string>)["Content-Type"];
   }
 
-  // Create AbortController with 3.5s timeout to prevent hanging on offline backends
+  // Create AbortController with 1.5s timeout for fast offline/demo fallback
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3500);
+  const timeoutId = setTimeout(() => {
+    try {
+      controller.abort("Backend request timed out (offline demo mode)");
+    } catch {
+      controller.abort();
+    }
+  }, 1500);
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -38,9 +44,15 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
       throw new Error(errorDetail);
     }
 
-    return response.json();
+    return await response.json();
   } catch (err: any) {
     clearTimeout(timeoutId);
+    // Gracefully normalize AbortError / offline connection errors
+    if (err?.name === "AbortError" || err?.message?.includes("aborted") || err?.message?.includes("Failed to fetch")) {
+      const silentError = new Error("Backend offline or unreachable");
+      silentError.name = "OfflineError";
+      throw silentError;
+    }
     throw err;
   }
 }
