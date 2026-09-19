@@ -18,10 +18,13 @@ import {
   FileText, 
   Camera, 
   Upload, 
-  Trash2 
+  Trash2,
+  RotateCcw,
+  ImageIcon
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
+import { SapcLogo } from "./SapcLogo";
 
 interface AccountManagementModalProps {
   isOpen: boolean;
@@ -41,11 +44,18 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const { user, logout, updateUserProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<"profile" | "academic" | "privacy">("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   
   // Editable form fields
   const [fullName, setFullName] = useState(user?.full_name || "Maria Theresa Cruz, RGC");
   const [email] = useState(user?.email || "counselor@sapc.edu.ph");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
+  const [customLogo, setCustomLogo] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sapc_custom_logo");
+    }
+    return null;
+  });
   const [lrn, setLrn] = useState("109482719283");
   const [strand, setStrand] = useState("Grade 11 - STEM (Science, Technology, Engineering, and Mathematics)");
   const [section, setSection] = useState("Section A - St. Thomas Aquinas");
@@ -56,6 +66,42 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handleInstitutionalLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      setUploadError("Logo file size must be less than 4MB.");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please upload a valid image file (PNG, JPG, SVG, WebP).");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        localStorage.setItem("sapc_custom_logo", result);
+        setCustomLogo(result);
+        window.dispatchEvent(new Event("sapc_logo_updated"));
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetInstitutionalLogo = () => {
+    localStorage.removeItem("sapc_custom_logo");
+    setCustomLogo(null);
+    window.dispatchEvent(new Event("sapc_logo_updated"));
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
@@ -317,6 +363,68 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                         ))}
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Institutional / School Branding Logo Upload Section */}
+              <div className="p-4 bg-gradient-to-r from-amber-50/70 to-rose-50/50 border border-amber-200/80 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <ImageIcon className="h-3.5 w-3.5 text-[#8B0014]" />
+                      Institutional / Campus Logo
+                    </label>
+                    <p className="text-[11px] text-slate-600">Customize the site header & sidebar brand emblem</p>
+                  </div>
+                  <span className="text-[10px] font-bold bg-white text-slate-700 border border-amber-300 px-2 py-0.5 rounded-full shadow-2xs">
+                    PNG, SVG, JPG, WebP
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
+                  <div className="p-2 bg-white rounded-2xl border border-amber-300/80 shadow-xs shrink-0 flex items-center justify-center">
+                    <SapcLogo size={52} />
+                  </div>
+
+                  <div className="flex-1 space-y-2 text-center sm:text-left w-full">
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleInstitutionalLogoUpload}
+                      className="hidden"
+                    />
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => logoInputRef.current?.click()}
+                        className="px-3.5 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs shadow-2xs transition flex items-center gap-1.5"
+                      >
+                        <Upload className="h-3.5 w-3.5" />
+                        <span>{customLogo ? "Change Custom Logo" : "Upload School Logo"}</span>
+                      </button>
+
+                      {customLogo && (
+                        <button
+                          type="button"
+                          onClick={handleResetInstitutionalLogo}
+                          className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs"
+                          title="Restore the official vector emblem"
+                        >
+                          <RotateCcw className="h-3.5 w-3.5 text-amber-600" />
+                          <span>Reset to Official SAPC Seal</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <p className="text-[10px] text-slate-500">
+                      {customLogo 
+                        ? "Custom campus logo is currently active in the navigation header & sidebar."
+                        : "Using the default official San Antonio de Padua College vector seal emblem."
+                      }
+                    </p>
                   </div>
                 </div>
               </div>

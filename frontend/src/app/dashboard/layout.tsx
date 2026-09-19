@@ -72,18 +72,20 @@ export default function DashboardLayout({
           {/* Top Global Dashboard Header Bar */}
           <header className="sticky top-1.5 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between shadow-2xs gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              {/* Desktop Sidebar Toggle in Header */}
-              <button
-                type="button"
-                onClick={toggleCollapse}
-                className="hidden lg:flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition shadow-2xs shrink-0"
-                title={isCollapsed ? "Expand Sidebar (Widescreen Mode)" : "Collapse Sidebar"}
-                aria-label="Toggle Sidebar"
-              >
-                {isCollapsed ? <PanelLeftOpen className="h-4 w-4 text-[#8B0014]" /> : <PanelLeftClose className="h-4 w-4" />}
-              </button>
+              {/* Desktop Sidebar Expand Toggle in Header (only visible when sidebar is collapsed) */}
+              {isCollapsed && (
+                <button
+                  type="button"
+                  onClick={toggleCollapse}
+                  className="hidden lg:flex items-center justify-center h-9 w-9 rounded-xl text-slate-600 hover:text-[#8B0014] hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition shadow-2xs shrink-0"
+                  title="Expand Sidebar (Widescreen Mode)"
+                  aria-label="Expand Sidebar"
+                >
+                  <PanelLeftOpen className="h-4 w-4 text-[#8B0014]" />
+                </button>
+              )}
 
-              <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-[#8B0014] border border-rose-200 capitalize flex items-center gap-1.5 shadow-2xs shrink-0">
+              <span className="px-3 py-1.5 rounded-xl text-xs font-black bg-rose-50 text-[#8B0014] border border-rose-200 capitalize flex items-center gap-1.5 shadow-2xs shrink-0">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 {user?.role ? `${user.role.replace("_", " ")} Portal` : "SAPC Portal"}
               </span>
@@ -92,22 +94,22 @@ export default function DashboardLayout({
               </span>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsChatOpen(true)}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition shadow-2xs"
+                className="hidden sm:flex items-center gap-2 h-9 px-3.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 text-xs font-bold transition shadow-2xs"
               >
-                <Bot className="h-3.5 w-3.5 text-[#8B0014]" />
+                <Bot className="h-4 w-4 text-[#8B0014]" />
                 <span>AI Guidance</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsOnboardingOpen(true)}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
+                className="hidden md:flex items-center gap-2 h-9 px-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 hover:border-slate-300 text-xs font-bold transition shadow-2xs"
               >
-                <Compass className="h-3.5 w-3.5 text-[#8B0014]" />
+                <Compass className="h-4 w-4 text-[#8B0014]" />
                 <span>Tour</span>
               </button>
 
@@ -115,17 +117,17 @@ export default function DashboardLayout({
               <button
                 type="button"
                 onClick={() => setIsAccountOpen(true)}
-                className="flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-xl bg-slate-50 hover:bg-rose-50/70 border border-slate-200 hover:border-[#8B0014]/40 transition group shadow-2xs"
-                title="Click to manage account settings"
+                className="flex items-center gap-2.5 h-9 pl-1.5 pr-3.5 rounded-xl bg-slate-50 hover:bg-rose-50/70 border border-slate-200 hover:border-[#8B0014]/40 transition group shadow-2xs"
+                title="Click to manage account settings and institution logo"
               >
                 {user?.avatar_url ? (
                   <img
                     src={user.avatar_url}
                     alt={user.full_name}
-                    className="h-7 w-7 rounded-lg object-cover border border-amber-400/80 shadow-xs shrink-0"
+                    className="h-6 w-6 rounded-lg object-cover border border-amber-400/80 shadow-xs shrink-0"
                   />
                 ) : (
-                  <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/80 flex items-center justify-center text-white text-xs font-extrabold shadow-xs shrink-0">
+                  <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/80 flex items-center justify-center text-white text-[11px] font-extrabold shadow-xs shrink-0">
                     {user?.full_name ? user.full_name.charAt(0).toUpperCase() : <User className="h-3.5 w-3.5" />}
                   </div>
                 )}
@@ -133,7 +135,7 @@ export default function DashboardLayout({
                   <p className="text-xs font-bold text-slate-900 group-hover:text-[#8B0014] leading-tight truncate max-w-[120px]">
                     {user?.full_name || "Account"}
                   </p>
-                  <p className="text-[10px] text-slate-500 font-medium">Manage Profile →</p>
+                  <p className="text-[9px] text-slate-500 font-medium leading-none mt-0.5">Manage Profile →</p>
                 </div>
               </button>
             </div>
