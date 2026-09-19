@@ -271,8 +271,8 @@ export const LandingPage: React.FC = () => {
                         <strong className="text-base sm:text-lg font-black text-emerald-700 block mt-0.5">98.4% Resolution</strong>
                       </div>
                       <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Saaty AHP CR</span>
-                        <strong className="text-base sm:text-lg font-black text-amber-700 block mt-0.5">0.048 ≤ 0.10</strong>
+                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Campus Roles</span>
+                        <strong className="text-base sm:text-lg font-black text-amber-700 block mt-0.5">5 Portals</strong>
                       </div>
                       <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
                         <span className="text-[11px] text-slate-500 font-semibold block uppercase">Data Privacy</span>
@@ -585,25 +585,25 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <div className="lg:col-span-6 grid grid-cols-2 gap-4">
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2">
-                <span className="text-4xl font-black text-[#8B0014] block">40.17%</span>
-                <strong className="text-sm font-bold text-slate-900 block">Academic Weight (w_AC)</strong>
-                <p className="text-xs text-slate-500">Quarterly GPA, failing subjects & attendance</p>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-[#8B0014]/40 transition">
+                <span className="text-4xl font-black text-[#8B0014] block">1979</span>
+                <strong className="text-sm font-bold text-slate-900 block">Founded in Pila, Laguna</strong>
+                <p className="text-xs text-slate-500">47+ years of values-driven educational excellence</p>
               </div>
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2">
-                <span className="text-4xl font-black text-rose-600 block">24.42%</span>
-                <strong className="text-sm font-bold text-slate-900 block">Mental Health (w_MH)</strong>
-                <p className="text-xs text-slate-500">Psychological distress, anxiety & NLP signals</p>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-amber-400 transition">
+                <span className="text-4xl font-black text-amber-600 block">5 Domains</span>
+                <strong className="text-sm font-bold text-slate-900 block">Holistic Student Care</strong>
+                <p className="text-xs text-slate-500">Academic, mental health, financial, family & physical</p>
               </div>
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2">
-                <span className="text-4xl font-black text-amber-600 block">13.73%</span>
-                <strong className="text-sm font-bold text-slate-900 block">Financial Strain (w_FI)</strong>
-                <p className="text-xs text-slate-500">Tuition arrears & allowance sufficiency</p>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-emerald-400 transition">
+                <span className="text-4xl font-black text-emerald-600 block">100%</span>
+                <strong className="text-sm font-bold text-slate-900 block">RA 10173 Privacy Sealed</strong>
+                <p className="text-xs text-slate-500">Encrypted role-based access for student data protection</p>
               </div>
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2">
-                <span className="text-4xl font-black text-emerald-600 block">0.048</span>
-                <strong className="text-sm font-bold text-slate-900 block">Consistency Ratio (CR)</strong>
-                <p className="text-xs text-slate-500">Saaty standard verified (CR &le; 0.10)</p>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-blue-400 transition">
+                <span className="text-4xl font-black text-blue-600 block">24/7</span>
+                <strong className="text-sm font-bold text-slate-900 block">Guidance Support</strong>
+                <p className="text-xs text-slate-500">Real-time student companion & crisis counselor alerts</p>
               </div>
             </div>
           </div>
