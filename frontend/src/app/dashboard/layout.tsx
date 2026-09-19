@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatbotModal } from "@/components/ChatbotModal";
 import { SensitivitySimulator } from "@/components/SensitivitySimulator";
@@ -17,6 +17,16 @@ export default function DashboardLayout({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const showTour = sessionStorage.getItem("sapc_show_tour");
+      if (showTour === "true") {
+        setIsOnboardingOpen(true);
+        sessionStorage.removeItem("sapc_show_tour");
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">

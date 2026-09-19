@@ -170,14 +170,24 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleFinishAndEnter = async () => {
     onClose();
-    if (activeTab === "student_claim") {
-      await switchRole("student");
-    } else if (activeTab === "parent_link") {
-      await switchRole("parent");
-    } else {
-      await switchRole("teacher");
+    const targetRole = activeTab === "parent_link" ? "parent" : activeTab === "faculty_request" ? "teacher" : "student";
+    const targetRoute = 
+      targetRole === "parent" ? "/dashboard/parent" :
+      targetRole === "teacher" ? "/dashboard/teacher" : "/dashboard/student";
+    
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("sapc_show_tour", "true");
     }
-    router.push("/dashboard");
+    
+    if (!auth.currentUser) {
+      try {
+        await switchRole(targetRole);
+      } catch (err) {
+        console.warn("Switch role notice:", err);
+      }
+    }
+    
+    router.push(targetRoute);
   };
 
   return (
