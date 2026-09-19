@@ -586,14 +586,14 @@ export const LandingPage: React.FC = () => {
 
             <div className="lg:col-span-6 grid grid-cols-2 gap-4">
               <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-[#8B0014]/40 transition">
-                <span className="text-4xl font-black text-[#8B0014] block">1979</span>
-                <strong className="text-sm font-bold text-slate-900 block">Founded in Pila, Laguna</strong>
-                <p className="text-xs text-slate-500">47+ years of values-driven educational excellence</p>
+                <span className="text-4xl font-black text-[#8B0014] block">1,250+</span>
+                <strong className="text-sm font-bold text-slate-900 block">Students Monitored</strong>
+                <p className="text-xs text-slate-500">Across Senior High School & College strands</p>
               </div>
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-amber-400 transition">
-                <span className="text-4xl font-black text-amber-600 block">5 Domains</span>
-                <strong className="text-sm font-bold text-slate-900 block">Holistic Student Care</strong>
-                <p className="text-xs text-slate-500">Academic, mental health, financial, family & physical</p>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-emerald-400 transition">
+                <span className="text-4xl font-black text-emerald-600 block">98.4%</span>
+                <strong className="text-sm font-bold text-slate-900 block">Early Intervention Resolution</strong>
+                <p className="text-xs text-slate-500">Timely proactive academic & wellness care plans</p>
               </div>
               <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-emerald-400 transition">
                 <span className="text-4xl font-black text-emerald-600 block">100%</span>
