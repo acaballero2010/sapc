@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
   Brain, 
@@ -13,160 +14,112 @@ import {
   Layers, 
   ArrowRight, 
   CheckCircle2, 
-  Lock, 
-  Mail, 
-  FileSpreadsheet, 
   HeartHandshake,
   ChevronRight,
-  School
+  ChevronLeft,
+  School,
+  Activity,
+  Award,
+  FileSpreadsheet
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
-import { useAuth, RoleType } from "@/lib/auth-context";
 import { RegistrationModal } from "./RegistrationModal";
 import { GoogleRoleSelectionModal } from "./GoogleRoleSelectionModal";
 
 export const LandingPage: React.FC = () => {
-  const router = useRouter();
-  const { login, loginWithGoogle, switchRole } = useAuth();
-  const [email, setEmail] = useState("counselor@sapc.edu.ph");
-  const [password, setPassword] = useState("counselor123");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [portalMode, setPortalMode] = useState<"quick_eval" | "credentials">("quick_eval");
+  const _router = useRouter();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [activeTab, setActiveTab] = useState<"counselor" | "teacher" | "student" | "parent">("counselor");
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [isGoogleRoleModalOpen, setIsGoogleRoleModalOpen] = useState(false);
-  const [googleUserName, setGoogleUserName] = useState("SAPC Member");
+  const [googleUserName] = useState("SAPC Member");
 
-  const quickRoles: { 
-    role: RoleType; 
-    label: string; 
-    personName: string;
-    email: string; 
-    pass: string; 
-    icon: string; 
-    desc: string; 
-    badge: string;
-    badgeColor: string;
-  }[] = [
-    { 
-      role: "guidance_counselor", 
-      label: "Guidance Counselor", 
-      personName: "Maria Theresa Cruz, RGC",
-      email: "counselor@sapc.edu.ph", 
-      pass: "counselor123", 
-      icon: "🧠", 
-      desc: "Crisis triage, AHP 5-domain decomposition, voice dictation & SPI clinical notes",
-      badge: "Crisis Triage",
-      badgeColor: "bg-rose-100 text-[#8B0014] border-rose-200"
+  const slides = [
+    {
+      id: "ahp-synthesis",
+      tag: '"A College for the Family" • Pila, Laguna • Est. 1979',
+      tagIcon: <Sparkles className="h-4 w-4 text-amber-500" />,
+      tagColor: "bg-amber-50 text-amber-900 border-amber-300",
+      headline: "Intelligent Student Decision Support System",
+      headlineGradient: "from-[#8B0014] via-[#B91C1C] to-[#D97706]",
+      subhead: "Multi-Criteria Failure Prevention Powered by the Analytic Hierarchy Process (AHP)",
+      description: "SAPC IntellySys is an institutional decision support platform uniting quarterly SASS academic metrics with Mental Health, Financial, Family, and Physical Wellness factors to calculate calibrated composite failure risk before grades decline.",
+      pillars: [
+        { label: "AHP Multi-Factor", sub: "5-Domain Synthesis", icon: <Layers className="h-4.5 w-4.5 text-[#D97706]" />, bg: "bg-amber-50 border-amber-200" },
+        { label: "Saaty Rigor", sub: "CR = 0.048 ≤ 0.10", icon: <Award className="h-4.5 w-4.5 text-emerald-600" />, bg: "bg-emerald-50 border-emerald-200" },
+        { label: "RA 10173 Privacy", sub: "Encrypted RBAC", icon: <ShieldCheck className="h-4.5 w-4.5 text-[#8B0014]" />, bg: "bg-rose-50 border-rose-200" }
+      ],
+      primaryCta: { label: "Access Decision Portal", href: "/login" },
+      secondaryCta: { label: "Explore 5 Domains", href: "#features" },
+      previewType: "ahp_matrix"
     },
-    { 
-      role: "teacher", 
-      label: "Class Adviser", 
-      personName: "Mr. Roberto Santos, LPT (STEM)",
-      email: "teacher@sapc.edu.ph", 
-      pass: "teacher123", 
-      icon: "📚", 
-      desc: "SASS grade CSV ingestion, deterministic academic risk & attendance roster",
-      badge: "SASS Ingestion",
-      badgeColor: "bg-amber-100 text-amber-900 border-amber-300"
+    {
+      id: "ai-counselor",
+      tag: "24/7 AI Guidance Counselor • Tagalog / Taglish NLP",
+      tagIcon: <Bot className="h-4 w-4 text-rose-600" />,
+      tagColor: "bg-rose-50 text-[#8B0014] border-rose-300",
+      headline: "Real-Time Mental Health & Crisis Triage Engine",
+      headlineGradient: "from-rose-700 via-pink-600 to-amber-600",
+      subhead: "Autonomous PHQ-9 & GAD-7 Distress Signal Detection and Counselor Escalation",
+      description: "Empowering SAPC students with a safe, confidential Taglish AI guidance companion that detects clinical distress indicators in conversational dialogue and instantly triages priority case files to registered counselors.",
+      pillars: [
+        { label: "Taglish NLP Triage", sub: "Crisis Escalation", icon: <Bot className="h-4.5 w-4.5 text-rose-600" />, bg: "bg-rose-50 border-rose-200" },
+        { label: "PHQ-9 / GAD-7", sub: "Clinical Screener", icon: <Activity className="h-4.5 w-4.5 text-purple-600" />, bg: "bg-purple-50 border-purple-200" },
+        { label: "SPI Confidentiality", sub: "Counselor Case File", icon: <ShieldCheck className="h-4.5 w-4.5 text-emerald-600" />, bg: "bg-emerald-50 border-emerald-200" }
+      ],
+      primaryCta: { label: "Launch AI Counselor", href: "/login" },
+      secondaryCta: { label: "Guidance Workflow", href: "/login" },
+      previewType: "nlp_triage"
     },
-    { 
-      role: "student", 
-      label: "Student Portal", 
-      personName: "Joshua Dimaculangan (Grade 11)",
-      email: "student@sapc.edu.ph", 
-      pass: "student123", 
-      icon: "🎓", 
-      desc: "Wellness radar, daily mood tracker, 60s breathing guide & goal simulator",
-      badge: "Wellness Radar",
-      badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300"
+    {
+      id: "sass-adviser",
+      tag: "Class Adviser Ecosystem • DepEd / CHED SASS Ingestion",
+      tagIcon: <School className="h-4 w-4 text-amber-600" />,
+      tagColor: "bg-amber-50 text-amber-900 border-amber-300",
+      headline: "SASS Grade Ingestion & 1-Click Faculty Referrals",
+      headlineGradient: "from-amber-700 via-[#8B0014] to-red-600",
+      subhead: "Streamline Quarterly Advisory Class Monitoring and Instant Guidance Endorsements",
+      description: "Teachers and strand advisers effortlessly upload SASS quarterly CSV grade sheets to compute deterministic academic risk, track attendance deficits, and dispatch 1-click confidential student referrals to the guidance department.",
+      pillars: [
+        { label: "CSV Ingestion", sub: "Quarterly SASS Sync", icon: <BookOpen className="h-4.5 w-4.5 text-amber-700" />, bg: "bg-amber-50 border-amber-200" },
+        { label: "1-Click Referral", sub: "Faculty to Counselor", icon: <HeartHandshake className="h-4.5 w-4.5 text-[#8B0014]" />, bg: "bg-rose-50 border-rose-200" },
+        { label: "Absence Tracker", sub: "Early Warning Alert", icon: <Activity className="h-4.5 w-4.5 text-blue-600" />, bg: "bg-blue-50 border-blue-200" }
+      ],
+      primaryCta: { label: "Class Adviser Portal", href: "/login" },
+      secondaryCta: { label: "Register as Faculty", href: "/register" },
+      previewType: "teacher_roster"
     },
-    { 
-      role: "parent", 
-      label: "Parent / Guardian", 
-      personName: "Mrs. Elena Dimaculangan",
-      email: "parent@sapc.edu.ph", 
-      pass: "parent123", 
-      icon: "👨‍👩‍👦", 
-      desc: "Linked child GPA standing, meeting notifications & 1-click consultation RSVP",
-      badge: "Parent Alerts",
-      badgeColor: "bg-blue-100 text-blue-900 border-blue-300"
-    },
-    { 
-      role: "admin", 
-      label: "System Administrator", 
-      personName: "IT & Guidance Central Directorate",
-      email: "admin@sapc.edu.ph", 
-      pass: "admin123", 
-      icon: "⚙️", 
-      desc: "AHP decision criteria weights, Saaty CR validation & RA 10173 audit trail",
-      badge: "Audit & Matrix",
-      badgeColor: "bg-purple-100 text-purple-900 border-purple-300"
+    {
+      id: "stakeholder-ecosystem",
+      tag: "5 Dedicated Institutional Roles • Connected Campus",
+      tagIcon: <Users className="h-4 w-4 text-blue-600" />,
+      tagColor: "bg-blue-50 text-blue-900 border-blue-300",
+      headline: "Empowering Students, Parents, Faculty & Administration",
+      headlineGradient: "from-blue-700 via-indigo-700 to-[#8B0014]",
+      subhead: "Unified Portals: Student Wellness Radars, Parent SMS Alerts & Longitudinal Trends",
+      description: "Connecting the entire SAPC family in a unified multi-role portal: students track wellness goals, parents receive automated consultation alerts, teachers manage advisory classes, and counselors deliver proactive care plans.",
+      pillars: [
+        { label: "5 Role Portals", sub: "Tailored Dashboards", icon: <Users className="h-4.5 w-4.5 text-blue-600" />, bg: "bg-blue-50 border-blue-200" },
+        { label: "Parent Progress", sub: "SMS & Consultation", icon: <HeartHandshake className="h-4.5 w-4.5 text-emerald-600" />, bg: "bg-emerald-50 border-emerald-200" },
+        { label: "Longitudinal Trends", sub: "Multi-Term Analytics", icon: <Layers className="h-4.5 w-4.5 text-purple-600" />, bg: "bg-purple-50 border-purple-200" }
+      ],
+      primaryCta: { label: "Claim / Register Account", href: "/register" },
+      secondaryCta: { label: "Sign In to Portal", href: "/login" },
+      previewType: "roles_grid"
     }
   ];
 
-  const ROLE_ROUTES: Record<RoleType, string> = {
-    guidance_counselor: "/dashboard/guidance",
-    teacher: "/dashboard/teacher",
-    student: "/dashboard/student",
-    parent: "/dashboard/parent",
-    admin: "/dashboard/admin"
-  };
+  // Auto-advance carousel every 6 seconds unless paused
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [isPaused, slides.length]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      await login(email, password);
-      const targetRole: RoleType = 
-        email.includes("admin") ? "admin" :
-        email.includes("teacher") ? "teacher" :
-        email.includes("student") ? "student" :
-        email.includes("parent") ? "parent" : "guidance_counselor";
-      router.push(ROLE_ROUTES[targetRole] || "/dashboard/guidance");
-    } catch {
-      router.push("/dashboard/guidance");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleGoogleSignIn = async (role?: RoleType) => {
-    setIsSubmitting(true);
-    try {
-      const res = await loginWithGoogle(role);
-      if (res && res.isNewUser) {
-        setGoogleUserName(res.user.full_name || "SAPC Member");
-        setIsGoogleRoleModalOpen(true);
-      } else if (res && res.user) {
-        router.push(ROLE_ROUTES[res.user.role] || "/dashboard/student");
-      } else if (role) {
-        router.push(ROLE_ROUTES[role] || "/dashboard/student");
-      }
-    } catch (err) {
-      console.warn("Google sign-in caught:", err);
-      if (role) {
-        router.push(ROLE_ROUTES[role] || "/dashboard/student");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleQuickSelect = async (roleObj: typeof quickRoles[0]) => {
-    setEmail(roleObj.email);
-    setPassword(roleObj.pass);
-    setIsSubmitting(true);
-    try {
-      await switchRole(roleObj.role);
-      router.push(ROLE_ROUTES[roleObj.role] || "/dashboard/guidance");
-    } catch {
-      router.push(ROLE_ROUTES[roleObj.role] || "/dashboard/guidance");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const activeSlide = slides[currentSlide];
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900">
@@ -177,7 +130,7 @@ export const LandingPage: React.FC = () => {
       <header className="sticky top-1.5 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <SapcLogo size={44} showText={false} />
+            <SapcLogo size={44} />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-xl text-slate-900 tracking-tight">
@@ -202,381 +155,398 @@ export const LandingPage: React.FC = () => {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => setIsRegistrationOpen(true)}
+            <Link
+              href="/register"
               className="hidden sm:flex px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold text-xs sm:text-sm border border-amber-300 transition items-center gap-1.5 shadow-2xs"
             >
               <Users className="h-4 w-4 text-[#8B0014]" />
               <span>Claim / Register</span>
-            </button>
-            <a
-              href="#login-section"
+            </Link>
+            <Link
+              href="/login"
               className="px-5 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm flex items-center gap-2 shadow-sm transition active:scale-95"
             >
               <span>Access Portal</span>
               <ArrowRight className="h-4 w-4 text-white" />
-            </a>
+            </Link>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-16 lg:pb-24 bg-gradient-to-b from-white via-slate-50/60 to-white">
-        {/* Subtle Decorative Ambient Background Blooms */}
+      {/* Hero Carousel Section */}
+      <section 
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        className="relative overflow-hidden pt-8 pb-16 lg:pt-12 lg:pb-20 bg-gradient-to-b from-white via-slate-50/70 to-white"
+      >
+        {/* Ambient Glows */}
         <div className="absolute top-10 left-1/4 -translate-x-1/2 w-96 h-96 bg-amber-200/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-20 right-1/4 w-96 h-96 bg-rose-200/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          
+          {/* Carousel Slide Tabs */}
+          <div className="flex items-center justify-between gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none border-b border-slate-200/80">
+            <div className="flex items-center gap-2 min-w-max">
+              {slides.map((s, idx) => (
+                <button
+                  key={s.id}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 ${
+                    currentSlide === idx
+                      ? "bg-[#8B0014] text-white shadow-sm"
+                      : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <span>0{idx + 1}.</span>
+                  <span>{s.tag.split("•")[0].replace(/"/g, "").trim()}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Arrows */}
+            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))}
+                aria-label="Previous Slide"
+                className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
+                aria-label="Next Slide"
+                className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Active Slide Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center min-h-[480px]">
             
-            {/* Left Hero Content */}
-            <div className="lg:col-span-7 space-y-6 text-left pt-2">
+            {/* Left Hero Text */}
+            <div className="lg:col-span-7 space-y-6 text-left animate-fadeIn">
               
-              {/* Institution Tagline Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200/90 text-[#8B0014] text-xs sm:text-sm font-extrabold shadow-xs">
-                <Sparkles className="h-4 w-4 text-[#8B0014]" />
-                <span>&quot;A College for the Family&quot; • Pila, Laguna</span>
-                <span className="hidden sm:inline text-rose-300">•</span>
-                <span className="hidden sm:inline text-xs font-semibold text-rose-900/80">Est. 1979</span>
+              {/* Slide Badge */}
+              <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-extrabold shadow-xs ${activeSlide.tagColor}`}>
+                {activeSlide.tagIcon}
+                <span>{activeSlide.tag}</span>
               </div>
 
               {/* Main Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.12]">
-                Intelligent Student <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B0014] via-[#B91C1C] to-[#D97706]">
-                  Decision Support System
-                </span>
-              </h1>
+              <div className="space-y-2">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-[1.14]">
+                  {activeSlide.headline.split(" ").slice(0, 3).join(" ")}{" "}
+                  <span className={`text-transparent bg-clip-text bg-gradient-to-r ${activeSlide.headlineGradient} block sm:inline`}>
+                    {activeSlide.headline.split(" ").slice(3).join(" ")}
+                  </span>
+                </h1>
+                <p className="text-sm sm:text-base font-bold text-[#8B0014]">
+                  {activeSlide.subhead}
+                </p>
+              </div>
 
-              {/* Lead Paragraph */}
-              <p className="text-base sm:text-lg text-slate-700 leading-relaxed max-w-2xl font-normal">
-                SAPC IntellySys is an institutional multi-criteria failure prevention platform designed for 
-                <strong className="text-slate-900 font-semibold"> San Antonio de Padua College</strong>. It unites SASS academic 
-                records with Mental Health, Financial, Family, and Physical Wellness factors using the 
-                <strong className="text-slate-900 font-semibold"> Analytic Hierarchy Process (AHP)</strong> and 
-                <strong className="text-slate-900 font-semibold"> NLP crisis triage</strong>.
+              {/* Description */}
+              <p className="text-sm sm:text-base text-slate-700 leading-relaxed max-w-2xl font-normal">
+                {activeSlide.description}
               </p>
 
               {/* 3 Pillar Feature Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                <div className="flex items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs hover:border-amber-300 transition">
-                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200/80 text-[#D97706] shrink-0">
-                    <Layers className="h-4.5 w-4.5" />
+                {activeSlide.pillars.map((pil, pIdx) => (
+                  <div 
+                    key={pIdx}
+                    className={`flex items-center gap-3 bg-white p-3.5 rounded-2xl border shadow-2xs transition hover:shadow-xs ${pil.bg}`}
+                  >
+                    <div className="p-2 rounded-xl bg-white/80 border border-slate-200/80 shrink-0 shadow-2xs">
+                      {pil.icon}
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block leading-tight">{pil.label}</span>
+                      <span className="text-[11px] text-slate-500 font-medium">{pil.sub}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block leading-tight">AHP Multi-Factor</span>
-                    <span className="text-[11px] text-slate-500 font-medium">5-Domain Matrix</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs hover:border-emerald-300 transition">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-700 shrink-0">
-                    <ShieldCheck className="h-4.5 w-4.5" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block leading-tight">RA 10173 Privacy</span>
-                    <span className="text-[11px] text-slate-500 font-medium">Encrypted RBAC</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs hover:border-rose-300 transition">
-                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200/80 text-[#8B0014] shrink-0">
-                    <Bot className="h-4.5 w-4.5" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block leading-tight">24/7 AI Triage</span>
-                    <span className="text-[11px] text-slate-500 font-medium">Taglish Distress NLP</span>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex flex-wrap items-center gap-4">
-                <a
-                  href="#login-section"
-                  className="px-7 py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-base shadow-md transition active:scale-95 flex items-center gap-2.5 group"
+              <div className="pt-2 flex flex-wrap items-center gap-3.5">
+                <Link
+                  href={activeSlide.primaryCta.href}
+                  className="px-6 py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm sm:text-base shadow-md transition active:scale-95 flex items-center gap-2.5 group"
                 >
-                  <span>Launch Decision Portal</span>
-                  <ChevronRight className="h-5 w-5 text-white group-hover:translate-x-0.5 transition-transform" />
-                </a>
-                <a
-                  href="#how-it-works"
-                  className="px-6 py-3.5 rounded-xl bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200 font-semibold text-base transition shadow-xs"
+                  <span>{activeSlide.primaryCta.label}</span>
+                  <ChevronRight className="h-4 w-4 text-white group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+
+                <Link
+                  href={activeSlide.secondaryCta.href}
+                  className="px-5 py-3.5 rounded-xl bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200 font-semibold text-sm sm:text-base transition shadow-xs"
                 >
-                  Explore AHP Methodology
-                </a>
+                  {activeSlide.secondaryCta.label}
+                </Link>
               </div>
 
               {/* Live Metric Stats Strip */}
               <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-slate-200/80">
                 <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                  <span className="text-xs text-slate-500 font-semibold block">Monitored Students</span>
-                  <strong className="text-lg font-black text-slate-900 block mt-0.5">1,250+</strong>
+                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Monitored</span>
+                  <strong className="text-base sm:text-lg font-black text-slate-900 block mt-0.5">1,250+ Students</strong>
                 </div>
                 <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                  <span className="text-xs text-slate-500 font-semibold block">Intervention SLA</span>
-                  <strong className="text-lg font-black text-emerald-700 block mt-0.5">98.4%</strong>
+                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Intervention SLA</span>
+                  <strong className="text-base sm:text-lg font-black text-emerald-700 block mt-0.5">98.4% Resolution</strong>
                 </div>
                 <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                  <span className="text-xs text-slate-500 font-semibold block">Saaty AHP (CR)</span>
-                  <strong className="text-lg font-black text-amber-700 block mt-0.5">0.048 ≤ 0.10</strong>
+                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Saaty AHP CR</span>
+                  <strong className="text-base sm:text-lg font-black text-amber-700 block mt-0.5">0.048 ≤ 0.10</strong>
                 </div>
                 <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                  <span className="text-xs text-slate-500 font-semibold block">Data Privacy</span>
-                  <strong className="text-lg font-black text-[#8B0014] block mt-0.5">RA 10173 SPI</strong>
+                  <span className="text-[11px] text-slate-500 font-semibold block uppercase">Data Privacy</span>
+                  <strong className="text-base sm:text-lg font-black text-[#8B0014] block mt-0.5">RA 10173 SPI</strong>
                 </div>
               </div>
 
             </div>
 
-            {/* Right Login / Quick Access Card */}
-            <div id="login-section" className="lg:col-span-5 scroll-mt-24 w-full">
-              <div className="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 relative overflow-hidden">
+            {/* Right Showcase Card */}
+            <div className="lg:col-span-5 w-full">
+              <div className="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-xl space-y-5 relative overflow-hidden">
                 
                 {/* Decorative Top Accent Bar */}
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#D97706] via-[#F59E0B] to-[#8B0014]" />
+                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#D97706] via-[#8B0014] to-amber-400" />
 
-                {/* Card Header */}
-                <div className="space-y-3 pb-3 border-b border-slate-100 pt-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-2xl bg-[#8B0014]/10 border border-[#8B0014]/20 flex items-center justify-center p-1.5 shrink-0 shadow-2xs">
-                        <SapcLogo className="h-7 w-7 object-contain" />
+                {/* SHOWCASE 1: AHP Multi-Domain Matrix */}
+                {activeSlide.previewType === "ahp_matrix" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-xl bg-amber-100 text-amber-900">
+                          <Layers className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-slate-900">AHP Calibrated Criteria Weights</h3>
+                          <span className="text-[11px] text-slate-500">Saaty Eigenvector Vector Synthesis</span>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">
-                          SAPC Decision Portal
-                        </h3>
-                        <p className="text-[11px] text-slate-500 font-semibold">
-                          San Antonio de Padua College
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
-                      <ShieldCheck className="h-3 w-3 text-emerald-600" />
-                      RA 10173 RBAC
-                    </span>
-                  </div>
-
-                  {/* Segmented Mode Selector */}
-                  <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs font-bold">
-                    <button
-                      type="button"
-                      onClick={() => setPortalMode("quick_eval")}
-                      className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                        portalMode === "quick_eval"
-                          ? "bg-white text-slate-900 shadow-xs border border-slate-200"
-                          : "text-slate-500 hover:text-slate-800"
-                      }`}
-                    >
-                      <span className="text-amber-500">⚡</span>
-                      <span>1-Click Evaluation</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPortalMode("credentials")}
-                      className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                        portalMode === "credentials"
-                          ? "bg-white text-slate-900 shadow-xs border border-slate-200"
-                          : "text-slate-500 hover:text-slate-800"
-                      }`}
-                    >
-                      <span className="text-[#8B0014]">🔑</span>
-                      <span>Institutional Login</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* MODE 1: 1-Click Evaluation Quick Select (All 5 Roles) */}
-                {portalMode === "quick_eval" && (
-                  <div className="space-y-3 animate-fadeIn">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-slate-600">
-                        Select a stakeholder profile to explore live:
-                      </p>
-                      <span className="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                        5 Live Portals
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        CR: 0.048
                       </span>
                     </div>
 
-                    <div className="space-y-2">
-                      {quickRoles.map((r) => (
-                        <button
-                          key={r.role}
-                          type="button"
-                          onClick={() => handleQuickSelect(r)}
-                          disabled={isSubmitting}
-                          className="w-full text-left p-3 rounded-2xl bg-slate-50/80 hover:bg-rose-50/70 border border-slate-200 hover:border-[#8B0014]/40 transition-all group flex items-center justify-between gap-3 shadow-2xs hover:shadow-xs active:scale-[0.99]"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-xl shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
-                              {r.icon}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="font-extrabold text-xs text-slate-900 group-hover:text-[#8B0014] truncate">
-                                  {r.label}
-                                </span>
-                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-md border ${r.badgeColor} shrink-0`}>
-                                  {r.badge}
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                                {r.personName}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-[#8B0014] group-hover:translate-x-0.5 transition-all">
-                            <span>Launch</span>
-                            <ChevronRight className="h-4 w-4" />
-                          </div>
-                        </button>
-                      ))}
+                    <div className="space-y-2 text-xs">
+                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <BookOpen className="h-3.5 w-3.5 text-[#8B0014]" /> Academic Domain (w_AC)
+                        </span>
+                        <strong className="text-[#8B0014] font-black">40.17% (0.4017)</strong>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <Brain className="h-3.5 w-3.5 text-rose-600" /> Mental Health Domain (w_MH)
+                        </span>
+                        <strong className="text-rose-700 font-black">24.42% (0.2442)</strong>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <Activity className="h-3.5 w-3.5 text-amber-600" /> Financial Overdue Domain (w_FI)
+                        </span>
+                        <strong className="text-amber-800 font-black">13.73% (0.1373)</strong>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <Users className="h-3.5 w-3.5 text-blue-600" /> Family Support Domain (w_FA)
+                        </span>
+                        <strong className="text-blue-800 font-black">13.73% (0.1373)</strong>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                          <Activity className="h-3.5 w-3.5 text-emerald-600" /> Physical Wellness Domain (w_HE)
+                        </span>
+                        <strong className="text-emerald-800 font-black">7.94% (0.0794)</strong>
+                      </div>
                     </div>
+
+                    <Link
+                      href="/login"
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <span>Simulate AHP What-If Scenarios</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
                   </div>
                 )}
 
-                {/* MODE 2: Institutional Login Form */}
-                {portalMode === "credentials" && (
-                  <div className="space-y-4 text-left animate-fadeIn">
-                    
-                    {/* Google Sign-in Spotlight */}
-                    <button
-                      type="button"
-                      onClick={() => handleGoogleSignIn()}
-                      disabled={isSubmitting}
-                      className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm border-2 border-slate-200 hover:border-slate-300 shadow-xs transition flex items-center justify-center gap-3 group active:scale-[0.99]"
-                    >
-                      <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                      </svg>
-                      <span>Sign in with Google Workspace</span>
-                    </button>
-
-                    {/* Centered Divider */}
-                    <div className="relative flex items-center justify-center my-3">
-                      <div className="border-t border-slate-200 w-full" />
-                      <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
-                        or institutional credentials
+                {/* SHOWCASE 2: NLP Crisis Triage */}
+                {activeSlide.previewType === "nlp_triage" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-xl bg-rose-100 text-rose-800">
+                          <Bot className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-slate-900">Taglish Guidance Dialogue</h3>
+                          <span className="text-[11px] text-slate-500">Clinical Screener & Crisis Detection</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                        Distress: 88/100
                       </span>
                     </div>
 
-                    {/* Role Quick Fill Preset Switcher */}
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-slate-700">Quick Fill Demo Roles:</span>
-                        <span className="text-[10px] text-slate-400 font-semibold">1-Click Auto Fill</span>
+                    <div className="space-y-2.5 text-xs">
+                      <div className="p-3 rounded-2xl bg-slate-100 text-slate-800 self-start max-w-[90%]">
+                        <span className="font-bold text-slate-900 block mb-0.5">Student (Joshua):</span>
+                        &quot;Sobrang nahihirapan na po ako sa Chemistry at Pre-Cal. Hindi na po ako makatulog sa gabi.&quot;
                       </div>
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {quickRoles.map((qr) => {
-                          const isActive = email === qr.email;
-                          return (
-                            <button
-                              key={qr.role}
-                              type="button"
-                              onClick={() => {
-                                setEmail(qr.email);
-                                setPassword(qr.pass);
-                              }}
-                              className={`py-1.5 px-1 rounded-xl text-[11px] font-bold border transition flex flex-col items-center justify-center gap-0.5 ${
-                                isActive
-                                  ? "bg-[#8B0014] text-white border-[#8B0014] shadow-xs"
-                                  : "bg-white text-slate-700 hover:text-[#8B0014] hover:bg-rose-50/50 border-slate-200"
-                              }`}
-                            >
-                              <span className="text-sm">{qr.icon}</span>
-                              <span className="truncate text-[10px]">{qr.label.split(" ")[0]}</span>
-                            </button>
-                          );
-                        })}
+                      <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-950 self-end">
+                        <span className="font-bold text-[#8B0014] block mb-0.5">SAPC Guidance AI:</span>
+                        &quot;Naiintindihan ko, Joshua. Normal makaramdam ng overwhelm. Naka-flag na ito sa guidance counselor para matulungan ka sa academic support plan.&quot;
                       </div>
                     </div>
 
-                    <form onSubmit={handleLogin} className="space-y-3.5">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">SAPC Email / LRN</label>
-                        <div className="relative">
-                          <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="text"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="counselor@sapc.edu.ph"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#8B0014]/20 focus:border-[#8B0014] transition"
-                          />
+                    <Link
+                      href="/login"
+                      className="w-full py-2.5 px-4 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <span>Open Counselor Triage Queue</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                )}
+
+                {/* SHOWCASE 3: Teacher Advisory & Ingestion */}
+                {activeSlide.previewType === "teacher_roster" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
+                          <School className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-slate-900">Advisory Class Roster</h3>
+                          <span className="text-[11px] text-slate-500">Grade 11 - St. Augustine (STEM)</span>
                         </div>
                       </div>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                        42 Students
+                      </span>
+                    </div>
 
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="text-xs font-bold text-slate-700">Password</label>
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="text-[11px] font-semibold text-slate-500 hover:text-slate-800"
-                          >
-                            {showPassword ? "Hide" : "Show"}
-                          </button>
+                    <div className="space-y-2 text-xs">
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div>
+                          <strong className="text-slate-900 block">Joshua Dimaculangan</strong>
+                          <span className="text-[11px] text-slate-500">LRN: 109238475612 • 2 Failing Marks</span>
                         </div>
-                        <div className="relative">
-                          <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type={showPassword ? "text" : "password"}
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#8B0014]/20 focus:border-[#8B0014] transition"
-                          />
+                        <span className="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-200">
+                          High Risk (69.8)
+                        </span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div>
+                          <strong className="text-slate-900 block">Angelica Dela Cruz</strong>
+                          <span className="text-[11px] text-slate-500">LRN: 109238475613 • Tuition Overdue</span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] border border-amber-200">
+                          Medium Risk (45.2)
+                        </span>
+                      </div>
+                    </div>
+
+                    <Link
+                      href="/login"
+                      className="w-full py-2.5 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <span>Ingest SASS CSV & Refer Students</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                )}
+
+                {/* SHOWCASE 4: 5 Roles Grid */}
+                {activeSlide.previewType === "roles_grid" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-xl bg-blue-100 text-blue-800">
+                          <Users className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-slate-900">5 Institutional Role Portals</h3>
+                          <span className="text-[11px] text-slate-500">Select any role to explore live</span>
                         </div>
                       </div>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300">
+                        Live Access
+                      </span>
+                    </div>
 
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#8B0014] via-[#7B0012] to-[#5A000D] hover:from-[#7B0012] hover:to-[#4A000A] text-white font-extrabold text-sm shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-60"
+                    <div className="space-y-2 text-xs">
+                      <Link 
+                        href="/login"
+                        className="p-2.5 rounded-xl bg-rose-50/70 hover:bg-rose-100/80 border border-rose-200 flex items-center justify-between transition group"
                       >
-                        {isSubmitting ? (
-                          <div className="flex items-center gap-2">
-                            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            <span>Authenticating Session...</span>
-                          </div>
-                        ) : (
-                          <>
-                            <span>Authenticate & Enter Portal</span>
-                            <ArrowRight className="h-4 w-4" />
-                          </>
-                        )}
-                      </button>
-                    </form>
+                        <span className="font-extrabold text-slate-900">🧠 Guidance Counselor (Crisis Triage)</span>
+                        <span className="text-[#8B0014] font-bold group-hover:translate-x-0.5 transition">Login →</span>
+                      </Link>
+                      <Link 
+                        href="/login"
+                        className="p-2.5 rounded-xl bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200 flex items-center justify-between transition group"
+                      >
+                        <span className="font-extrabold text-slate-900">📚 Class Adviser (SASS Ingestion)</span>
+                        <span className="text-amber-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
+                      </Link>
+                      <Link 
+                        href="/login"
+                        className="p-2.5 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/80 border border-emerald-200 flex items-center justify-between transition group"
+                      >
+                        <span className="font-extrabold text-slate-900">🎓 Student Portal (Wellness Radar)</span>
+                        <span className="text-emerald-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
+                      </Link>
+                      <Link 
+                        href="/login"
+                        className="p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200 flex items-center justify-between transition group"
+                      >
+                        <span className="font-extrabold text-slate-900">👨‍👩‍👦 Parent / Guardian (Progress Alerts)</span>
+                        <span className="text-blue-800 font-bold group-hover:translate-x-0.5 transition">Login →</span>
+                      </Link>
+                    </div>
+
+                    <Link
+                      href="/register"
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white text-xs font-black transition flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <span>Claim New Student or Faculty Account</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
                   </div>
                 )}
-
-                {/* Footer Registration Prompt & Security Badge */}
-                <div className="pt-3 border-t border-slate-100 space-y-2 text-center">
-                  <button
-                    type="button"
-                    onClick={() => setIsRegistrationOpen(true)}
-                    className="w-full py-2.5 px-3 rounded-2xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-[#8B0014] border border-slate-200 text-xs font-bold transition flex items-center justify-center gap-2 shadow-2xs hover:border-[#8B0014]/30"
-                  >
-                    <Users className="h-4 w-4 text-[#8B0014]" />
-                    <span>New student or parent? Claim Account & Link Profile →</span>
-                  </button>
-                  <span className="text-[11px] font-semibold text-slate-400 flex items-center justify-center gap-1.5 pt-0.5">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                    RA 10173 Data Privacy Sealed • 256-Bit TLS Encryption
-                  </span>
-                </div>
 
               </div>
             </div>
 
           </div>
+
+          {/* Carousel Dot Indicators */}
+          <div className="flex items-center justify-center gap-2 mt-8">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                aria-label={`Go to slide ${idx + 1}`}
+                className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                  currentSlide === idx
+                    ? "w-8 bg-[#8B0014]"
+                    : "w-2.5 bg-slate-300 hover:bg-slate-400"
+                }`}
+              />
+            ))}
+          </div>
+
         </div>
       </section>
 
