@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Public / System Config
+    match /system_config/{configId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Users Collection (RA 10173 Protected)
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // Students Cohort Records
+    match /students/{studentId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Academic & AHP Assessment Records
+    match /assessments/{assessmentId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Daily Mood Check-ins
+    match /mood_checkins/{checkinId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Guidance Intervention Plans
+    match /interventions/{planId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Parent Notifications & SMS Logs
+    match /notifications/{notificationId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // RA 10173 Immutable Audit Logs
+    match /audit_logs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Append-only audit integrity
+    }
+  }
+}
