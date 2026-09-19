@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Activity,
   Eye,
+  Check,
   Compass,
   PanelLeftClose,
   PanelLeftOpen,
@@ -392,14 +393,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     setIsOpen(false);
                   }}
                   title="AI Counselor & Guidance Assistant"
-                  className={`w-full flex items-center rounded-xl text-white bg-[#8B0014] hover:bg-[#6D0010] shadow-2xs transition ${
+                  className={`w-full flex items-center rounded-xl transition shadow-2xs ${
                     isCollapsed 
-                      ? "justify-center h-11 w-11 mx-auto" 
-                      : "px-3 py-2.5 text-xs sm:text-sm font-bold"
+                      ? "justify-center h-11 w-11 mx-auto bg-rose-50 hover:bg-rose-100 text-[#8B0014] border border-rose-200" 
+                      : "px-3 py-2.5 text-xs sm:text-sm font-bold text-rose-950 bg-rose-50/70 hover:bg-rose-100/90 border border-rose-200/90"
                   }`}
                 >
                   <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
-                    <Bot className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-white shrink-0`} />
+                    <Bot className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-[#8B0014] shrink-0`} />
                     {!isCollapsed && <span className="truncate font-bold">AI Counselor</span>}
                   </div>
                 </button>
@@ -450,20 +451,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         setIsOpen(false);
                         router.push(item.path);
                       }}
-                      className={`w-full flex items-center rounded-xl transition ${
+                      className={`w-full flex items-center justify-between rounded-xl transition ${
                         isCollapsed
-                          ? `justify-center h-10 w-10 mx-auto text-base ${isCurrent ? "bg-[#8B0014] text-white shadow-xs" : "hover:bg-white text-slate-700 border border-transparent hover:border-slate-200"}`
-                          : `px-3 py-2 text-xs sm:text-sm font-bold ${
+                          ? `justify-center h-10 w-10 mx-auto text-base ${isCurrent ? "bg-white text-slate-900 border border-slate-300 shadow-xs ring-2 ring-emerald-500/30" : "hover:bg-white text-slate-700 border border-transparent hover:border-slate-200"}`
+                          : `px-3 py-2 text-xs sm:text-sm ${
                               isCurrent
-                                ? "bg-[#8B0014] text-white shadow-2xs"
-                                : "text-slate-700 hover:bg-white hover:text-slate-950 border border-transparent hover:border-slate-200"
+                                ? "bg-white text-slate-900 font-extrabold border border-slate-300/90 shadow-2xs"
+                                : "text-slate-700 hover:bg-white hover:text-slate-950 font-medium border border-transparent hover:border-slate-200"
                             }`
                       }`}
                     >
                       <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
                         <span className={`${isCollapsed ? "text-base" : "text-sm"} shrink-0`}>{item.icon}</span>
-                        {!isCollapsed && <span className="truncate font-bold">{item.name}</span>}
+                        {!isCollapsed && <span className="truncate">{item.name}</span>}
                       </div>
+
+                      {!isCollapsed && isCurrent && (
+                        <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0 ml-2" />
+                      )}
                     </button>
                   );
                 })}
