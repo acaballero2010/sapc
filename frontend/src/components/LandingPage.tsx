@@ -34,54 +34,76 @@ export const LandingPage: React.FC = () => {
   const { login, switchRole, serverError, retryConnection } = useAuth();
   const [email, setEmail] = useState("counselor@sapc.edu.ph");
   const [password, setPassword] = useState("counselor123");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [portalMode, setPortalMode] = useState<"quick_eval" | "credentials">("quick_eval");
   const [activeTab, setActiveTab] = useState<"counselor" | "teacher" | "student" | "parent">("counselor");
 
-  const quickRoles: { role: RoleType; label: string; email: string; pass: string; icon: string; desc: string; badge: string }[] = [
+  const quickRoles: { 
+    role: RoleType; 
+    label: string; 
+    personName: string;
+    email: string; 
+    pass: string; 
+    icon: string; 
+    desc: string; 
+    badge: string;
+    badgeColor: string;
+  }[] = [
     { 
       role: "guidance_counselor", 
       label: "Guidance Counselor", 
+      personName: "Maria Theresa Cruz, RGC",
       email: "counselor@sapc.edu.ph", 
       pass: "counselor123", 
       icon: "🧠", 
-      desc: "Full crisis triage, AHP 5-domain decomposition & SPI notes",
-      badge: "Crisis Triage"
+      desc: "Crisis triage, AHP 5-domain decomposition, voice dictation & SPI clinical notes",
+      badge: "Crisis Triage",
+      badgeColor: "bg-rose-100 text-[#8B0014] border-rose-200"
     },
     { 
       role: "teacher", 
       label: "Class Adviser", 
+      personName: "Mr. Roberto Santos, LPT (STEM)",
       email: "teacher@sapc.edu.ph", 
       pass: "teacher123", 
       icon: "📚", 
-      desc: "SASS grade ingestion, academic risk & attendance roster",
-      badge: "SASS Ingestion"
+      desc: "SASS grade CSV ingestion, deterministic academic risk & attendance roster",
+      badge: "SASS Ingestion",
+      badgeColor: "bg-amber-100 text-amber-900 border-amber-300"
     },
     { 
       role: "student", 
       label: "Student Portal", 
+      personName: "Joshua Dimaculangan (Grade 11)",
       email: "student@sapc.edu.ph", 
       pass: "student123", 
       icon: "🎓", 
-      desc: "Holistic wellness radar, tutoring resources & 24/7 AI chat",
-      badge: "Wellness"
+      desc: "Wellness radar, daily mood tracker, 60s breathing guide & goal simulator",
+      badge: "Wellness Radar",
+      badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-300"
     },
     { 
       role: "parent", 
       label: "Parent / Guardian", 
+      personName: "Mrs. Elena Dimaculangan",
       email: "parent@sapc.edu.ph", 
       pass: "parent123", 
       icon: "👨‍👩‍👦", 
-      desc: "Linked child GPA standing, attendance alerts & adviser messaging",
-      badge: "Progress"
+      desc: "Linked child GPA standing, meeting notifications & 1-click consultation RSVP",
+      badge: "Parent Alerts",
+      badgeColor: "bg-blue-100 text-blue-900 border-blue-300"
     },
     { 
       role: "admin", 
       label: "System Administrator", 
+      personName: "IT & Guidance Central Directorate",
       email: "admin@sapc.edu.ph", 
       pass: "admin123", 
       icon: "⚙️", 
-      desc: "AHP decision criteria matrix weights & RA 10173 audit trail",
-      badge: "Audit & Config"
+      desc: "AHP decision criteria weights, Saaty CR validation & RA 10173 audit trail",
+      badge: "Audit & Matrix",
+      badgeColor: "bg-purple-100 text-purple-900 border-purple-300"
     }
   ];
 
@@ -114,7 +136,7 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900">
-      {/* Top Gold-Maroon Header Strip */}
+      {/* Top Gold-Maroon Header Accent */}
       <div className="h-1.5 w-full bg-gradient-to-r from-[#D97706] via-[#F59E0B] to-[#8B0014] fixed top-0 left-0 right-0 z-50 shadow-sm" />
 
       {/* Navigation Header */}
@@ -139,9 +161,9 @@ export const LandingPage: React.FC = () => {
 
           <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
             <a href="#about" className="hover:text-[#8B0014] transition">About SAPC</a>
-            <a href="#features" className="hover:text-[#8B0014] transition">Features</a>
-            <a href="#benefits" className="hover:text-[#8B0014] transition">Benefits</a>
-            <a href="#how-it-works" className="hover:text-[#8B0014] transition">How It Works</a>
+            <a href="#features" className="hover:text-[#8B0014] transition">5 Domains</a>
+            <a href="#benefits" className="hover:text-[#8B0014] transition">Efficacy</a>
+            <a href="#how-it-works" className="hover:text-[#8B0014] transition">AHP Model</a>
             <a href="#contact" className="hover:text-[#8B0014] transition">Contact</a>
           </nav>
 
@@ -158,16 +180,26 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-14 pb-20 lg:pt-20 lg:pb-24 bg-gradient-to-b from-white via-slate-50/50 to-white">
+      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-16 lg:pb-24 bg-gradient-to-b from-white via-slate-50/60 to-white">
+        {/* Subtle Decorative Ambient Background Blooms */}
+        <div className="absolute top-10 left-1/4 -translate-x-1/2 w-96 h-96 bg-amber-200/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-1/4 w-96 h-96 bg-rose-200/20 rounded-full blur-3xl pointer-events-none" />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Hero Text */}
-            <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-[#8B0014] text-xs sm:text-sm font-bold shadow-xs">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+            
+            {/* Left Hero Content */}
+            <div className="lg:col-span-7 space-y-6 text-left pt-2">
+              
+              {/* Institution Tagline Badge */}
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200/90 text-[#8B0014] text-xs sm:text-sm font-extrabold shadow-xs">
                 <Sparkles className="h-4 w-4 text-[#8B0014]" />
                 <span>"A College for the Family" • Pila, Laguna</span>
+                <span className="hidden sm:inline text-rose-300">•</span>
+                <span className="hidden sm:inline text-xs font-semibold text-rose-900/80">Est. 1979</span>
               </div>
 
+              {/* Main Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.12]">
                 Intelligent Student <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B0014] via-[#B91C1C] to-[#D97706]">
@@ -175,176 +207,274 @@ export const LandingPage: React.FC = () => {
                 </span>
               </h1>
 
+              {/* Lead Paragraph */}
               <p className="text-base sm:text-lg text-slate-700 leading-relaxed max-w-2xl font-normal">
-                SAPC IntellySys is an institutional multi-criteria decision engine designed for 
+                SAPC IntellySys is an institutional multi-criteria failure prevention platform designed for 
                 <strong className="text-slate-900 font-semibold"> San Antonio de Padua College</strong>. It unites SASS academic 
-                records with Mental Health, Financial, Family, and Physical Wellness indicators using the 
+                records with Mental Health, Financial, Family, and Physical Wellness factors using the 
                 <strong className="text-slate-900 font-semibold"> Analytic Hierarchy Process (AHP)</strong> and 
                 <strong className="text-slate-900 font-semibold"> NLP crisis triage</strong>.
               </p>
 
-              {/* Key Highlights Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
-                  <div className="p-2 rounded-xl bg-amber-50 text-[#D97706]">
-                    <Layers className="h-4 w-4 shrink-0" />
+              {/* 3 Pillar Feature Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div className="flex items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs hover:border-amber-300 transition">
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200/80 text-[#D97706] shrink-0">
+                    <Layers className="h-4.5 w-4.5" />
                   </div>
                   <div>
                     <span className="text-xs font-bold text-slate-900 block leading-tight">AHP Multi-Factor</span>
-                    <span className="text-[11px] text-slate-500">5-Domain Matrix</span>
+                    <span className="text-[11px] text-slate-500 font-medium">5-Domain Matrix</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
-                    <ShieldCheck className="h-4 w-4 shrink-0" />
+
+                <div className="flex items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs hover:border-emerald-300 transition">
+                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-700 shrink-0">
+                    <ShieldCheck className="h-4.5 w-4.5" />
                   </div>
                   <div>
                     <span className="text-xs font-bold text-slate-900 block leading-tight">RA 10173 Privacy</span>
-                    <span className="text-[11px] text-slate-500">Encrypted Role Access</span>
+                    <span className="text-[11px] text-slate-500 font-medium">Encrypted RBAC</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs col-span-2 sm:col-span-1">
-                  <div className="p-2 rounded-xl bg-rose-50 text-[#8B0014]">
-                    <Bot className="h-4 w-4 shrink-0" />
+
+                <div className="flex items-center gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs hover:border-rose-300 transition">
+                  <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200/80 text-[#8B0014] shrink-0">
+                    <Bot className="h-4.5 w-4.5" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block leading-tight">24/7 AI Counselor</span>
-                    <span className="text-[11px] text-slate-500">Taglish Crisis Triage</span>
+                    <span className="text-xs font-bold text-slate-900 block leading-tight">24/7 AI Triage</span>
+                    <span className="text-[11px] text-slate-500 font-medium">Taglish Distress NLP</span>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 flex flex-wrap items-center gap-4">
+              <div className="pt-2 flex flex-wrap items-center gap-4">
                 <a
                   href="#login-section"
-                  className="px-7 py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-base shadow-sm transition active:scale-95 flex items-center gap-2.5"
+                  className="px-7 py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-base shadow-md transition active:scale-95 flex items-center gap-2.5 group"
                 >
                   <span>Launch Decision Portal</span>
-                  <ChevronRight className="h-5 w-5 text-white" />
+                  <ChevronRight className="h-5 w-5 text-white group-hover:translate-x-0.5 transition-transform" />
                 </a>
                 <a
-                  href="#features"
+                  href="#how-it-works"
                   className="px-6 py-3.5 rounded-xl bg-white text-slate-700 hover:text-slate-950 hover:bg-slate-50 border border-slate-200 font-semibold text-base transition shadow-xs"
                 >
-                  Explore 5-Domain Engine
+                  Explore AHP Methodology
                 </a>
               </div>
+
+              {/* Live Metric Stats Strip */}
+              <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-slate-200/80">
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                  <span className="text-xs text-slate-500 font-semibold block">Monitored Students</span>
+                  <strong className="text-lg font-black text-slate-900 block mt-0.5">1,250+</strong>
+                </div>
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                  <span className="text-xs text-slate-500 font-semibold block">Intervention SLA</span>
+                  <strong className="text-lg font-black text-emerald-700 block mt-0.5">98.4%</strong>
+                </div>
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                  <span className="text-xs text-slate-500 font-semibold block">Saaty AHP (CR)</span>
+                  <strong className="text-lg font-black text-amber-700 block mt-0.5">0.048 ≤ 0.10</strong>
+                </div>
+                <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
+                  <span className="text-xs text-slate-500 font-semibold block">Data Privacy</span>
+                  <strong className="text-lg font-black text-[#8B0014] block mt-0.5">RA 10173 SPI</strong>
+                </div>
+              </div>
+
             </div>
 
             {/* Right Login / Quick Access Card */}
-            <div id="login-section" className="lg:col-span-5 scroll-mt-24">
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 relative">
-                {/* Card Top Banner */}
-                <div className="border-b border-slate-100 pb-4">
+            <div id="login-section" className="lg:col-span-5 scroll-mt-24 w-full">
+              <div className="bg-white border-2 border-slate-200 rounded-3xl p-6 sm:p-7 shadow-xl space-y-5 relative">
+                
+                {/* Decorative Top Gold Line */}
+                <div className="absolute top-0 left-8 right-8 h-1 bg-gradient-to-r from-amber-400 to-[#8B0014] rounded-full" />
+
+                {/* Card Header & Segmented Tab Switcher */}
+                <div className="space-y-3 pb-2 border-b border-slate-100">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                      <Lock className="h-5 w-5 text-[#8B0014]" />
-                      Sign In to SAPC Portal
-                    </h3>
-                    <span className="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                      Secure RBAC
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-rose-50 text-[#8B0014]">
+                        <Lock className="h-4.5 w-4.5" />
+                      </div>
+                      <h3 className="text-lg font-extrabold text-slate-900">
+                        SAPC Decision Portal
+                      </h3>
+                    </div>
+                    <span className="text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                      🔒 Secure RBAC
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Select an evaluation role below for 1-click instant login or enter institutional credentials.
-                  </p>
+
+                  {/* Segmented Mode Selector */}
+                  <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setPortalMode("quick_eval")}
+                      className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                        portalMode === "quick_eval"
+                          ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      <span>⚡</span>
+                      <span>1-Click Evaluation</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPortalMode("credentials")}
+                      className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                        portalMode === "credentials"
+                          ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      <span>🔑</span>
+                      <span>Institutional Login</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* 1-Click Role Quick Access */}
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-[#8B0014] uppercase tracking-wider block">
-                    ⚡ 1-Click Role Access (Evaluation Demo)
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {quickRoles.slice(0, 4).map((r) => (
-                      <button
-                        key={r.role}
-                        type="button"
-                        onClick={() => handleQuickSelect(r)}
-                        className="text-left p-3 rounded-2xl bg-slate-50 hover:bg-rose-50/70 border border-slate-200 hover:border-rose-300 transition group flex flex-col justify-between"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 font-bold text-xs text-slate-900 group-hover:text-[#8B0014]">
-                            <span>{r.icon}</span>
-                            <span>{r.label}</span>
+                {/* MODE 1: 1-Click Evaluation Quick Select */}
+                {portalMode === "quick_eval" && (
+                  <div className="space-y-2.5 animate-fadeIn">
+                    <p className="text-xs text-slate-500">
+                      Select any institutional stakeholder to test live dashboards and decision tools:
+                    </p>
+
+                    <div className="space-y-2">
+                      {quickRoles.map((r) => (
+                        <button
+                          key={r.role}
+                          type="button"
+                          onClick={() => handleQuickSelect(r)}
+                          disabled={isSubmitting}
+                          className="w-full text-left p-3 rounded-2xl bg-slate-50/90 hover:bg-rose-50/60 border border-slate-200 hover:border-[#8B0014]/40 transition-all group flex items-center justify-between gap-3 shadow-2xs hover:shadow-xs"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-lg shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                              {r.icon}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-extrabold text-xs text-slate-900 group-hover:text-[#8B0014] truncate">
+                                  {r.label}
+                                </span>
+                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-md border ${r.badgeColor} shrink-0`}>
+                                  {r.badge}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                                {r.personName}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <span className="text-[11px] text-slate-500 group-hover:text-slate-700 mt-1 line-clamp-1">
-                          {r.desc}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickSelect(quickRoles[4])}
-                    className="w-full text-left p-3 rounded-2xl bg-slate-50 hover:bg-rose-50/70 border border-slate-200 hover:border-rose-300 transition group flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-2 font-bold text-slate-900 group-hover:text-[#8B0014]">
-                      <span>⚙️</span>
-                      <span>System Administrator Portal</span>
+
+                          <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-[#8B0014] opacity-80 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                            <span>Launch</span>
+                            <ChevronRight className="h-4 w-4" />
+                          </div>
+                        </button>
+                      ))}
                     </div>
-                    <span className="text-xs text-[#8B0014] font-bold">AHP Matrix & Audit →</span>
-                  </button>
-                </div>
-
-                {/* Form Divider */}
-                <div className="relative flex items-center justify-center">
-                  <div className="border-t border-slate-200 w-full" />
-                  <span className="bg-white px-3 text-xs text-slate-400 font-semibold uppercase">or credentials</span>
-                  <div className="border-t border-slate-200 w-full" />
-                </div>
-
-                {/* Manual Credentials Form */}
-                <form onSubmit={handleLogin} className="space-y-4 text-left">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">SAPC Email / LRN</label>
-                    <div className="relative">
-                      <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                      <input
-                        type="text"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="counselor@sapc.edu.ph"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Password</label>
-                    <div className="relative">
-                      <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                      <input
-                        type="password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm shadow-sm transition disabled:opacity-50"
-                  >
-                    {isSubmitting ? "Authenticating Session..." : "Enter Decision Support System"}
-                  </button>
-                </form>
-
-                {serverError && (
-                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between">
-                    <span>{serverError}</span>
-                    <button onClick={retryConnection} className="underline font-bold text-amber-900">Retry</button>
                   </div>
                 )}
+
+                {/* MODE 2: Manual Credentials Form */}
+                {portalMode === "credentials" && (
+                  <form onSubmit={handleLogin} className="space-y-4 text-left animate-fadeIn">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">SAPC Email / LRN</label>
+                      <div className="relative">
+                        <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <input
+                          type="text"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="counselor@sapc.edu.ph"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-bold text-slate-700">Password</label>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-[11px] font-semibold text-slate-500 hover:text-slate-800"
+                        >
+                          {showPassword ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quick Preset Selector */}
+                    <div className="pt-1">
+                      <span className="text-[11px] font-bold text-slate-500 block mb-1.5">Quick Fill Demo Credentials:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {quickRoles.map((qr) => (
+                          <button
+                            key={qr.role}
+                            type="button"
+                            onClick={() => {
+                              setEmail(qr.email);
+                              setPassword(qr.pass);
+                            }}
+                            className="px-2.5 py-1 text-[10px] font-bold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-[#8B0014] rounded-lg border border-slate-200 transition"
+                          >
+                            {qr.icon} {qr.label.split(" ")[0]}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isSubmitting ? (
+                        <span>Authenticating Session...</span>
+                      ) : (
+                        <>
+                          <span>Authenticate & Enter Portal</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+
+                {/* Footer Security Badge */}
+                <div className="pt-2 border-t border-slate-100 text-center">
+                  <span className="text-[11px] font-semibold text-slate-400 flex items-center justify-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    RA 10173 Data Privacy Sealed • 256-Bit TLS Encryption
+                  </span>
+                </div>
+
               </div>
             </div>
+
           </div>
         </div>
       </section>
