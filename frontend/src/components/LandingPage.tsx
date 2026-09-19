@@ -260,26 +260,6 @@ export const LandingPage: React.FC = () => {
                       </Link>
                     </div>
 
-                    {/* Live Metric Stats Strip */}
-                    <div className="pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-slate-200/80">
-                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Monitored</span>
-                        <strong className="text-base sm:text-lg font-black text-slate-900 block mt-0.5">1,250+ Students</strong>
-                      </div>
-                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Intervention SLA</span>
-                        <strong className="text-base sm:text-lg font-black text-emerald-700 block mt-0.5">98.4% Resolution</strong>
-                      </div>
-                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Campus Roles</span>
-                        <strong className="text-base sm:text-lg font-black text-amber-700 block mt-0.5">5 Portals</strong>
-                      </div>
-                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200">
-                        <span className="text-[11px] text-slate-500 font-semibold block uppercase">Data Privacy</span>
-                        <strong className="text-base sm:text-lg font-black text-[#8B0014] block mt-0.5">RA 10173 SPI</strong>
-                      </div>
-                    </div>
-
                   </div>
 
                   {/* Right Showcase Card */}
