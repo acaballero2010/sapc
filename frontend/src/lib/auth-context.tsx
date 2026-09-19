@@ -26,12 +26,34 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEMO_CREDENTIALS: Record<RoleType, { email: string; pass: string }> = {
-  guidance_counselor: { email: "counselor@sapc.edu.ph", pass: "counselor123" },
-  teacher: { email: "teacher@sapc.edu.ph", pass: "teacher123" },
-  admin: { email: "admin@sapc.edu.ph", pass: "admin123" },
-  student: { email: "student@sapc.edu.ph", pass: "student123" },
-  parent: { email: "parent@sapc.edu.ph", pass: "parent123" }
+const DEMO_PROFILES: Record<RoleType, { email: string; pass: string; name: string; student_id?: number }> = {
+  guidance_counselor: { 
+    email: "counselor@sapc.edu.ph", 
+    pass: "counselor123", 
+    name: "Maria Theresa Cruz, RGC (Guidance Counselor)" 
+  },
+  teacher: { 
+    email: "teacher@sapc.edu.ph", 
+    pass: "teacher123", 
+    name: "Mr. Roberto Santos (STEM Adviser)" 
+  },
+  admin: { 
+    email: "admin@sapc.edu.ph", 
+    pass: "admin123", 
+    name: "Administrator (SAPC IT & Guidance)" 
+  },
+  student: { 
+    email: "student@sapc.edu.ph", 
+    pass: "student123", 
+    name: "Joshua Dimaculangan (Grade 11 STEM)",
+    student_id: 1 
+  },
+  parent: { 
+    email: "parent@sapc.edu.ph", 
+    pass: "parent123", 
+    name: "Mrs. Elena Dimaculangan (Parent)",
+    student_id: 1 
+  }
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -40,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const loginWithCredentials = async (email: string, pass: string) => {
+  const loginWithCredentials = async (email: string, pass: string, targetRole?: RoleType) => {
     setIsLoading(true);
     setServerError(null);
     try {
@@ -59,7 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const data = await res.json();
-      localStorage.setItem("sapc_token", data.access_token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_token", data.access_token);
+      }
       setToken(data.access_token);
       setUser({
         id: 1,
@@ -70,28 +94,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       setServerError(null);
     } catch (err: any) {
-      console.error("Backend connection error:", err);
-      setServerError(err.message || "Failed to connect to FastAPI backend at http://localhost:8000");
+      console.warn("Backend FastAPI offline or connection failed, falling back to local session:", err);
+      // Fallback to local profile for seamless frontend navigation
+      const fallbackRole = targetRole || "guidance_counselor";
+      const profile = DEMO_PROFILES[fallbackRole];
+      setUser({
+        id: 1,
+        email: profile.email,
+        full_name: profile.name,
+        role: fallbackRole,
+        student_id: profile.student_id || null
+      });
+      setServerError("FastAPI backend at http://localhost:8000 is offline. Run 'npm run dev' to start both servers.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const switchRole = async (role: RoleType) => {
-    const creds = DEMO_CREDENTIALS[role];
+    const creds = DEMO_PROFILES[role];
     if (creds) {
-      await loginWithCredentials(creds.email, creds.pass);
+      await loginWithCredentials(creds.email, creds.pass, role);
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("sapc_token");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("sapc_token");
+    }
     setToken(null);
     setUser(null);
   };
 
   const retryConnection = async () => {
-    await switchRole("guidance_counselor");
+    await switchRole(user?.role || "guidance_counselor");
   };
 
   useEffect(() => {
@@ -99,7 +135,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await switchRole("guidance_counselor");
       } catch {
-        setServerError("Could not reach backend API. Ensure FastAPI is running on port 8000.");
         setIsLoading(false);
       }
     };
@@ -121,14 +156,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }}
     >
       {serverError && (
-        <div className="bg-rose-950 border-b border-rose-800 text-rose-200 px-4 py-2.5 text-xs flex items-center justify-between">
+        <div className="bg-[#3D0A11] border-b border-[#70000D] text-amber-200 px-4 py-2 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 shadow-md">
           <div className="flex items-center gap-2">
-            <span className="font-bold">⚠️ Backend Warning:</span>
+            <span className="font-bold text-[#F5B800]">⚡ Backend Notice:</span>
             <span>{serverError}</span>
           </div>
           <button
             onClick={retryConnection}
-            className="px-2.5 py-1 rounded bg-rose-900 hover:bg-rose-800 text-white font-semibold transition"
+            className="px-2.5 py-1 rounded bg-[#70000D] hover:bg-[#8E0F1E] text-white font-bold text-[11px] transition shadow"
           >
             Retry Connection
           </button>

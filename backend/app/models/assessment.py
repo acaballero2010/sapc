@@ -54,3 +54,20 @@ class CounselorNote(Base):
     # Relationships
     student = relationship("Student", back_populates="counselor_notes")
     counselor = relationship("User", back_populates="counselor_notes")
+
+class DailyMoodCheckin(Base):
+    __tablename__ = "daily_mood_checkins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    mood_score = Column(Integer, nullable=False) # 1=Distressed, 2=Stressed, 3=Okay, 4=Good, 5=Great
+    mood_emoji = Column(String(10), nullable=False, default="😊")
+    energy_level = Column(Integer, default=3) # 1-5
+    primary_stressor = Column(String(100), nullable=True) # "Academics", "Family", "Finances", "Health", "None"
+    reflection_note = Column(Text, nullable=True)
+    sentiment_polarity = Column(Float, default=0.0) # -1.0 to 1.0
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    student = relationship("Student", back_populates="mood_checkins")
+

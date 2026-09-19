@@ -10,7 +10,8 @@ import {
   PhoneCall, 
   HeartHandshake, 
   ShieldCheck,
-  RefreshCw
+  RefreshCw,
+  Sparkles
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
@@ -104,79 +105,79 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col h-[650px] max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 font-sans">
+      <div className="bg-white border border-slate-200 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col h-[680px] max-h-[90vh] overflow-hidden">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 p-0.5 shadow-lg shadow-indigo-500/20">
-              <div className="h-full w-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <Bot className="h-5 w-5 text-indigo-400" />
+        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-[#8B0014] to-[#B91C1C] p-0.5 shadow-xs">
+              <div className="h-full w-full bg-white rounded-[14px] flex items-center justify-center">
+                <Bot className="h-6 w-6 text-[#8B0014]" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white">SAPC Guidance Companion</h3>
-                <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">
-                  NLP Active
+                <h3 className="text-lg font-bold text-slate-900">SAPC Guidance Companion</h3>
+                <span className="px-2.5 py-0.5 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 rounded-full flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" /> NLP Active
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Confidential AI Mental Health & Academic Support</p>
+              <p className="text-xs text-slate-500 mt-0.5">San Antonio de Padua College • Confidential Wellness Support</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition"
+            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Crisis Notification Banner (If triggered) */}
+        {/* Crisis Notification Banner */}
         {activeAlert && (
-          <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 py-2.5 flex items-center gap-3 text-xs text-amber-300">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
-            <span className="flex-1">{activeAlert}</span>
-            <div className="flex items-center gap-1 font-semibold text-amber-200">
-              <PhoneCall className="h-3.5 w-3.5" />
+          <div className="bg-rose-50 border-b border-rose-200 px-6 py-3 flex items-center gap-3 text-xs sm:text-sm text-rose-900">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-rose-600" />
+            <span className="flex-1 font-semibold">{activeAlert}</span>
+            <div className="flex items-center gap-1.5 font-bold text-rose-900 bg-rose-100 px-3 py-1 rounded-lg border border-rose-200">
+              <PhoneCall className="h-4 w-4 text-rose-700" />
               <span>NCMH 1553</span>
             </div>
           </div>
         )}
 
         {/* Chat Messages Log */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-950/30">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
           {messages.map((m, idx) => (
             <div
               key={idx}
-              className={`flex gap-3 ${m.sender === "student" ? "justify-end" : "justify-start"}`}
+              className={`flex gap-3.5 ${m.sender === "student" ? "justify-end" : "justify-start"}`}
             >
               {m.sender === "bot" && (
-                <div className="h-8 w-8 rounded-full bg-indigo-900/60 border border-indigo-700/60 flex items-center justify-center shrink-0">
-                  <Bot className="h-4 w-4 text-indigo-300" />
+                <div className="h-9 w-9 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
+                  <Bot className="h-5 w-5 text-[#8B0014]" />
                 </div>
               )}
 
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                className={`max-w-[82%] rounded-2xl px-5 py-3.5 text-sm sm:text-base leading-relaxed ${
                   m.sender === "student"
-                    ? "bg-indigo-600 text-white rounded-tr-none shadow-md shadow-indigo-600/20"
-                    : "bg-slate-800/90 text-slate-200 border border-slate-700/60 rounded-tl-none shadow-sm"
+                    ? "bg-[#8B0014] text-white rounded-tr-none shadow-xs"
+                    : "bg-white text-slate-900 border border-slate-200 rounded-tl-none shadow-xs"
                 }`}
               >
                 <p>{m.text}</p>
 
-                {/* Suggested Campus / Crisis Resources */}
+                {/* Suggested Campus Resources */}
                 {m.resources && m.resources.length > 0 && (
-                  <div className="mt-3 pt-2.5 border-t border-slate-700/70 text-xs">
-                    <p className="font-semibold text-indigo-300 mb-1.5 flex items-center gap-1">
-                      <HeartHandshake className="h-3.5 w-3.5" />
+                  <div className="mt-3.5 pt-3 border-t border-slate-200 text-xs sm:text-sm">
+                    <p className="font-bold text-[#8B0014] mb-1.5 flex items-center gap-1.5">
+                      <HeartHandshake className="h-4 w-4" />
                       Recommended Support Resources:
                     </p>
-                    <ul className="space-y-1 text-slate-300">
+                    <ul className="space-y-1.5 text-slate-700">
                       {m.resources.map((r, rIdx) => (
-                        <li key={rIdx} className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                        <li key={rIdx} className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-[#8B0014] shrink-0" />
                           <span>{r}</span>
                         </li>
                       ))}
@@ -184,27 +185,27 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                   </div>
                 )}
 
-                <div className="mt-1 flex items-center justify-end gap-1.5 text-[10px] text-slate-400 opacity-80">
+                <div className="mt-1.5 flex items-center justify-end gap-2 text-xs text-slate-400">
                   <span>{m.time}</span>
                   {m.distressScore !== undefined && m.distressScore > 40 && (
-                    <span className="text-amber-400 font-bold">• Risk Tagged</span>
+                    <span className="text-rose-600 font-bold">• Risk Tagged</span>
                   )}
                 </div>
               </div>
 
               {m.sender === "student" && (
-                <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 text-slate-300">
-                  <User className="h-4 w-4" />
+                <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border border-amber-400/50 flex items-center justify-center shrink-0 text-white shadow-xs font-bold text-sm">
+                  <User className="h-5 w-5" />
                 </div>
               )}
             </div>
           ))}
           {isLoading && (
-            <div className="flex gap-3 justify-start">
-              <div className="h-8 w-8 rounded-full bg-indigo-900/60 border border-indigo-700/60 flex items-center justify-center shrink-0">
-                <RefreshCw className="h-4 w-4 text-indigo-300 animate-spin" />
+            <div className="flex gap-3.5 justify-start">
+              <div className="h-9 w-9 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                <RefreshCw className="h-5 w-5 text-[#8B0014] animate-spin" />
               </div>
-              <div className="bg-slate-800/60 text-slate-400 border border-slate-700/40 rounded-2xl rounded-tl-none px-4 py-3 text-xs italic">
+              <div className="bg-white text-slate-500 border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3.5 text-sm italic shadow-xs">
                 Analyzing distress indicators & formulating guidance response...
               </div>
             </div>
@@ -213,36 +214,36 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         </div>
 
         {/* Input Bar */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/80">
+        <div className="p-4 sm:p-5 border-t border-slate-200 bg-white">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSend();
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-3"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message (e.g. 'I am feeling overwhelmed with my grades...')"
-              className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
+              className="px-5 py-3 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold flex items-center gap-2 transition disabled:opacity-50 active:scale-95 shadow-xs text-sm sm:text-base"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5 text-white" />
               <span className="hidden sm:inline">Send</span>
             </button>
           </form>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="h-3.5 w-3.5 text-indigo-400" />
+          <div className="mt-2.5 flex items-center justify-between text-xs text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
               RA 10173 Protected • Guidance Counselor Access Only
             </span>
-            <span>National Crisis Hotline: 1553</span>
+            <span>National Crisis Hotline: <strong className="text-slate-900 font-bold">1553</strong></span>
           </div>
         </div>
       </div>

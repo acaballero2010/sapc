@@ -66,54 +66,54 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in">
-      <div className="bg-slate-900 border border-slate-800 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in font-sans">
+      <div className="bg-white border border-slate-200 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-              <Target className="h-5 w-5" />
+        <div className="px-6 sm:px-8 py-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-rose-50 border border-rose-200 text-[#8B0014]">
+              <Target className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Create Intervention Care Plan</h3>
-              <p className="text-xs text-slate-400">
-                For: <span className="text-white font-medium">{student.first_name} {student.last_name}</span> (LRN: {student.lrn})
+              <h3 className="text-lg font-bold text-slate-900">Create Intervention Care Plan</h3>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                For: <span className="text-slate-900 font-bold">{student.first_name} {student.last_name}</span> (LRN: {student.lrn})
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-4 text-sm">
           {error && (
-            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 shrink-0" />
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center gap-2.5">
+              <AlertTriangle className="h-5 w-5 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
 
           <div>
-            <label className="block font-semibold text-slate-300 mb-1">Plan Title *</label>
+            <label className="block font-bold text-slate-700 mb-1.5">Plan Title *</label>
             <input
               type="text"
               required
               placeholder="e.g. Peer Tutoring & Weekly Counseling Support Protocol"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Target Risk Domain</label>
+              <label className="block font-bold text-slate-700 mb-1.5">Target Risk Domain</label>
               <select
                 value={formData.target_domain}
                 onChange={(e) => setFormData({ ...formData, target_domain: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
               >
                 <option value="Academic & Mental Health">Academic & Mental Health</option>
                 <option value="Academic Remediation">Academic Remediation</option>
@@ -125,11 +125,11 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Follow-up Schedule</label>
+              <label className="block font-bold text-slate-700 mb-1.5">Follow-up Schedule</label>
               <select
                 value={formData.followup_days}
                 onChange={(e) => setFormData({ ...formData, followup_days: Number(e.target.value) })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
               >
                 <option value={3}>In 3 Days (Urgent)</option>
                 <option value={7}>In 1 Week (Standard)</option>
@@ -140,40 +140,40 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-300 mb-1">Intervention Objective & Diagnosis *</label>
+            <label className="block font-bold text-slate-700 mb-1.5">Intervention Objective & Diagnosis *</label>
             <textarea
               rows={2}
               required
               placeholder="Detail the failure risk factors and remediation goals..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-300 mb-1">Action Items / Assigned Tasks</label>
+            <label className="block font-bold text-slate-700 mb-1.5">Action Items / Assigned Tasks</label>
             <textarea
               rows={3}
               placeholder="- Coordinate with Subject Teacher for remedial tests&#10;- Schedule parent consultation on allowance/study space&#10;- Assign peer study buddy for Math"
               value={formData.action_items}
               onChange={(e) => setFormData({ ...formData, action_items: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
             />
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-3">
+          <div className="pt-3 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition"
+              className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold transition text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5 transition disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold flex items-center gap-2 transition disabled:opacity-50 shadow-xs text-sm"
             >
               {isSubmitting ? (
                 <>

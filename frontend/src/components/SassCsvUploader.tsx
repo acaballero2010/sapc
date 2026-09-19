@@ -81,35 +81,35 @@ export const SassCsvUploader: React.FC<SassCsvUploaderProps> = ({ onSuccess }) =
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <FileSpreadsheet className="h-6 w-6" />
+    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-[#8B0014]">
+            <FileSpreadsheet className="h-7 w-7" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">SASS Academic CSV Ingestion Pipeline</h3>
-            <p className="text-xs text-slate-400">
-              Parses quarterly GPA, attendance & failing counts to compute deterministic Academic Risk ($S_&#123;AC&#125;$)
+            <h3 className="text-xl font-bold text-slate-900">SASS Academic CSV Ingestion Pipeline</h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Parses quarterly GPA, attendance & failing counts to compute deterministic Academic Risk (S_AC)
             </p>
           </div>
         </div>
         <button
           onClick={downloadSampleTemplate}
-          className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 underline underline-offset-4 self-start sm:self-auto"
+          className="text-sm font-bold text-[#8B0014] hover:text-[#6D0010] underline underline-offset-4 self-start sm:self-auto"
         >
           Download SASS CSV Template
         </button>
       </div>
 
       {/* Target Academic Period Selectors */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Academic Year</label>
+          <label className="block text-xs font-bold text-slate-700 mb-1.5">Academic Year</label>
           <select
             value={academicYear}
             onChange={(e) => setAcademicYear(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-800 text-xs text-white rounded-lg p-2 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-white border border-slate-200 text-sm font-semibold text-slate-900 rounded-xl p-3 focus:outline-none focus:border-[#8B0014] transition"
           >
             <option value="2025-2026">2025-2026</option>
             <option value="2024-2025">2024-2025</option>
@@ -117,11 +117,11 @@ export const SassCsvUploader: React.FC<SassCsvUploaderProps> = ({ onSuccess }) =
           </select>
         </div>
         <div>
-          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Grading Quarter</label>
+          <label className="block text-xs font-bold text-slate-700 mb-1.5">Grading Quarter</label>
           <select
             value={quarter}
             onChange={(e) => setQuarter(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-800 text-xs text-white rounded-lg p-2 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-white border border-slate-200 text-sm font-semibold text-slate-900 rounded-xl p-3 focus:outline-none focus:border-[#8B0014] transition"
           >
             <option value="Q1">1st Quarter (Q1)</option>
             <option value="Q2">2nd Quarter (Q2)</option>
@@ -132,7 +132,7 @@ export const SassCsvUploader: React.FC<SassCsvUploaderProps> = ({ onSuccess }) =
       </div>
 
       {/* Drag & Drop Upload Zone */}
-      <div className="border-2 border-dashed border-slate-700 hover:border-indigo-500/60 rounded-xl p-6 text-center transition bg-slate-950/40">
+      <div className="border-2 border-dashed border-slate-300 hover:border-[#8B0014] rounded-2xl p-8 text-center transition bg-slate-50/50">
         <input
           type="file"
           accept=".csv"
@@ -140,31 +140,31 @@ export const SassCsvUploader: React.FC<SassCsvUploaderProps> = ({ onSuccess }) =
           className="hidden"
           id="sass-csv-input"
         />
-        <label htmlFor="sass-csv-input" className="cursor-pointer flex flex-col items-center gap-2">
-          <UploadCloud className="h-9 w-9 text-slate-400 hover:text-indigo-400 transition" />
-          <span className="text-sm font-medium text-slate-300">
+        <label htmlFor="sass-csv-input" className="cursor-pointer flex flex-col items-center gap-3">
+          <UploadCloud className="h-10 w-10 text-slate-400 hover:text-[#8B0014] transition" />
+          <span className="text-base font-bold text-slate-900">
             {file ? file.name : "Click or drag & drop SASS CSV export here"}
           </span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs sm:text-sm text-slate-500 max-w-xl leading-relaxed">
             Required columns: student_id, student_name, grade_level, section, quarter_gpa, failing_subjects_count, days_absent, incomplete_requirements_count
           </span>
         </label>
       </div>
 
       {file && (
-        <div className="flex items-center justify-between bg-slate-950 p-3 rounded-lg border border-slate-800">
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <span className="font-semibold text-white">{file.name}</span>
-            <span className="text-slate-500">({(file.size / 1024).toFixed(1)} KB)</span>
+        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div className="flex items-center gap-3 text-sm text-slate-700">
+            <span className="font-bold text-slate-900">{file.name}</span>
+            <span className="text-slate-500 font-mono">({(file.size / 1024).toFixed(1)} KB)</span>
           </div>
           <button
             onClick={handleUpload}
             disabled={isUploading}
-            className="px-4 py-2 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 transition disabled:opacity-50 shadow"
+            className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-[#8B0014] hover:bg-[#6D0010] text-white flex items-center gap-2 transition disabled:opacity-50 shadow-xs"
           >
             {isUploading ? (
               <>
-                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin" />
                 <span>Validating & Processing AHP Risk...</span>
               </>
             ) : (
@@ -176,13 +176,13 @@ export const SassCsvUploader: React.FC<SassCsvUploaderProps> = ({ onSuccess }) =
 
       {/* Validation Error Box */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 space-y-2">
-          <div className="flex items-center gap-2 font-bold text-rose-400">
-            <AlertCircle className="h-4 w-4 shrink-0" />
+        <div className="p-5 rounded-2xl bg-rose-50 border border-rose-200 text-sm text-rose-900 space-y-2.5">
+          <div className="flex items-center gap-2.5 font-bold text-rose-700">
+            <AlertCircle className="h-5 w-5 shrink-0" />
             <span>{error}</span>
           </div>
           {validationErrors.length > 0 && (
-            <ul className="list-disc list-inside space-y-1 pl-1 text-[11px] text-rose-200">
+            <ul className="list-disc list-inside space-y-1.5 pl-1 text-xs text-rose-800">
               {validationErrors.map((vErr, i) => (
                 <li key={i}>
                   Line {vErr.line} [{vErr.field}]: {vErr.error}
@@ -195,22 +195,22 @@ export const SassCsvUploader: React.FC<SassCsvUploaderProps> = ({ onSuccess }) =
 
       {/* Success Output Summary */}
       {result && result.success && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-slate-200 space-y-2">
-          <div className="flex items-center gap-2 font-bold text-emerald-400">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
+        <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-sm text-slate-800 space-y-3">
+          <div className="flex items-center gap-2.5 font-bold text-emerald-800">
+            <CheckCircle2 className="h-5 w-5 shrink-0" />
             <span>SASS Ingestion Completed Successfully (Batch #{result.batch_id})</span>
           </div>
-          <p className="text-slate-300">
-            Ingested <strong className="text-white">{result.successful_imports}</strong> student records for{" "}
-            <strong className="text-emerald-300">{academicYear} {quarter}</strong>.
+          <p className="text-slate-700">
+            Ingested <strong className="text-slate-900 font-bold">{result.successful_imports}</strong> student records for{" "}
+            <strong className="text-emerald-800 font-bold">{academicYear} {quarter}</strong>.
           </p>
 
           {result.details && result.details.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-emerald-500/20 max-h-40 overflow-y-auto space-y-1">
+            <div className="mt-2 pt-3 border-t border-emerald-200 max-h-48 overflow-y-auto space-y-2">
               {result.details.map((d: any, idx: number) => (
-                <div key={idx} className="flex items-center justify-between text-[11px] text-slate-300 bg-slate-950/40 px-2 py-1 rounded">
-                  <span>{d.student_name} (ID: {d.student_id})</span>
-                  <span className="font-mono text-emerald-400 font-bold">
+                <div key={idx} className="flex items-center justify-between text-xs sm:text-sm text-slate-800 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs">
+                  <span className="font-medium">{d.student_name} (ID: {d.student_id})</span>
+                  <span className="font-mono text-[#D97706] font-bold">
                     S_AC: {d.academic_risk_score.toFixed(1)}/100 → Composite: {d.composite_risk_score.toFixed(1)} ({d.risk_tier})
                   </span>
                 </div>

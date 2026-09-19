@@ -86,3 +86,29 @@ class CohortRiskAnalytics(BaseModel):
     average_composite_score: float
     domain_averages: DomainScoreBreakdown
     high_risk_students: List[Dict[str, Any]]
+
+class RecoverySimulationRequest(BaseModel):
+    student_id: Optional[int] = None
+    target_gpa: float = 85.0
+    target_absences: int = 1
+    target_failing_count: int = 0
+    target_incomplete_count: int = 0
+    simulated_mental_health: Optional[float] = None
+    simulated_financial: Optional[float] = None
+    simulated_family: Optional[float] = None
+    simulated_health: Optional[float] = None
+
+class RecoverySimulationResponse(BaseModel):
+    current_composite_score: float
+    current_risk_tier: str
+    current_academic_score: float
+    simulated_academic_score: float
+    simulated_composite_score: float
+    simulated_risk_tier: str
+    risk_reduction_points: float
+    risk_reduction_pct: float
+    domain_breakdown: Dict[str, float]
+    required_milestones: List[str]
+    target_achieved: bool
+    optimal_target_recommendation: Dict[str, Any]
+

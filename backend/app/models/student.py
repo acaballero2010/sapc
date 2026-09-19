@@ -56,3 +56,7 @@ class Student(Base):
     risk_scores = relationship("RiskScore", back_populates="student", cascade="all, delete-orphan")
     chatbot_sessions = relationship("ChatbotSession", back_populates="student", cascade="all, delete-orphan")
     interventions = relationship("InterventionPlan", back_populates="student", cascade="all, delete-orphan")
+    mood_checkins = relationship("DailyMoodCheckin", back_populates="student", cascade="all, delete-orphan")
+    parent_notifications = relationship("ParentNotification", back_populates="student", cascade="all, delete-orphan")
+
+

@@ -71,3 +71,39 @@ class InterventionPlan(Base):
     # Relationships
     student = relationship("Student", back_populates="interventions")
     counselor = relationship("User", back_populates="interventions")
+
+class NotificationChannel(str, enum.Enum):
+    SMS = "sms"
+    EMAIL = "email"
+    BOTH = "both"
+
+class NotificationStatus(str, enum.Enum):
+    SENT = "sent"
+    DELIVERED = "delivered"
+    ACKNOWLEDGED = "acknowledged"
+    RESCHEDULED = "rescheduled"
+
+class ParentNotification(Base):
+    __tablename__ = "parent_notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    parent_contact = Column(String(100), nullable=False) # e.g. "+63 917 555 0192" or "parent@gmail.com"
+    channel = Column(Enum(NotificationChannel), default=NotificationChannel.BOTH)
+    notification_type = Column(String(50), default="case_conference")
+    subject = Column(String(200), nullable=False)
+    message_body = Column(Text, nullable=False)
+    
+    meeting_date = Column(DateTime(timezone=True), nullable=True)
+    meeting_location = Column(String(150), default="Room 204 Guidance Center, SAPC")
+    status = Column(Enum(NotificationStatus), default=NotificationStatus.SENT)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    acknowledged_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    student = relationship("Student", back_populates="parent_notifications")
+    sender = relationship("User", foreign_keys=[sender_id])
+
