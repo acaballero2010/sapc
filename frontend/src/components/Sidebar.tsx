@@ -22,9 +22,10 @@ import { SapcLogo } from "./SapcLogo";
 interface SidebarProps {
   onOpenChat?: () => void;
   onOpenSimulator?: () => void;
+  onOpenOnboarding?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onOpenChat, onOpenSimulator }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onOpenChat, onOpenSimulator, onOpenOnboarding }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, switchRole } = useAuth();
@@ -191,6 +192,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenChat, onOpenSimulator })
                     <span>AI Counselor</span>
                   </div>
                   <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                </button>
+              )}
+
+              {onOpenOnboarding && (
+                <button
+                  onClick={() => {
+                    onOpenOnboarding();
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 transition"
+                >
+                  <div className="flex items-center gap-2 text-amber-950 font-bold">
+                    <Sparkles className="h-3.5 w-3.5 text-[#8B0014]" />
+                    <span>Role Tour & Guide</span>
+                  </div>
+                  <span className="text-[10px] text-amber-800 font-extrabold">3-Step</span>
                 </button>
               )}
             </div>

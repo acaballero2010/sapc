@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
 import { useAuth, RoleType } from "@/lib/auth-context";
+import { RegistrationModal } from "./RegistrationModal";
 
 export const LandingPage: React.FC = () => {
   const router = useRouter();
@@ -38,6 +39,7 @@ export const LandingPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [portalMode, setPortalMode] = useState<"quick_eval" | "credentials">("quick_eval");
   const [activeTab, setActiveTab] = useState<"counselor" | "teacher" | "student" | "parent">("counselor");
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
 
   const quickRoles: { 
     role: RoleType; 
@@ -167,7 +169,14 @@ export const LandingPage: React.FC = () => {
             <a href="#contact" className="hover:text-[#8B0014] transition">Contact</a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setIsRegistrationOpen(true)}
+              className="hidden sm:flex px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold text-xs sm:text-sm border border-amber-300 transition items-center gap-1.5 shadow-2xs"
+            >
+              <Users className="h-4 w-4 text-[#8B0014]" />
+              <span>Claim / Register</span>
+            </button>
             <a
               href="#login-section"
               className="px-5 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm flex items-center gap-2 shadow-sm transition active:scale-95"
@@ -464,9 +473,17 @@ export const LandingPage: React.FC = () => {
                   </form>
                 )}
 
-                {/* Footer Security Badge */}
-                <div className="pt-2 border-t border-slate-100 text-center">
-                  <span className="text-[11px] font-semibold text-slate-400 flex items-center justify-center gap-1.5">
+                {/* Footer Registration Prompt & Security Badge */}
+                <div className="pt-3 border-t border-slate-100 space-y-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsRegistrationOpen(true)}
+                    className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-[#8B0014] border border-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                  >
+                    <Users className="h-3.5 w-3.5 text-[#8B0014]" />
+                    <span>New student or parent? Claim Account & Link Profile →</span>
+                  </button>
+                  <span className="text-[11px] font-semibold text-slate-400 flex items-center justify-center gap-1.5 pt-0.5">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                     RA 10173 Data Privacy Sealed • 256-Bit TLS Encryption
                   </span>
@@ -887,6 +904,12 @@ export const LandingPage: React.FC = () => {
           <p>Powered by IntellySys Multi-Criteria Decision Support System</p>
         </div>
       </footer>
+
+      {/* Account Registration & Family Claim Modal */}
+      <RegistrationModal
+        isOpen={isRegistrationOpen}
+        onClose={() => setIsRegistrationOpen(false)}
+      />
     </div>
   );
 };

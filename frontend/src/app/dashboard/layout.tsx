@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatbotModal } from "@/components/ChatbotModal";
 import { SensitivitySimulator } from "@/components/SensitivitySimulator";
+import { RoleOnboardingWizard } from "@/components/RoleOnboardingWizard";
+import { useAuth } from "@/lib/auth-context";
 import { ShieldCheck } from "lucide-react";
 
 export default function DashboardLayout({
@@ -11,8 +13,10 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { user } = useAuth();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
@@ -24,6 +28,7 @@ export default function DashboardLayout({
         <Sidebar
           onOpenChat={() => setIsChatOpen(true)}
           onOpenSimulator={() => setIsSimulatorOpen(true)}
+          onOpenOnboarding={() => setIsOnboardingOpen(true)}
         />
 
         {/* Main Content Area offset by Sidebar width on lg screens */}
@@ -55,6 +60,14 @@ export default function DashboardLayout({
         isOpen={isSimulatorOpen}
         onClose={() => setIsSimulatorOpen(false)}
       />
+
+      {user && (
+        <RoleOnboardingWizard
+          role={user.role}
+          isOpen={isOnboardingOpen}
+          onClose={() => setIsOnboardingOpen(false)}
+        />
+      )}
     </div>
   );
 }
