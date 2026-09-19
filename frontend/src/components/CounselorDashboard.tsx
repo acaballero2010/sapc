@@ -314,7 +314,7 @@ export const CounselorDashboard: React.FC = () => {
       </div>
 
       {/* Analytics KPI Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <div id="triage-overview" className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 scroll-mt-24">
         {/* Total Monitored */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-sm transition flex flex-col justify-between">
           <div className="flex items-center justify-between">
@@ -374,7 +374,7 @@ export const CounselorDashboard: React.FC = () => {
 
       {/* Urgent NLP Distress Alerts Queue (RA 10173 Protected) */}
       {flaggedSessions.length > 0 && (
-        <div className="bg-white border-l-4 border-l-rose-600 border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
+        <div id="alerts-queue" className="bg-white border-l-4 border-l-rose-600 border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-rose-100 text-rose-700">
@@ -433,7 +433,7 @@ export const CounselorDashboard: React.FC = () => {
 
       {/* Teacher Guidance Referrals Queue */}
       {teacherReferrals.length > 0 && (
-        <div className="bg-white border-l-4 border-l-amber-500 border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
+        <div id="teacher-referrals" className="bg-white border-l-4 border-l-amber-500 border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
@@ -510,7 +510,7 @@ export const CounselorDashboard: React.FC = () => {
       )}
 
       {/* Main Student Roster & Risk Table */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      <div id="students-roster" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-3">
@@ -623,10 +623,12 @@ export const CounselorDashboard: React.FC = () => {
       </div>
 
       {/* Longitudinal Multi-Term Progression & Retention Matrix */}
-      <CohortTrendAnalytics />
+      <div id="trend-analytics" className="scroll-mt-24">
+        <CohortTrendAnalytics />
+      </div>
 
       {/* Active Interventions Board */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      <div id="active-interventions" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xl font-extrabold text-slate-900">Active Intervention Protocols</h3>

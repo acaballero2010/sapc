@@ -138,10 +138,12 @@ export const TeacherDashboard: React.FC = () => {
       </div>
 
       {/* SASS Ingestion Component */}
-      <SassCsvUploader onSuccess={loadData} />
+      <div id="uploader" className="scroll-mt-24">
+        <SassCsvUploader onSuccess={loadData} />
+      </div>
 
       {/* Advisory Class Roster */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      <div id="roster" className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-xl font-bold text-slate-900">Assigned Advisory Students</h3>
