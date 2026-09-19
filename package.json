@@ -1,0 +1,23 @@
+{
+  "name": "sapc-intellysys",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SAPC IntellySys: Multi-Criteria Decision Support System for San Antonio de Padua College",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "lint": "npm --prefix frontend run lint",
+    "backend": "cd backend && .\\venv\\Scripts\\uvicorn app.main:app --reload --port 8000",
+    "test:backend": "cd backend && .\\venv\\Scripts\\pytest"
+  },
+  "keywords": [
+    "decision-support-system",
+    "ahp",
+    "fastapi",
+    "nextjs",
+    "nlp"
+  ],
+  "author": "San Antonio de Padua College",
+  "license": "UNLICENSED"
+}
