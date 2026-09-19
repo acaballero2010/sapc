@@ -9,11 +9,14 @@ import {
   Users, 
   HeartPulse, 
   ShieldAlert, 
-  FileText, 
   PlusCircle, 
   RefreshCw,
   Clock,
-  Sparkles
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowRight,
+  Award
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -36,6 +39,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const { user } = useAuth();
   const [student, setStudent] = useState<any | null>(null);
   const [riskData, setRiskData] = useState<any | null>(null);
+  const [riskBreakdown, setRiskBreakdown] = useState<any | null>(null);
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
   const [assessments, setAssessments] = useState<any[]>([]);
   const [counselorNotes, setCounselorNotes] = useState<any[]>([]);
@@ -55,15 +59,17 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [sRes, rRes, aRes, assRes] = await Promise.all([
+        const [sRes, rRes, rbRes, aRes, assRes] = await Promise.all([
           fetchWithAuth(`/students/${studentId}`),
           fetchWithAuth(`/risk/student/${studentId}`),
+          fetchWithAuth(`/analytics/student/${studentId}/risk-breakdown`),
           fetchWithAuth(`/academic/student/${studentId}`),
           fetchWithAuth(`/assessments/student/${studentId}`)
         ]);
 
         setStudent(sRes);
         setRiskData(rRes);
+        setRiskBreakdown(rbRes);
         setAcademicRecords(aRes);
         setAssessments(assRes);
 
@@ -175,38 +181,46 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
               {/* AHP Decision Engine Synthesis Card */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-950/60 p-5 rounded-2xl border border-slate-800">
                 <div>
-                  <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    AHP Decision Criteria Breakdown
-                  </h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      AHP Criteria Weights Breakdown
+                    </h4>
+                    {riskBreakdown && (
+                      <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                        <ShieldCheck className="h-3 w-3" /> CR: {riskBreakdown.consistency_ratio} (Consistent)
+                      </span>
+                    )}
+                  </div>
+
                   <div className="space-y-2.5 text-xs">
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
                       <span className="flex items-center gap-1.5 text-slate-300">
-                        <BookOpen className="h-3.5 w-3.5 text-blue-400" /> Academic (Weight 40.17%)
+                        <BookOpen className="h-3.5 w-3.5 text-blue-400" /> Academic (w_AC = 0.4017)
                       </span>
                       <span className="font-bold text-white">{domainScores.academic.toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
                       <span className="flex items-center gap-1.5 text-slate-300">
-                        <Brain className="h-3.5 w-3.5 text-purple-400" /> Mental Health (Weight 24.42%)
+                        <Brain className="h-3.5 w-3.5 text-purple-400" /> Mental Health (w_MH = 0.2442)
                       </span>
                       <span className="font-bold text-white">{domainScores.mental_health.toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
                       <span className="flex items-center gap-1.5 text-slate-300">
-                        <DollarSign className="h-3.5 w-3.5 text-emerald-400" /> Financial (Weight 13.73%)
+                        <DollarSign className="h-3.5 w-3.5 text-emerald-400" /> Financial (w_FI = 0.1373)
                       </span>
                       <span className="font-bold text-white">{domainScores.financial.toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
                       <span className="flex items-center gap-1.5 text-slate-300">
-                        <Users className="h-3.5 w-3.5 text-amber-400" /> Family (Weight 13.73%)
+                        <Users className="h-3.5 w-3.5 text-amber-400" /> Family (w_FA = 0.1373)
                       </span>
                       <span className="font-bold text-white">{domainScores.family.toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800">
                       <span className="flex items-center gap-1.5 text-slate-300">
-                        <HeartPulse className="h-3.5 w-3.5 text-rose-400" /> Health (Weight 7.94%)
+                        <HeartPulse className="h-3.5 w-3.5 text-rose-400" /> Health (w_HE = 0.0794)
                       </span>
                       <span className="font-bold text-white">{domainScores.health.toFixed(1)} / 100</span>
                     </div>
@@ -227,6 +241,56 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </div>
               </div>
 
+              {/* AHP Alternative Ranking & Recommended Interventions */}
+              {riskBreakdown?.primary_recommendation && (
+                <div className="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 p-5 rounded-2xl border border-indigo-500/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-amber-400" />
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                        AHP Targeted Decision Recommendation (Dominant: {riskBreakdown.dominant_domain.replace("_", " ").toUpperCase()})
+                      </h4>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      Alternative Ranking #{1}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-white text-sm">
+                        {riskBreakdown.primary_recommendation.title}
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-indigo-600 text-white font-semibold text-[10px]">
+                        Primary Action
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300">{riskBreakdown.primary_recommendation.description}</p>
+                    {riskBreakdown.primary_recommendation.action_items && (
+                      <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-400 pt-1">
+                        {riskBreakdown.primary_recommendation.action_items.map((act: string, aIdx: number) => (
+                          <li key={aIdx}>{act}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {riskBreakdown.secondary_recommendations && riskBreakdown.secondary_recommendations.length > 0 && (
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[11px] font-semibold text-slate-400">Secondary Targeted Protocols:</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {riskBreakdown.secondary_recommendations.map((sec: any, idx: number) => (
+                          <div key={idx} className="bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 text-[11px]">
+                            <span className="font-semibold text-slate-200 block">{sec.title}</span>
+                            <span className="text-slate-400 text-[10px]">{sec.description}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* SASS Academic History */}
               <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800">
                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
@@ -246,14 +310,14 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                           <th className="pb-2">Incompletes</th>
                           <th className="pb-2">Attendance</th>
                           <th className="pb-2">Absences</th>
-                          <th className="pb-2 text-right">Normalized Risk</th>
+                          <th className="pb-2 text-right">Normalized S_AC Risk</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60">
                         {academicRecords.map((r) => (
                           <tr key={r.id} className="text-slate-300">
                             <td className="py-2.5 font-medium text-white">
-                              SY {r.school_year} ({r.semester} Sem)
+                              SY {r.school_year} ({r.quarter || r.semester})
                             </td>
                             <td className="py-2.5">
                               <span className={`font-bold ${r.gpa < 75 ? "text-rose-400" : r.gpa < 80 ? "text-amber-400" : "text-emerald-400"}`}>
