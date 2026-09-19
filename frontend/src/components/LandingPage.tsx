@@ -331,62 +331,73 @@ export const LandingPage: React.FC = () => {
 
             {/* Right Login / Quick Access Card */}
             <div id="login-section" className="lg:col-span-5 scroll-mt-24 w-full">
-              <div className="bg-white border-2 border-slate-200 rounded-3xl p-6 sm:p-7 shadow-xl space-y-5 relative">
+              <div className="bg-white border-2 border-slate-200/90 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 relative overflow-hidden">
                 
-                {/* Decorative Top Gold Line */}
-                <div className="absolute top-0 left-8 right-8 h-1 bg-gradient-to-r from-amber-400 to-[#8B0014] rounded-full" />
+                {/* Decorative Top Accent Bar */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#D97706] via-[#F59E0B] to-[#8B0014]" />
 
-                {/* Card Header & Segmented Tab Switcher */}
-                <div className="space-y-3 pb-2 border-b border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-rose-50 text-[#8B0014]">
-                        <Lock className="h-4.5 w-4.5" />
+                {/* Card Header */}
+                <div className="space-y-3 pb-3 border-b border-slate-100 pt-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-2xl bg-[#8B0014]/10 border border-[#8B0014]/20 flex items-center justify-center p-1.5 shrink-0 shadow-2xs">
+                        <SapcLogo className="h-7 w-7 object-contain" />
                       </div>
-                      <h3 className="text-lg font-extrabold text-slate-900">
-                        SAPC Decision Portal
-                      </h3>
+                      <div>
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">
+                          SAPC Decision Portal
+                        </h3>
+                        <p className="text-[11px] text-slate-500 font-semibold">
+                          San Antonio de Padua College
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                      🔒 Secure RBAC
+                    <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                      <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                      RA 10173 RBAC
                     </span>
                   </div>
 
                   {/* Segmented Mode Selector */}
-                  <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
+                  <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs font-bold">
                     <button
                       type="button"
                       onClick={() => setPortalMode("quick_eval")}
-                      className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                      className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
                         portalMode === "quick_eval"
                           ? "bg-white text-slate-900 shadow-xs border border-slate-200"
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                     >
-                      <span>⚡</span>
+                      <span className="text-amber-500">⚡</span>
                       <span>1-Click Evaluation</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setPortalMode("credentials")}
-                      className={`py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                      className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
                         portalMode === "credentials"
                           ? "bg-white text-slate-900 shadow-xs border border-slate-200"
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                     >
-                      <span>🔑</span>
+                      <span className="text-[#8B0014]">🔑</span>
                       <span>Institutional Login</span>
                     </button>
                   </div>
                 </div>
 
-                {/* MODE 1: 1-Click Evaluation Quick Select */}
+                {/* MODE 1: 1-Click Evaluation Quick Select (All 5 Roles) */}
                 {portalMode === "quick_eval" && (
-                  <div className="space-y-2.5 animate-fadeIn">
-                    <p className="text-xs text-slate-500">
-                      Select any institutional stakeholder to test live dashboards and decision tools:
-                    </p>
+                  <div className="space-y-3 animate-fadeIn">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-slate-600">
+                        Select a stakeholder profile to explore live:
+                      </p>
+                      <span className="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                        5 Live Portals
+                      </span>
+                    </div>
 
                     <div className="space-y-2">
                       {quickRoles.map((r) => (
@@ -395,10 +406,10 @@ export const LandingPage: React.FC = () => {
                           type="button"
                           onClick={() => handleQuickSelect(r)}
                           disabled={isSubmitting}
-                          className="w-full text-left p-3 rounded-2xl bg-slate-50/90 hover:bg-rose-50/60 border border-slate-200 hover:border-[#8B0014]/40 transition-all group flex items-center justify-between gap-3 shadow-2xs hover:shadow-xs"
+                          className="w-full text-left p-3 rounded-2xl bg-slate-50/80 hover:bg-rose-50/70 border border-slate-200 hover:border-[#8B0014]/40 transition-all group flex items-center justify-between gap-3 shadow-2xs hover:shadow-xs active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-lg shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-xl shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                               {r.icon}
                             </div>
                             <div className="min-w-0">
@@ -416,7 +427,7 @@ export const LandingPage: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-[#8B0014] opacity-80 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                          <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-[#8B0014] group-hover:translate-x-0.5 transition-all">
                             <span>Launch</span>
                             <ChevronRight className="h-4 w-4" />
                           </div>
@@ -426,15 +437,16 @@ export const LandingPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* MODE 2: Manual Credentials Form */}
+                {/* MODE 2: Institutional Login Form */}
                 {portalMode === "credentials" && (
                   <div className="space-y-4 text-left animate-fadeIn">
-                    {/* Google Sign-in Option */}
+                    
+                    {/* Google Sign-in Spotlight */}
                     <button
                       type="button"
                       onClick={() => handleGoogleSignIn()}
                       disabled={isSubmitting}
-                      className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm border-2 border-slate-200 hover:border-slate-300 shadow-xs transition flex items-center justify-center gap-3 group active:scale-[0.99]"
+                      className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm border-2 border-slate-200 hover:border-slate-300 shadow-xs transition flex items-center justify-center gap-3 group active:scale-[0.99]"
                     >
                       <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -445,14 +457,46 @@ export const LandingPage: React.FC = () => {
                       <span>Sign in with Google Workspace</span>
                     </button>
 
-                    <div className="relative flex items-center justify-center my-1">
+                    {/* Centered Divider */}
+                    <div className="relative flex items-center justify-center my-3">
                       <div className="border-t border-slate-200 w-full" />
-                      <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                        or credentials
+                      <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
+                        or institutional credentials
                       </span>
                     </div>
 
-                    <form onSubmit={handleLogin} className="space-y-4">
+                    {/* Role Quick Fill Preset Switcher */}
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-slate-700">Quick Fill Demo Roles:</span>
+                        <span className="text-[10px] text-slate-400 font-semibold">1-Click Auto Fill</span>
+                      </div>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {quickRoles.map((qr) => {
+                          const isActive = email === qr.email;
+                          return (
+                            <button
+                              key={qr.role}
+                              type="button"
+                              onClick={() => {
+                                setEmail(qr.email);
+                                setPassword(qr.pass);
+                              }}
+                              className={`py-1.5 px-1 rounded-xl text-[11px] font-bold border transition flex flex-col items-center justify-center gap-0.5 ${
+                                isActive
+                                  ? "bg-[#8B0014] text-white border-[#8B0014] shadow-xs"
+                                  : "bg-white text-slate-700 hover:text-[#8B0014] hover:bg-rose-50/50 border-slate-200"
+                              }`}
+                            >
+                              <span className="text-sm">{qr.icon}</span>
+                              <span className="truncate text-[10px]">{qr.label.split(" ")[0]}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-3.5">
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1.5">SAPC Email / LRN</label>
                         <div className="relative">
@@ -463,70 +507,53 @@ export const LandingPage: React.FC = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="counselor@sapc.edu.ph"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#8B0014]/20 focus:border-[#8B0014] transition"
                           />
                         </div>
                       </div>
 
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-bold text-slate-700">Password</label>
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="text-[11px] font-semibold text-slate-500 hover:text-slate-800"
-                        >
-                          {showPassword ? "Hide" : "Show"}
-                        </button>
-                      </div>
-                      <div className="relative">
-                        <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          required
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="••••••••"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Quick Preset Selector */}
-                    <div className="pt-1">
-                      <span className="text-[11px] font-bold text-slate-500 block mb-1.5">Quick Fill Demo Credentials:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {quickRoles.map((qr) => (
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-slate-700">Password</label>
                           <button
-                            key={qr.role}
                             type="button"
-                            onClick={() => {
-                              setEmail(qr.email);
-                              setPassword(qr.pass);
-                            }}
-                            className="px-2.5 py-1 text-[10px] font-bold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-[#8B0014] rounded-lg border border-slate-200 transition"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="text-[11px] font-semibold text-slate-500 hover:text-slate-800"
                           >
-                            {qr.icon} {qr.label.split(" ")[0]}
+                            {showPassword ? "Hide" : "Show"}
                           </button>
-                        ))}
+                        </div>
+                        <div className="relative">
+                          <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#8B0014]/20 focus:border-[#8B0014] transition"
+                          />
+                        </div>
                       </div>
-                    </div>
 
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full py-3.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? (
-                        <span>Authenticating Session...</span>
-                      ) : (
-                        <>
-                          <span>Authenticate & Enter Portal</span>
-                          <ArrowRight className="h-4 w-4" />
-                        </>
-                      )}
-                    </button>
-                  </form>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#8B0014] via-[#7B0012] to-[#5A000D] hover:from-[#7B0012] hover:to-[#4A000A] text-white font-extrabold text-sm shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-60"
+                      >
+                        {isSubmitting ? (
+                          <div className="flex items-center gap-2">
+                            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Authenticating Session...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <span>Authenticate & Enter Portal</span>
+                            <ArrowRight className="h-4 w-4" />
+                          </>
+                        )}
+                      </button>
+                    </form>
                   </div>
                 )}
 
@@ -535,9 +562,9 @@ export const LandingPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsRegistrationOpen(true)}
-                    className="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-[#8B0014] border border-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 px-3 rounded-2xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-[#8B0014] border border-slate-200 text-xs font-bold transition flex items-center justify-center gap-2 shadow-2xs hover:border-[#8B0014]/30"
                   >
-                    <Users className="h-3.5 w-3.5 text-[#8B0014]" />
+                    <Users className="h-4 w-4 text-[#8B0014]" />
                     <span>New student or parent? Claim Account & Link Profile →</span>
                   </button>
                   <span className="text-[11px] font-semibold text-slate-400 flex items-center justify-center gap-1.5 pt-0.5">
