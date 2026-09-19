@@ -14,23 +14,35 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
     delete (headers as Record<string, string>)["Content-Type"];
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  // Create AbortController with 3.5s timeout to prevent hanging on offline backends
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-  if (!response.ok) {
-    let errorDetail = "An unexpected error occurred";
-    try {
-      const errorJson = await response.json();
-      errorDetail = errorJson.detail || JSON.stringify(errorJson);
-    } catch {
-      errorDetail = response.statusText;
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: options.signal || controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      let errorDetail = "An unexpected error occurred";
+      try {
+        const errorJson = await response.json();
+        errorDetail = errorJson.detail || JSON.stringify(errorJson);
+      } catch {
+        errorDetail = response.statusText;
+      }
+      throw new Error(errorDetail);
     }
-    throw new Error(errorDetail);
-  }
 
-  return response.json();
+    return response.json();
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    throw err;
+  }
 }
 
 export { API_BASE_URL };

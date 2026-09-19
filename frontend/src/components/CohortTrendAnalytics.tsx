@@ -180,9 +180,9 @@ const DEFAULT_TRENDS: LongitudinalTrendsResponse = {
 };
 
 export const CohortTrendAnalytics: React.FC = () => {
-  const [data, setData] = useState<LongitudinalTrendsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedTermIdx, setSelectedTermIdx] = useState<number | null>(null);
+  const [data, setData] = useState<LongitudinalTrendsResponse>(DEFAULT_TRENDS);
+  const [loading, setLoading] = useState(false);
+  const [selectedTermIdx, setSelectedTermIdx] = useState<number>(DEFAULT_TRENDS.multi_term_progression.length - 1);
   const [gradeFilter, setGradeFilter] = useState<string>("all");
   const [viewMetric, setViewMetric] = useState<"risk_distribution" | "domain_breakdown" | "gpa_resolution">("risk_distribution");
 
@@ -193,13 +193,9 @@ export const CohortTrendAnalytics: React.FC = () => {
         if (res && res.multi_term_progression?.length) {
           setData(res);
           setSelectedTermIdx(res.multi_term_progression.length - 1);
-        } else {
-          setData(DEFAULT_TRENDS);
-          setSelectedTermIdx(DEFAULT_TRENDS.multi_term_progression.length - 1);
         }
       } catch {
-        setData(DEFAULT_TRENDS);
-        setSelectedTermIdx(DEFAULT_TRENDS.multi_term_progression.length - 1);
+        // Keeps DEFAULT_TRENDS
       } finally {
         setLoading(false);
       }
