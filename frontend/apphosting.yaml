@@ -1,0 +1,21 @@
+# Firebase App Hosting Configuration
+# Reference: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 1024
+
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: sapc-intellysys-ph
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: sapc-intellysys-ph.firebaseapp.com
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: sapc-intellysys-ph.firebasestorage.app
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "923880712593"
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:923880712593:web:942fcdeac9a8e251519230"
