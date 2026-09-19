@@ -18,7 +18,10 @@ import {
   Brain, 
   HeartPulse, 
   FileText,
-  UserCheck
+  UserCheck,
+  Lock,
+  Key,
+  Check
 } from "lucide-react";
 import { AuditLogViewer } from "./AuditLogViewer";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
@@ -31,10 +34,20 @@ const CAMPUS_USERS = [
     email: "counselor@sapc.edu.ph",
     role: "guidance_counselor",
     roleLabel: "Guidance Counselor",
+    identifier: "EMP-GC-2018-0042",
     department: "Guidance & Counseling Department (Room 204)",
     accessScope: "Full Pastoral Records & Triage",
     status: "active",
-    lastLogin: "Just now"
+    mfaEnabled: true,
+    lastLogin: "Just now",
+    authorizedModules: [
+      "Crisis Triage Queue & Heatmap",
+      "NLP Sentiment & Distress Flags",
+      "Classroom Teacher Referrals",
+      "Tier-3 Multi-Domain Care Protocols",
+      "DepEd / CHED Institutional Reports"
+    ],
+    recentAuditActivity: "Evaluated AHP composite risk for Joshua Dimaculangan (Score: 0.618, High Risk)"
   },
   {
     id: 2,
@@ -42,10 +55,19 @@ const CAMPUS_USERS = [
     email: "teacher@sapc.edu.ph",
     role: "teacher",
     roleLabel: "Class Adviser",
+    identifier: "EMP-FAC-2015-0108",
     department: "Grade 11 - St. Augustine (Senior High STEM)",
     accessScope: "Advisory Class Roster & SASS Ingestion",
     status: "active",
-    lastLogin: "10 mins ago"
+    mfaEnabled: true,
+    lastLogin: "10 mins ago",
+    authorizedModules: [
+      "Advisory Class Roster (45 Students)",
+      "DepEd SASS Academic Ingestion",
+      "1-Click Guidance Counselor Referral",
+      "Academic Attendance Marking"
+    ],
+    recentAuditActivity: "Dispatched 1-Click Guidance Referral for Mark Anthony Reyes (Math Q1 Drop: 71.5%)"
   },
   {
     id: 3,
@@ -53,10 +75,20 @@ const CAMPUS_USERS = [
     email: "admin@sapc.edu.ph",
     role: "admin",
     roleLabel: "System Administrator",
+    identifier: "EMP-ADM-2011-0003",
     department: "Office of the Principal & Academic Affairs",
     accessScope: "System Governance & RA 10173 Audit Logs",
     status: "active",
-    lastLogin: "Active now"
+    mfaEnabled: true,
+    lastLogin: "Active now",
+    authorizedModules: [
+      "AHP Criteria Weights Vector Management",
+      "Saaty Mathematical Model Consistency (CR ≤ 0.10)",
+      "Campus User Roles & Directory Boundary Enforcer",
+      "RA 10173 Immutable Audit Trail Viewer",
+      "DepEd Compliance & Executive Export"
+    ],
+    recentAuditActivity: "Verified AHP pairwise matrix consistency (CR = 0.048) and reviewed immutable audit trail"
   },
   {
     id: 4,
@@ -64,10 +96,19 @@ const CAMPUS_USERS = [
     email: "student@sapc.edu.ph",
     role: "student",
     roleLabel: "Student",
+    identifier: "STD-2024-00129",
     department: "Grade 11 - STEM Track",
     accessScope: "Self Wellness Pulse & Academic Standing",
     status: "active",
-    lastLogin: "Today, 8:15 AM"
+    mfaEnabled: false,
+    lastLogin: "Today, 8:15 AM",
+    authorizedModules: [
+      "Self Wellness Mood Pulse & Reflection Journal",
+      "5-Domain Holistic Progress Tracking",
+      "Grade 11 SASS Academic Simulator (₱ / GPA)",
+      "Assigned Care Plan Goals & Action Steps"
+    ],
+    recentAuditActivity: "Submitted Daily Wellness Mood Check-in ('Stressed & Overwhelmed' - Math Exam Prep)"
   },
   {
     id: 5,
@@ -75,10 +116,19 @@ const CAMPUS_USERS = [
     email: "parent@sapc.edu.ph",
     role: "parent",
     roleLabel: "Parent / Guardian",
+    identifier: "PAR-2024-00084",
     department: "PTCA — Parent of Joshua Dimaculangan",
     accessScope: "Linked Child Academic & Wellness Progress",
     status: "active",
-    lastLogin: "Yesterday"
+    mfaEnabled: false,
+    lastLogin: "Yesterday",
+    authorizedModules: [
+      "Linked Child Academic Summary & Quarterly GPA",
+      "Attendance & Absence Monitoring",
+      "Counselor Advisories & Action Plans",
+      "Child Emotional Wellness Pulse Review"
+    ],
+    recentAuditActivity: "Acknowledged Counselor Advisory Notice from Maria Theresa Cruz, RGC"
   }
 ];
 
@@ -94,11 +144,25 @@ export const AdminDashboard: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isMatrixModalOpen, setIsMatrixModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<typeof CAMPUS_USERS[0] | null>(null);
   const [userSearch, setUserSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // Check if there is a hash in the URL on mount or navigation
+    if (typeof window !== "undefined" && window.location.hash) {
+      const targetId = window.location.hash.replace("#", "");
+      setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          el.classList.add("ring-4", "ring-amber-400/50");
+          setTimeout(() => el.classList.remove("ring-4", "ring-amber-400/50"), 2500);
+        }
+      }, 200);
+    }
   }, []);
 
   if (!isMounted) {
@@ -307,7 +371,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-2xs">
           <table className="min-w-full text-left text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">
@@ -315,15 +379,24 @@ export const AdminDashboard: React.FC = () => {
                 <th className="py-3.5 px-4">Role Designation</th>
                 <th className="py-3.5 px-4">Department / Section</th>
                 <th className="py-3.5 px-4">RA 10173 Data Access Scope</th>
-                <th className="py-3.5 px-4 text-right">Status</th>
+                <th className="py-3.5 px-4 text-center">Status</th>
+                <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-slate-50 transition text-slate-800">
+                <tr 
+                  key={u.id} 
+                  onClick={() => setSelectedUser(u)}
+                  className="hover:bg-rose-50/40 cursor-pointer transition text-slate-800 group"
+                >
                   <td className="py-3.5 px-4">
-                    <div className="font-bold text-slate-900">{u.name}</div>
-                    <div className="text-slate-500 font-mono text-[11px]">{u.email}</div>
+                    <div className="font-bold text-slate-900 group-hover:text-[#8B0014] transition-colors">{u.name}</div>
+                    <div className="text-slate-500 font-mono text-[11px] flex items-center gap-1.5 mt-0.5">
+                      <span>{u.email}</span>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-400">{u.identifier}</span>
+                    </div>
                   </td>
                   <td className="py-3.5 px-4">
                     <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
@@ -338,11 +411,23 @@ export const AdminDashboard: React.FC = () => {
                   </td>
                   <td className="py-3.5 px-4 text-slate-700 font-medium">{u.department}</td>
                   <td className="py-3.5 px-4 text-slate-600 font-mono text-xs">{u.accessScope}</td>
-                  <td className="py-3.5 px-4 text-right">
+                  <td className="py-3.5 px-4 text-center">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Active
                     </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-right">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedUser(u);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#8B0014] text-slate-700 hover:text-white font-bold text-xs transition shadow-2xs"
+                    >
+                      Inspect Scope
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -458,6 +543,113 @@ export const AdminDashboard: React.FC = () => {
                 className="px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition"
               >
                 Close Matrix View
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Campus User Account & Role Boundary Inspector Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] text-white flex items-center justify-between border-t-4 border-amber-400">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-2xl bg-amber-400/20 text-amber-300 border border-amber-400/40 flex items-center justify-center font-extrabold text-lg">
+                  {selectedUser.name.charAt(0)}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-400/20 text-amber-200 border border-amber-400/30">
+                      {selectedUser.roleLabel}
+                    </span>
+                    <span className="text-xs text-rose-200">• {selectedUser.identifier}</span>
+                  </div>
+                  <h3 className="text-xl font-black text-white">
+                    {selectedUser.name}
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedUser(null)}
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-5">
+              {/* Account Meta Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Institutional Email</span>
+                  <p className="text-xs font-mono font-bold text-slate-800 mt-1 truncate">{selectedUser.email}</p>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Security & 2FA</span>
+                  <p className="text-xs font-bold text-emerald-700 mt-1 flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5" />
+                    {selectedUser.mfaEnabled ? "2FA Verified" : "Standard Auth"}
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 col-span-2 sm:col-span-1">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Last Active</span>
+                  <p className="text-xs font-bold text-slate-800 mt-1">{selectedUser.lastLogin}</p>
+                </div>
+              </div>
+
+              {/* Department & Access Scope */}
+              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/90 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
+                  <ShieldCheck className="h-4 w-4 text-[#8B0014]" />
+                  <span>RA 10173 Institutional Access Scope</span>
+                </div>
+                <p className="text-xs text-amber-950 font-medium">
+                  <strong>Assignment:</strong> {selectedUser.department}
+                </p>
+                <p className="text-xs text-slate-700 bg-white/80 p-2.5 rounded-xl border border-amber-200/60 font-mono">
+                  {selectedUser.accessScope}
+                </p>
+              </div>
+
+              {/* Authorized Modules */}
+              <div className="space-y-2.5">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Authorized Subsystems &amp; Clinical Portals
+                </h4>
+                <div className="space-y-1.5">
+                  {selectedUser.authorizedModules.map((mod, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800">
+                      <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span>{mod}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recent Audit Event */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700">Recent Immutable Audit Activity</span>
+                  <span className="text-[10px] font-mono text-slate-400">RA 10173 Trail</span>
+                </div>
+                <p className="text-xs text-slate-600 font-mono bg-white p-2.5 rounded-xl border border-slate-200/80">
+                  {selectedUser.recentAuditActivity}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+              <span className="text-xs text-slate-500 font-medium hidden sm:inline">
+                Verified SAPC Institutional Directory Entry
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedUser(null)}
+                className="px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition"
+              >
+                Close Inspector
               </button>
             </div>
           </div>

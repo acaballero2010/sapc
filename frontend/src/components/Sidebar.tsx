@@ -213,17 +213,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleNavigation = (item: { href: string }) => {
     setIsOpen(false);
     const [targetPath, hash] = item.href.split("#");
-    if (pathname === targetPath) {
+    const currentNorm = (pathname || "").replace(/\/$/, "");
+    const targetNorm = (targetPath || "").replace(/\/$/, "");
+
+    if (currentNorm === targetNorm) {
       if (hash) {
         if (hash === "referral-action") {
           window.dispatchEvent(new CustomEvent("sapc:open-teacher-referral"));
           const el = document.getElementById("roster");
-          if (el) el.scrollIntoView({ behavior: "smooth" });
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
           return;
         }
         const el = document.getElementById(hash);
         if (el) {
-          el.scrollIntoView({ behavior: "smooth" });
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          el.classList.add("ring-4", "ring-amber-400/50");
+          setTimeout(() => el.classList.remove("ring-4", "ring-amber-400/50"), 2000);
           return;
         }
       } else {
