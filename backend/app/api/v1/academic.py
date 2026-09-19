@@ -1,46 +1,67 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request, status, Response
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import User, UserRole
 from app.models.student import Student, Section
 from app.models.academic import AcademicRecord
-from app.schemas.academic import AcademicRecordOut, SASSImportSummary
-from app.api.deps import get_current_user, require_faculty, require_admin
+from app.schemas.academic import AcademicRecordOut, SASSUploadResponse
+from app.api.deps import get_current_user, RoleChecker
 from app.services.sass_parser import SASSParserService
 from app.services.audit_service import AuditService
 
 router = APIRouter()
 
-@router.post("/sass-import", response_model=SASSImportSummary)
-async def import_sass_csv(
+# Restricted strictly to TEACHER and ADMIN roles
+require_teacher_or_admin = RoleChecker([UserRole.TEACHER, UserRole.ADMIN])
+
+@router.post("/upload-sass", response_model=SASSUploadResponse)
+async def upload_sass_csv(
     request: Request,
     file: UploadFile = File(...),
+    academic_year: str = Form("2025-2026"),
+    quarter: str = Form("Q1"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_faculty)
+    current_user: User = Depends(require_teacher_or_admin)
 ):
     """
-    Ingests SASS Academic CSV data, computes normalized academic sub-scores,
-    and updates AHP composite failure risks.
+    Phase 2: Ingests SASS Academic CSV data for a given academic year and quarter.
+    - Restricted to TEACHER and ADMIN roles.
+    - Expected CSV columns: student_id, student_name, grade_level, section, quarter_gpa,
+      failing_subjects_count, days_absent, incomplete_requirements_count.
+    - Computes deterministic Academic Risk Score (S_AC).
+    - Returns 200 with summary on success, or 400 with line-by-line validation errors on failure.
     """
-    if not file.filename.endswith(".csv"):
+    if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File must be a valid CSV file (.csv)"
         )
 
     content = await file.read()
-    result = SASSParserService.parse_and_ingest_csv(db, content)
+    result = SASSParserService.parse_and_ingest_sass_csv(
+        db=db,
+        file_content=content,
+        academic_year=academic_year.strip(),
+        quarter=quarter.strip()
+    )
 
-    # Log RA 10173 Audit Record for Bulk Academic Ingestion
+    # Log RA 10173 Audit Record
     AuditService.log_event(
         db=db,
         actor=current_user,
-        action="INGEST_SASS_CSV",
+        action="UPLOAD_SASS_CSV",
         target_resource=f"batch_id:{result['batch_id']}",
-        details=f"Processed {result['total_processed']} rows ({result['successful_imports']} successful)",
+        details=f"Academic Year: {academic_year}, Quarter: {quarter}, Total Rows: {result['total_rows']}, Success: {result['successful_imports']}, Errors: {result['errors_count']}",
         request=request
     )
+
+    if not result["success"]:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=result
+        )
 
     return result
 

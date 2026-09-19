@@ -4,8 +4,8 @@ from datetime import datetime
 
 class AcademicRecordBase(BaseModel):
     school_year: str
-    semester: str
-    quarter: Optional[str] = "Final"
+    semester: Optional[str] = "1st"
+    quarter: Optional[str] = "Q1"
     gpa: float
     failed_subjects_count: int = 0
     incomplete_subjects_count: int = 0
@@ -28,9 +28,23 @@ class AcademicRecordOut(AcademicRecordBase):
     class Config:
         from_attributes = True
 
-class SASSImportSummary(BaseModel):
-    total_processed: int
+class LineValidationError(BaseModel):
+    line: int
+    field: str
+    error: str
+
+class SASSUploadDetail(BaseModel):
+    student_id: str
+    student_name: str
+    academic_risk_score: float
+    composite_risk_score: float
+    risk_tier: str
+
+class SASSUploadResponse(BaseModel):
+    success: bool
+    batch_id: str
+    total_rows: int
     successful_imports: int
     errors_count: int
-    batch_id: str
-    details: List[str]
+    errors: List[LineValidationError] = []
+    details: List[SASSUploadDetail] = []

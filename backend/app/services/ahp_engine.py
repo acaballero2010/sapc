@@ -51,50 +51,63 @@ class AHPEngine:
         return weights, lambda_max, cr
 
     @staticmethod
+    def calculate_academic_risk_score(
+        quarter_gpa: float,
+        failing_subjects_count: int,
+        days_absent: int,
+        incomplete_requirements_count: int
+    ) -> float:
+        """
+        Computes deterministic Academic Risk Score (S_AC in [0.0, 100.0]):
+        - Failing subjects penalty: 25 points per failing grade (max 50)
+        - GPA penalty: If GPA < 75 -> 30 pts; if 75 <= GPA < 80 -> 15 pts; if GPA >= 80 -> 0 pts
+        - Attendance penalty: >5 unexcused absences -> 15 pts; 3-5 absences -> 8 pts; <3 absences -> 0 pts
+        - Incompletes: 5 points per incomplete mark (max 10)
+        - Total clamped between 0.0 and 100.0.
+        """
+        # 1. Failing subjects penalty (max 50)
+        failing_penalty = min(50.0, max(0, failing_subjects_count) * 25.0)
+
+        # 2. GPA penalty
+        if quarter_gpa < 75.0:
+            gpa_penalty = 30.0
+        elif quarter_gpa < 80.0:
+            gpa_penalty = 15.0
+        else:
+            gpa_penalty = 0.0
+
+        # 3. Attendance penalty
+        if days_absent > 5:
+            attendance_penalty = 15.0
+        elif days_absent >= 3:
+            attendance_penalty = 8.0
+        else:
+            attendance_penalty = 0.0
+
+        # 4. Incompletes penalty (max 10)
+        incomplete_penalty = min(10.0, max(0, incomplete_requirements_count) * 5.0)
+
+        total_risk = failing_penalty + gpa_penalty + attendance_penalty + incomplete_penalty
+        return float(np.clip(round(total_risk, 2), 0.0, 100.0))
+
+    @classmethod
     def normalize_academic_risk(
+        cls,
         gpa: float,
         failed_count: int,
         incomplete_count: int,
-        attendance_rate: float,
-        absences: int
+        attendance_rate: float = 100.0,
+        absences: int = 0
     ) -> float:
         """
-        Converts raw academic indicators into a normalized risk score (0 - 100).
-        Higher score = Higher risk of academic failure.
-        
-        Philippine Grade Scale (Standard DepEd/CHED 0-100 or 75 passing):
-        - Grade < 75: Extreme Risk (100%)
-        - Grade 75-79: High Risk (70-90%)
-        - Grade 80-84: Moderate Risk (40-60%)
-        - Grade 85-89: Low Risk (15-35%)
-        - Grade 90+: Minimal Risk (0-15%)
+        Standard normalizer delegating to deterministic S_AC calculation.
         """
-        # 1. Grade sub-risk
-        if gpa < 75.0:
-            grade_risk = 100.0
-        elif gpa < 80.0:
-            # 75.0 -> 90.0 risk, 79.9 -> 70.0 risk
-            grade_risk = 90.0 - ((gpa - 75.0) / 5.0) * 20.0
-        elif gpa < 85.0:
-            # 80.0 -> 60.0 risk, 84.9 -> 35.0 risk
-            grade_risk = 60.0 - ((gpa - 80.0) / 5.0) * 25.0
-        elif gpa < 90.0:
-            # 85.0 -> 35.0 risk, 89.9 -> 10.0 risk
-            grade_risk = 35.0 - ((gpa - 85.0) / 5.0) * 25.0
-        else:
-            grade_risk = max(0.0, 10.0 - ((gpa - 90.0) / 10.0) * 10.0)
-
-        # 2. Failed / Incomplete subjects impact
-        subject_risk = min(100.0, (failed_count * 35.0) + (incomplete_count * 20.0))
-
-        # 3. Attendance / Absences risk
-        # 10 or more absences is near failure limit (20% of semester)
-        absence_risk = min(100.0, max(0.0, (100.0 - attendance_rate) * 2.5 + (absences * 6.0)))
-
-        # Sub-criteria weights inside Academic Domain:
-        # Grade (50%), Failed/Incomplete (30%), Attendance (20%)
-        academic_composite = (0.50 * grade_risk) + (0.30 * subject_risk) + (0.20 * absence_risk)
-        return float(np.clip(round(academic_composite, 2), 0.0, 100.0))
+        return cls.calculate_academic_risk_score(
+            quarter_gpa=gpa,
+            failing_subjects_count=failed_count,
+            days_absent=absences,
+            incomplete_requirements_count=incomplete_count
+        )
 
     @classmethod
     def compute_composite_risk(
