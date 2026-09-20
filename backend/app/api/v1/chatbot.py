@@ -96,8 +96,10 @@ def send_chat_message(
         # Recalculate AHP Risk
         SASSParserService.recalculate_student_risk(db, student.id)
 
-    # Generate supportive reply
-    bot_reply_text, resources = nlp_service.generate_supportive_response(nlp_res, payload.message)
+    # Generate supportive reply (with conversation history for Gemini multi-turn context)
+    bot_reply_text, resources = nlp_service.generate_supportive_response(
+        nlp_res, payload.message, payload.conversation_history
+    )
 
     bot_msg = ChatMessage(
         session_id=session.id,

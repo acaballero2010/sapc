@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
 from app.models.chatbot import SentimentCategory
@@ -6,6 +6,7 @@ from app.models.chatbot import SentimentCategory
 class ChatMessageInput(BaseModel):
     message: str
     session_token: Optional[str] = None
+    conversation_history: Optional[List[Dict[str, str]]] = None
 
 class ChatMessageOut(BaseModel):
     id: int

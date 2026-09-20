@@ -263,54 +263,78 @@ class NLPService:
                 "Online Appointment Request via Student Dashboard"
             ]
 
-    def call_gemini_guidance(self, message: str, analysis: Dict[str, Any]) -> Optional[str]:
+    def call_gemini_guidance(
+        self,
+        message: str,
+        analysis: Dict[str, Any],
+        conversation_history: Optional[List[Dict[str, str]]] = None
+    ) -> Optional[str]:
         """
-        Calls Google Gemini Generative API (Gemini 1.5 Flash / Gemini 2.0 Flash)
-        for personalized, highly empathetic, culturally-grounded counseling dialogue.
+        Calls Google Gemini Generative API for personalized, empathetic counseling dialogue.
+        Supports multi-turn conversation history for coherent, contextual responses.
         Falls back to None if GEMINI_API_KEY is not configured or on network timeout.
         """
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             return None
 
-        model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+        model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
 
         domain = analysis.get("inferred_domain", "general")
         emotion = analysis.get("detected_emotion", "neutral")
-        intent = analysis.get("intent", "reflection")
-        subject = self.extract_detected_subject(message)
+        detected_subject = self.extract_detected_subject(message)
 
-        system_prompt = (
-            "You are the official AI Guidance Counselor Companion for San Antonio de Padua College (SAPC), "
-            "a respected educational institution in the Philippines. "
-            "Your mission is to provide warm, culturally-grounded, empathetic, and constructive guidance to high school and college students.\n"
-            "Key Instructions:\n"
-            "1. Match the student's language naturally (warm Filipino / Taglish / English).\n"
-            "2. Be compassionate, validating, and supportive without being overly verbose (2-3 concise paragraphs max).\n"
-            "3. Reference SAPC campus support resources when relevant (Registered Guidance Counselor Ms. Maria Theresa Cruz, Guidance Office Room 204 Bldg A, Peer Tutoring in Room 104, Student Financial Assistance).\n"
-            "4. NEVER diagnose mental illness, and never encourage self-harm or hopelessness.\n"
-            f"Context: Student Emotion = {emotion}, Inferred Domain = {domain}, Intent = {intent}, Detected Subject = {subject or 'None'}."
+        system_instruction = (
+            "You are the SAPC Guidance Companion, the official AI guidance counselor for San Antonio de Padua College (SAPC), "
+            "a Philippine educational institution. Your role is to support high school and college students with their academic, "
+            "emotional, family, financial, and wellness concerns.\n\n"
+            "Guidelines:\n"
+            "- Respond warmly and naturally in the same language the student uses (Filipino, Taglish, or English).\n"
+            "- Be empathetic, validating, and constructive. Never be dismissive or robotic.\n"
+            "- Keep responses focused and concise (2–3 short paragraphs max). Do NOT be overly verbose.\n"
+            "- Reference SAPC resources when relevant: Guidance Counselor Ms. Maria Theresa Cruz RGC (Room 204, Bldg A), "
+            "Peer Tutoring (Room 104 Learning Commons), Financial Assistance Office.\n"
+            "- NEVER diagnose mental illness. NEVER encourage self-harm or hopelessness.\n"
+            "- Remember and refer to what the student shared earlier in the conversation to maintain continuity.\n"
+            f"- Current context: Detected emotion = {emotion}, Domain = {domain}, Subject = {detected_subject or 'none'}.\n"
         )
 
+        # Build multi-turn contents array for Gemini
+        contents = []
+
+        # Add conversation history (prior turns) if provided
+        if conversation_history:
+            for turn in conversation_history:
+                role = turn.get("role", "user")
+                text = turn.get("text", "")
+                if text:
+                    contents.append({
+                        "role": role,
+                        "parts": [{"text": text}]
+                    })
+
+        # Add the current student message
+        contents.append({
+            "role": "user",
+            "parts": [{"text": message}]
+        })
+
         payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": f"System Context: {system_prompt}\n\nStudent Message: {message}"}
-                    ]
-                }
-            ],
+            "system_instruction": {
+                "parts": [{"text": system_instruction}]
+            },
+            "contents": contents,
             "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 350,
+                "temperature": 0.72,
+                "maxOutputTokens": 400,
                 "topP": 0.95
             }
         }
 
         try:
             import httpx
-            with httpx.Client(timeout=8.0) as client:
+            with httpx.Client(timeout=12.0) as client:
                 res = client.post(url, json=payload)
                 if res.status_code == 200:
                     data = res.json()
@@ -319,13 +343,20 @@ class NLPService:
                         parts = candidates[0]["content"].get("parts", [])
                         if parts and "text" in parts[0]:
                             return parts[0]["text"].strip()
+                else:
+                    print(f"[Gemini Guidance Notice]: HTTP {res.status_code} — {res.text[:200]}")
         except Exception as e:
             print(f"[Gemini Guidance Notice]: Using local NLP fallback ({e})")
             return None
 
         return None
 
-    def generate_supportive_response(self, analysis: Dict[str, Any], message: str) -> Tuple[str, List[str]]:
+    def generate_supportive_response(
+        self,
+        analysis: Dict[str, Any],
+        message: str,
+        conversation_history: Optional[List[Dict[str, str]]] = None
+    ) -> Tuple[str, List[str]]:
         """
         Scaffolded Bilingual Conversational Response Generator (Vygotsky ZPD & WHO Protocols).
         Generates dynamic, non-repetitive responses tailored directly to the student's message.
@@ -353,7 +384,7 @@ class NLPService:
             return reply, resources
 
         # 2. Check if Google Gemini generative guidance is available
-        gemini_text = self.call_gemini_guidance(message, analysis)
+        gemini_text = self.call_gemini_guidance(message, analysis, conversation_history)
         if gemini_text:
             resources = self.get_contextual_resources(domain, emotion, detected_subject)
             return gemini_text, resources
