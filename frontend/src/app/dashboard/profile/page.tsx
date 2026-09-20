@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { 
   User, 
   ShieldCheck, 
@@ -32,7 +32,7 @@ const AVATAR_PRESETS = [
   { id: "creative", label: "Arts & Culture", emoji: "🎨", bg: "from-emerald-600 to-teal-800" }
 ];
 
-export default function UserProfilePage() {
+function UserProfileContent() {
   const searchParams = useSearchParams();
   const { user, updateUserProfile } = useAuth();
   
@@ -709,5 +709,13 @@ export default function UserProfilePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function UserProfilePage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">Loading profile...</div>}>
+      <UserProfileContent />
+    </Suspense>
   );
 }

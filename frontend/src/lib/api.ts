@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
-export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+export async function fetchWithAuth(endpoint: string, options: RequestInit & { timeoutMs?: number } = {}) {
   const token = typeof window !== "undefined" ? localStorage.getItem("sapc_token") : null;
   
   const headers: HeadersInit = {
@@ -14,15 +14,16 @@ export async function fetchWithAuth(endpoint: string, options: RequestInit = {})
     delete (headers as Record<string, string>)["Content-Type"];
   }
 
-  // Create AbortController with 1.5s timeout for fast offline/demo fallback
+  // Create AbortController with configurable timeout (default 15s for Gemini AI / backend responses)
   const controller = new AbortController();
+  const timeoutDuration = options.timeoutMs ?? 15000;
   const timeoutId = setTimeout(() => {
     try {
-      controller.abort("Backend request timed out (offline demo mode)");
+      controller.abort("Backend request timed out (offline fallback mode)");
     } catch {
       controller.abort();
     }
-  }, 1500);
+  }, timeoutDuration);
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

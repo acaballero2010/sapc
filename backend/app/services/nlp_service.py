@@ -35,6 +35,15 @@ EMOTION_LEXICON_MAP = {
     "neutral": ["okay", "normal", "ordinary", "regular", "kumusta", "ayos lang", "class", "schedule", "school", "info"]
 }
 
+def has_keyword_match(text: str, keywords: List[str]) -> bool:
+    clean = text.lower()
+    for kw in keywords:
+        kw_clean = kw.lower().strip()
+        pattern = r'(?:\b|\A)' + re.escape(kw_clean) + r'(?:\b|\Z)'
+        if re.search(pattern, clean):
+            return True
+    return False
+
 DOMAIN_KEYWORD_MAP = {
     "mental_health": [
         "sad", "depressed", "crying", "anxious", "stress", "sleep", "insomnia", 
@@ -49,8 +58,10 @@ DOMAIN_KEYWORD_MAP = {
         "home", "siblings", "magulang", "tatay", "nanay", "away", "kapatid", "ofw", "panganay", "bahay", "family"
     ],
     "academic": [
-        "exam", "grades", "failed", "homework", "project", "deadline", "prof", 
-        "teacher", "subject", "studying", "bagsak", "aral", "pasa", "guro", "recitation", "quiz", "math", "science", "chemistry", "physics", "calculus", "research", "thesis"
+        "exam", "exams", "grades", "grade", "failed", "homework", "project", "deadline", "prof", 
+        "teacher", "subject", "subjects", "studying", "study", "bagsak", "aral", "pasa", "guro", 
+        "recitation", "quiz", "quizzes", "math", "science", "chemistry", "physics", "calculus", 
+        "research", "thesis", "nahihirapan", "hirap", "lesson", "lessons", "mababa", "module", "modules"
     ],
     "health": [
         "sick", "hospital", "illness", "fever", "headache", "pain", "doctor", 
@@ -80,7 +91,7 @@ class NLPService:
         clean_text = text.lower()
         counts = {}
         for emotion, keywords in EMOTION_LEXICON_MAP.items():
-            count = sum(1 for kw in keywords if kw in clean_text or re.search(r'\b' + re.escape(kw) + r'\b', clean_text))
+            count = sum(1 for kw in keywords if has_keyword_match(clean_text, [kw]))
             if count > 0:
                 counts[emotion] = count
 
@@ -98,18 +109,36 @@ class NLPService:
         if is_crisis:
             return "crisis_intervention"
         clean = text.lower()
-        if any(w in clean for w in ["kausap", "makausap", "talk to someone", "lonely", "mag-isa", "wala akong kaibigan", "samahan", "kwentuhan"]):
+
+        # 1. Companionship
+        if has_keyword_match(clean, ["kausap", "makausap", "talk to someone", "lonely", "mag-isa", "wala akong kaibigan", "samahan", "kwentuhan"]):
             return "companionship"
-        if any(w in clean for w in ["help", "tulong", "ano gagawin", "what should i do", "advice", "paano", "tips"]):
+
+        # 2. Academic difficulty & study advice
+        if domain == "academic" or has_keyword_match(clean, ["nahihirapan", "hirap", "bagsak", "failed", "grades", "subject", "subjects", "exam", "exams", "lesson", "lessons", "homework"]):
             return "advice"
-        if any(w in clean for w in ["counselor", "guidance", "office", "schedule", "appointment"]):
+
+        # 3. General advice / help
+        if has_keyword_match(clean, ["help", "tulong", "ano gagawin", "what should i do", "advice", "paano", "tips"]):
+            return "advice"
+
+        # 4. Referrals
+        if has_keyword_match(clean, ["counselor", "guidance", "office", "schedule", "appointment"]):
             return "referral"
-        if any(w in clean for w in ["scholarship", "clinic", "hotline", "form", "permit", "room", "handbook", "hours"]):
+
+        # 5. Resources
+        if has_keyword_match(clean, ["scholarship", "clinic", "hotline", "form", "permit", "room", "handbook", "hours"]):
             return "resource_sharing"
-        if any(w in clean for w in ["salamat", "thank you", "thanks", "appreciate", "ok na", "okay na"]):
+
+        # 6. Gratitude
+        if has_keyword_match(clean, ["salamat", "thank you", "thanks", "appreciate", "ok na", "okay na"]):
             return "gratitude"
-        if any(w in clean for w in ["hi", "hello", "kumusta", "kamusta", "good morning", "magandang umaga", "magandang hapon", "good afternoon"]):
+
+        # 7. Greeting (Only for standalone greeting or very short greetings)
+        greeting_words = ["hi", "hello", "kumusta", "kamusta", "hey", "good morning", "magandang umaga", "magandang hapon", "good afternoon", "good evening", "magandang gabi"]
+        if clean in greeting_words or (len(clean.split()) <= 3 and has_keyword_match(clean, greeting_words)):
             return "greeting"
+
         return "reflection"
 
     def analyze_message(self, text: str) -> Dict[str, Any]:
@@ -263,72 +292,138 @@ class NLPService:
                 "Online Appointment Request via Student Dashboard"
             ]
 
-    def call_gemini_guidance(self, message: str, analysis: Dict[str, Any]) -> Optional[str]:
+    def call_gemini_guidance(
+        self, 
+        message: str, 
+        analysis: Dict[str, Any],
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        student_context: Optional[Dict[str, Any]] = None
+    ) -> Tuple[Optional[str], Optional[str]]:
         """
-        Calls Google Gemini Generative API (Gemini 1.5 Flash / Gemini 2.0 Flash)
+        Calls Google Gemini Generative API (e.g. gemini-2.5-flash, gemini-1.5-flash, gemini-2.0-flash)
         for personalized, highly empathetic, culturally-grounded counseling dialogue.
-        Falls back to None if GEMINI_API_KEY is not configured or on network timeout.
+        Supports multi-turn conversational history and student profile awareness.
+        Falls back gracefully if GEMINI_API_KEY is not configured or on network timeout.
+        Returns: (response_text, model_name_used)
         """
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            return None
+            return None, None
 
-        model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        primary_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        candidate_models = [primary_model]
+        for fallback in ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"]:
+            if fallback not in candidate_models:
+                candidate_models.append(fallback)
 
         domain = analysis.get("inferred_domain", "general")
         emotion = analysis.get("detected_emotion", "neutral")
+        confidence = analysis.get("emotion_confidence", 0.85)
         intent = analysis.get("intent", "reflection")
         subject = self.extract_detected_subject(message)
 
+        student_name = student_context.get("name", "Student") if student_context else "Student"
+        student_year = student_context.get("year_level", "") if student_context else ""
+        student_strand = student_context.get("strand", "") if student_context else ""
+        student_desc = f"Student Name: {student_name}" + (f", Level: {student_year}" if student_year else "") + (f", Strand/Course: {student_strand}" if student_strand else "")
+
         system_prompt = (
             "You are the official AI Guidance Counselor Companion for San Antonio de Padua College (SAPC), "
-            "a respected educational institution in the Philippines. "
-            "Your mission is to provide warm, culturally-grounded, empathetic, and constructive guidance to high school and college students.\n"
-            "Key Instructions:\n"
+            "a respected educational institution in the Philippines.\n"
+            "Your mission is to provide warm, culturally-grounded, empathetic, and constructive guidance to high school and college students.\n\n"
+            "Guiding Principles:\n"
             "1. Match the student's language naturally (warm Filipino / Taglish / English).\n"
-            "2. Be compassionate, validating, and supportive without being overly verbose (2-3 concise paragraphs max).\n"
-            "3. Reference SAPC campus support resources when relevant (Registered Guidance Counselor Ms. Maria Theresa Cruz, Guidance Office Room 204 Bldg A, Peer Tutoring in Room 104, Student Financial Assistance).\n"
+            "2. Be compassionate, validating, and supportive without being overly verbose (2-3 concise paragraphs or bullet points max).\n"
+            "3. Reference SAPC campus support resources when relevant (Registered Guidance Counselor Ms. Maria Theresa Cruz RGC, Guidance Office Room 204 Bldg A, Peer Tutoring in Room 104 Learning Commons, Student Assistance Grants).\n"
             "4. NEVER diagnose mental illness, and never encourage self-harm or hopelessness.\n"
-            f"Context: Student Emotion = {emotion}, Inferred Domain = {domain}, Intent = {intent}, Detected Subject = {subject or 'None'}."
+            "5. Encourage healthy coping mechanisms, academic problem-solving, and reaching out to trusted school personnel.\n\n"
+            f"Student Info: {student_desc}\n"
+            f"Current Analysis: Detected Emotion={emotion} ({int(confidence*100)}% conf), Domain={domain}, Intent={intent}, Subject={subject or 'None'}."
         )
 
+        # Build contents array with multi-turn history if present
+        contents = []
+        if conversation_history:
+            for turn in conversation_history[-6:]:  # include up to last 6 turns for context
+                role = "user" if turn.get("sender") in ["student", "user"] else "model"
+                text_content = turn.get("text") or turn.get("message_text", "")
+                if text_content.strip():
+                    contents.append({
+                        "role": role,
+                        "parts": [{"text": text_content.strip()}]
+                    })
+
+        # Append current user prompt
+        contents.append({
+            "role": "user",
+            "parts": [{"text": message}]
+        })
+
         payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": f"System Context: {system_prompt}\n\nStudent Message: {message}"}
-                    ]
-                }
-            ],
+            "system_instruction": {
+                "parts": [{"text": system_prompt}]
+            },
+            "contents": contents,
             "generationConfig": {
                 "temperature": 0.7,
-                "maxOutputTokens": 350,
+                "maxOutputTokens": 450,
                 "topP": 0.95
             }
         }
 
-        try:
-            import httpx
-            with httpx.Client(timeout=8.0) as client:
-                res = client.post(url, json=payload)
-                if res.status_code == 200:
-                    data = res.json()
-                    candidates = data.get("candidates", [])
-                    if candidates and "content" in candidates[0]:
-                        parts = candidates[0]["content"].get("parts", [])
-                        if parts and "text" in parts[0]:
-                            return parts[0]["text"].strip()
-        except Exception as e:
-            print(f"[Gemini Guidance Notice]: Using local NLP fallback ({e})")
-            return None
+        import httpx
+        for model in candidate_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            try:
+                with httpx.Client(timeout=10.0) as client:
+                    res = client.post(url, json=payload)
+                    if res.status_code == 200:
+                        data = res.json()
+                        candidates = data.get("candidates", [])
+                        if candidates and "content" in candidates[0]:
+                            parts = candidates[0]["content"].get("parts", [])
+                            if parts and "text" in parts[0]:
+                                return parts[0]["text"].strip(), model
+                    elif res.status_code == 400:
+                        # If system_instruction is not supported in older model format, fallback to inline context
+                        alt_payload = {
+                            "contents": [
+                                {
+                                    "parts": [{"text": f"System Context:\n{system_prompt}\n\nStudent Message:\n{message}"}]
+                                }
+                            ],
+                            "generationConfig": {
+                                "temperature": 0.7,
+                                "maxOutputTokens": 450,
+                                "topP": 0.95
+                            }
+                        }
+                        alt_res = client.post(url, json=alt_payload)
+                        if alt_res.status_code == 200:
+                            data = alt_res.json()
+                            candidates = data.get("candidates", [])
+                            if candidates and "content" in candidates[0]:
+                                parts = candidates[0]["content"].get("parts", [])
+                                if parts and "text" in parts[0]:
+                                    return parts[0]["text"].strip(), model
+            except Exception as e:
+                print(f"[Gemini Guidance Notice]: Model {model} request notice ({e}), trying next candidate...")
+                continue
 
-        return None
+        return None, None
 
-    def generate_supportive_response(self, analysis: Dict[str, Any], message: str) -> Tuple[str, List[str]]:
+    def generate_supportive_response(
+        self, 
+        analysis: Dict[str, Any], 
+        message: str,
+        conversation_history: Optional[List[Dict[str, str]]] = None,
+        student_context: Optional[Dict[str, Any]] = None
+    ) -> Tuple[str, List[str], bool, Optional[str]]:
         """
         Scaffolded Bilingual Conversational Response Generator (Vygotsky ZPD & WHO Protocols).
-        Generates dynamic, non-repetitive responses tailored directly to the student's message.
+        Prioritizes Google Gemini AI for personalized counseling responses with automatic
+        fallback to institutional rule-based scaffolded responses.
+        Returns: (reply_text, suggested_resources, is_gemini_powered, model_used)
         """
         domain = analysis["inferred_domain"]
         is_crisis = analysis.get("crisis_flag", False)
@@ -337,7 +432,7 @@ class NLPService:
         clean = message.lower().strip()
         detected_subject = self.extract_detected_subject(message)
 
-        # 1. CRISIS / SELF-HARM PROTOCOL (Always takes hard precedence)
+        # 1. CRISIS / SELF-HARM PROTOCOL (Always takes hard precedence over AI generation for safety)
         if is_crisis:
             reply = (
                 "Naririnig kita, at gusto kong malaman mo na hindi ka nag-iisa. Mahalaga ang buhay mo at may mga taong handang makinig at tumulong sa iyo ngayon nang walang paghuhusga. "
@@ -350,16 +445,37 @@ class NLPService:
                 "Hopeline Philippines: 0917-558-4673 / (02) 8804-4673",
                 "Philippine Red Cross 24/7 Helpline: 143"
             ]
-            return reply, resources
+            return reply, resources, False, None
 
         # 2. Check if Google Gemini generative guidance is available
-        gemini_text = self.call_gemini_guidance(message, analysis)
+        gemini_text, model_used = self.call_gemini_guidance(
+            message=message, 
+            analysis=analysis, 
+            conversation_history=conversation_history,
+            student_context=student_context
+        )
         if gemini_text:
             resources = self.get_contextual_resources(domain, emotion, detected_subject)
-            return gemini_text, resources
+            return gemini_text, resources, True, model_used
 
-        # 2. DIRECT COMPANIONSHIP / NEED SOMEONE TO TALK TO ("Gusto ko ng kausap", "I feel lonely")
-        if intent == "companionship" or any(w in clean for w in ["kausap", "makausap", "lonely", "mag-isa", "makikipag-usap", "kwentuhan"]):
+        # 3. ACADEMIC SPECIFIC CONCERNS (e.g. failing grades, subject difficulties, study strategies)
+        if domain == "academic" or has_keyword_match(clean, ["bagsak", "mababa", "grades", "grade", "exam", "exams", "quiz", "subject", "subjects", "prof", "teacher", "nahihirapan", "hirap", "failed", "homework", "project", "lesson", "lessons", "math", "science", "chemistry", "physics"]):
+            subject_mention = f" sa subject na {detected_subject}" if detected_subject else " sa iyong mga subjects"
+            reply = (
+                f"Naiintindihan ko kung gaano kabigat kapag nahihirapan ka{subject_mention}. Ang academic challenges ay normal at natural na bahagi ng pagkatuto, pero hindi ito sumusukat sa buong kakayahan mo bilang estudyante.\n\n"
+                "• May libreng Academic Peer Tutoring ang SAPC sa Room 104 (Learning Commons).\n"
+                "• Maaari ka ring mag-request ng remedial consultation o consultation hours sa iyong subject teacher para sa one-on-one guidance.\n\n"
+                "Gusto mo bang himayin natin ang mga partikular na aralin o topics na pinaka-nahihirapan ka, para makagawa tayo ng structured study plan?"
+            )
+            resources = [
+                "SAPC Free Academic Peer Tutoring (Room 104, Learning Commons)",
+                "Subject Teacher Consultation & Remedial Program",
+                "Form 137 / Grade Recovery Roadmap"
+            ]
+            return reply, resources, False, None
+
+        # 4. DIRECT COMPANIONSHIP / NEED SOMEONE TO TALK TO ("Gusto ko ng kausap", "I feel lonely")
+        if intent == "companionship" or has_keyword_match(clean, ["kausap", "makausap", "lonely", "mag-isa", "makikipag-usap", "kwentuhan", "samahan", "wala akong kaibigan"]):
             companionship_replies = [
                 "Nandito ako para sa iyo at buong puso akong handang makinig. Minsan nakakagaan talaga sa dibdib kapag may napagsasabihan tayo ng ating mga naiisip o nararamdaman. Ano ang mga tumatakbo sa isip mo ngayon? Pwede mong ikwento sa akin nang malaya at walang paghuhusga.",
                 "Salamat sa pagtitiwala na magsabi sa akin. Hindi mo kailangang sarilinin ang nararamdaman mo. Nandito ako para samahan ka. May partikular bang nangyari sa school, sa bahay, o sa personal mong buhay na nagpapabigat sa iyo ngayon?",
@@ -371,53 +487,10 @@ class NLPService:
                 "Peer Wellness Listening Buddy Circle",
                 "Student Lounge & Quiet Meditation Space (Bldg B)"
             ]
-            return reply, resources
+            return reply, resources, False, None
 
-        # 3. GREETINGS & CASUAL CHECK-INS ("Hi", "Hello", "Magandang umaga")
-        if intent == "greeting" or clean in ["hi", "hello", "kumusta", "kamusta", "hey", "good morning", "good afternoon", "magandang umaga", "magandang hapon", "magandang gabi"]:
-            greeting_replies = [
-                "Hello! Magandang araw sa iyo. Nandito ako bilang iyong SAPC Guidance Companion. Kumusta ang iyong araw, klase, at pakiramdam ngayon? May maitutulong ba ako sa iyo?",
-                "Hi there! Happy to connect with you today. Kumusta ang mga requirements at wellness mo ngayong linggo? Feel free to share anything on your mind!",
-                "Kumusta! Nandito ako handang makinig at gumabay sa iyong academic at wellness journey sa SAPC. Ano ang pinagkakaabalahan o naiisip mo ngayon?"
-            ]
-            reply = random.choice(greeting_replies)
-            resources = [
-                "SAPC Student Wellness & Counseling Services",
-                "Guidance Office Hours: Mon-Fri 8:00 AM - 5:00 PM"
-            ]
-            return reply, resources
-
-        # 4. GRATITUDE ("Salamat", "Thank you")
-        if intent == "gratitude" or any(w in clean for w in ["salamat", "thank you", "thanks", "salamat po", "maraming salamat"]):
-            gratitude_replies = [
-                "Walang anuman! I'm really glad I could be here for you. Tandaan mo na palagi kang welcome mag-chat dito anumang oras na kailangan mo ng gabay o makakausap. Ingat ka palagi!",
-                "You're very welcome! Proud ako sa pagsisikap mo. Kung may iba ka pang katanungan o gusto mong pag-usapan later, nandito lang ako palagi para sa iyo.",
-                "Walang anuman, SAPCian! Keep taking care of yourself and taking things one step at a time. May maitutulong pa ba ako bago ka magpatuloy?"
-            ]
-            reply = random.choice(gratitude_replies)
-            resources = [
-                "Guidance Center Ongoing Support (Room 204)",
-                "SAPC Daily Wellness Affirmations"
-            ]
-            return reply, resources
-
-        # 5. GUIDANCE OFFICE / CAMPUS SERVICE INQUIRIES ("Saan ang guidance office", "anong oras bukas")
-        if any(w in clean for w in ["saan", "location", "office", "oras", "hours", "appointment", "schedule counseling", "counselor"]):
-            reply = (
-                "Ang SAPC Guidance and Counseling Office ay matatagpuan sa Room 204, 2nd Floor ng Building A. "
-                "Bukas ang opisina mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM. "
-                "Maaari kang mag-walk in para sa confidential consultation o mag-request ng appointment sa pamamagitan ng iyong Student Portal. "
-                "Ang ating Registered Guidance Counselor na si Ms. Maria Theresa Cruz, RGC ay handang tumulong sa iyo."
-            )
-            resources = [
-                "Guidance & Counseling Center: Room 204, Bldg A (Mon-Fri 8AM-5PM)",
-                "Counselor Direct Email: guidance@sapc.edu.ph",
-                "Online Appointment Request via Student Dashboard"
-            ]
-            return reply, resources
-
-        # 6. ANXIETY, PANIC, OVERTHINKING ("Kinakabahan ako", "Overthinking", "Di ako makatulog")
-        if emotion in ["anxiety", "fear"] or any(w in clean for w in ["panic", "kaba", "kinakabahan", "overthinking", "takot", "balisa", "di makatulog", "insomnia"]):
+        # 5. ANXIETY, PANIC, OVERTHINKING ("Kinakabahan ako", "Overthinking", "Di ako makatulog")
+        if emotion in ["anxiety", "fear"] or has_keyword_match(clean, ["panic", "kaba", "kinakabahan", "overthinking", "takot", "balisa", "di makatulog", "insomnia"]):
             reply = (
                 "Ramdam ko ang bigat at kaba na nararamdaman mo ngayon. Subukan nating huminga nang malalim nang magkasama:\n\n"
                 "• Huminga papasok sa ilong sa loob ng 4 na segundo...\n"
@@ -430,13 +503,13 @@ class NLPService:
                 "SAPC Peer Wellness Support Circle",
                 "Guidance Relaxation & Mindfulness Corner (Room 204)"
             ]
-            return reply, resources
+            return reply, resources, False, None
 
-        # 7. STRESS, BURNOUT, EXHAUSTION ("Sobrang pagod", "Burnout", "Daming requirements")
-        if emotion in ["stress", "frustration"] or any(w in clean for w in ["stress", "pagod", "burnout", "exhausted", "puyat", "daming gawain", "dami requirements", "tambak"]):
+        # 6. STRESS, BURNOUT, EXHAUSTION ("Sobrang pagod", "Burnout", "Daming requirements")
+        if emotion in ["stress", "frustration"] or has_keyword_match(clean, ["stress", "pagod", "burnout", "exhausted", "puyat", "daming gawain", "dami requirements", "tambak"]):
             reply = (
                 "Naiintindihan ko ang nararamdaman mong pagod. Normal lang na maramdaman ang burnout lalo na kapag sunod-sunod ang mga academic deadlines at responsibilidad. "
-                "Tandaan na hindi mo kailangang tapusin ang lahat nang sabay-sabay. "
+                "Tandaan na hindi mo kailangang tapusin ang lahat nang sabay-sabay.\n\n"
                 "Subukan nating gamitin ang 'Pomodoro Technique' (25 minutes focus, 5 minutes rest) at unahin ang 1 pinaka-urgent na gawain muna. "
                 "Gusto mo bang tulungan kitang ayusin ang study priorities mo?"
             )
@@ -445,25 +518,25 @@ class NLPService:
                 "Guidance Peer Tutoring & Study Pods",
                 "5-Minute Break & Hydration Reminder"
             ]
-            return reply, resources
+            return reply, resources, False, None
 
-        # 8. ACADEMIC SPECIFIC CONCERNS (e.g. failing grades, specific subjects like Math/Chemistry)
-        if domain == "academic" or any(w in clean for w in ["bagsak", "mababa", "grades", "exam", "quiz", "subject", "prof", "nahihirapan", "failed"]):
-            subject_mention = f" sa subject na {detected_subject}" if detected_subject else ""
+        # 7. GUIDANCE OFFICE / CAMPUS SERVICE INQUIRIES ("Saan ang guidance office", "anong oras bukas")
+        if has_keyword_match(clean, ["saan", "location", "office", "oras", "hours", "appointment", "schedule counseling", "counselor"]):
             reply = (
-                f"Ang academic challenges{subject_mention} ay bahagi ng pagkatuto, pero hindi ito sumusukat sa buong kakayahan mo bilang estudyante. "
-                "May libreng Academic Peer Tutoring program ang SAPC, at pwede ka ring mag-request ng remedial consultation sa iyong subject teacher. "
-                "Gusto mo bang i-break down natin ang mga topics na nahihirapan ka, o tulungan kang gumawa ng structured review plan?"
+                "Ang SAPC Guidance and Counseling Office ay matatagpuan sa Room 204, 2nd Floor ng Building A. "
+                "Bukas ang opisina mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM. "
+                "Maaari kang mag-walk in para sa confidential consultation o mag-request ng appointment sa pamamagitan ng iyong Student Portal. "
+                "Ang ating Registered Guidance Counselor na si Ms. Maria Theresa Cruz, RGC ay handang tumulong sa iyo."
             )
             resources = [
-                "SAPC Free Academic Peer Tutoring (Room 104, Learning Commons)",
-                "Subject Teacher Consultation Scheduling",
-                "Form 137 / Grade Recovery Roadmap"
+                "Guidance & Counseling Center: Room 204, Bldg A (Mon-Fri 8AM-5PM)",
+                "Counselor Direct Email: guidance@sapc.edu.ph",
+                "Online Appointment Request via Student Dashboard"
             ]
-            return reply, resources
+            return reply, resources, False, None
 
-        # 9. FINANCIAL CONCERNS ("Tuition", "Walang pera", "Baon", "Promissory")
-        if domain == "financial" or any(w in clean for w in ["pera", "tuition", "baon", "bayad", "promissory", "allowance", "utang", "fees"]):
+        # 8. FINANCIAL CONCERNS ("Tuition", "Walang pera", "Baon", "Promissory")
+        if domain == "financial" or has_keyword_match(clean, ["pera", "tuition", "baon", "bayad", "promissory", "allowance", "utang", "fees", "scholarship"]):
             reply = (
                 "Naiintindihan ko kung gaano kabigat sa isip ang mga alalahaning pinansyal. "
                 "Gusto kong ipaalala na may mga support programs ang San Antonio de Padua College tulad ng Student Assistance Grants, flexible promissory note arrangements sa Accounting, at CHED/DepEd educational subsidy assistance. "
@@ -474,10 +547,10 @@ class NLPService:
                 "Accounting Office Promissory Note Support",
                 "Work-Study Student Program Application"
             ]
-            return reply, resources
+            return reply, resources, False, None
 
-        # 10. FAMILY & HOME RELATIONSHIPS ("Away sa bahay", "Magulang", "Family")
-        if domain == "family" or any(w in clean for w in ["magulang", "tatay", "nanay", "away", "kapatid", "pamilya", "bahay", "parents"]):
+        # 9. FAMILY & HOME RELATIONSHIPS ("Away sa bahay", "Magulang", "Family")
+        if domain == "family" or has_keyword_match(clean, ["magulang", "tatay", "nanay", "away", "kapatid", "pamilya", "bahay", "parents"]):
             reply = (
                 "Ang mga problema o tensyon sa tahanan ay may malaking epekto sa ating emosyon at pokus sa pag-aaral. "
                 "Ang Guidance Office ay nagbibigay ng ligtas, pribado, at kumpidensyal na espasyo kung saan maaari mong ibahagi ang iyong pinagdaraanan nang walang takot o panghuhusga. "
@@ -488,10 +561,38 @@ class NLPService:
                 "Guidance Wellness Safe Space",
                 "Student Welfare Support"
             ]
-            return reply, resources
+            return reply, resources, False, None
 
-        # 11. POSITIVE / HOPE ("Masaya ako", "Nakapasa ako", "Kaya pa")
-        if emotion in ["joy", "hope"] or any(w in clean for w in ["masaya", "passed", "nakapasa", "good", "great", "proud", "blessed"]):
+        # 10. GRATITUDE ("Salamat", "Thank you")
+        if intent == "gratitude" or has_keyword_match(clean, ["salamat", "thank you", "thanks", "salamat po", "maraming salamat"]):
+            gratitude_replies = [
+                "Walang anuman! I'm really glad I could be here for you. Tandaan mo na palagi kang welcome mag-chat dito anumang oras na kailangan mo ng gabay o makakausap. Ingat ka palagi!",
+                "You're very welcome! Proud ako sa pagsisikap mo. Kung may iba ka pang katanungan o gusto mong pag-usapan later, nandito lang ako palagi para sa iyo.",
+                "Walang anuman, SAPCian! Keep taking care of yourself and taking things one step at a time. May maitutulong pa ba ako bago ka magpatuloy?"
+            ]
+            reply = random.choice(gratitude_replies)
+            resources = [
+                "Guidance Center Ongoing Support (Room 204)",
+                "SAPC Daily Wellness Affirmations"
+            ]
+            return reply, resources, False, None
+
+        # 11. GREETINGS & CASUAL CHECK-INS (ONLY when intent is greeting and domain is general)
+        if intent == "greeting" or clean in ["hi", "hello", "kumusta", "kamusta", "hey", "good morning", "good afternoon", "magandang umaga", "magandang hapon", "magandang gabi"]:
+            greeting_replies = [
+                "Hello! Magandang araw sa iyo. Nandito ako bilang iyong SAPC Guidance Companion. Kumusta ang iyong araw, klase, at pakiramdam ngayon? May maitutulong ba ako sa iyo?",
+                "Hi there! Happy to connect with you today. Kumusta ang mga requirements at wellness mo ngayong linggo? Feel free to share anything on your mind!",
+                "Kumusta! Nandito ako handang makinig at gumabay sa iyong academic at wellness journey sa SAPC. Ano ang pinagkakaabalahan o naiisip mo ngayon?"
+            ]
+            reply = random.choice(greeting_replies)
+            resources = [
+                "SAPC Student Wellness & Counseling Services",
+                "Guidance Office Hours: Mon-Fri 8:00 AM - 5:00 PM"
+            ]
+            return reply, resources, False, None
+
+        # 12. POSITIVE / HOPE ("Masaya ako", "Nakapasa ako", "Kaya pa")
+        if emotion in ["joy", "hope"] or has_keyword_match(clean, ["masaya", "passed", "nakapasa", "good", "great", "proud", "blessed"]):
             reply = (
                 "Nakakataba ng puso marinig 'yan! Ipagpatuloy mo ang magandang momentum at huwag kalimutang i-celebrate ang iyong mga tagumpay, malaki man o maliit. "
                 "Paano pa ako makakatulong sa iyong student journey ngayong linggo?"
@@ -500,9 +601,9 @@ class NLPService:
                 "SAPC Student Achievement Board",
                 "Extracurricular Clubs & Leadership Programs"
             ]
-            return reply, resources
+            return reply, resources, False, None
 
-        # 12. DYNAMIC CONVERSATIONAL FALLBACK (Contextual reflection)
+        # 13. DYNAMIC CONVERSATIONAL FALLBACK (Contextual reflection)
         fallback_replies = [
             f"Salamat sa pagbabahagi nito sa akin. Naririnig ko ang sinabi mo tungkol sa '{message[:40]}...'. Mahalaga sa amin sa SAPC ang kapakanan mo. Nais mo bang magkwento pa nang mas detalyado para mas matulungan kita?",
             "Naiintindihan ko ang iyong punto. Nandito ako para magbigay ng ligtas at kumpidensyal na suporta sa iyong pag-aaral at well-being. Ano ang pinakamagandang maitutulong ko sa iyo ngayon?",
@@ -513,7 +614,7 @@ class NLPService:
             "SAPC Student Handbook & Guidance Directory",
             "Guidance Center Office Hours: Mon-Fri 8:00 AM - 5:00 PM (Room 204)"
         ]
-        return reply, resources
+        return reply, resources, False, None
 
 nlp_service = NLPService()
 

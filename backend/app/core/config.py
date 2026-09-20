@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     
     # AI & External Services
     GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY", None)
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     
     # Database
     DATABASE_URL: str = os.getenv(

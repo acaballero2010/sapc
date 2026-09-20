@@ -46,4 +46,6 @@ class ChatbotReplyResponse(BaseModel):
     intent: Optional[str] = "reflection"
     conversation_stage: Optional[str] = "context_gathering"
     crisis_triggered: Optional[bool] = False
+    is_gemini_powered: Optional[bool] = False
+    model_used: Optional[str] = None
     suggested_resources: List[str] = []

@@ -11,7 +11,7 @@ import {
   HeartHandshake, 
   ShieldCheck,
   RefreshCw,
-  Activity
+  Sparkles
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 
@@ -30,6 +30,8 @@ interface Message {
   emotionConfidence?: number;
   intent?: string;
   crisisTriggered?: boolean;
+  isGeminiPowered?: boolean;
+  modelUsed?: string;
   resources?: string[];
   time: string;
 }
@@ -41,7 +43,6 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
   const [isLoading, setIsLoading] = useState(false);
   const [activeAlert, setActiveAlert] = useState<string | null>(null);
   const [showConsentModal, setShowConsentModal] = useState(false);
-  const [lastDetectedEmotion, setLastDetectedEmotion] = useState<{ emotion: string; confidence: number } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize personalized greeting & cross-session memory
@@ -66,7 +67,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
 
     const greetingText = previousTopic
       ? `${timeOfDay}, ${studentName}! I remember in our previous session we touched on ${previousTopic}. Kumusta ang pakiramdam mo ngayon sa iyong mga klase at wellness? Nandito ako para makinig.`
-      : `${timeOfDay}, ${studentName}! I am your SAPC Student Guidance Companion. Kumusta ang mga klase, kalusugan, o nararamdaman mo ngayong linggo? Everything you share is safe and confidential.`;
+      : `${timeOfDay}, ${studentName}! I am your SAPC Student Guidance Companion powered by Gemini AI. Kumusta ang mga klase, kalusugan, o nararamdaman mo ngayong linggo? Everything you share is safe and confidential.`;
 
     setMessages((prev) => {
       if (prev.length === 0) {
@@ -74,6 +75,8 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           {
             sender: "bot",
             text: greetingText,
+            isGeminiPowered: true,
+            modelUsed: "gemini-2.5-flash",
             time: "Just now"
           }
         ];
@@ -104,6 +107,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
     try {
       const res = await fetchWithAuth("/chatbot/message", {
         method: "POST",
+        timeoutMs: 20000,
         body: JSON.stringify({
           message: textToSend,
           session_token: sessionToken
@@ -112,13 +116,6 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
 
       if (res.session_token) {
         setSessionToken(res.session_token);
-      }
-
-      if (res.detected_emotion) {
-        setLastDetectedEmotion({
-          emotion: res.detected_emotion,
-          confidence: res.emotion_confidence || 0.85
-        });
       }
 
       // 5-Step Crisis Protocol Trigger
@@ -139,6 +136,8 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         emotionConfidence: res.emotion_confidence,
         intent: res.intent,
         crisisTriggered: res.crisis_triggered,
+        isGeminiPowered: res.is_gemini_powered,
+        modelUsed: res.model_used,
         resources: res.suggested_resources,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       };
@@ -162,6 +161,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         sender: "bot",
         text: fallbackText,
         time: "Just now",
+        isGeminiPowered: false,
         resources: [
           "SAPC Guidance & Counseling Office (Room 204, Bldg A)",
           "National Center for Mental Health (NCMH) Hotline: 1553 (24/7 Toll-Free)",
@@ -207,37 +207,27 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
               </div>
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">SAPC Guidance Companion</h3>
-                <span className="px-2.5 py-0.5 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 rounded-full flex items-center gap-1">
-                  <Activity className="h-3 w-3 text-emerald-600" /> 8-Stage NLP Active
+                <span className="px-2.5 py-0.5 text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Online • Safe &amp; Confidential
+                </span>
+                <span className="px-2.5 py-0.5 text-[11px] font-medium bg-purple-50 text-purple-800 border border-purple-200 rounded-full flex items-center gap-1">
+                  <Sparkles className="h-3 w-3 text-purple-600" /> Gemini AI
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">San Antonio de Padua College • Student Confidential Companion</p>
+              <p className="text-xs text-slate-500 mt-0.5">San Antonio de Padua College • Safe, Caring, &amp; Confidential Space</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition"
+            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Emotion Telemetry Strip */}
-        {lastDetectedEmotion && (
-          <div className="bg-slate-100/90 border-b border-slate-200 px-6 py-2 flex items-center justify-between text-xs text-slate-700">
-            <span className="font-semibold flex items-center gap-1.5">
-              <span>🧠 Detected Emotion (Calvo &amp; D&apos;Mello):</span>
-              <span className="px-2 py-0.5 rounded-full bg-white border border-slate-300 font-extrabold text-[#8B0014] uppercase text-[10px]">
-                {lastDetectedEmotion.emotion} ({Math.round(lastDetectedEmotion.confidence * 100)}% Confidence)
-              </span>
-            </span>
-            <span className="text-[10px] text-slate-500 hidden sm:inline">Vygotsky ZPD Scaffolding Enabled</span>
-          </div>
-        )}
-
-        {/* Crisis Notification Banner */}
+        {/* Crisis Notification Banner (Only shown when student initiates crisis protocol) */}
         {activeAlert && (
           <div className="bg-rose-50 border-b border-rose-200 px-6 py-3 flex items-center gap-3 text-xs sm:text-sm text-rose-900">
             <AlertTriangle className="h-5 w-5 shrink-0 text-rose-600" />
@@ -269,7 +259,17 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                     : "bg-white text-slate-900 border border-slate-200 rounded-tl-none shadow-xs"
                 }`}
               >
-                <p>{m.text}</p>
+                {/* Subtle Gemini Counselor Tag on Bot Messages */}
+                {m.sender === "bot" && (
+                  <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 w-fit">
+                    <Sparkles className="h-3 w-3 text-purple-600" />
+                    <span>Guidance Companion</span>
+                  </div>
+                )}
+
+                <div className="whitespace-pre-wrap space-y-1.5">
+                  {m.text}
+                </div>
 
                 {/* Suggested Campus Resources */}
                 {m.resources && m.resources.length > 0 && (
@@ -289,11 +289,8 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                   </div>
                 )}
 
-                <div className="mt-1.5 flex items-center justify-end gap-2 text-xs text-slate-400">
+                <div className="mt-2 flex items-center justify-end gap-2 text-xs text-slate-400">
                   <span>{m.time}</span>
-                  {m.distressScore !== undefined && m.distressScore > 40 && (
-                    <span className="text-rose-600 font-bold">• Risk Tagged</span>
-                  )}
                 </div>
               </div>
 
@@ -309,8 +306,9 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
               <div className="h-9 w-9 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
                 <RefreshCw className="h-5 w-5 text-[#8B0014] animate-spin" />
               </div>
-              <div className="bg-white text-slate-500 border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3.5 text-sm italic shadow-xs">
-                Analyzing emotions &amp; generating empathetic response...
+              <div className="bg-white text-slate-600 border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3.5 text-sm shadow-xs flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-purple-600 animate-pulse" />
+                <span className="italic">Listening &amp; preparing a supportive response...</span>
               </div>
             </div>
           )}

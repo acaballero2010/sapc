@@ -61,6 +61,16 @@ def send_chat_message(
         db.add(session)
         db.flush()
 
+    # Retrieve recent conversation history for multi-turn Gemini reasoning
+    recent_messages = db.query(ChatMessage).filter(
+        ChatMessage.session_id == session.id
+    ).order_by(ChatMessage.created_at.asc()).all()
+
+    conversation_history = [
+        {"sender": m.sender, "text": m.message_text}
+        for m in recent_messages
+    ]
+
     # NLP Analysis
     nlp_res = nlp_service.analyze_message(payload.message)
 
@@ -96,8 +106,22 @@ def send_chat_message(
         # Recalculate AHP Risk
         SASSParserService.recalculate_student_risk(db, student.id)
 
-    # Generate supportive reply
-    bot_reply_text, resources = nlp_service.generate_supportive_response(nlp_res, payload.message)
+    # Build student profile context
+    student_name = f"{student.first_name} {student.last_name}" if student and hasattr(student, "first_name") and student.first_name else current_user.full_name or "Student"
+    grade_or_section = student.section.name if (student and getattr(student, "section", None)) else ""
+    student_context = {
+        "name": student_name,
+        "year_level": grade_or_section,
+        "strand": ""
+    }
+
+    # Generate supportive reply (Gemini AI with fallback to rule-based scaffolded system)
+    bot_reply_text, resources, is_gemini_powered, model_used = nlp_service.generate_supportive_response(
+        analysis=nlp_res,
+        message=payload.message,
+        conversation_history=conversation_history,
+        student_context=student_context
+    )
 
     bot_msg = ChatMessage(
         session_id=session.id,
@@ -116,7 +140,7 @@ def send_chat_message(
         actor=current_user,
         action="CHATBOT_STUDENT_INTERACTION",
         target_resource=f"session_token:{session.session_token}",
-        details=f"NLP Sentiment: {nlp_res['sentiment_category'].value}, Flagged: {nlp_res['counselor_flag']}",
+        details=f"NLP Sentiment: {nlp_res['sentiment_category'].value}, Flagged: {nlp_res['counselor_flag']}, Gemini: {is_gemini_powered}",
         request=request
     )
 
@@ -126,6 +150,12 @@ def send_chat_message(
         sentiment=nlp_res["sentiment_category"],
         distress_score=nlp_res["distress_score"],
         counselor_flagged=nlp_res["counselor_flag"],
+        detected_emotion=nlp_res.get("detected_emotion", "neutral"),
+        emotion_confidence=nlp_res.get("emotion_confidence", 0.85),
+        intent=nlp_res.get("intent", "reflection"),
+        crisis_triggered=nlp_res.get("crisis_flag", False),
+        is_gemini_powered=is_gemini_powered,
+        model_used=model_used,
         suggested_resources=resources
     )
 
