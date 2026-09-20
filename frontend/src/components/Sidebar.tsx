@@ -14,20 +14,18 @@ import {
   Menu, 
   X, 
   ShieldCheck, 
-  Settings,
-  AlertTriangle,
-  HeartHandshake,
-  TrendingUp,
-  Activity,
-  Eye,
-  Check,
-  Compass,
-  PanelLeftClose,
-  PanelLeftOpen,
-  User,
-  BarChart3,
-  MessageSquare,
-  Calendar
+  Settings, 
+  AlertTriangle, 
+  HeartHandshake, 
+  TrendingUp, 
+  Activity, 
+  Compass, 
+  PanelLeftClose, 
+  PanelLeftOpen, 
+  User, 
+  BarChart3, 
+  MessageSquare, 
+  Calendar 
 } from "lucide-react";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { SapcLogo } from "./SapcLogo";
@@ -51,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, switchRole } = useAuth();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const currentRole: RoleType = user?.role || "guidance_counselor";
@@ -277,18 +275,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ]
   };
 
-  // Demo evaluator role list
-  const evaluatorRoles: Array<{ role: RoleType; name: string; icon: string; path: string }> = [
-    { role: "guidance_counselor", name: "Guidance Counselor", icon: "🧠", path: "/dashboard/guidance" },
-    { role: "teacher", name: "Class Adviser", icon: "📚", path: "/dashboard/teacher" },
-    { role: "student", name: "Student Portal", icon: "🎓", path: "/dashboard/student" },
-    { role: "parent", name: "Parent Portal", icon: "👨‍👩‍👦", path: "/dashboard/parent" },
-    { role: "admin", name: "Admin Control", icon: "⚙️", path: "/dashboard/admin" }
-  ];
-
   const currentWorkspaceItems = roleWorkspaces[currentRole] || roleWorkspaces.guidance_counselor;
   const currentRoleInfo = roleTitles[currentRole] || roleTitles.guidance_counselor;
-  const canPreviewRoles = user?.role === "admin" || user?.role === "guidance_counselor";
 
   const handleNavigation = (item: { href: string }) => {
     setIsOpen(false);
@@ -540,56 +528,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </div>
           </div>
-
-          {/* Section 3: Role Preview (Evaluator Switcher for Admin & Counselor Staff Only) */}
-          {canPreviewRoles && (
-            <div className="pt-2 border-t border-slate-200">
-              <div className={`bg-slate-50 border border-slate-200/90 rounded-2xl ${isCollapsed ? "p-1.5 space-y-1.5 text-center" : "p-3 space-y-2"}`}>
-                {!isCollapsed && (
-                  <div className="flex items-center gap-2 text-xs font-black text-slate-800 px-1 mb-1">
-                    <Eye className="h-3.5 w-3.5 text-[#8B0014]" />
-                    <span>Role Preview</span>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 gap-1">
-                  {evaluatorRoles.map((item) => {
-                    const isCurrent = currentRole === item.role;
-                    return (
-                      <button
-                        key={item.role}
-                        type="button"
-                        title={`Switch to ${item.name}`}
-                        onClick={async () => {
-                          await switchRole(item.role);
-                          setIsOpen(false);
-                          router.push(item.path);
-                        }}
-                        className={`w-full flex items-center justify-between rounded-xl transition ${
-                          isCollapsed
-                            ? `justify-center h-10 w-10 mx-auto text-base ${isCurrent ? "bg-white text-slate-900 border border-slate-300 shadow-xs ring-2 ring-emerald-500/30" : "hover:bg-white text-slate-700 border border-transparent hover:border-slate-200"}`
-                            : `px-3 py-2 text-xs sm:text-sm ${
-                                isCurrent
-                                  ? "bg-white text-slate-900 font-extrabold border border-slate-300/90 shadow-2xs"
-                                  : "text-slate-700 hover:bg-white hover:text-slate-950 font-medium border border-transparent hover:border-slate-200"
-                              }`
-                        }`}
-                      >
-                        <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
-                          <span className={`${isCollapsed ? "text-base" : "text-sm"} shrink-0`}>{item.icon}</span>
-                          {!isCollapsed && <span className="truncate">{item.name}</span>}
-                        </div>
-
-                        {!isCollapsed && isCurrent && (
-                          <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0 ml-2" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* User Profile & Footer Security Note */}

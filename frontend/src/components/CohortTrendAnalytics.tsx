@@ -13,7 +13,8 @@ import {
   ArrowUpRight
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
-import { SAPC_500_STUDENTS } from "@/data/students500";
+import type { StudentRecord } from "@/data/students500";
+import { getActiveStudentDataset, computeCohortAggregates } from "@/lib/dataset-store";
 
 interface TermTrendPoint {
   term: string;
@@ -55,10 +56,10 @@ interface LongitudinalTrendsResponse {
   avg_risk_reduction_pts: number;
 }
 
-// Dynamically compute exact section benchmarks from 500-student cohort
-const buildDynamicSectionBenchmarks = (): SectionComparison[] => {
+// Dynamically compute exact section benchmarks from active cohort
+const buildDynamicSectionBenchmarks = (students: StudentRecord[] = getActiveStudentDataset()): SectionComparison[] => {
   const map = new Map<string, { total: number; high: number; avgSum: number; adviser: string; grade: string }>();
-  SAPC_500_STUDENTS.forEach((s) => {
+  students.forEach((s) => {
     if (!map.has(s.section_name)) {
       map.set(s.section_name, {
         total: 0,
@@ -75,7 +76,7 @@ const buildDynamicSectionBenchmarks = (): SectionComparison[] => {
   });
 
   return Array.from(map.entries()).map(([secName, stat], idx) => {
-    const avgRisk = parseFloat((stat.avgSum / stat.total).toFixed(1));
+    const avgRisk = parseFloat((stat.avgSum / (stat.total || 1)).toFixed(1));
     let health = "Optimal";
     if (avgRisk < 20) health = "Exemplary";
     else if (avgRisk >= 28 || stat.high >= 5) health = "Monitored";
@@ -183,13 +184,68 @@ interface CohortTrendAnalyticsProps {
 }
 
 export const CohortTrendAnalytics: React.FC<CohortTrendAnalyticsProps> = ({ onSelectSection }) => {
-  const [data, setData] = useState<LongitudinalTrendsResponse>(DEFAULT_TRENDS);
+  const [data, setData] = useState<LongitudinalTrendsResponse>(() => {
+    const students = getActiveStudentDataset();
+    const aggs = computeCohortAggregates(students);
+    const updatedProgression = [...DEFAULT_TRENDS.multi_term_progression];
+    updatedProgression[updatedProgression.length - 1] = {
+      ...updatedProgression[updatedProgression.length - 1],
+      total_students: aggs.total,
+      low_risk_pct: aggs.lowRiskPct,
+      medium_risk_pct: aggs.mediumRiskPct,
+      high_risk_pct: aggs.highRiskPct,
+      average_composite_score: aggs.avgRiskScore,
+      average_gpa: aggs.avgGpa,
+      domain_averages: {
+        academic: aggs.domainAverages.academic,
+        mental_health: aggs.domainAverages.mental_health,
+        financial: aggs.domainAverages.financial,
+        family: aggs.domainAverages.family,
+        health: aggs.domainAverages.health
+      }
+    };
+    return {
+      ...DEFAULT_TRENDS,
+      multi_term_progression: updatedProgression,
+      section_benchmarks: buildDynamicSectionBenchmarks(students)
+    };
+  });
   const [loading, setLoading] = useState(false);
   const [selectedTermIdx, setSelectedTermIdx] = useState<number>(DEFAULT_TRENDS.multi_term_progression.length - 1);
   const [gradeFilter, setGradeFilter] = useState<string>("all");
   const [viewMetric, setViewMetric] = useState<"risk_distribution" | "domain_breakdown" | "gpa_resolution">("risk_distribution");
 
+  const syncWithActiveDataset = () => {
+    const students = getActiveStudentDataset();
+    const aggs = computeCohortAggregates(students);
+    setData(prev => {
+      const updatedProgression = [...prev.multi_term_progression];
+      updatedProgression[updatedProgression.length - 1] = {
+        ...updatedProgression[updatedProgression.length - 1],
+        total_students: aggs.total,
+        low_risk_pct: aggs.lowRiskPct,
+        medium_risk_pct: aggs.mediumRiskPct,
+        high_risk_pct: aggs.highRiskPct,
+        average_composite_score: aggs.avgRiskScore,
+        average_gpa: aggs.avgGpa,
+        domain_averages: {
+          academic: aggs.domainAverages.academic,
+          mental_health: aggs.domainAverages.mental_health,
+          financial: aggs.domainAverages.financial,
+          family: aggs.domainAverages.family,
+          health: aggs.domainAverages.health
+        }
+      };
+      return {
+        ...prev,
+        multi_term_progression: updatedProgression,
+        section_benchmarks: buildDynamicSectionBenchmarks(students)
+      };
+    });
+  };
+
   useEffect(() => {
+    syncWithActiveDataset();
     const loadTrends = async () => {
       try {
         const res = await fetchWithAuth("/analytics/longitudinal-trends");
@@ -198,12 +254,18 @@ export const CohortTrendAnalytics: React.FC<CohortTrendAnalyticsProps> = ({ onSe
           setSelectedTermIdx(res.multi_term_progression.length - 1);
         }
       } catch {
-        // Keeps DEFAULT_TRENDS
+        syncWithActiveDataset();
       } finally {
         setLoading(false);
       }
     };
     loadTrends();
+
+    const handleDatasetUpdate = () => {
+      syncWithActiveDataset();
+    };
+    window.addEventListener("sapc:dataset-updated", handleDatasetUpdate);
+    return () => window.removeEventListener("sapc:dataset-updated", handleDatasetUpdate);
   }, []);
 
   if (loading || !data) {

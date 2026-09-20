@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { SapcLogo } from "./SapcLogo";
-import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+import type { StudentRecord } from "@/data/students500";
+import { getActiveStudentDataset, computeCohortAggregates, getActiveRiskWeights } from "@/lib/dataset-store";
 
 interface InstitutionalReportModalProps {
   isOpen: boolean;
@@ -22,32 +23,9 @@ interface InstitutionalReportModalProps {
 }
 
 function generateFallbackReport(): any {
-  let students: StudentRecord[] = SAPC_500_STUDENTS;
-  if (typeof window !== "undefined") {
-    const custom = localStorage.getItem("sapc_custom_student_data");
-    if (custom) {
-      try {
-        const parsed = JSON.parse(custom);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const customMap = new Map(parsed.map((s: StudentRecord) => [s.id, s]));
-          students = students.map((s: StudentRecord) => customMap.get(s.id) ?? s);
-        }
-      } catch {
-        // Fall back to default
-      }
-    }
-  }
-
-  const total = students.length || 500;
-  const high = students.filter(s => s.latest_risk_tier === "high").length;
-  const med = students.filter(s => s.latest_risk_tier === "medium").length;
-  const low = students.filter(s => s.latest_risk_tier === "low").length;
-
-  const avgAcademic = Math.round((students.reduce((acc, s) => acc + (s.domain_scores?.academic || 0), 0) / total) * 10) / 10;
-  const avgMental = Math.round((students.reduce((acc, s) => acc + (s.domain_scores?.mental_health || 0), 0) / total) * 10) / 10;
-  const avgFinancial = Math.round((students.reduce((acc, s) => acc + (s.domain_scores?.financial || 0), 0) / total) * 10) / 10;
-  const avgFamily = Math.round((students.reduce((acc, s) => acc + (s.domain_scores?.family || 0), 0) / total) * 10) / 10;
-  const avgHealth = Math.round((students.reduce((acc, s) => acc + (s.domain_scores?.health || 0), 0) / total) * 10) / 10;
+  const students: StudentRecord[] = getActiveStudentDataset();
+  const aggregates = computeCohortAggregates(students);
+  const weights = getActiveRiskWeights();
 
   // Interventions metrics
   let totalInterventions = 12;
@@ -74,19 +52,19 @@ function generateFallbackReport(): any {
     generation_timestamp: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
     academic_year: "2025-2026",
     term: "2nd Semester / Final Term",
-    total_enrolled: total,
+    total_enrolled: aggregates.total,
     risk_distribution: {
-      high: { count: high, pct: Math.round((high / total) * 1000) / 10 },
-      medium: { count: med, pct: Math.round((med / total) * 1000) / 10 },
-      low: { count: low, pct: Math.round((low / total) * 1000) / 10 }
+      high: { count: aggregates.highRiskCount, pct: aggregates.highRiskPct },
+      medium: { count: aggregates.mediumRiskCount, pct: aggregates.mediumRiskPct },
+      low: { count: aggregates.lowRiskCount, pct: aggregates.lowRiskPct }
     },
-    ahp_consistency_ratio: 0.042,
+    ahp_consistency_ratio: 0.048,
     domain_metrics: [
-      { domain: "Academic Performance (SASS)", weight_pct: 35, cohort_avg: avgAcademic, target_threshold: 40, risk_level: avgAcademic >= 70 ? "High" : avgAcademic >= 40 ? "Moderate" : "Nominal" },
-      { domain: "Mental Health & Emotional Wellbeing", weight_pct: 25, cohort_avg: avgMental, target_threshold: 40, risk_level: avgMental >= 70 ? "High" : avgMental >= 40 ? "Moderate" : "Nominal" },
-      { domain: "Financial Distress & Tuition Balance", weight_pct: 15, cohort_avg: avgFinancial, target_threshold: 40, risk_level: avgFinancial >= 70 ? "High" : avgFinancial >= 40 ? "Moderate" : "Nominal" },
-      { domain: "Family Structure & OFW Context", weight_pct: 15, cohort_avg: avgFamily, target_threshold: 40, risk_level: avgFamily >= 70 ? "High" : avgFamily >= 40 ? "Moderate" : "Nominal" },
-      { domain: "Physical Health & Clinic Records", weight_pct: 10, cohort_avg: avgHealth, target_threshold: 40, risk_level: avgHealth >= 70 ? "High" : avgHealth >= 40 ? "Moderate" : "Nominal" }
+      { domain: "Academic Performance (SASS)", weight_pct: weights.academic, cohort_avg: aggregates.domainAverages.academic, target_threshold: 40, risk_level: aggregates.domainAverages.academic >= 70 ? "High" : aggregates.domainAverages.academic >= 40 ? "Moderate" : "Nominal" },
+      { domain: "Family Structure & OFW Context", weight_pct: weights.family, cohort_avg: aggregates.domainAverages.family, target_threshold: 40, risk_level: aggregates.domainAverages.family >= 70 ? "High" : aggregates.domainAverages.family >= 40 ? "Moderate" : "Nominal" },
+      { domain: "Physical Health & Clinic Records", weight_pct: weights.health, cohort_avg: aggregates.domainAverages.health, target_threshold: 40, risk_level: aggregates.domainAverages.health >= 70 ? "High" : aggregates.domainAverages.health >= 40 ? "Moderate" : "Nominal" },
+      { domain: "Mental Health & Emotional Wellbeing", weight_pct: weights.mental, cohort_avg: aggregates.domainAverages.mental_health, target_threshold: 40, risk_level: aggregates.domainAverages.mental_health >= 70 ? "High" : aggregates.domainAverages.mental_health >= 40 ? "Moderate" : "Nominal" },
+      { domain: "Financial Distress & Tuition Balance", weight_pct: weights.financial, cohort_avg: aggregates.domainAverages.financial, target_threshold: 40, risk_level: aggregates.domainAverages.financial >= 70 ? "High" : aggregates.domainAverages.financial >= 40 ? "Moderate" : "Nominal" }
     ],
     intervention_metrics: {
       total: totalInterventions,

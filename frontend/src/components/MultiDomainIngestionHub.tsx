@@ -276,13 +276,14 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
             newScores.health = Math.min(100, Math.max(5, Math.round(healthRisk)));
           }
 
-          // Composite AHP synthesis: 0.35 Academic + 0.25 Mental Health + 0.15 Financial + 0.15 Family + 0.10 Health
+          // Composite AHP synthesis (Psychometrician Validated Baseline): 
+          // 0.30 Academic + 0.20 Family + 0.20 Health + 0.15 Mental Health + 0.15 Financial
           const composite = (
-            newScores.academic * 0.35 +
-            newScores.mental_health * 0.25 +
-            newScores.financial * 0.15 +
-            newScores.family * 0.15 +
-            newScores.health * 0.10
+            newScores.academic * 0.30 +
+            newScores.family * 0.20 +
+            newScores.health * 0.20 +
+            newScores.mental_health * 0.15 +
+            newScores.financial * 0.15
           );
 
           const compositeRounded = Math.round(composite * 10) / 10;
@@ -291,10 +292,10 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           // Determine primary risk driver
           const drivers = [
             { name: "Academic", val: newScores.academic },
-            { name: "Mental Health", val: newScores.mental_health },
-            { name: "Financial", val: newScores.financial },
             { name: "Family", val: newScores.family },
-            { name: "Health", val: newScores.health }
+            { name: "Health", val: newScores.health },
+            { name: "Mental Health", val: newScores.mental_health },
+            { name: "Financial", val: newScores.financial }
           ].sort((a, b) => b.val - a.val);
 
           const primaryDriver = drivers[0].val >= 40 ? drivers[0].name : "Academic";
@@ -310,6 +311,7 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
         });
 
         localStorage.setItem("sapc_custom_student_data", JSON.stringify(updatedStudentList));
+        window.dispatchEvent(new CustomEvent("sapc:dataset-updated", { detail: { count: updatedStudentList.length } }));
 
         // Log RA 10173 Audit Record
         const storedLogs = localStorage.getItem("sapc_audit_logs");

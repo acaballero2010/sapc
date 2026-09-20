@@ -33,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenChat, 
   onOpenSimulator
 }) => {
-  const { user, switchRole } = useAuth();
+  const { user } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   
@@ -77,17 +77,13 @@ export const Navbar: React.FC<NavbarProps> = ({
     { role: "parent", label: "Parent View", icon: "👨‍👩‍👦" }
   ];
 
-  const canPreviewRoles = user?.role === "admin" || user?.role === "guidance_counselor";
   const currentRoleObj = rolesList.find((r) => r.role === user?.role) || {
     role: user?.role || "student",
     label: (user?.role || "student").replace("_", " "),
     icon: "🎓"
   };
 
-  const handleNavigateTab = (tabName: string, targetRole?: string) => {
-    if (targetRole && targetRole !== user?.role) {
-      switchRole(targetRole as RoleType);
-    }
+  const handleNavigateTab = (tabName: string) => {
     window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab: tabName } }));
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -203,7 +199,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Email / SMS Gateway Config (for Admins / Counselors) */}
-            {canPreviewRoles && (
+            {(user?.role === "admin" || user?.role === "guidance_counselor") && (
               <button
                 onClick={() => setIsEmailSmsOpen(true)}
                 className="hidden xl:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer"
@@ -239,28 +235,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* Role Switcher */}
-            {canPreviewRoles ? (
-              <div className="flex items-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1.5 shadow-xs">
-                <span className="text-xs font-bold text-[#8B0014] dark:text-rose-400 px-2 hidden lg:inline">Role:</span>
-                <select
-                  value={user?.role || "guidance_counselor"}
-                  onChange={(e) => switchRole(e.target.value as RoleType)}
-                  className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#8B0014] transition cursor-pointer"
-                >
-                  {rolesList.map((r) => (
-                    <option key={r.role} value={r.role} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                      {r.icon} {r.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <div className="flex items-center bg-amber-50/70 dark:bg-amber-950/60 border border-amber-300/80 dark:border-amber-700 rounded-xl px-3 py-1.5 shadow-2xs text-xs font-bold text-amber-950 dark:text-amber-200 gap-1.5">
-                <span>{currentRoleObj.icon}</span>
-                <span className="font-extrabold capitalize">{currentRoleObj.label}</span>
-              </div>
-            )}
+            {/* Verified Role Badge */}
+            <div className="flex items-center bg-amber-50/80 dark:bg-amber-950/60 border border-amber-300/80 dark:border-amber-700 rounded-xl px-3 py-1.5 shadow-2xs text-xs font-bold text-amber-950 dark:text-amber-200 gap-1.5">
+              <span>{currentRoleObj.icon}</span>
+              <span className="font-extrabold capitalize">{currentRoleObj.label}</span>
+            </div>
 
             {/* User Avatar / Role Info */}
             <div className="hidden sm:flex items-center gap-2.5 pl-2.5 border-l border-slate-200 dark:border-slate-700">

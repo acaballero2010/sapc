@@ -17,7 +17,8 @@ import {
   ShieldCheck,
   TrendingUp,
   FileSpreadsheet,
-  Brain
+  Brain,
+  Sliders
 } from "lucide-react";
 import { SAPC_500_STUDENTS } from "@/data/students500";
 import type { StudentRecord } from "@/data/students500";
@@ -38,7 +39,7 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
 }) => {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<"all" | "students" | "modules" | "scenarios" | "hotlines">("all");
-  const { switchRole } = useAuth();
+  const { user } = useAuth();
 
   // Keyboard shortcut listener
   useEffect(() => {
@@ -106,15 +107,24 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
 
   // Quick Modules List
   const SYSTEM_MODULES = [
+    // Guidance Modules
     { name: "Counselor Command Center", tab: "dashboard", role: "guidance_counselor", icon: Brain, cat: "Counselor" },
     { name: "Crisis Alerts & Triage Queue", tab: "crisis_alerts", role: "guidance_counselor", icon: AlertTriangle, cat: "Counselor" },
     { name: "Standardized Screenings (PHQ-9 / GAD-7)", tab: "assessments", role: "guidance_counselor", icon: Activity, cat: "Counselor" },
     { name: "Master Care Plans Caseload", tab: "interventions", role: "guidance_counselor", icon: ShieldCheck, cat: "Counselor" },
     { name: "Intervention Risk De-escalation Reviews", tab: "risk_reviews", role: "guidance_counselor", icon: TrendingUp, cat: "Counselor" },
-    { name: "Teacher Import Wizard (Grades/Attendance/Behavior)", tab: "import_wizard", role: "teacher", icon: FileSpreadsheet, cat: "Teacher" },
+    { name: "DepEd / CHED Institutional Risk Report", tab: "reports", role: "guidance_counselor", icon: GraduationCap, cat: "Counselor" },
+    // Teacher Modules
+    { name: "Teacher Import Wizard", tab: "import_wizard", role: "teacher", icon: FileSpreadsheet, cat: "Teacher" },
     { name: "Advisory Gradebook & SASS Warning Matrix", tab: "gradebook", role: "teacher", icon: BookOpen, cat: "Teacher" },
     { name: "Parent Conference Scheduler", tab: "parent_conferences", role: "teacher", icon: Calendar, cat: "Teacher" },
-    { name: "DepEd / CHED Institutional Risk Report", tab: "reports", role: "guidance_counselor", icon: GraduationCap, cat: "Institutional" }
+    // Admin Modules
+    { name: "Admin Command Center", tab: "dashboard", role: "admin", icon: Brain, cat: "Admin" },
+    { name: "AHP 5-Domain Risk Configuration", tab: "risk_config", role: "admin", icon: Sliders, cat: "Admin" },
+    { name: "Master Ingestion Hub", tab: "import_wizard", role: "admin", icon: Layers, cat: "Admin" },
+    { name: "Campus User Accounts Directory", tab: "teachers", role: "admin", icon: Users, cat: "Admin" },
+    { name: "Grading Terms & Quarter Calendar", tab: "quarter_management", role: "admin", icon: Calendar, cat: "Admin" },
+    { name: "Ingestion Audit Trail & Rollback", tab: "import_history", role: "admin", icon: ShieldCheck, cat: "Admin" }
   ];
 
   // Philippine Crisis Hotlines
@@ -125,8 +135,10 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
     { name: "Bantay Bata Child Helpline", number: "163", note: "DepEd Child Protection Policy (DO 40, s. 2012)" }
   ];
 
-  // Search Filtering (Derived State)
+  // Search Filtering (Derived State strictly scoped by RBAC role)
+  const currentRole = user?.role || "guidance_counselor";
   const q = query.trim().toLowerCase();
+  
   const filteredStudents = !q 
     ? SAPC_500_STUDENTS.slice(0, 6) 
     : SAPC_500_STUDENTS.filter(s => 
@@ -136,13 +148,13 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
         (s.section_name && s.section_name.toLowerCase().includes(q))
       ).slice(0, 8);
 
+  const roleScopedModules = SYSTEM_MODULES.filter(m => m.role === currentRole);
   const filteredModules = !q 
-    ? SYSTEM_MODULES 
-    : SYSTEM_MODULES.filter(m => m.name.toLowerCase().includes(q) || m.cat.toLowerCase().includes(q));
+    ? roleScopedModules 
+    : roleScopedModules.filter(m => m.name.toLowerCase().includes(q) || m.cat.toLowerCase().includes(q));
 
-  const filteredScenarios = !q 
-    ? DEMO_SCENARIOS 
-    : DEMO_SCENARIOS.filter(s => s.title.toLowerCase().includes(q) || s.studentName.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q));
+  const filteredScenarios = (!q ? DEMO_SCENARIOS : DEMO_SCENARIOS.filter(s => s.title.toLowerCase().includes(q) || s.studentName.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q)))
+    .filter(s => s.role === currentRole);
 
   if (!isOpen) return null;
 
@@ -213,8 +225,7 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
                   <div
                     key={scen.id}
                     onClick={() => {
-                      if (scen.role) switchRole(scen.role as any);
-                      if (onNavigateTab) onNavigateTab(scen.tab, scen.role);
+                      if (onNavigateTab) onNavigateTab(scen.tab);
                       onClose();
                     }}
                     className="p-3.5 rounded-2xl bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200 transition cursor-pointer space-y-1.5 shadow-2xs group"
@@ -246,7 +257,7 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
                     key={s.id}
                     onClick={() => {
                       if (onSelectStudent) onSelectStudent(s);
-                      if (onNavigateTab) onNavigateTab("student_profile", "guidance_counselor");
+                      if (onNavigateTab) onNavigateTab(currentRole === "teacher" ? "students" : "student_profile");
                       onClose();
                     }}
                     className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer flex items-center justify-between gap-3 group"
@@ -295,8 +306,7 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
                     <div
                       key={idx}
                       onClick={() => {
-                        if (m.role) switchRole(m.role as any);
-                        if (onNavigateTab) onNavigateTab(m.tab, m.role);
+                        if (onNavigateTab) onNavigateTab(m.tab);
                         onClose();
                       }}
                       className="p-3 rounded-2xl bg-white hover:bg-rose-50/50 border border-slate-200 hover:border-rose-200 transition cursor-pointer flex items-center gap-2.5 shadow-2xs group"

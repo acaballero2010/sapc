@@ -45,6 +45,11 @@ import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { AHPDataVisualizer } from "./AHPDataVisualizer";
 import { SAPC_500_STUDENTS, SAPC_COHORT_SUMMARY } from "@/data/students500";
 import type { StudentRecord } from "@/data/students500";
+import { 
+  getActiveStudentDataset, 
+  computeCohortAggregates, 
+  exportActiveDatasetToCSV 
+} from "@/lib/dataset-store";
 
 // Tab types for all 20 Counselor modules
 export type CounselorTabType = 
@@ -261,11 +266,18 @@ export const CounselorDashboard: React.FC = () => {
   };
 
   // State Datasets
-  const [analytics, setAnalytics] = useState<any | null>(DEFAULT_ANALYTICS);
-  const [students, setStudents] = useState<StudentRecord[]>(DEFAULT_STUDENTS);
+  const [students, setStudents] = useState<StudentRecord[]>(() => {
+    if (typeof window !== "undefined") {
+      return getActiveStudentDataset();
+    }
+    return DEFAULT_STUDENTS;
+  });
+  const [_analytics, setAnalytics] = useState<any | null>(DEFAULT_ANALYTICS);
   const [flaggedSessions] = useState<FlaggedAlert[]>(DEFAULT_FLAGGED_ALERTS);
   const [interventions] = useState<InterventionCarePlan[]>(DEFAULT_INTERVENTIONS);
   const [selectedAlert, setSelectedAlert] = useState<FlaggedAlert>(DEFAULT_FLAGGED_ALERTS[0]);
+
+  const cohortStats = useMemo(() => computeCohortAggregates(students), [students]);
 
   // Modals & Sub-views
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(1);
@@ -478,6 +490,9 @@ export const CounselorDashboard: React.FC = () => {
 
   const loadData = useCallback(async () => {
     try {
+      if (typeof window !== "undefined") {
+        setStudents(getActiveStudentDataset());
+      }
       const [analyticsRes, studentsRes] = await Promise.all([
         fetchWithAuth("/analytics/summary").catch(() => null),
         fetchWithAuth("/students").catch(() => null)
@@ -487,7 +502,7 @@ export const CounselorDashboard: React.FC = () => {
         setStudents(studentsRes);
       }
     } catch (err) {
-      console.warn("Using default counselor mock data:", err);
+      console.warn("Using default counselor dataset:", err);
     }
   }, []);
 
@@ -496,6 +511,11 @@ export const CounselorDashboard: React.FC = () => {
     loadData();
 
     if (typeof window !== "undefined") {
+      const handleDatasetUpdated = () => {
+        setStudents(getActiveStudentDataset());
+      };
+      window.addEventListener("sapc:dataset-updated", handleDatasetUpdated);
+
       const params = new URLSearchParams(window.location.search);
       const urlTab = params.get("tab") as CounselorTabType;
       if (urlTab) setActiveTab(urlTab);
@@ -504,7 +524,10 @@ export const CounselorDashboard: React.FC = () => {
         if (e.detail?.tab) setActiveTab(e.detail.tab);
       };
       window.addEventListener("sapc:navigate-tab", handleCustomNav as EventListener);
-      return () => window.removeEventListener("sapc:navigate-tab", handleCustomNav as EventListener);
+      return () => {
+        window.removeEventListener("sapc:dataset-updated", handleDatasetUpdated);
+        window.removeEventListener("sapc:navigate-tab", handleCustomNav as EventListener);
+      };
     }
   }, [loadData]);
 
@@ -638,6 +661,15 @@ export const CounselorDashboard: React.FC = () => {
             </button>
 
             <button
+              onClick={() => exportActiveDatasetToCSV(students, "Guidance_Active_Cohort_Dataset.csv")}
+              className="min-h-[44px] px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2"
+              title="Export complete 5-domain cohort dataset to CSV"
+            >
+              <Download className="h-4 w-4 text-amber-300" />
+              <span>Export CSV</span>
+            </button>
+
+            <button
               onClick={() => setIsReportOpen(true)}
               className="min-h-[44px] px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2"
             >
@@ -648,7 +680,7 @@ export const CounselorDashboard: React.FC = () => {
             <div className="bg-black/35 backdrop-blur-md border border-white/25 rounded-2xl p-3 sm:p-4 text-center shadow-lg min-w-[130px]">
               <span className="text-[10px] sm:text-xs text-amber-200 font-extrabold uppercase tracking-wider block">Cohort Risk Avg</span>
               <p className="text-xl sm:text-2xl lg:text-3xl font-black text-[#FBBF24] mt-0.5">
-                {analytics?.average_composite_score ? Number(analytics.average_composite_score).toFixed(2) : "0.00"}
+                {cohortStats.avgRiskScore ? Number(cohortStats.avgRiskScore).toFixed(1) : "0.0"}
                 <span className="text-xs font-bold text-slate-300 ml-1">/ 100</span>
               </p>
             </div>
@@ -674,7 +706,7 @@ export const CounselorDashboard: React.FC = () => {
             </div>
           </div>
           <div className="my-2 flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-none">{analytics?.total_students || students.length}</span>
+            <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-none">{cohortStats.total}</span>
             <span className="text-xs sm:text-sm font-bold text-slate-500">Students</span>
           </div>
           <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Across all SAPC grade levels</span>
@@ -689,8 +721,8 @@ export const CounselorDashboard: React.FC = () => {
             </div>
           </div>
           <div className="my-2 flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-rose-600 leading-none">{analytics?.high_risk_count || 14}</span>
-            <span className="text-xs sm:text-sm font-bold text-rose-700">Students</span>
+            <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-rose-600 leading-none">{cohortStats.highRiskCount}</span>
+            <span className="text-xs sm:text-sm font-bold text-rose-700">({cohortStats.highRiskPct}%)</span>
           </div>
           <span className="text-[10px] sm:text-[11px] text-rose-700 font-bold">Requires Priority Care Plan</span>
         </div>
@@ -704,8 +736,8 @@ export const CounselorDashboard: React.FC = () => {
             </div>
           </div>
           <div className="my-2 flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#D97706] leading-none">{analytics?.medium_risk_count || 48}</span>
-            <span className="text-xs sm:text-sm font-bold text-amber-800">Students</span>
+            <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#D97706] leading-none">{cohortStats.mediumRiskCount}</span>
+            <span className="text-xs sm:text-sm font-bold text-amber-800">({cohortStats.mediumRiskPct}%)</span>
           </div>
           <span className="text-[10px] sm:text-[11px] text-amber-800 font-bold">Active Remediation Protocol</span>
         </div>
@@ -719,8 +751,8 @@ export const CounselorDashboard: React.FC = () => {
             </div>
           </div>
           <div className="my-2 flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-emerald-600 leading-none">{analytics?.low_risk_count || 438}</span>
-            <span className="text-xs sm:text-sm font-bold text-emerald-800">Students</span>
+            <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-emerald-600 leading-none">{cohortStats.lowRiskCount}</span>
+            <span className="text-xs sm:text-sm font-bold text-emerald-800">({cohortStats.lowRiskPct}%)</span>
           </div>
           <span className="text-[10px] sm:text-[11px] text-emerald-700 font-bold">Standard Guidance Tracking</span>
         </div>

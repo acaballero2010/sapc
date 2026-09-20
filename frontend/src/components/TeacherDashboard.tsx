@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+import { getActiveStudentDataset } from "@/lib/dataset-store";
 import { RiskBadge } from "./RiskBadge";
 import { StudentDetailModal } from "./StudentDetailModal";
 import { TeacherReferralModal } from "./TeacherReferralModal";
@@ -94,9 +95,19 @@ export const TeacherDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TeacherTabType>("dashboard");
 
   // Advisory Class Dataset (Grade 11 - STEM St. Augustine default)
-  const [students] = useState<StudentRecord[]>(() => {
-    return SAPC_500_STUDENTS.filter(s => s.section_name.includes("St. Augustine") || s.grade_level === 11).slice(0, 40);
+  const [students, setStudents] = useState<StudentRecord[]>(() => {
+    const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
+    return all.filter(s => s.section_name.includes("St. Augustine") || s.grade_level === 11).slice(0, 40);
   });
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      const all = getActiveStudentDataset();
+      setStudents(all.filter(s => s.section_name.includes("St. Augustine") || s.grade_level === 11).slice(0, 40));
+    };
+    window.addEventListener("sapc:dataset-updated", handleUpdate);
+    return () => window.removeEventListener("sapc:dataset-updated", handleUpdate);
+  }, []);
 
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState<string>("all");

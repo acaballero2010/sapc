@@ -30,7 +30,17 @@ import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { RiskBadge } from "./RiskBadge";
-import { SAPC_500_STUDENTS } from "@/data/students500";
+import { 
+  getActiveStudentDataset, 
+  saveStudentDataset, 
+  computeCohortAggregates, 
+  exportActiveDatasetToCSV,
+  importFullCohortCSV,
+  getActiveRiskWeights,
+  saveRiskWeights,
+  recalculateAHPForDataset
+} from "@/lib/dataset-store";
+import type { StudentRecord } from "@/data/students500";
 
 // Tab types for all 21 Admin Modules
 export type AdminTabType = 
@@ -62,6 +72,20 @@ export const AdminDashboard: React.FC = () => {
   const [selectedNavCategory, setSelectedNavCategory] = useState<string>("all");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Dynamic Live Student Dataset
+  const [students, setStudents] = useState<StudentRecord[]>([]);
+
+  useEffect(() => {
+    setStudents(getActiveStudentDataset());
+    const handleDatasetUpdate = () => {
+      setStudents(getActiveStudentDataset());
+    };
+    window.addEventListener("sapc:dataset-updated", handleDatasetUpdate);
+    return () => window.removeEventListener("sapc:dataset-updated", handleDatasetUpdate);
+  }, []);
+
+  const cohortStats = useMemo(() => computeCohortAggregates(students), [students]);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
@@ -73,17 +97,46 @@ export const AdminDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // 13. Risk Config Weights State (Psychometrician Validated AHP 5-Domain)
-  const [riskWeights, setRiskWeights] = useState({
-    academic: 30.0,
-    family: 20.0,
-    health: 20.0,
-    mental: 15.0,
-    financial: 15.0
-  });
+  const [riskWeights, setRiskWeights] = useState(() => getActiveRiskWeights());
 
   const totalWeight = useMemo(() => {
     return Number((riskWeights.academic + riskWeights.family + riskWeights.health + riskWeights.mental + riskWeights.financial).toFixed(1));
   }, [riskWeights]);
+
+  // Handle live AHP recalculation
+  const handleSaveAndRecalculateAHP = () => {
+    if (totalWeight !== 100.0) {
+      showToast("Weights must equal exactly 100.0% before saving.");
+      return;
+    }
+    saveRiskWeights(riskWeights);
+    const recalculated = recalculateAHPForDataset(students, riskWeights);
+    saveStudentDataset(recalculated);
+    setStudents(recalculated);
+    showToast(`Successfully recalculated AHP risk scores across ${recalculated.length} students.`);
+  };
+
+  // Handle full CSV import
+  const handleFullCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const content = event.target?.result as string;
+          const result = importFullCohortCSV(content);
+          if (result.success) {
+            showToast(`Imported and recalculated ${result.count} students from ${file.name}.`);
+          } else {
+            showToast(`Import failed: ${result.error || "Invalid CSV"}`);
+          }
+        } catch {
+          showToast("Failed to process CSV file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
 
   // 12. Quarter Calendar Config
   const [quarterConfig, setQuarterConfig] = useState([
@@ -131,7 +184,7 @@ export const AdminDashboard: React.FC = () => {
     { id: "import_wizard", label: "Master Import Wizard", icon: Layers, badge: "DepEd SASS", category: "ingestion" },
     { id: "import_history", label: "Import Audit History", icon: ShieldCheck, badge: `${importHistory.length}`, category: "ingestion" },
     { id: "revert_import", label: "Rollback & Revert Engine", icon: RotateCcw, badge: "Emergency", category: "ingestion" },
-    { id: "students", label: "Master Student Registry", icon: BookOpen, badge: "500", category: "students" },
+    { id: "students", label: "Master Student Registry", icon: BookOpen, badge: `${cohortStats.total || 500}`, category: "students" },
     { id: "create_student", label: "Create Single Student", icon: UserPlus, category: "students" },
     { id: "student_profile", label: "Student Override Editor", icon: Edit, category: "students" },
     { id: "teachers", label: "Teacher Accounts Roster", icon: GraduationCap, badge: "4 Active", category: "users" },
@@ -153,19 +206,19 @@ export const AdminDashboard: React.FC = () => {
     : TAB_ITEMS.filter(t => t.category === selectedNavCategory);
 
   const selectedStudentObj = useMemo(() => {
-    return SAPC_500_STUDENTS.find(s => s.id === selectedStudentId) || SAPC_500_STUDENTS[0];
-  }, [selectedStudentId]);
+    return students.find(s => s.id === selectedStudentId) || students[0];
+  }, [students, selectedStudentId]);
 
   const filteredStudents = useMemo(() => {
-    if (!searchQuery.trim()) return SAPC_500_STUDENTS.slice(0, 10);
+    if (!searchQuery.trim()) return students.slice(0, 10);
     const q = searchQuery.toLowerCase();
-    return SAPC_500_STUDENTS.filter(s => 
+    return students.filter(s => 
       s.first_name.toLowerCase().includes(q) ||
       s.last_name.toLowerCase().includes(q) ||
       s.lrn.includes(searchQuery) ||
       (s.section_name && s.section_name.toLowerCase().includes(q))
     ).slice(0, 15);
-  }, [searchQuery]);
+  }, [students, searchQuery]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -262,22 +315,22 @@ export const AdminDashboard: React.FC = () => {
             <Users className="h-4 w-4 text-[#8B0014]" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-2xl sm:text-3xl font-black text-slate-900">500</span>
+            <span className="text-2xl sm:text-3xl font-black text-slate-900">{cohortStats.total}</span>
             <span className="text-xs font-bold text-slate-400">Students</span>
           </div>
-          <span className="text-[11px] text-slate-500">Across 12 Sections (JHS &amp; SHS)</span>
+          <span className="text-[11px] text-slate-500">Across {cohortStats.sectionBreakdown.length || 12} Sections (JHS &amp; SHS)</span>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Campus Accounts</span>
-            <GraduationCap className="h-4 w-4 text-blue-600" />
+            <span className="text-[10px] sm:text-xs font-black text-rose-700 uppercase tracking-wider">High Risk / Tier 1</span>
+            <ShieldAlert className="h-4 w-4 text-rose-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-2xl sm:text-3xl font-black text-blue-900">142</span>
-            <span className="text-xs font-bold text-slate-400">Users</span>
+            <span className="text-2xl sm:text-3xl font-black text-rose-600">{cohortStats.highRiskCount}</span>
+            <span className="text-xs font-bold text-slate-400">({cohortStats.highRiskPct}%)</span>
           </div>
-          <span className="text-[11px] font-bold text-blue-700">Teachers, Counselors &amp; Parents</span>
+          <span className="text-[11px] font-bold text-rose-700">Priority Guidance Interventions</span>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
@@ -294,14 +347,14 @@ export const AdminDashboard: React.FC = () => {
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Active Quarter</span>
+            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Cohort Risk Avg</span>
             <Calendar className="h-4 w-4 text-amber-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-2xl sm:text-3xl font-black text-amber-800">Q2</span>
-            <span className="text-xs font-bold text-slate-400">2025-2026</span>
+            <span className="text-2xl sm:text-3xl font-black text-amber-800">{cohortStats.avgRiskScore}</span>
+            <span className="text-xs font-bold text-slate-400">/ 100</span>
           </div>
-          <span className="text-[11px] font-bold text-amber-800">Midterm Remediation Cycle</span>
+          <span className="text-[11px] font-bold text-amber-800">Mean 5-Domain Vulnerability</span>
         </div>
       </div>
 
@@ -574,23 +627,29 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => {
-                  setRiskWeights({ academic: 30.0, family: 20.0, health: 20.0, mental: 15.0, financial: 15.0 });
-                  showToast("Reset to Psychometrician Standard (30/20/20/15/15)");
+                  const baselineWeights = { academic: 30.0, family: 20.0, health: 20.0, mental: 15.0, financial: 15.0 };
+                  setRiskWeights(baselineWeights);
+                  saveRiskWeights(baselineWeights);
+                  const recalculated = recalculateAHPForDataset(students, baselineWeights);
+                  saveStudentDataset(recalculated);
+                  setStudents(recalculated);
+                  showToast("Reset to Psychometrician Standard (30/20/20/15/15) and recalculated cohort.");
                 }}
-                className="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition"
+                className="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition cursor-pointer"
               >
                 Reset to Psychometrician Baseline
               </button>
               <button
                 type="button"
-                onClick={() => showToast("AHP Risk weights vector and consistency matrix updated across all 500 students.")}
-                className="px-5 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs transition"
+                onClick={handleSaveAndRecalculateAHP}
+                className="px-5 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs transition cursor-pointer shadow-md flex items-center gap-1.5"
               >
-                Save &amp; Recalculate School Cohort
+                <Sliders className="h-3.5 w-3.5 text-amber-300" />
+                <span>Save &amp; Recalculate School Cohort</span>
               </button>
             </div>
           </div>
@@ -779,15 +838,42 @@ export const AdminDashboard: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900">Master Student Database (500 Students)</h3>
-                <p className="text-xs sm:text-sm text-slate-500">Full administrative access across all junior and senior high cohorts</p>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+                  Master Student Database ({cohortStats.total} Students)
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Full administrative access across all {cohortStats.sectionBreakdown.length || 12} sections with dynamic AHP scoring
+                </p>
               </div>
-              <button
-                onClick={() => handleTabChange("create_student")}
-                className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition self-start sm:self-auto"
-              >
-                + Add Single Student
-              </button>
+
+              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => exportActiveDatasetToCSV(students)}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                >
+                  <Download className="h-3.5 w-3.5 text-slate-600" />
+                  <span>Export Active CSV</span>
+                </button>
+
+                <label className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                  <FileSpreadsheet className="h-3.5 w-3.5 text-[#8B0014]" />
+                  <span>Import / Re-Upload CSV</span>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFullCSVUpload}
+                    className="hidden"
+                  />
+                </label>
+
+                <button
+                  onClick={() => handleTabChange("create_student")}
+                  className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition"
+                >
+                  + Add Single Student
+                </button>
+              </div>
             </div>
 
             <div className="relative">
@@ -1072,7 +1158,95 @@ export const AdminDashboard: React.FC = () => {
       {/* ========================================================= */}
       {/* 13. KNOWLEDGE BASE & ALL REMAINING VIEWS (Fallbacks) */}
       {/* ========================================================= */}
-      {(activeTab === "parents" || activeTab === "interventions" || activeTab === "intervention_suggestions" || activeTab === "reports" || activeTab === "notifications" || activeTab === "knowledge_base" || activeTab === "verify_assessments" || activeTab === "export_credentials" || activeTab === "export_import_history") && (
+      {/* ========================================================= */}
+      {/* 13. REPORTS, EXPORTS & KNOWLEDGE BASE */}
+      {/* ========================================================= */}
+      {activeTab === "reports" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <Award className="h-6 w-6 text-[#8B0014]" />
+                  Official DepEd &amp; CHED Institutional Guidance Reports
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Generate compliance documents, multi-domain audit summaries, and accredited retention reports
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsReportOpen(true)}
+                  className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-1.5 shadow-xs"
+                >
+                  <Award className="h-4 w-4 text-amber-300" />
+                  <span>Generate Official Report</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => exportActiveDatasetToCSV(students, "DepEd_Compliance_SAPC_Cohort.csv")}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition flex items-center gap-1.5"
+                >
+                  <Download className="h-4 w-4 text-slate-600" />
+                  <span>Export SASS CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span className="font-extrabold text-slate-900 block">DepEd Form 137 / 138 Sync</span>
+                <p className="text-slate-600">Quarterly scholastic academic achievement and attendance summary.</p>
+                <button onClick={() => exportActiveDatasetToCSV(students, "DepEd_Form_138_Sync.csv")} className="text-[#8B0014] font-bold hover:underline block pt-1">Download DepEd Format →</button>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span className="font-extrabold text-slate-900 block">AHP Longitudinal Retention Audit</span>
+                <p className="text-slate-600">Multi-semester risk tier progression and early dropout prevention data.</p>
+                <button onClick={() => setIsReportOpen(true)} className="text-[#8B0014] font-bold hover:underline block pt-1">Open Audit Modal →</button>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span className="font-extrabold text-slate-900 block">Mental Health &amp; Crisis Log Report</span>
+                <p className="text-slate-600">DepEd Child Protection &amp; Mental Health Act RA 11036 compliance summary.</p>
+                <button onClick={() => showToast("Mental Health compliance log exported.")} className="text-[#8B0014] font-bold hover:underline block pt-1">Export RA 11036 Log →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "export_credentials" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <Download className="h-6 w-6 text-[#8B0014]" />
+                  Bulk Export Campus Credentials &amp; Cohort Roster
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">Secure credential distribution for faculty, guidance staff, and parent accounts</p>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-3">
+              <span className="font-extrabold text-amber-950 block">Active Student Cohort Export ({cohortStats.total} Records)</span>
+              <p className="text-amber-900 leading-relaxed">
+                Download the complete 5-domain dataset with LRNs, advisory sections, composite risk scores, and granular scores. You can modify this spreadsheet and re-upload it via the Master Import Wizard or Student Registry to test custom scenarios.
+              </p>
+              <button
+                type="button"
+                onClick={() => exportActiveDatasetToCSV(students)}
+                className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-2 shadow-xs"
+              >
+                <Download className="h-4 w-4 text-amber-300" />
+                <span>Download Complete 5-Domain Cohort CSV ({cohortStats.total} Rows)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(activeTab === "parents" || activeTab === "interventions" || activeTab === "intervention_suggestions" || activeTab === "notifications" || activeTab === "knowledge_base" || activeTab === "verify_assessments" || activeTab === "export_import_history") && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
             <div className="border-b border-slate-100 pb-4">
