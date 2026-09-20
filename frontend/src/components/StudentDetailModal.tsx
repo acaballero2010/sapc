@@ -465,38 +465,41 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in font-sans">
-      <div className="bg-white border border-slate-200 w-full max-w-4xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="px-6 sm:px-8 py-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border-2 border-amber-400/80 flex items-center justify-center text-white font-black text-xl shadow-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in font-sans">
+      <div className="bg-white border border-slate-200 w-full max-w-4xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[92vh] overflow-hidden">
+        {/* Header — compact single-block to minimise vertical footprint */}
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 shrink-0 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border-2 border-amber-400/80 flex items-center justify-center text-white font-black text-lg shadow-xs">
               {student ? student.first_name[0] : "S"}
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-slate-900">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight truncate">
                   {student ? `${student.first_name} ${student.last_name}` : "Student Profile"}
                 </h2>
                 {riskData && (
                   <RiskBadge score={riskData.composite_risk_score} tier={riskData.risk_tier} size="md" />
                 )}
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                LRN: <span className="text-slate-900 font-mono font-semibold">{student?.lrn}</span> • Section:{" "}
-                <span className="text-slate-900 font-medium">{student?.section_name}</span> • Adviser:{" "}
-                <span className="text-slate-900 font-medium">{student?.adviser_name || "Unassigned"}</span>
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">
+                LRN: <span className="text-slate-900 font-mono font-semibold">{student?.lrn}</span>
+                <span className="mx-1.5 text-slate-300">•</span>
+                <span className="text-slate-900 font-medium">{student?.section_name}</span>
+                <span className="mx-1.5 text-slate-300">•</span>
+                Adviser: <span className="text-slate-900 font-medium">{student?.adviser_name || "Unassigned"}</span>
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             {onCreateIntervention && isCounselor && (
               <button
                 onClick={() => onCreateIntervention(student)}
-                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-[#8B0014] hover:bg-[#6D0010] text-white flex items-center gap-2 transition shadow-xs"
+                className="px-3 py-2 rounded-xl text-xs font-bold bg-[#8B0014] hover:bg-[#6D0010] text-white flex items-center gap-1.5 transition shadow-xs whitespace-nowrap"
               >
-                <PlusCircle className="h-4 w-4 text-white" />
-                <span>Create Care Plan</span>
+                <PlusCircle className="h-3.5 w-3.5 text-white" />
+                <span className="hidden sm:inline">Create Care Plan</span>
+                <span className="sm:hidden">Care Plan</span>
               </button>
             )}
             <button
@@ -508,40 +511,40 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-slate-200 bg-slate-100/70 px-6 sm:px-8 gap-2 pt-2 overflow-x-auto">
+        {/* Tab Navigation — sits OUTSIDE the scrollable body so it's always visible */}
+        <div className="flex border-b border-slate-200 bg-slate-100/70 px-4 sm:px-6 gap-1 pt-2 overflow-x-auto shrink-0 scrollbar-none">
           <button
             onClick={() => setActiveTab("synthesis")}
-            className={`px-4 py-2.5 rounded-t-2xl font-bold text-xs sm:text-sm flex items-center gap-2 transition shrink-0 ${
+            className={`px-3 sm:px-4 py-2.5 rounded-t-2xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 transition shrink-0 ${
               activeTab === "synthesis"
                 ? "bg-white text-[#8B0014] border-t border-x border-slate-200 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Brain className="h-4 w-4 text-[#8B0014]" />
-            AHP Multi-Domain Synthesis & Notes
+            <Brain className="h-3.5 w-3.5 text-[#8B0014]" />
+            AHP Multi-Domain Synthesis
           </button>
           <button
             onClick={() => setActiveTab("wellness")}
-            className={`px-4 py-2.5 rounded-t-2xl font-bold text-xs sm:text-sm flex items-center gap-2 transition shrink-0 ${
+            className={`px-3 sm:px-4 py-2.5 rounded-t-2xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 transition shrink-0 ${
               activeTab === "wellness"
                 ? "bg-white text-[#8B0014] border-t border-x border-slate-200 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Smile className="h-4 w-4 text-[#8B0014]" />
-            Wellness & Daily Mood Log ({activeMoodList.length})
+            <Smile className="h-3.5 w-3.5 text-[#8B0014]" />
+            Wellness & Mood Log ({activeMoodList.length})
           </button>
           <button
             onClick={() => setActiveTab("simulator")}
-            className={`px-4 py-2.5 rounded-t-2xl font-bold text-xs sm:text-sm flex items-center gap-2 transition shrink-0 ${
+            className={`px-3 sm:px-4 py-2.5 rounded-t-2xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 transition shrink-0 ${
               activeTab === "simulator"
                 ? "bg-white text-[#8B0014] border-t border-x border-slate-200 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <Calculator className="h-4 w-4 text-[#8B0014]" />
-            &quot;What-If&quot; Academic Recovery Simulator
+            <Calculator className="h-3.5 w-3.5 text-[#8B0014]" />
+            &quot;What-If&quot; Simulator
           </button>
         </div>
 
