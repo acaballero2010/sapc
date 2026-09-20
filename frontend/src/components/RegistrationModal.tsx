@@ -852,19 +852,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 ))}
               </div>
 
-              {/* Demo Helper */}
-              <div className="p-2.5 rounded-xl bg-slate-100 text-xs text-slate-600 flex items-center justify-center gap-2">
-                <span className="font-bold text-[#8B0014]">💡 Demo Sandbox:</span>
-                <span>Click autofill to use PIN <strong className="font-mono text-slate-900">774-892</strong></span>
-                <button
-                  type="button"
-                  onClick={() => setOtp(["7", "7", "4", "8", "9", "2"])}
-                  className="px-2 py-0.5 rounded-md bg-white border border-slate-300 font-bold text-slate-800 text-[11px] hover:bg-slate-50"
-                >
-                  Autofill
-                </button>
-              </div>
-
               {otpError && (
                 <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center">
                   {otpError}

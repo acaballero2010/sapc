@@ -158,66 +158,68 @@ export default function LoginPage() {
             </span>
           </div>
 
-          {/* Quick 1-Click Demo Profiles Selector */}
-          <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-300/80 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1">
-                🚀 Instant 1-Click Demo Logins
-              </span>
-              <span className="text-[10px] font-bold text-amber-800">No Password Needed</span>
+          {/* Quick 1-Click Demo Profiles Selector (Hidden by default in production) */}
+          {process.env.NEXT_PUBLIC_SHOW_DEMO_LOGINS === "true" && (
+            <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-300/80 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1">
+                  🚀 Instant 1-Click Demo Logins
+                </span>
+                <span className="text-[10px] font-bold text-amber-800">No Password Needed</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoLogin("guidance_counselor")}
+                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+                >
+                  <div className="text-sm">🧠</div>
+                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Counselor</div>
+                  <div className="text-[9px] text-slate-500">RGC Portal</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoLogin("teacher")}
+                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+                >
+                  <div className="text-sm">📚</div>
+                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Teacher</div>
+                  <div className="text-[9px] text-slate-500">Adviser View</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoLogin("parent")}
+                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+                >
+                  <div className="text-sm">👨‍👩‍👦</div>
+                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Parent</div>
+                  <div className="text-[9px] text-slate-500">Guardian View</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoLogin("student")}
+                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+                >
+                  <div className="text-sm">🎓</div>
+                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Student</div>
+                  <div className="text-[9px] text-slate-500">Joshua D.</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoLogin("admin")}
+                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group col-span-2 sm:col-span-2"
+                >
+                  <div className="text-sm">⚙️</div>
+                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">System Administrator</div>
+                  <div className="text-[9px] text-slate-500">Master Ingestion &amp; AHP Config</div>
+                </button>
+              </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin("guidance_counselor")}
-                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
-              >
-                <div className="text-sm">🧠</div>
-                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Counselor</div>
-                <div className="text-[9px] text-slate-500">RGC Portal</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin("teacher")}
-                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
-              >
-                <div className="text-sm">📚</div>
-                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Teacher</div>
-                <div className="text-[9px] text-slate-500">Adviser View</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin("parent")}
-                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
-              >
-                <div className="text-sm">👨‍👩‍👦</div>
-                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Parent</div>
-                <div className="text-[9px] text-slate-500">Guardian View</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin("student")}
-                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
-              >
-                <div className="text-sm">🎓</div>
-                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Student</div>
-                <div className="text-[9px] text-slate-500">Joshua D.</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin("admin")}
-                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group col-span-2 sm:col-span-2"
-              >
-                <div className="text-sm">⚙️</div>
-                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">System Administrator</div>
-                <div className="text-[9px] text-slate-500">Master Ingestion &amp; AHP Config</div>
-              </button>
-            </div>
-          </div>
+          )}
 
           {errorMessage && (
             <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium">
