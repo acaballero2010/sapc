@@ -209,10 +209,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const userDoc = await getDoc(userRef);
         let role: RoleType = targetRole || "student";
         let isNewUser = false;
+        let studentId: number | null = null;
 
         if (userDoc.exists()) {
           const docData = userDoc.data();
           role = (targetRole || docData?.role || "student") as RoleType;
+          studentId = docData?.student_id || null;
           isNewUser = !docData?.roleConfirmed && !targetRole;
           if (targetRole) {
             await setDoc(userRef, { role: targetRole, roleConfirmed: true, updatedAt: serverTimestamp() }, { merge: true });
@@ -235,7 +237,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: fbUser.email || "",
           full_name: fbUser.displayName || "Google User",
           role: role,
-          student_id: 1,
+          student_id: studentId,
           firebaseUid: fbUser.uid,
           avatar_url: fbUser.photoURL || null
         };
@@ -246,19 +248,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return null;
     } catch (err: any) {
-      console.warn("Google Sign-In note:", err);
-      const fallbackRole = targetRole || "student";
-      const profileData = DEMO_PROFILES[fallbackRole];
-      const fallbackProfile: UserProfile = {
-        id: 1,
-        email: profileData.email,
-        full_name: profileData.name,
-        role: fallbackRole,
-        student_id: 1,
-        avatar_url: null
-      };
-      setUser(fallbackProfile);
-      return { user: fallbackProfile, isNewUser: false };
+      // Re-throw so the caller (login page) can display an appropriate error message
+      // instead of silently creating a demo session for a failed auth attempt.
+      console.warn("Google Sign-In error:", err);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -314,8 +307,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
+        // A real Firebase session exists — restore it from Firestore
         try {
-          const userDoc = await getDoc(doc(db, "users", fbUser.uid));
+          const userDocRef = doc(db, "users", fbUser.uid);
+          const userDoc = await getDoc(userDocRef);
           const userData = userDoc.data();
           const customSaved = typeof window !== "undefined" ? localStorage.getItem("sapc_custom_profile") : null;
           const parsed = customSaved ? JSON.parse(customSaved) : null;
@@ -325,21 +320,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: fbUser.email || "",
             full_name: parsed?.full_name || userData?.name || fbUser.displayName || fbUser.email?.split("@")[0] || "Authenticated User",
             role: (userData?.role || "student") as RoleType,
-            student_id: 1,
+            // Read student_id from Firestore document rather than always using 1
+            student_id: userData?.student_id || parsed?.student_id || null,
             firebaseUid: fbUser.uid,
             avatar_url: parsed?.avatar_url || userData?.avatar_url || fbUser.photoURL || null
           });
+          setIsLoading(false);
         } catch {
-          // Keep current user state
+          // Firestore read failed — keep whatever state we have, still unblock loading
+          setIsLoading(false);
         }
+      } else {
+        // No Firebase session — fall back to demo mode for immediate usability
+        setIsLoading(false);
+        switchRole("guidance_counselor");
       }
-      setIsLoading(false);
     });
-
-    // Default to counselor for instant demo readiness
-    if (!user) {
-      switchRole("guidance_counselor");
-    }
 
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps

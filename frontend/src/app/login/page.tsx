@@ -47,8 +47,12 @@ export default function LoginPage() {
         email.includes("counselor") ? "guidance_counselor" : "student";
       await login(email, password, targetRole);
       router.push(ROLE_ROUTES[targetRole] || "/dashboard/student");
-    } catch {
-      router.push("/dashboard/student");
+    } catch (err: any) {
+      // Show error — do NOT redirect on failed authentication
+      const msg = err?.message || "Authentication failed. Please check your credentials and try again.";
+      setErrorMessage(msg.includes("OfflineError") || msg.includes("offline") 
+        ? "Could not reach the authentication server. Please check your connection."
+        : "Invalid email or password. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -68,9 +72,17 @@ export default function LoginPage() {
       } else {
         router.push(ROLE_ROUTES[targetRole] || "/dashboard/student");
       }
-    } catch (err) {
-      console.warn("Google sign-in fallback:", err);
-      router.push("/dashboard/student");
+    } catch (err: any) {
+      // Surface the error to the user; do NOT silently redirect to dashboard
+      const code = err?.code || "";
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+        // User dismissed the popup — not an error, just reset
+        setErrorMessage(null);
+      } else if (code === "auth/unauthorized-domain") {
+        setErrorMessage("Google Sign-In is not configured for this domain. Please use email/password login.");
+      } else {
+        setErrorMessage("Google Sign-In failed. Please try again or use email/password login.");
+      }
     } finally {
       setIsSubmitting(false);
     }

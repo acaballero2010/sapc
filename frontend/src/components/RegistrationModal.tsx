@@ -90,12 +90,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [teacherEmail, setTeacherEmail] = useState("");
   const [teacherDept, setTeacherDept] = useState("Senior High School (STEM)");
   const [teacherPassword, setTeacherPassword] = useState("");
+  const [teacherError, setTeacherError] = useState<string | null>(null);
 
   // Counselor form state
   const [counselorName, setCounselorName] = useState("");
   const [counselorEmail, setCounselorEmail] = useState("");
   const [counselorPrc, setCounselorPrc] = useState("");
   const [counselorPassword, setCounselorPassword] = useState("");
+  const [counselorError, setCounselorError] = useState<string | null>(null);
 
   // Parent form state
   const [parentName, setParentName] = useState("");
@@ -108,6 +110,18 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [adminEmail, setAdminEmail] = useState("");
   const [adminEmployeeId, setAdminEmployeeId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [otpError, setOtpError] = useState<string | null>(null);
+
+  // Helper: translate Firebase error codes to user-friendly messages
+  const getFirebaseErrorMsg = (err: any): string | null => {
+    const code = err?.code || "";
+    if (code === "auth/email-already-in-use") return "This email is already registered. Please sign in instead.";
+    if (code === "auth/weak-password") return "Password is too weak. Use at least 8 characters with mixed case and numbers.";
+    if (code === "auth/invalid-email") return "Please enter a valid email address.";
+    if (code === "auth/network-request-failed") return "Network error. Please check your connection and try again.";
+    return null;
+  };
 
   if (!isOpen) return null;
 
@@ -157,6 +171,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleTeacherSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTeacherError(null);
     setIsSubmitting(true);
     try {
       const pass = teacherPassword || "Teacher@SAPC2026!";
@@ -175,8 +190,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       });
       setStep("success");
     } catch (err: any) {
-      console.warn("Firebase Auth creation notice:", err);
-      setStep("success");
+      const msg = getFirebaseErrorMsg(err);
+      if (msg) {
+        setTeacherError(msg);
+      } else {
+        // Unknown error — still proceed to success in demo mode
+        console.warn("Firebase Auth creation notice:", err);
+        setStep("success");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -184,6 +205,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleCounselorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setCounselorError(null);
     setIsSubmitting(true);
     try {
       const pass = counselorPassword || "Counselor@SAPC2026!";
@@ -202,8 +224,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       });
       setStep("success");
     } catch (err: any) {
-      console.warn("Firebase Auth creation notice:", err);
-      setStep("success");
+      const msg = getFirebaseErrorMsg(err);
+      if (msg) {
+        setCounselorError(msg);
+      } else {
+        console.warn("Firebase Auth creation notice:", err);
+        setStep("success");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -211,6 +238,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
   const handleAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAdminError(null);
     setIsSubmitting(true);
     try {
       const pass = adminPassword || "Admin@SAPC2026!";
@@ -229,14 +257,25 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       });
       setStep("success");
     } catch (err: any) {
-      console.warn("Firebase Auth creation notice:", err);
-      setStep("success");
+      const msg = getFirebaseErrorMsg(err);
+      if (msg) {
+        setAdminError(msg);
+      } else {
+        console.warn("Firebase Auth creation notice:", err);
+        setStep("success");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleVerifyOtp = async () => {
+    const allFilled = otp.every(d => d.length === 1);
+    if (!allFilled) {
+      setOtpError("Please enter all 6 digits of the verification code.");
+      return;
+    }
+    setOtpError(null);
     setIsSubmitting(true);
     try {
       if (activeTab === "student") {
@@ -275,8 +314,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       }
       setStep("success");
     } catch (err: any) {
-      console.warn("Firebase Auth creation:", err);
-      setStep("success");
+      const msg = getFirebaseErrorMsg(err);
+      setOtpError(msg || "Account creation failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -320,7 +359,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 <ShieldCheck className="h-3 w-3 text-amber-300" />
                 SAPC Institutional Onboarding
               </span>
-              <span className="text-xs text-rose-200">• 5 Institutional Roles</span>
+              <span className="text-xs text-rose-200">• 5 System Roles</span>
             </div>
             <h3 className="text-xl font-black text-white">
               {step === "form" && "Create Account / Registration"}
@@ -532,6 +571,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     />
                   </div>
 
+                  {teacherError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium">
+                      {teacherError}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -603,6 +648,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                     />
                   </div>
+
+                  {counselorError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium">
+                      {counselorError}
+                    </div>
+                  )}
 
                   <button
                     type="submit"
@@ -749,6 +800,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     />
                   </div>
 
+                  {adminError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium">
+                      {adminError}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -802,6 +859,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 </button>
               </div>
 
+              {otpError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center">
+                  {otpError}
+                </div>
+              )}
+
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="button"
@@ -813,8 +876,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 <button
                   type="button"
                   onClick={handleVerifyOtp}
-                  disabled={isSubmitting}
-                  className="flex-2 py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition"
+                  disabled={isSubmitting || otp.some(d => d.length !== 1)}
+                  className="flex-2 py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50"
                 >
                   {isSubmitting ? "Verifying PIN..." : "Verify & Complete Onboarding →"}
                 </button>
