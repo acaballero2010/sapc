@@ -36,6 +36,7 @@ import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
 import { SAPC_500_STUDENTS } from "@/data/students500";
+import { analyzeMoodTelemetry } from "@/lib/mood-telemetry";
 
 interface StudentDetailModalProps {
   studentId: number | null;
@@ -974,6 +975,105 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   </div>
                 )}
               </div>
+
+              {/* Adaptive Mood Telemetry & Graceful Fallback Analysis */}
+              {(() => {
+                const telemetryResult = analyzeMoodTelemetry(
+                  moodHistory?.recent_checkins || [],
+                  academicRecords[0]?.absences_count || 0,
+                  riskData?.mental_health_score || 20
+                );
+
+                return (
+                  <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">
+                          <Smile className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                              Adaptive Mood Telemetry &amp; Fallback Status
+                            </h4>
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                              telemetryResult.frequency_tier === "high_frequency"
+                                ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                                : telemetryResult.frequency_tier === "low_frequency"
+                                ? "bg-amber-100 text-amber-900 border border-amber-300"
+                                : "bg-slate-100 text-slate-700 border border-slate-300"
+                            }`}>
+                              {telemetryResult.tier_label}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Real-time time-decayed EMA telemetry blended with formal quarterly psychometric screeners
+                          </p>
+                        </div>
+                      </div>
+
+                      {telemetryResult.disengagement_anomaly_detected && (
+                        <div className="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-900 text-xs font-bold flex items-center gap-1.5 animate-pulse">
+                          <ShieldAlert className="h-4 w-4 text-[#8B0014]" />
+                          <span>Disengagement Anomaly Flagged</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Telemetry Metric Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">14-Day Check-Ins</span>
+                        <strong className="text-xl font-black text-slate-900 mt-1 block">
+                          {telemetryResult.checkins_last_14d} <span className="text-xs font-normal text-slate-500">entries</span>
+                        </strong>
+                        <span className="text-[10px] font-semibold text-slate-500">{telemetryResult.total_checkins} total recorded</span>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Decayed Mood Avg</span>
+                        <strong className={`text-xl font-black mt-1 block ${
+                          telemetryResult.time_decayed_mood_avg < 2.5 ? "text-rose-600" : telemetryResult.time_decayed_mood_avg < 3.5 ? "text-amber-700" : "text-emerald-700"
+                        }`}>
+                          {telemetryResult.time_decayed_mood_avg.toFixed(1)} <span className="text-xs font-normal text-slate-500">/ 5.0</span>
+                        </strong>
+                        <span className="text-[10px] font-semibold text-slate-500">Exponential Decay (EMA)</span>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Weight Distribution</span>
+                        <strong className="text-sm font-black text-slate-800 mt-1 block">
+                          {Math.round(telemetryResult.baseline_screener_weight * 100)}% Screener
+                        </strong>
+                        <span className="text-[10px] font-semibold text-slate-500">
+                          {Math.round(telemetryResult.telemetry_weight * 100)}% Live Telemetry
+                        </span>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Top Stressor Tag</span>
+                        <strong className="text-xs font-black text-slate-900 mt-1 block truncate">
+                          {telemetryResult.primary_stressor}
+                        </strong>
+                        <span className="text-[10px] font-semibold text-slate-500">
+                          {telemetryResult.acute_distress_streak_days > 0 ? `${telemetryResult.acute_distress_streak_days}d distress streak` : "No acute streak"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Explanation Banner */}
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
+                      <Sparkles className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <p className="font-semibold text-slate-900">{telemetryResult.explanation}</p>
+                        {telemetryResult.disengagement_reason && (
+                          <p className="text-rose-700 font-bold">{telemetryResult.disengagement_reason}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* SASS Academic History */}
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">

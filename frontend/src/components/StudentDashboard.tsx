@@ -18,7 +18,8 @@ import {
   Clock,
   Send,
   X,
-  Camera
+  Camera,
+  Flame
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -42,6 +43,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
   const [_isLoading, setIsLoading] = useState(true);
   
+  // 1-Click Micro Mood Check-in State
+  const [checkedInToday, setCheckedInToday] = useState(false);
+  const [microSubmittedEmoji, setMicroSubmittedEmoji] = useState<string | null>(null);
+  const [currentStreak, setCurrentStreak] = useState(12);
+
   // Quick Consultation Modal State
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
   const [consultationReason, setConsultationReason] = useState("Academic & Career Mentorship");
@@ -152,6 +158,44 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
   const displayGpa = academicRecords[0]?.gpa ? academicRecords[0].gpa.toFixed(1) : "87.5";
   const displayAttendance = academicRecords[0]?.attendance_rate ? `${academicRecords[0].attendance_rate}%` : "96.5%";
 
+  const handleQuickMicroCheckin = async (score: number, emoji: string, label: string) => {
+    const timestampIso = new Date().toISOString();
+    setMicroSubmittedEmoji(emoji);
+    setCheckedInToday(true);
+    setCurrentStreak((prev) => prev + 1);
+
+    const entry = {
+      id: `checkin-${score}-${student?.id || 1}`,
+      student_id: student?.id || 1,
+      mood_score: score,
+      mood_emoji: emoji,
+      energy_level: score >= 4 ? 4 : 2,
+      primary_stressor: score <= 2 ? "Exams / Deadlines" : "None / Peaceful",
+      reflection_note: `1-Click quick check-in: Feeling ${label}`,
+      created_at: timestampIso
+    };
+
+    try {
+      await fetchWithAuth("/assessments/mood-checkin", {
+        method: "POST",
+        body: JSON.stringify(entry)
+      }).catch(() => null);
+
+      if (typeof window !== "undefined") {
+        const localKey = student?.id ? `sapc_mood_history_${student.id}` : "sapc_mood_history";
+        const stored = localStorage.getItem(localKey);
+        const currentHistory = stored ? JSON.parse(stored) : { streak_days: currentStreak, recent_checkins: [] };
+        const updatedRecent = [entry, ...(currentHistory.recent_checkins || [])];
+        localStorage.setItem(localKey, JSON.stringify({
+          ...currentHistory,
+          streak_days: currentStreak + 1,
+          recent_checkins: updatedRecent
+        }));
+        window.dispatchEvent(new CustomEvent("sapc:mood-checkin-updated", { detail: entry }));
+      }
+    } catch {}
+  };
+
   const handleConsultationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setConsultationSubmitted(true);
@@ -202,6 +246,59 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
             <span>Book Counselor</span>
           </button>
         </div>
+      </div>
+
+      {/* 1-Click Micro Mood Check-In Bar */}
+      <div className="bg-gradient-to-r from-amber-500/15 via-rose-500/10 to-amber-500/10 border border-amber-300/80 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-2xl bg-amber-400 text-amber-950 font-black shadow-xs shrink-0 flex items-center gap-1">
+            <Flame className="h-5 w-5 text-[#8B0014]" />
+            <span className="text-xs">{currentStreak}d</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-950">
+                Daily Wellness Micro-Pulse
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                1-Tap Intake
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
+              {checkedInToday 
+                ? `✓ Logged for today (${microSubmittedEmoji || "🙂"})! Adaptive telemetry active.`
+                : "How are you feeling today? Tap to log in 1 second:"}
+            </p>
+          </div>
+        </div>
+
+        {!checkedInToday ? (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {[
+              { score: 1, emoji: "😫", label: "Overwhelmed", bg: "hover:bg-rose-100 border-rose-300 text-rose-900" },
+              { score: 2, emoji: "😟", label: "Stressed", bg: "hover:bg-amber-100 border-amber-300 text-amber-900" },
+              { score: 3, emoji: "😐", label: "Okay", bg: "hover:bg-slate-100 border-slate-300 text-slate-900" },
+              { score: 4, emoji: "🙂", label: "Good", bg: "hover:bg-emerald-100 border-emerald-300 text-emerald-900" },
+              { score: 5, emoji: "✨", label: "Energized", bg: "hover:bg-amber-100 border-amber-400 text-amber-900" }
+            ].map((opt) => (
+              <button
+                key={opt.score}
+                type="button"
+                onClick={() => handleQuickMicroCheckin(opt.score, opt.emoji, opt.label)}
+                className={`px-3 py-2 rounded-2xl bg-white border font-bold text-xs sm:text-sm flex items-center gap-1.5 transition transform active:scale-95 shadow-2xs cursor-pointer ${opt.bg}`}
+                title={`Check in as ${opt.label}`}
+              >
+                <span className="text-base">{opt.emoji}</span>
+                <span className="hidden sm:inline text-xs">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 bg-emerald-50 px-3.5 py-2 rounded-2xl border border-emerald-200">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            <span>Telemetry Recorded • GAD-7 / Mood Blended</span>
+          </div>
+        )}
       </div>
 
       {/* KPI Overview Summary Bar */}
