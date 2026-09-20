@@ -7,8 +7,17 @@ const frontendNext = path.join(frontendDir, '.next');
 const rootNext = path.join(rootDir, '.next');
 
 if (fs.existsSync(frontendNext)) {
-  // 1. Copy frontend/.next to root .next
-  fs.cpSync(frontendNext, rootNext, { recursive: true });
+  fs.mkdirSync(rootNext, { recursive: true });
+
+  // 1. Copy required metadata and server files
+  const itemsToCopy = ['BUILD_ID', 'routes-manifest.json', 'prerender-manifest.json', 'required-server-files.json', 'server', 'static'];
+  for (const item of itemsToCopy) {
+    const src = path.join(frontendNext, item);
+    const dest = path.join(rootNext, item);
+    if (fs.existsSync(src)) {
+      fs.cpSync(src, dest, { recursive: true });
+    }
+  }
 
   // 2. Flatten frontend/.next/standalone/frontend/* into .next/standalone/
   const standaloneFrontend = path.join(frontendNext, 'standalone', 'frontend');
@@ -16,12 +25,18 @@ if (fs.existsSync(frontendNext)) {
   
   if (fs.existsSync(standaloneFrontend)) {
     fs.cpSync(standaloneFrontend, rootStandalone, { recursive: true });
+  } else {
+    const directStandalone = path.join(frontendNext, 'standalone');
+    if (fs.existsSync(directStandalone)) {
+      fs.cpSync(directStandalone, rootStandalone, { recursive: true });
+    }
   }
 
   // 3. Ensure static assets are present in standalone
   const frontendStatic = path.join(frontendNext, 'static');
   const standaloneStatic = path.join(rootStandalone, '.next', 'static');
   if (fs.existsSync(frontendStatic)) {
+    fs.mkdirSync(path.dirname(standaloneStatic), { recursive: true });
     fs.cpSync(frontendStatic, standaloneStatic, { recursive: true });
   }
 

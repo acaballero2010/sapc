@@ -9,6 +9,8 @@ runConfig:
   memoryMiB: 1024
 
 env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyAi9KdQAuOdyEo1T3SURKMjKJ3iVWeABb0"
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
     value: sapc-intellysys-ph
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
