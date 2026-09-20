@@ -15,6 +15,7 @@ export interface DomainMetadata {
   bgLight: string;
   description: string;
   csvFileName: string;
+  fullDatasetUrl: string;
   requiredColumns: string[];
   sampleData: string;
 }
@@ -33,6 +34,7 @@ export const INGESTION_DOMAINS: Record<IngestionDomain, DomainMetadata> = {
     bgLight: "bg-rose-50",
     description: "Ingests quarterly Grade Point Average (GPA), failing marks count, days absent, and incomplete tasks.",
     csvFileName: "SAPC_Academic_Attendance_Template.csv",
+    fullDatasetUrl: "/samples/sapc_500_academic_sass.csv",
     requiredColumns: [
       "lrn",
       "student_name",
@@ -64,6 +66,7 @@ export const INGESTION_DOMAINS: Record<IngestionDomain, DomainMetadata> = {
     bgLight: "bg-purple-50",
     description: "Ingests standardized GAD-7 (Anxiety 0–21), PHQ-9 (Depression 0–27), stress level index (1–5), and confidential crisis flags.",
     csvFileName: "SAPC_Mental_Health_Screenings_Template.csv",
+    fullDatasetUrl: "/samples/sapc_500_mental_health_screenings.csv",
     requiredColumns: [
       "lrn",
       "student_name",
@@ -94,6 +97,7 @@ export const INGESTION_DOMAINS: Record<IngestionDomain, DomainMetadata> = {
     bgLight: "bg-emerald-50",
     description: "Ingests overdue installment counts, unpaid tuition balance, promissory notes, and DepEd SHS Voucher / ESC grant status.",
     csvFileName: "SAPC_Financial_Assistance_Template.csv",
+    fullDatasetUrl: "/samples/sapc_500_financial_records.csv",
     requiredColumns: [
       "lrn",
       "student_name",
@@ -124,6 +128,7 @@ export const INGESTION_DOMAINS: Record<IngestionDomain, DomainMetadata> = {
     bgLight: "bg-amber-50",
     description: "Ingests OFW parent indicators, guardian contact responsiveness, single-parent domestic pressure, and adviser observation flags.",
     csvFileName: "SAPC_Family_Social_Support_Template.csv",
+    fullDatasetUrl: "/samples/sapc_500_family_social_support.csv",
     requiredColumns: [
       "lrn",
       "student_name",
@@ -154,6 +159,7 @@ export const INGESTION_DOMAINS: Record<IngestionDomain, DomainMetadata> = {
     bgLight: "bg-cyan-50",
     description: "Ingests quarterly clinic visits, chronic conditions (asthma, anemia, migraine), nutritional status (BMI), and physical education clearances.",
     csvFileName: "SAPC_Clinic_Health_Records_Template.csv",
+    fullDatasetUrl: "/samples/sapc_500_clinic_health_records.csv",
     requiredColumns: [
       "lrn",
       "student_name",

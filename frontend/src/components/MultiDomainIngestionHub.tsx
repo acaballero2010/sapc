@@ -461,14 +461,25 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleDownloadTemplate}
-          className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs flex items-center justify-center gap-2 transition shadow-2xs shrink-0 cursor-pointer"
-        >
-          <Download className="h-4 w-4 text-[#8B0014]" />
-          <span>Download CSV Template</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          <a
+            href={domainMeta.fullDatasetUrl}
+            download
+            className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-2xs"
+          >
+            <Download className="h-3.5 w-3.5 text-[#8B0014]" />
+            <span>Download 500-Student Dataset</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={handleDownloadTemplate}
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer"
+          >
+            <Download className="h-3.5 w-3.5 text-slate-600" />
+            <span>Blank Template</span>
+          </button>
+        </div>
       </div>
 
       {/* Mode 1: Batch CSV Upload */}
