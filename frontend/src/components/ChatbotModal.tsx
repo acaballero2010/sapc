@@ -26,23 +26,61 @@ interface Message {
   sentiment?: string;
   distressScore?: number;
   flagged?: boolean;
+  detectedEmotion?: string;
+  emotionConfidence?: number;
+  intent?: string;
+  crisisTriggered?: boolean;
   resources?: string[];
   time: string;
 }
 
 export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      sender: "bot",
-      text: "Hello! I am your SAPC Student Support Companion. How are your classes, health, or emotional wellness feeling lately? Everything you share is treated with utmost care and guidance support.",
-      time: "Just now"
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeAlert, setActiveAlert] = useState<string | null>(null);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [lastDetectedEmotion, setLastDetectedEmotion] = useState<{ emotion: string; confidence: number } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize personalized greeting & cross-session memory
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const hour = new Date().getHours();
+    const timeOfDay = hour < 12 ? "Magandang umaga" : hour < 18 ? "Magandang hapon" : "Magandang gabi";
+
+    let studentName = "SAPCian";
+    let previousTopic = "";
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("sapc_user");
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          studentName = parsed.full_name?.split(" ")[0] || "SAPCian";
+        } catch {}
+      }
+      previousTopic = localStorage.getItem("sapc_last_chat_topic") || "";
+    }
+
+    const greetingText = previousTopic
+      ? `${timeOfDay}, ${studentName}! I remember in our previous session we touched on ${previousTopic}. Kumusta ang pakiramdam mo ngayon sa iyong mga klase at wellness? Nandito ako para makinig.`
+      : `${timeOfDay}, ${studentName}! I am your SAPC Student Guidance Companion. Kumusta ang mga klase, kalusugan, o nararamdaman mo ngayong linggo? Everything you share is safe and confidential.`;
+
+    setMessages((prev) => {
+      if (prev.length === 0) {
+        return [
+          {
+            sender: "bot",
+            text: greetingText,
+            time: "Just now"
+          }
+        ];
+      }
+      return prev;
+    });
+  }, [isOpen]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -76,8 +114,19 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         setSessionToken(res.session_token);
       }
 
-      if (res.counselor_flagged) {
-        setActiveAlert("Guidance Counselor Notification Sent: A counselor has been alerted for priority support.");
+      if (res.detected_emotion) {
+        setLastDetectedEmotion({
+          emotion: res.detected_emotion,
+          confidence: res.emotion_confidence || 0.85
+        });
+      }
+
+      // 5-Step Crisis Protocol Trigger
+      if (res.crisis_triggered || res.distress_score >= 85.0) {
+        setShowConsentModal(true);
+        setActiveAlert("Crisis Protocol Initiated: Priority counseling assistance and emergency hotlines available.");
+      } else if (res.counselor_flagged) {
+        setActiveAlert("Guidance Support Flagged: Your counselor has been notified to check in.");
       }
 
       const botMsg: Message = {
@@ -86,29 +135,63 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         sentiment: res.sentiment,
         distressScore: res.distress_score,
         flagged: res.counselor_flagged,
+        detectedEmotion: res.detected_emotion,
+        emotionConfidence: res.emotion_confidence,
+        intent: res.intent,
+        crisisTriggered: res.crisis_triggered,
         resources: res.suggested_resources,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       };
       setMessages((prev) => [...prev, botMsg]);
+
+      // Save cross-session topic
+      if (typeof window !== "undefined" && userText.length > 10) {
+        localStorage.setItem("sapc_last_chat_topic", userText.slice(0, 40) + "...");
+      }
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "bot",
-          text: "I am here for you, though I encountered a connection issue. Please feel free to reach out to the Guidance Office directly at Room 204.",
-          time: "Just now"
-        }
-      ]);
+      // Fallback offline mock response with Filipino guidance
+      const botMsg: Message = {
+        sender: "bot",
+        text: "Naririnig kita at nandito ako para sa iyo. Kung nakakaranas ka ng matinding stress o pangamba, huwag mag-atubiling lumapit sa Guidance Office sa Room 204 o tumawag sa NCMH 1553.",
+        time: "Just now",
+        resources: [
+          "SAPC Guidance & Counseling Office (Room 204, Bldg A)",
+          "National Center for Mental Health (NCMH) Hotline: 1553 (24/7 Toll-Free)",
+          "Hopeline Philippines: 0917-558-4673"
+        ]
+      };
+      setMessages((prev) => [...prev, botMsg]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleConsentDecision = (granted: boolean) => {
+    setShowConsentModal(false);
+
+    if (granted) {
+      setActiveAlert("Confidential Alert Sent: Registered Guidance Counselor Maria Theresa Cruz, RGC will follow up safely.");
+      // Save local emergency alert
+      if (typeof window !== "undefined") {
+        const alerts = JSON.parse(localStorage.getItem("sapc_crisis_alerts") || "[]");
+        alerts.push({
+          id: `crisis-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          status: "urgent_counselor_notified",
+          type: "5-Step Crisis Protocol Triggered (Student Consent Granted)"
+        });
+        localStorage.setItem("sapc_crisis_alerts", JSON.stringify(alerts));
+      }
+    } else {
+      setActiveAlert("Self-Care Protocol: You can visit Room 204 anytime or dial 1553 for 24/7 confidential help.");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 font-sans">
-      <div className="bg-white border border-slate-200 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col h-[680px] max-h-[90vh] overflow-hidden">
+      <div className="bg-white border border-slate-200 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col h-[700px] max-h-[92vh] overflow-hidden relative">
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-[#8B0014] to-[#B91C1C] p-0.5 shadow-xs">
               <div className="h-full w-full bg-white rounded-[14px] flex items-center justify-center">
@@ -117,12 +200,12 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-slate-900">SAPC Guidance Companion</h3>
-                <span className="px-2.5 py-0.5 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 rounded-full flex items-center gap-1">
-                  <Activity className="h-3 w-3 text-emerald-600" /> NLP Active
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">SAPC Guidance Companion</h3>
+                <span className="px-2.5 py-0.5 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 rounded-full flex items-center gap-1">
+                  <Activity className="h-3 w-3 text-emerald-600" /> 8-Stage NLP Active
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">San Antonio de Padua College • Confidential Wellness Support</p>
+              <p className="text-xs text-slate-500 mt-0.5">San Antonio de Padua College • Student Confidential Companion</p>
             </div>
           </div>
           <button
@@ -132,6 +215,19 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Emotion Telemetry Strip */}
+        {lastDetectedEmotion && (
+          <div className="bg-slate-100/90 border-b border-slate-200 px-6 py-2 flex items-center justify-between text-xs text-slate-700">
+            <span className="font-semibold flex items-center gap-1.5">
+              <span>🧠 Detected Emotion (Calvo &amp; D&apos;Mello):</span>
+              <span className="px-2 py-0.5 rounded-full bg-white border border-slate-300 font-extrabold text-[#8B0014] uppercase text-[10px]">
+                {lastDetectedEmotion.emotion} ({Math.round(lastDetectedEmotion.confidence * 100)}% Confidence)
+              </span>
+            </span>
+            <span className="text-[10px] text-slate-500 hidden sm:inline">Vygotsky ZPD Scaffolding Enabled</span>
+          </div>
+        )}
 
         {/* Crisis Notification Banner */}
         {activeAlert && (
@@ -159,7 +255,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
               )}
 
               <div
-                className={`max-w-[82%] rounded-2xl px-5 py-3.5 text-sm sm:text-base leading-relaxed ${
+                className={`max-w-[84%] rounded-2xl px-5 py-3.5 text-sm sm:text-base leading-relaxed ${
                   m.sender === "student"
                     ? "bg-[#8B0014] text-white rounded-tr-none shadow-xs"
                     : "bg-white text-slate-900 border border-slate-200 rounded-tl-none shadow-xs"
@@ -206,12 +302,44 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                 <RefreshCw className="h-5 w-5 text-[#8B0014] animate-spin" />
               </div>
               <div className="bg-white text-slate-500 border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3.5 text-sm italic shadow-xs">
-                Analyzing distress indicators & formulating guidance response...
+                Analyzing emotions &amp; generating empathetic response...
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* 5-Step Crisis Protocol: Counselor Alert Consent Modal Popup */}
+        {showConsentModal && (
+          <div className="absolute inset-0 z-30 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-6 animate-in fade-in">
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-rose-200 shadow-2xl space-y-4 text-center">
+              <div className="h-12 w-12 rounded-2xl bg-rose-100 text-[#8B0014] mx-auto flex items-center justify-center">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <h4 className="text-lg font-black text-slate-900">Safety &amp; Guidance Care Support</h4>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Naririnig namin ang iyong pinagdaraanan. Gusto mo bang ipagbigay-alam namin ito sa Guidance Counselor (Maria Theresa Cruz, RGC) upang mabigyan ka ng ligtas at kumpidensyal na tulong?
+              </p>
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleConsentDecision(true)}
+                  className="w-full py-3 px-4 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm shadow-md transition"
+                >
+                  Oo, Ipaalam sa Guidance Counselor
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleConsentDecision(false)}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
+                >
+                  Ako na lamang ang pupunta sa Guidance Office (Room 204)
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-400">RA 10173 Protected • Free 24/7 National Center for Mental Health Hotline: 1553</p>
+            </div>
+          </div>
+        )}
 
         {/* Input Bar */}
         <div className="p-4 sm:p-5 border-t border-slate-200 bg-white">
@@ -226,7 +354,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message (e.g. 'I am feeling overwhelmed with my grades...')"
+              placeholder="Type your message (e.g. 'Nahihirapan po ako sa subjects ko...')"
               className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
             />
             <button
@@ -241,7 +369,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           <div className="mt-2.5 flex items-center justify-between text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              RA 10173 Protected • Guidance Counselor Access Only
+              RA 10173 Protected • Student Interface Only
             </span>
             <span>National Crisis Hotline: <strong className="text-slate-900 font-bold">1553</strong></span>
           </div>

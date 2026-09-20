@@ -241,11 +241,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           dominant_domain: found.primary_risk_driver ? found.primary_risk_driver.toLowerCase().replace(/[^a-z]/g, "_") : "academic",
           consistency_ratio: "0.042",
           weights: {
-            academic: 0.4017,
-            mental_health: 0.2442,
-            financial: 0.1373,
-            family: 0.1373,
-            health: 0.0794
+            academic: 0.30,
+            family: 0.20,
+            health: 0.20,
+            mental_health: 0.15,
+            financial: 0.15
           },
           primary_recommendation: {
             title: found.latest_risk_tier === "high" 
@@ -282,9 +282,12 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             gpa: found.sass_metrics.gpa,
             failed_subjects_count: found.sass_metrics.failing_subjects_count,
             incomplete_subjects_count: found.sass_metrics.incomplete_requirements_count,
-            attendance_rate: Math.max(70, 100 - found.sass_metrics.days_absent * 2.5),
+            attendance_rate: found.sass_metrics.attendance_rate_pct ?? Math.max(70, 100 - found.sass_metrics.days_absent * 2.5),
             absences_count: found.sass_metrics.days_absent,
-            normalized_academic_risk: found.domain_scores.academic
+            normalized_academic_risk: found.domain_scores.academic,
+            extracurricular_club: found.sass_metrics.extracurricular_club,
+            club_participation_level: found.sass_metrics.club_participation_level,
+            hobbies_interests: found.sass_metrics.hobbies_interests
           },
           {
             id: 2,
@@ -295,7 +298,10 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             incomplete_subjects_count: 0,
             attendance_rate: Math.min(100, Math.max(75, 100 - Math.max(0, found.sass_metrics.days_absent - 1) * 2.5)),
             absences_count: Math.max(0, found.sass_metrics.days_absent - 1),
-            normalized_academic_risk: Math.max(5, parseFloat((found.domain_scores.academic - 3.2).toFixed(1)))
+            normalized_academic_risk: Math.max(5, parseFloat((found.domain_scores.academic - 3.2).toFixed(1))),
+            extracurricular_club: found.sass_metrics.extracurricular_club,
+            club_participation_level: found.sass_metrics.club_participation_level,
+            hobbies_interests: found.sass_metrics.hobbies_interests
           }
         ];
 
@@ -612,7 +618,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     <strong className="text-2xl font-black text-rose-700 block mt-1">
                       {Number(domainScores.mental_health || 15.0).toFixed(1)} <span className="text-sm font-normal text-slate-500">pts</span>
                     </strong>
-                    <span className="text-[11px] font-semibold text-slate-600 mt-0.5 block">Weight: 24.42% (w_MH)</span>
+                    <span className="text-[11px] font-semibold text-slate-600 mt-0.5 block">Weight: 15.00% (w_MH)</span>
                   </div>
                   <div className="p-3 rounded-xl bg-rose-50 text-rose-700 border border-rose-200">
                     <HeartPulse className="h-6 w-6" />
@@ -736,33 +742,33 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
                       <span className="flex items-center gap-2 text-slate-700 font-medium">
-                        <BookOpen className="h-4 w-4 text-[#8B0014]" /> Academic (w_AC = 0.4017)
+                        <BookOpen className="h-4 w-4 text-[#8B0014]" /> Academic (w_AC = 0.3000)
                       </span>
                       <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.academic || 0).toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
                       <span className="flex items-center gap-2 text-slate-700 font-medium">
-                        <Brain className="h-4 w-4 text-rose-600" /> Mental Health (w_MH = 0.2442)
-                      </span>
-                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.mental_health || 0).toFixed(1)} / 100</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
-                      <span className="flex items-center gap-2 text-slate-700 font-medium">
-                        <DollarSign className="h-4 w-4 text-amber-600" /> Financial (w_FI = 0.1373)
-                      </span>
-                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.financial || 0).toFixed(1)} / 100</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
-                      <span className="flex items-center gap-2 text-slate-700 font-medium">
-                        <Users className="h-4 w-4 text-amber-600" /> Family (w_FA = 0.1373)
+                        <Users className="h-4 w-4 text-amber-600" /> Family (w_FA = 0.2000)
                       </span>
                       <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.family || 0).toFixed(1)} / 100</span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
                       <span className="flex items-center gap-2 text-slate-700 font-medium">
-                        <HeartPulse className="h-4 w-4 text-rose-600" /> Health (w_HE = 0.0794)
+                        <HeartPulse className="h-4 w-4 text-rose-600" /> Health (w_HE = 0.2000)
                       </span>
                       <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.health || 0).toFixed(1)} / 100</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
+                      <span className="flex items-center gap-2 text-slate-700 font-medium">
+                        <Brain className="h-4 w-4 text-rose-600" /> Mental Health (w_MH = 0.1500)
+                      </span>
+                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.mental_health || 0).toFixed(1)} / 100</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
+                      <span className="flex items-center gap-2 text-slate-700 font-medium">
+                        <DollarSign className="h-4 w-4 text-amber-600" /> Financial (w_FI = 0.1500)
+                      </span>
+                      <span className="font-extrabold text-slate-900 text-base">{Number(domainScores.financial || 0).toFixed(1)} / 100</span>
                     </div>
                   </div>
 
@@ -1122,6 +1128,48 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                )}
+
+                {/* Engagement Factors & Extracurricular Protective Buffer */}
+                {academicRecords.length > 0 && academicRecords[0].extracurricular_club && (
+                  <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black uppercase text-slate-800 tracking-wider">
+                          Engagement & Extracurricular Activities
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          academicRecords[0].club_participation_level === "High"
+                            ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                            : academicRecords[0].club_participation_level === "Moderate"
+                            ? "bg-blue-100 text-blue-800 border border-blue-200"
+                            : academicRecords[0].club_participation_level === "Low"
+                            ? "bg-amber-100 text-amber-800 border border-amber-200"
+                            : "bg-slate-200 text-slate-700 border border-slate-300"
+                        }`}>
+                          {academicRecords[0].club_participation_level || "None"} Participation
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        🛡️ Protective Factor against Dropout
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 bg-white rounded-xl border border-slate-200">
+                        <span className="text-slate-500 font-bold block text-[10px] uppercase">Club / Organization Membership</span>
+                        <span className="font-extrabold text-slate-900 text-sm mt-0.5 block">
+                          {academicRecords[0].extracurricular_club}
+                        </span>
+                      </div>
+                      <div className="p-3 bg-white rounded-xl border border-slate-200">
+                        <span className="text-slate-500 font-bold block text-[10px] uppercase">Hobbies &amp; Creative Interests</span>
+                        <span className="font-extrabold text-slate-900 text-sm mt-0.5 block">
+                          {academicRecords[0].hobbies_interests}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

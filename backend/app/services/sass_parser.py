@@ -90,6 +90,10 @@ class SASSParserService:
 
         # 2. Sanitize and validate headers
         df.columns = cls.sanitize_headers(df.columns.tolist())
+        # Support either 'student_id' or 'lrn'
+        if "lrn" in df.columns and "student_id" not in df.columns:
+            df.rename(columns={"lrn": "student_id"}, inplace=True)
+
         missing_cols = [col for col in EXPECTED_SASS_COLUMNS if col not in df.columns]
         if missing_cols:
             return {
@@ -265,8 +269,19 @@ class SASSParserService:
             acad_rec.failed_subjects_count = item["failing_subjects_count"]
             acad_rec.incomplete_subjects_count = item["incomplete_requirements_count"]
             acad_rec.absences_count = item["days_absent"]
-            # Approximate attendance rate: assuming 50 school days per quarter
-            acad_rec.attendance_rate = max(0.0, round((50.0 - item["days_absent"]) / 50.0 * 100.0, 1))
+            # Approximate attendance rate: assuming 50 school days per quarter (or use provided attendance_rate_pct)
+            if "attendance_rate_pct" in item["raw_dict"] and item["raw_dict"]["attendance_rate_pct"]:
+                try:
+                    acad_rec.attendance_rate = float(item["raw_dict"]["attendance_rate_pct"])
+                except ValueError:
+                    acad_rec.attendance_rate = max(0.0, round((50.0 - item["days_absent"]) / 50.0 * 100.0, 1))
+            else:
+                acad_rec.attendance_rate = max(0.0, round((50.0 - item["days_absent"]) / 50.0 * 100.0, 1))
+                
+            acad_rec.extracurricular_club = str(item["raw_dict"].get("extracurricular_club", "None / Non-Member") or "None / Non-Member")
+            acad_rec.club_participation_level = str(item["raw_dict"].get("club_participation_level", "None") or "None")
+            acad_rec.hobbies_interests = str(item["raw_dict"].get("hobbies_interests", "None") or "None")
+            
             acad_rec.normalized_academic_risk = s_ac
             acad_rec.batch_import_id = batch_id
             acad_rec.raw_details = json.dumps(item["raw_dict"])

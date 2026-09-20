@@ -26,11 +26,11 @@ interface DomainRadarChartProps {
 
 export const DomainRadarChart: React.FC<DomainRadarChartProps> = ({ scores, studentName }) => {
   const data = [
-    { domain: "Academic (40.2%)", score: scores.academic, weight: "40.17%" },
-    { domain: "Mental Health (24.4%)", score: scores.mental_health, weight: "24.42%" },
-    { domain: "Financial (13.7%)", score: scores.financial, weight: "13.73%" },
-    { domain: "Family (13.7%)", score: scores.family, weight: "13.73%" },
-    { domain: "Health (7.9%)", score: scores.health, weight: "7.94%" },
+    { domain: "Academic (30.0%)", score: scores.academic, weight: "30.00%" },
+    { domain: "Family (20.0%)", score: scores.family, weight: "20.00%" },
+    { domain: "Health (20.0%)", score: scores.health, weight: "20.00%" },
+    { domain: "Mental Health (15.0%)", score: scores.mental_health, weight: "15.00%" },
+    { domain: "Financial (15.0%)", score: scores.financial, weight: "15.00%" },
   ];
 
   return (

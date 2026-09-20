@@ -5,12 +5,12 @@ A web-based Decision Support System addressing multi-factor student failure caus
 ## Core Features
 - **Academic Data Processing**: Ingest SASS CSV exports (grades, attendance, absences, incomplete coursework).
 - **Non-Academic Evaluation**: 4 qualitative assessment domains (Mental Health, Health, Financial, Family) through structured surveys, counselor observations, and an NLP-powered student chatbot.
-- **Decision Engine**: Multi-Criteria Analytic Hierarchy Process (AHP) weighted risk composite scoring:
-  - Academic: `0.4017`
-  - Mental Health: `0.2442`
-  - Financial: `0.1373`
-  - Family: `0.1373`
-  - Health: `0.0794`
+- **Decision Engine**: Multi-Criteria Analytic Hierarchy Process (AHP) weighted risk composite scoring (Psychometrician Validated):
+  - Academic: `0.3000` (30%)
+  - Family: `0.2000` (20%)
+  - Health: `0.2000` (20%)
+  - Mental Health: `0.1500` (15%)
+  - Financial: `0.1500` (15%)
 - **Risk Tiers**:
   - Low Risk: `0.0` – `39.9`
   - Medium Risk: `40.0` – `69.9`

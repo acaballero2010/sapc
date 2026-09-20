@@ -23,7 +23,11 @@ import {
   Check,
   Compass,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  User,
+  BarChart3,
+  MessageSquare,
+  Calendar
 } from "lucide-react";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { SapcLogo } from "./SapcLogo";
@@ -65,130 +69,208 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const roleWorkspaces: Record<RoleType, Array<{ name: string; href: string; icon: any; badge?: string }>> = {
     guidance_counselor: [
       {
-        name: "Triage & Risk Monitor",
-        href: "/dashboard/guidance#triage-overview",
+        name: "Command Center",
+        href: "/dashboard/guidance?tab=dashboard#triage-overview",
         icon: Brain,
-        badge: "AHP Synthesis"
+        badge: "Overview"
       },
       {
-        name: "NLP Crisis Alerts",
-        href: "/dashboard/guidance#alerts-queue",
+        name: "Crisis Alerts Queue",
+        href: "/dashboard/guidance?tab=crisis_alerts#alerts-queue",
         icon: AlertTriangle,
-        badge: "Live Signals"
+        badge: "Urgent"
       },
       {
-        name: "Teacher Referrals",
-        href: "/dashboard/guidance#teacher-referrals",
+        name: "Faculty Referrals",
+        href: "/dashboard/guidance?tab=referrals#teacher-referrals",
         icon: HeartHandshake,
-        badge: "Faculty Ingest"
+        badge: "Triage"
       },
       {
-        name: "Student Cohort Registry",
-        href: "/dashboard/guidance#students-roster",
+        name: "Student Roster",
+        href: "/dashboard/guidance?tab=students#students-roster",
         icon: Users,
-        badge: "1,250 Monitored"
+        badge: "Cohort"
       },
       {
-        name: "Cohort Retention Trends",
-        href: "/dashboard/guidance#trend-analytics",
-        icon: TrendingUp,
-        badge: "Longitudinal"
-      },
-      {
-        name: "Active Care Protocols",
-        href: "/dashboard/guidance#active-interventions",
+        name: "Interventions & Approvals",
+        href: "/dashboard/guidance?tab=interventions#active-interventions",
         icon: ShieldCheck,
-        badge: "Case Plans"
+        badge: "Caseload"
+      },
+      {
+        name: "Counseling Sessions",
+        href: "/dashboard/guidance?tab=sessions#sessions-schedule",
+        icon: Calendar,
+        badge: "Schedule"
+      },
+      {
+        name: "Cohort Analytics",
+        href: "/dashboard/guidance?tab=analytics#trend-analytics",
+        icon: TrendingUp,
+        badge: "AHP 5-Domain"
       }
     ],
     teacher: [
       {
-        name: "Class Roster & SASS",
-        href: "/dashboard/teacher#roster",
-        icon: BookOpen,
-        badge: "Advisory"
+        name: "Class Overview",
+        href: "/dashboard/teacher?tab=dashboard#advisory-overview",
+        icon: BarChart3,
+        badge: "Overview"
       },
       {
-        name: "1-Click Guidance Referral",
-        href: "/dashboard/teacher#referral-action",
-        icon: HeartHandshake,
-        badge: "Submit Case"
+        name: "Advisory Class Roster",
+        href: "/dashboard/teacher?tab=students#roster",
+        icon: Users,
+        badge: "Students"
       },
       {
-        name: "SASS Batch Ingestion",
-        href: "/dashboard/teacher#uploader",
+        name: "At-Risk Priority Focus",
+        href: "/dashboard/teacher?tab=at_risk#at-risk-view",
+        icon: AlertTriangle,
+        badge: "Priority"
+      },
+      {
+        name: "CSV Import Wizard",
+        href: "/dashboard/teacher?tab=import_wizard#uploader",
         icon: Layers,
         badge: "DepEd SASS"
+      },
+      {
+        name: "Interventions & Care",
+        href: "/dashboard/teacher?tab=interventions#interventions-view",
+        icon: ShieldCheck,
+        badge: "Care Plans"
+      },
+      {
+        name: "Digital Class Record",
+        href: "/dashboard/teacher?tab=class_record#class-record-view",
+        icon: BookOpen,
+        badge: "Grades"
+      },
+      {
+        name: "Messages & Referrals",
+        href: "/dashboard/teacher?tab=messages#messages-view",
+        icon: MessageSquare,
+        badge: "Counselor"
       }
     ],
     student: [
       {
+        name: "Student Profile",
+        href: "/dashboard/student?tab=profile#student-profile",
+        icon: User,
+        badge: "Primary"
+      },
+      {
         name: "Holistic Wellness",
-        href: "/dashboard/student#wellness-radar",
+        href: "/dashboard/student?tab=progress#wellness-radar",
         icon: GraduationCap,
         badge: "5 Domains"
       },
       {
         name: "Academic Standing & GPA",
-        href: "/dashboard/student#academic-records",
+        href: "/dashboard/student?tab=grades#academic-records",
         icon: BookOpen,
-        badge: "Quarter 2"
+        badge: "Grades"
       },
       {
-        name: "Daily Mood Check-in",
-        href: "/dashboard/student#daily-mood",
+        name: "Attendance Tracker",
+        href: "/dashboard/student?tab=attendance#attendance-tracker",
+        icon: Activity,
+        badge: "DepEd"
+      },
+      {
+        name: "Daily Mood & Screeners",
+        href: "/dashboard/student?tab=mental_assessment#daily-mood",
         icon: HeartHandshake,
-        badge: "Daily"
+        badge: "Screeners"
       },
       {
         name: "Academic Simulator",
-        href: "/dashboard/student#academic-simulator",
+        href: "/dashboard/student?tab=forecast#academic-simulator",
         icon: Layers,
         badge: "What-If"
       }
     ],
     parent: [
       {
-        name: "Academic Progress",
-        href: "/dashboard/parent#child-profile",
+        name: "Parent Overview",
+        href: "/dashboard/parent?tab=dashboard#parent-overview",
         icon: Users,
-        badge: "SASS Live"
+        badge: "Overview"
       },
       {
-        name: "Attendance Tracking",
-        href: "/dashboard/parent#child-profile",
+        name: "Child Progress & Wellness",
+        href: "/dashboard/parent?tab=child_progress#progress-tracker",
+        icon: TrendingUp,
+        badge: "Consent"
+      },
+      {
+        name: "Academic Reports",
+        href: "/dashboard/parent?tab=academic_reports#grades-report",
+        icon: BookOpen,
+        badge: "Form 138"
+      },
+      {
+        name: "Attendance Record",
+        href: "/dashboard/parent?tab=attendance#attendance-history",
         icon: Activity,
-        badge: "Quarter 1"
+        badge: "Patterns"
       },
       {
-        name: "Guidance Advisories",
-        href: "/dashboard/parent#guidance-notices",
-        icon: Brain,
-        badge: "Counselor"
+        name: "Care Interventions",
+        href: "/dashboard/parent?tab=interventions#active-care",
+        icon: ShieldCheck,
+        badge: "Support"
+      },
+      {
+        name: "Schedule Meeting",
+        href: "/dashboard/parent?tab=schedule_meeting#consultation",
+        icon: Calendar,
+        badge: "PTC"
+      },
+      {
+        name: "Adviser Messages",
+        href: "/dashboard/parent?tab=messages#direct-chat",
+        icon: MessageSquare,
+        badge: "Direct"
       }
     ],
     admin: [
       {
-        name: "AHP Criteria Matrix",
-        href: "/dashboard/admin#ahp-matrix",
+        name: "System Command Center",
+        href: "/dashboard/admin?tab=dashboard#admin-overview",
+        icon: Users,
+        badge: "Overview"
+      },
+      {
+        name: "AHP Risk Configuration",
+        href: "/dashboard/admin?tab=risk_config#weights-config",
         icon: Sliders,
         badge: "Weights"
       },
       {
         name: "Campus User Accounts",
-        href: "/dashboard/admin#campus-users",
+        href: "/dashboard/admin?tab=teachers#campus-users",
         icon: Users,
         badge: "Directory"
       },
       {
-        name: "Cohort Analytics",
-        href: "/dashboard/admin#trend-analytics",
-        icon: TrendingUp,
-        badge: "Trends"
+        name: "Quarter Management",
+        href: "/dashboard/admin?tab=quarter_management#calendar",
+        icon: Calendar,
+        badge: "Calendar"
+      },
+      {
+        name: "Master Ingestion Hub",
+        href: "/dashboard/admin?tab=import_wizard#master-import",
+        icon: Layers,
+        badge: "Master"
       },
       {
         name: "RA 10173 Audit Logs",
-        href: "/dashboard/admin#audit-logs",
+        href: "/dashboard/admin?tab=import_history#audit-logs",
         icon: ShieldCheck,
         badge: "Compliance"
       }
@@ -210,11 +292,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleNavigation = (item: { href: string }) => {
     setIsOpen(false);
-    const [targetPath, hash] = item.href.split("#");
+    const [pathWithQuery, hash] = item.href.split("#");
+    const [targetPath, queryString] = pathWithQuery.split("?");
     const currentNorm = (pathname || "").replace(/\/$/, "");
     const targetNorm = (targetPath || "").replace(/\/$/, "");
 
+    const urlParams = new URLSearchParams(queryString || "");
+    const requestedTab = urlParams.get("tab");
+
     if (currentNorm === targetNorm) {
+      if (requestedTab) {
+        window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab: requestedTab, hash } }));
+        const newUrl = `${targetPath}?tab=${requestedTab}${hash ? `#${hash}` : ""}`;
+        window.history.pushState({}, "", newUrl);
+      }
       if (hash) {
         if (hash === "referral-action") {
           window.dispatchEvent(new CustomEvent("sapc:open-teacher-referral"));
@@ -222,13 +313,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
           return;
         }
-        const el = document.getElementById(hash);
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-          el.classList.add("ring-4", "ring-amber-400/50");
-          setTimeout(() => el.classList.remove("ring-4", "ring-amber-400/50"), 2000);
-          return;
-        }
+        setTimeout(() => {
+          const el = document.getElementById(hash);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+            el.classList.add("ring-4", "ring-amber-400/50");
+            setTimeout(() => el.classList.remove("ring-4", "ring-amber-400/50"), 2000);
+          }
+        }, 60);
+        return;
       } else {
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;

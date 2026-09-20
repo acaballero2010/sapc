@@ -11,11 +11,11 @@ class DomainScoreBreakdown(BaseModel):
     health: float
 
 class DomainWeightBreakdown(BaseModel):
-    academic: float = 0.4017
-    mental_health: float = 0.2442
-    financial: float = 0.1373
-    family: float = 0.1373
-    health: float = 0.0794
+    academic: float = 0.30
+    family: float = 0.20
+    health: float = 0.20
+    mental_health: float = 0.15
+    financial: float = 0.15
 
 class RiskScoreOut(BaseModel):
     id: int

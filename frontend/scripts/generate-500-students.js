@@ -139,13 +139,88 @@ for (let i = 1; i <= 500; i++) {
   if (compositeScore >= 65.0) riskTier = "high";
   else if (compositeScore >= 40.0) riskTier = "medium";
 
-  // Derive realistic SASS quarterly metrics
+  // Derive realistic SASS quarterly metrics & Engagement factors
   // High academic risk -> GPA 68-74, failing 1-3, absences 5-14
   // Low academic risk -> GPA 85-96, failing 0, absences 0-2
   const gpa = parseFloat((100 - (academicScore * 0.35) - randomRange(0, 5)).toFixed(1));
   const failingCount = compositeScore >= 70 ? Math.floor(randomRange(1, 4, 0)) : (compositeScore >= 50 && pseudoRandom() > 0.6 ? 1 : 0);
   const absences = compositeScore >= 70 ? Math.floor(randomRange(6, 15, 0)) : Math.floor(randomRange(0, 5, 0));
   const incompleteReqs = compositeScore >= 60 ? Math.floor(randomRange(1, 3, 0)) : 0;
+  const attendanceRate = Math.max(60.0, parseFloat((100 - (absences * 2.2)).toFixed(1)));
+
+  // Engagement Factors (Clubs, Hobbies, Extracurriculars) - Protective factor against dropout
+  const highEngagementClubs = [
+    "Supreme Secondary Learner Government (SSLG)",
+    "Math & Science Guild",
+    "Robotics & Coding Society",
+    "Campus Journalism (The Padua Clarion)",
+    "Varsity Athletics (Basketball/Volleyball)",
+    "Glee Club & Chorale",
+    "Red Cross Youth (RCY)"
+  ];
+  const moderateEngagementClubs = [
+    "Young Entrepreneurs & ABM Club",
+    "Teatro San Antonio (Drama Guild)",
+    "Peer Facilitators Wellness Circle",
+    "Badminton & Table Tennis Club",
+    "TVL Skills & Hospitality Society",
+    "Boy Scouts / Girl Scouts"
+  ];
+  const activeHobbies = [
+    "Robotics & Web Development",
+    "Debate & Public Speaking",
+    "Digital Art & Graphic Design",
+    "Acoustic Band & Guitar",
+    "Competitive Basketball",
+    "Campus Journalism & Creative Writing",
+    "Community Outreach Volunteering"
+  ];
+  const moderateHobbies = [
+    "Reading Novels & Webtoons",
+    "Photography & Video Editing",
+    "Cooking & Baking",
+    "Badminton & Cycling",
+    "Mobile App Experimentation"
+  ];
+  const lowEngagementHobbies = [
+    "Passive Screen Time / Social Media",
+    "Casual Mobile Gaming",
+    "Unstructured Rest / Inactive",
+    "None / Disengaged"
+  ];
+
+  let club = "None / Non-Member";
+  let participationLevel = "None";
+  let hobbies = "None / Disengaged";
+
+  if (compositeScore < 40) {
+    // Low Risk: 90% in high/moderate clubs, high activity
+    club = pseudoRandom() > 0.3 ? randomChoice(highEngagementClubs) : randomChoice(moderateEngagementClubs);
+    participationLevel = pseudoRandom() > 0.25 ? "High" : "Moderate";
+    hobbies = pseudoRandom() > 0.2 ? randomChoice(activeHobbies) : randomChoice(moderateHobbies);
+  } else if (compositeScore < 65) {
+    // Medium Risk: 60% in clubs
+    if (pseudoRandom() > 0.4) {
+      club = randomChoice(moderateEngagementClubs);
+      participationLevel = pseudoRandom() > 0.5 ? "Moderate" : "Low";
+      hobbies = randomChoice(moderateHobbies);
+    } else {
+      club = "None / Non-Member";
+      participationLevel = "None";
+      hobbies = randomChoice(lowEngagementHobbies);
+    }
+  } else {
+    // High Risk: Disengaged, 80% non-members
+    if (pseudoRandom() > 0.8) {
+      club = "Peer Facilitators Wellness Circle";
+      participationLevel = "Low";
+      hobbies = randomChoice(moderateHobbies);
+    } else {
+      club = "None / Non-Member";
+      participationLevel = "None";
+      hobbies = randomChoice(lowEngagementHobbies);
+    }
+  }
 
   students.push({
     id: i,
@@ -172,7 +247,11 @@ for (let i = 1; i <= 500; i++) {
       gpa,
       failing_subjects_count: failingCount,
       days_absent: absences,
-      incomplete_requirements_count: incompleteReqs
+      attendance_rate_pct: attendanceRate,
+      incomplete_requirements_count: incompleteReqs,
+      extracurricular_club: club,
+      club_participation_level: participationLevel,
+      hobbies_interests: hobbies
     }
   });
 }
@@ -204,7 +283,11 @@ export interface StudentRecord {
     gpa: number;
     failing_subjects_count: number;
     days_absent: number;
+    attendance_rate_pct: number;
     incomplete_requirements_count: number;
+    extracurricular_club: string;
+    club_participation_level: "High" | "Moderate" | "Low" | "None";
+    hobbies_interests: string;
   };
 }
 
@@ -220,19 +303,23 @@ export const SAPC_COHORT_SUMMARY = {
 `;
 
 // 2. Output SASS CSV File for Ingestion
-let csvContent = "student_id,student_name,grade_level,section,quarter_gpa,failing_subjects_count,days_absent,incomplete_requirements_count\n";
+let csvContent = "lrn,student_name,grade_level,section,quarter_gpa,failing_subjects_count,days_absent,attendance_rate_pct,incomplete_requirements_count,extracurricular_club,club_participation_level,hobbies_interests\n";
 students.forEach(s => {
-  csvContent += `${s.lrn},"${s.full_name}",Grade ${s.grade_level},"${s.section_name}",${s.sass_metrics.gpa},${s.sass_metrics.failing_subjects_count},${s.sass_metrics.days_absent},${s.sass_metrics.incomplete_requirements_count}\n`;
+  csvContent += `${s.lrn},"${s.full_name}",Grade ${s.grade_level},"${s.section_name}",${s.sass_metrics.gpa},${s.sass_metrics.failing_subjects_count},${s.sass_metrics.days_absent},${s.sass_metrics.attendance_rate_pct},${s.sass_metrics.incomplete_requirements_count},"${s.sass_metrics.extracurricular_club}","${s.sass_metrics.club_participation_level}","${s.sass_metrics.hobbies_interests}"\n`;
 });
 
 // Ensure directories exist
 fs.mkdirSync(path.join(__dirname, '../src/data'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, '../public/samples'), { recursive: true });
+fs.mkdirSync(path.join(__dirname, '../../public/samples'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, '../../backend/samples'), { recursive: true });
 
 // Write files
 fs.writeFileSync(path.join(__dirname, '../src/data/students500.ts'), tsContent, 'utf-8');
 fs.writeFileSync(path.join(__dirname, '../public/samples/sapc_500_students_sass_cohort.csv'), csvContent, 'utf-8');
+fs.writeFileSync(path.join(__dirname, '../public/samples/sapc_500_academic_sass.csv'), csvContent, 'utf-8');
+fs.writeFileSync(path.join(__dirname, '../../public/samples/sapc_500_students_sass_cohort.csv'), csvContent, 'utf-8');
+fs.writeFileSync(path.join(__dirname, '../../public/samples/sapc_500_academic_sass.csv'), csvContent, 'utf-8');
 fs.writeFileSync(path.join(__dirname, '../../backend/samples/sample_500_students_5domains.csv'), csvContent, 'utf-8');
 fs.writeFileSync(path.join(__dirname, '../../backend/samples/sample_500_students_complete.json'), JSON.stringify(students, null, 2), 'utf-8');
 

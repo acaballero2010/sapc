@@ -1,501 +1,501 @@
-student_id,student_name,grade_level,section,quarter_gpa,failing_subjects_count,days_absent,incomplete_requirements_count
-109238475001,"Jerome Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",67.5,2,7,2
-109238475002,"Alyssa Castro",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",74.8,1,4,0
-109238475003,"Shaina Soriano",Grade 11,"Grade 11 - St. Clare (ABM)",78.8,0,1,0
-109238475004,"Hannah Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.5,0,2,0
-109238475005,"Danielle Torres",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",92.1,0,4,0
-109238475006,"Vincent Ocampo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",80,0,3,0
-109238475007,"Chloe San Jose",Grade 12,"Grade 12 - St. Jude (ABM)",74.3,0,1,3
-109238475008,"Lucas Valdez",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75.7,0,3,0
-109238475009,"Miguel Rivera",Grade 10,"Grade 10 - St. Francis",86.9,0,4,0
-109238475010,"Danielle Garcia",Grade 9,"Grade 9 - St. Benedict",78.9,0,1,0
-109238475011,"Danielle Corpuz",Grade 8,"Grade 8 - St. Dominic",87.6,0,2,0
-109238475012,"Althea Ocampo",Grade 7,"Grade 7 - St. Ignatius",94.8,0,3,0
-109238475013,"Princess Mae Soriano",Grade 11,"Grade 11 - St. Augustine (STEM)",84.9,0,1,0
-109238475014,"Erika San Jose",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.6,0,3,0
-109238475015,"Camille Padilla",Grade 11,"Grade 11 - St. Clare (ABM)",90.6,0,1,0
-109238475016,"Angelo Ramos",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",77.7,0,2,0
-109238475017,"Aaron Corpuz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88.6,0,1,0
-109238475018,"Trisha Bautista",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",90.5,0,1,0
-109238475019,"Mariel Rivera",Grade 12,"Grade 12 - St. Jude (ABM)",91.5,0,1,0
-109238475020,"Nicole Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.6,0,5,0
-109238475021,"Miguel Mendoza",Grade 10,"Grade 10 - St. Francis",75.1,0,2,0
-109238475022,"Gabriel Bautista",Grade 9,"Grade 9 - St. Benedict",93.2,0,5,0
-109238475023,"Jasmine De Leon",Grade 8,"Grade 8 - St. Dominic",80.5,0,3,0
-109238475024,"Gabriel Padilla",Grade 7,"Grade 7 - St. Ignatius",81.8,0,5,0
-109238475025,"Sofia Reyes",Grade 11,"Grade 11 - St. Augustine (STEM)",70.3,0,3,0
-109238475026,"Danielle Reyes",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",86.3,0,5,0
-109238475027,"Bea Patricia Flores",Grade 11,"Grade 11 - St. Clare (ABM)",89.3,0,5,0
-109238475028,"Kathleen Ocampo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",78.3,0,1,0
-109238475029,"Shaina Navarro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",67.7,0,3,3
-109238475030,"Erika Mercado",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.6,0,0,0
-109238475031,"Rochelle Castillo",Grade 12,"Grade 12 - St. Jude (ABM)",79.4,0,5,0
-109238475032,"Mark Kenneth San Jose",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.9,0,2,0
-109238475033,"Hannah Dela Cruz",Grade 10,"Grade 10 - St. Francis",93.5,0,1,0
-109238475034,"Althea Villanueva",Grade 9,"Grade 9 - St. Benedict",74.6,0,4,2
-109238475035,"Francis Valdez",Grade 8,"Grade 8 - St. Dominic",88.5,0,3,0
-109238475036,"Christian Dave Dizon",Grade 7,"Grade 7 - St. Ignatius",91.3,0,4,0
-109238475037,"Shaina Torres",Grade 11,"Grade 11 - St. Augustine (STEM)",94.6,0,5,0
-109238475038,"Hannah Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.7,0,4,0
-109238475039,"Erika Corpuz",Grade 11,"Grade 11 - St. Clare (ABM)",70.7,1,4,1
-109238475040,"Kathleen Castillo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93.6,0,3,0
-109238475041,"Kyle Bautista",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.6,0,3,0
-109238475042,"Erika Mendoza",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",75.1,0,4,1
-109238475043,"Bea Patricia Mercado",Grade 12,"Grade 12 - St. Jude (ABM)",88,0,4,0
-109238475044,"Alyssa Domingo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",73.7,0,2,0
-109238475045,"Kristine Tan",Grade 10,"Grade 10 - St. Francis",90,0,1,0
-109238475046,"Kyle Dela Cruz",Grade 9,"Grade 9 - St. Benedict",88.4,0,0,0
-109238475047,"Patricia Santos",Grade 8,"Grade 8 - St. Dominic",93.1,0,3,0
-109238475048,"Althea Rivera",Grade 7,"Grade 7 - St. Ignatius",92.4,0,2,0
-109238475049,"Jerome Villanueva",Grade 11,"Grade 11 - St. Augustine (STEM)",76.4,0,1,0
-109238475050,"Mariel Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",76.4,0,2,0
-109238475051,"Daniel Valdez",Grade 11,"Grade 11 - St. Clare (ABM)",93.5,0,4,0
-109238475052,"Adrian Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",88.6,0,4,0
-109238475053,"Angelica Corpuz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",92.8,0,0,0
-109238475054,"Kyle Corpuz",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",93.7,0,4,0
-109238475055,"Vincent Dela Cruz",Grade 12,"Grade 12 - St. Jude (ABM)",88.3,0,1,0
-109238475056,"Denise Alcantara",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",80.8,0,4,0
-109238475057,"Chloe Bautista",Grade 10,"Grade 10 - St. Francis",91.1,0,2,0
-109238475058,"Christian Dave Bautista",Grade 9,"Grade 9 - St. Benedict",83.1,0,3,0
-109238475059,"Samantha Nicole Valdez",Grade 8,"Grade 8 - St. Dominic",89.2,0,4,0
-109238475060,"Ralph Valdez",Grade 7,"Grade 7 - St. Ignatius",92,0,1,0
-109238475061,"Alyssa Padilla",Grade 11,"Grade 11 - St. Augustine (STEM)",87.3,0,4,0
-109238475062,"Ethan Valdez",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.6,0,0,0
-109238475063,"Denise Pascual",Grade 11,"Grade 11 - St. Clare (ABM)",85.7,0,5,0
-109238475064,"Andrea Bautista",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",92.6,0,3,0
-109238475065,"Vincent Mendoza",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",89.7,0,4,0
-109238475066,"Andrea San Jose",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",95.6,0,3,0
-109238475067,"Ralph Santiago",Grade 12,"Grade 12 - St. Jude (ABM)",84.9,0,1,0
-109238475068,"Miguel Reyes",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",83.1,0,2,0
-109238475069,"Kyle Gonzales",Grade 10,"Grade 10 - St. Francis",76,0,3,0
-109238475070,"Bianca Domingo",Grade 9,"Grade 9 - St. Benedict",78.8,0,3,0
-109238475071,"Hannah Salazar",Grade 8,"Grade 8 - St. Dominic",78.3,1,3,0
-109238475072,"Francis Pascual",Grade 7,"Grade 7 - St. Ignatius",77.1,0,3,0
-109238475073,"Kyle Salazar",Grade 11,"Grade 11 - St. Augustine (STEM)",94.7,0,0,0
-109238475074,"Justin Domingo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",92.1,0,1,0
-109238475075,"Kathleen Manalo",Grade 11,"Grade 11 - St. Clare (ABM)",85.2,0,1,0
-109238475076,"Erika Corpuz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",84.7,0,2,0
-109238475077,"Samantha Nicole Dizon",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",92.5,0,3,0
-109238475078,"Jasmine Aquino",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",75.4,0,2,0
-109238475079,"Lance Valdez",Grade 12,"Grade 12 - St. Jude (ABM)",94.6,0,4,0
-109238475080,"Andrea Tolentino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",80.2,0,1,0
-109238475081,"Francis Castro",Grade 10,"Grade 10 - St. Francis",84.5,0,3,0
-109238475082,"Vanessa Santos",Grade 9,"Grade 9 - St. Benedict",87.3,0,3,0
-109238475083,"Kristine Salazar",Grade 8,"Grade 8 - St. Dominic",88.3,0,5,0
-109238475084,"Paolo Reyes",Grade 7,"Grade 7 - St. Ignatius",78.9,0,1,0
-109238475085,"Mariel Tolentino",Grade 11,"Grade 11 - St. Augustine (STEM)",87.6,0,1,0
-109238475086,"Althea Manalo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.6,0,1,0
-109238475087,"Cedric Corpuz",Grade 11,"Grade 11 - St. Clare (ABM)",90.5,0,3,0
-109238475088,"Samantha Nicole Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",92.7,0,3,0
-109238475089,"Francis Soriano",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",81.8,0,2,0
-109238475090,"Aaron San Jose",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",86.2,0,5,0
-109238475091,"Cedric Villanueva",Grade 12,"Grade 12 - St. Jude (ABM)",91.8,0,2,0
-109238475092,"Nicole Soriano",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",85.7,0,3,0
-109238475093,"John Carlo Salazar",Grade 10,"Grade 10 - St. Francis",89.8,0,3,0
-109238475094,"Jerome Tolentino",Grade 9,"Grade 9 - St. Benedict",80.5,0,1,0
-109238475095,"Sofia Tolentino",Grade 8,"Grade 8 - St. Dominic",76.8,0,3,0
-109238475096,"Dominic Mendoza",Grade 7,"Grade 7 - St. Ignatius",90,0,1,0
-109238475097,"Ethan Pascual",Grade 11,"Grade 11 - St. Augustine (STEM)",68.4,0,1,3
-109238475098,"Rochelle Dizon",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.6,0,3,0
-109238475099,"Adrian Rivera",Grade 11,"Grade 11 - St. Clare (ABM)",72.2,2,6,3
-109238475100,"Kyle Mercado",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",75.4,0,1,0
-109238475101,"Bianca Torres",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",79.1,0,1,0
-109238475102,"Samantha Nicole Rivera",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",88.5,0,3,0
-109238475103,"Cedric Alcantara",Grade 12,"Grade 12 - St. Jude (ABM)",74.9,0,1,0
-109238475104,"Vanessa Santos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.3,0,0,0
-109238475105,"Rochelle Ocampo",Grade 10,"Grade 10 - St. Francis",95.1,0,5,0
-109238475106,"Ethan Manalo",Grade 9,"Grade 9 - St. Benedict",73.4,0,4,0
-109238475107,"Althea Mercado",Grade 8,"Grade 8 - St. Dominic",88.3,0,4,0
-109238475108,"Ralph Dela Cruz",Grade 7,"Grade 7 - St. Ignatius",77.6,0,3,0
-109238475109,"Rafael Pascual",Grade 11,"Grade 11 - St. Augustine (STEM)",87.7,0,2,0
-109238475110,"Mark Kenneth Bautista",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",77.8,0,2,0
-109238475111,"Miguel Domingo",Grade 11,"Grade 11 - St. Clare (ABM)",95.1,0,2,0
-109238475112,"Alexander De Leon",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",83.9,0,0,0
-109238475113,"Erika Garcia",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91.4,0,0,0
-109238475114,"Denise Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",65.8,1,5,3
-109238475115,"Lance Lim",Grade 12,"Grade 12 - St. Jude (ABM)",74.6,1,1,0
-109238475116,"Kristine Bautista",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",67.5,2,12,2
-109238475117,"Adrian Padilla",Grade 10,"Grade 10 - St. Francis",91.8,0,4,0
-109238475118,"Camille Pascual",Grade 9,"Grade 9 - St. Benedict",68.5,3,8,1
-109238475119,"Camille Dizon",Grade 8,"Grade 8 - St. Dominic",71,1,7,3
-109238475120,"Justin Dizon",Grade 7,"Grade 7 - St. Ignatius",86,0,1,0
-109238475121,"Angelo Aquino",Grade 11,"Grade 11 - St. Augustine (STEM)",73.1,0,2,0
-109238475122,"Vincent Tan",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.6,0,0,0
-109238475123,"Joshua Soriano",Grade 11,"Grade 11 - St. Clare (ABM)",70.5,1,2,3
-109238475124,"Alyssa Valdez",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",77.8,0,3,0
-109238475125,"Samantha Nicole Rivera",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",90.5,0,0,0
-109238475126,"Camille Santos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",76.5,1,4,0
-109238475127,"Angelo Castro",Grade 12,"Grade 12 - St. Jude (ABM)",92.7,0,0,0
-109238475128,"Angelo Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",81.7,0,2,0
-109238475129,"Chloe Torres",Grade 10,"Grade 10 - St. Francis",74,0,3,0
-109238475130,"Chloe Flores",Grade 9,"Grade 9 - St. Benedict",83.9,0,5,0
-109238475131,"Gabriel Bautista",Grade 8,"Grade 8 - St. Dominic",88.7,0,2,0
-109238475132,"Shaina Salazar",Grade 7,"Grade 7 - St. Ignatius",83.7,0,0,0
-109238475133,"Kathleen Aquino",Grade 11,"Grade 11 - St. Augustine (STEM)",92.7,0,2,0
-109238475134,"Princess Mae Pascual",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",65.8,4,13,3
-109238475135,"Rochelle San Jose",Grade 11,"Grade 11 - St. Clare (ABM)",81.8,0,3,0
-109238475136,"Vanessa Valdez",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",70.7,2,11,2
-109238475137,"Nicole Navarro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",78.7,0,3,0
-109238475138,"Danielle Navarro",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",80.7,0,1,0
-109238475139,"Angelica Garcia",Grade 12,"Grade 12 - St. Jude (ABM)",86.7,0,5,0
-109238475140,"Kristine Lim",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",81.2,0,0,0
-109238475141,"Matthew Castro",Grade 10,"Grade 10 - St. Francis",80.4,1,1,0
-109238475142,"Kristine Castro",Grade 9,"Grade 9 - St. Benedict",87.6,0,1,0
-109238475143,"Patricia De Leon",Grade 8,"Grade 8 - St. Dominic",86.2,0,3,0
-109238475144,"Chloe Bautista",Grade 7,"Grade 7 - St. Ignatius",88.3,0,3,0
-109238475145,"Francis Ocampo",Grade 11,"Grade 11 - St. Augustine (STEM)",91.2,0,3,0
-109238475146,"Christian Dave Mendoza",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91.1,0,5,0
-109238475147,"Erika Santos",Grade 11,"Grade 11 - St. Clare (ABM)",90.4,0,2,0
-109238475148,"Lucas Pascual",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",95.9,0,2,0
-109238475149,"Paolo Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91.2,0,0,0
-109238475150,"Patricia Salazar",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",74.9,0,1,0
-109238475151,"Sofia Mendoza",Grade 12,"Grade 12 - St. Jude (ABM)",94.6,0,0,0
-109238475152,"Alyssa Aquino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.1,0,1,0
-109238475153,"Mark Kenneth Reyes",Grade 10,"Grade 10 - St. Francis",86.9,0,4,0
-109238475154,"Adrian Santos",Grade 9,"Grade 9 - St. Benedict",75.7,0,1,0
-109238475155,"Bianca Flores",Grade 8,"Grade 8 - St. Dominic",79.6,0,1,0
-109238475156,"Trisha Tan",Grade 7,"Grade 7 - St. Ignatius",93.5,0,2,0
-109238475157,"Lance Pascual",Grade 11,"Grade 11 - St. Augustine (STEM)",91.7,0,1,0
-109238475158,"Kyle Castillo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.7,0,1,0
-109238475159,"Paolo Gonzales",Grade 11,"Grade 11 - St. Clare (ABM)",90.3,0,1,0
-109238475160,"John Carlo Castillo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",92.2,0,4,0
-109238475161,"Camille De Leon",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88.2,0,3,0
-109238475162,"Trisha Valdez",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",90.7,0,1,0
-109238475163,"Adrian Lim",Grade 12,"Grade 12 - St. Jude (ABM)",76.3,0,5,0
-109238475164,"Matthew Navarro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75.4,0,0,0
-109238475165,"Kyle Tolentino",Grade 10,"Grade 10 - St. Francis",71.2,2,8,2
-109238475166,"Mark Kenneth Torres",Grade 9,"Grade 9 - St. Benedict",82.7,0,2,0
-109238475167,"Matthew Mercado",Grade 8,"Grade 8 - St. Dominic",92,0,3,0
-109238475168,"Kyle Dela Cruz",Grade 7,"Grade 7 - St. Ignatius",86.7,0,4,0
-109238475169,"Hannah Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",68.2,3,8,1
-109238475170,"Shaina Mercado",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",95.1,0,4,0
-109238475171,"Erika Alcantara",Grade 11,"Grade 11 - St. Clare (ABM)",78.3,0,1,0
-109238475172,"Gabriel Salazar",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",79.3,0,2,0
-109238475173,"Jerome Domingo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",69.9,1,0,2
-109238475174,"Cedric Reyes",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.4,0,2,0
-109238475175,"Sofia San Jose",Grade 12,"Grade 12 - St. Jude (ABM)",92.2,0,4,0
-109238475176,"Karl Dela Cruz",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.4,0,1,0
-109238475177,"Nathan Santos",Grade 10,"Grade 10 - St. Francis",70.1,1,8,3
-109238475178,"Vanessa Soriano",Grade 9,"Grade 9 - St. Benedict",90.3,0,1,0
-109238475179,"Vincent De Leon",Grade 8,"Grade 8 - St. Dominic",74.2,1,4,0
-109238475180,"Vincent Bautista",Grade 7,"Grade 7 - St. Ignatius",91.3,0,1,0
-109238475181,"Alyssa Soriano",Grade 11,"Grade 11 - St. Augustine (STEM)",88.7,0,3,0
-109238475182,"Angelo Dela Cruz",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",92.4,0,5,0
-109238475183,"Joshua Dizon",Grade 11,"Grade 11 - St. Clare (ABM)",76,0,5,0
-109238475184,"Chloe Villanueva",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",78.5,0,2,0
-109238475185,"Princess Mae San Jose",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",72.3,1,5,1
-109238475186,"Hannah Manalo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.1,0,4,0
-109238475187,"Alexander Reyes",Grade 12,"Grade 12 - St. Jude (ABM)",90.3,0,2,0
-109238475188,"Trisha Domingo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75.9,1,5,0
-109238475189,"Kristine San Jose",Grade 10,"Grade 10 - St. Francis",79.7,0,0,0
-109238475190,"Mariel Rivera",Grade 9,"Grade 9 - St. Benedict",93.2,0,2,0
-109238475191,"Lucas Corpuz",Grade 8,"Grade 8 - St. Dominic",70.2,1,4,2
-109238475192,"Jasmine Aquino",Grade 7,"Grade 7 - St. Ignatius",72.9,0,1,3
-109238475193,"Althea Salazar",Grade 11,"Grade 11 - St. Augustine (STEM)",65.8,2,14,1
-109238475194,"Camille Rivera",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",85.1,0,4,0
-109238475195,"Lance Corpuz",Grade 11,"Grade 11 - St. Clare (ABM)",68.9,1,12,1
-109238475196,"Adrian Tan",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",82.1,0,4,0
-109238475197,"Adrian Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.1,0,1,0
-109238475198,"Jerome Ocampo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",78,0,4,0
-109238475199,"Alyssa Mendoza",Grade 12,"Grade 12 - St. Jude (ABM)",87.1,0,4,0
-109238475200,"Mariel Gonzales",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",79,1,5,0
-109238475201,"Cedric Flores",Grade 10,"Grade 10 - St. Francis",86.2,0,1,0
-109238475202,"Samantha Nicole Salazar",Grade 9,"Grade 9 - St. Benedict",88.4,0,0,0
-109238475203,"Rafael Pascual",Grade 8,"Grade 8 - St. Dominic",91.1,0,5,0
-109238475204,"Rafael Lim",Grade 7,"Grade 7 - St. Ignatius",74.2,0,4,0
-109238475205,"Angelica Mendoza",Grade 11,"Grade 11 - St. Augustine (STEM)",74.6,0,5,0
-109238475206,"Trisha Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",85,0,3,0
-109238475207,"Kyle De Leon",Grade 11,"Grade 11 - St. Clare (ABM)",92.6,0,4,0
-109238475208,"Andrea Pascual",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",81.5,0,0,0
-109238475209,"Bea Patricia Ocampo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.4,0,2,0
-109238475210,"Joshua Garcia",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.3,0,1,0
-109238475211,"Angelica Garcia",Grade 12,"Grade 12 - St. Jude (ABM)",81.7,0,0,0
-109238475212,"Trisha Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93,0,2,0
-109238475213,"Patricia Reyes",Grade 10,"Grade 10 - St. Francis",73.6,1,3,0
-109238475214,"Trisha De Leon",Grade 9,"Grade 9 - St. Benedict",89.4,0,5,0
-109238475215,"Matthew Salazar",Grade 8,"Grade 8 - St. Dominic",85.6,0,2,0
-109238475216,"Cedric Dela Cruz",Grade 7,"Grade 7 - St. Ignatius",74.2,0,2,1
-109238475217,"Vanessa Garcia",Grade 11,"Grade 11 - St. Augustine (STEM)",81.6,1,1,0
-109238475218,"Rochelle Rivera",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",85,0,4,0
-109238475219,"Kyle Santiago",Grade 11,"Grade 11 - St. Clare (ABM)",85.9,0,3,0
-109238475220,"Camille San Jose",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93.2,0,4,0
-109238475221,"Cedric Mendoza",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.5,0,1,0
-109238475222,"Vanessa Reyes",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",76.5,0,3,0
-109238475223,"Aaron Soriano",Grade 12,"Grade 12 - St. Jude (ABM)",79.9,0,2,0
-109238475224,"Sofia Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75,0,4,0
-109238475225,"Adrian Soriano",Grade 10,"Grade 10 - St. Francis",91.5,0,3,0
-109238475226,"Ethan Dizon",Grade 9,"Grade 9 - St. Benedict",91.4,0,0,0
-109238475227,"Ethan Manalo",Grade 8,"Grade 8 - St. Dominic",89.2,0,2,0
-109238475228,"Althea Rivera",Grade 7,"Grade 7 - St. Ignatius",76.1,1,2,0
-109238475229,"Daniel Navarro",Grade 11,"Grade 11 - St. Augustine (STEM)",81.6,0,4,0
-109238475230,"Kristine Lim",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",67.3,2,13,2
-109238475231,"Hannah Padilla",Grade 11,"Grade 11 - St. Clare (ABM)",76.6,0,3,0
-109238475232,"Matthew Santos",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",91.2,0,3,0
-109238475233,"Paolo Navarro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.1,0,4,0
-109238475234,"Cedric Salazar",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",79,0,2,0
-109238475235,"Karl Ocampo",Grade 12,"Grade 12 - St. Jude (ABM)",79.1,0,5,0
-109238475236,"Samantha Nicole Alcantara",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",83.6,0,3,0
-109238475237,"Sofia Manalo",Grade 10,"Grade 10 - St. Francis",84.4,0,4,0
-109238475238,"Lance Dela Cruz",Grade 9,"Grade 9 - St. Benedict",79.5,0,3,0
-109238475239,"Ethan Reyes",Grade 8,"Grade 8 - St. Dominic",84.2,0,4,0
-109238475240,"Erika Castillo",Grade 7,"Grade 7 - St. Ignatius",89.4,0,1,0
-109238475241,"Kristine Ocampo",Grade 11,"Grade 11 - St. Augustine (STEM)",82.5,0,5,0
-109238475242,"Erika Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",71.7,4,9,1
-109238475243,"Patricia Manalo",Grade 11,"Grade 11 - St. Clare (ABM)",86.2,0,3,0
-109238475244,"Rochelle Aquino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",82.7,0,1,0
-109238475245,"Lucas Padilla",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",89.4,0,5,0
-109238475246,"Alyssa Aquino",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",88.8,0,5,0
-109238475247,"Nicole Mendoza",Grade 12,"Grade 12 - St. Jude (ABM)",86,0,2,0
-109238475248,"Angelica Santiago",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",92.9,0,2,0
-109238475249,"Erika Villanueva",Grade 10,"Grade 10 - St. Francis",79.7,0,0,0
-109238475250,"Hannah Reyes",Grade 9,"Grade 9 - St. Benedict",76.9,0,2,0
-109238475251,"Justin Villanueva",Grade 8,"Grade 8 - St. Dominic",93.3,0,1,0
-109238475252,"Patricia Tan",Grade 7,"Grade 7 - St. Ignatius",90.1,0,3,0
-109238475253,"Camille De Leon",Grade 11,"Grade 11 - St. Augustine (STEM)",87.7,0,1,0
-109238475254,"Princess Mae Lim",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",89.9,0,0,0
-109238475255,"Bea Patricia Aquino",Grade 11,"Grade 11 - St. Clare (ABM)",91.5,0,3,0
-109238475256,"Matthew Garcia",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",89.3,0,2,0
-109238475257,"Ethan Soriano",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",66.8,2,12,2
-109238475258,"Mariel Navarro",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",92.3,0,2,0
-109238475259,"Lance Flores",Grade 12,"Grade 12 - St. Jude (ABM)",89.3,0,5,0
-109238475260,"Sofia Lim",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93.7,0,1,0
-109238475261,"Danielle Villanueva",Grade 10,"Grade 10 - St. Francis",84.8,0,1,0
-109238475262,"Kathleen Bautista",Grade 9,"Grade 9 - St. Benedict",78.9,0,4,0
-109238475263,"Paolo Villanueva",Grade 8,"Grade 8 - St. Dominic",94.4,0,5,0
-109238475264,"Kristine Tan",Grade 7,"Grade 7 - St. Ignatius",87.2,0,2,0
-109238475265,"Nicole Domingo",Grade 11,"Grade 11 - St. Augustine (STEM)",68.3,0,3,2
-109238475266,"Vanessa Santos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.1,0,0,0
-109238475267,"Sean Dela Cruz",Grade 11,"Grade 11 - St. Clare (ABM)",88.5,0,1,0
-109238475268,"Kristine Mendoza",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",73.3,0,4,0
-109238475269,"Vincent Corpuz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.1,0,3,0
-109238475270,"Nicole Flores",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",85.4,0,4,0
-109238475271,"Matthew Soriano",Grade 12,"Grade 12 - St. Jude (ABM)",93.8,0,3,0
-109238475272,"Miguel Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",66.1,2,12,1
-109238475273,"Rochelle Flores",Grade 10,"Grade 10 - St. Francis",86.4,0,3,0
-109238475274,"Angelica Tan",Grade 9,"Grade 9 - St. Benedict",91.8,0,5,0
-109238475275,"Nathan Castillo",Grade 8,"Grade 8 - St. Dominic",85.6,0,0,0
-109238475276,"Miguel Valdez",Grade 7,"Grade 7 - St. Ignatius",68.8,2,12,2
-109238475277,"Mark Kenneth Navarro",Grade 11,"Grade 11 - St. Augustine (STEM)",80.2,0,4,0
-109238475278,"Bianca Padilla",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",67.7,3,10,2
-109238475279,"Sean Torres",Grade 11,"Grade 11 - St. Clare (ABM)",89.3,0,2,0
-109238475280,"Vanessa Navarro",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.3,0,2,0
-109238475281,"Kyle San Jose",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91,0,0,0
-109238475282,"Rochelle Padilla",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",78.5,0,4,0
-109238475283,"Samantha Nicole Tan",Grade 12,"Grade 12 - St. Jude (ABM)",80,0,4,0
-109238475284,"Princess Mae Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",83.4,0,0,0
-109238475285,"Samantha Nicole Ocampo",Grade 10,"Grade 10 - St. Francis",85.4,0,4,0
-109238475286,"Princess Mae Navarro",Grade 9,"Grade 9 - St. Benedict",83.9,0,1,0
-109238475287,"Adrian Corpuz",Grade 8,"Grade 8 - St. Dominic",93.4,0,1,0
-109238475288,"Denise Bautista",Grade 7,"Grade 7 - St. Ignatius",77.6,0,5,0
-109238475289,"Kathleen Salazar",Grade 11,"Grade 11 - St. Augustine (STEM)",89.3,0,3,0
-109238475290,"Jasmine Bautista",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",74.6,0,0,1
-109238475291,"Rafael Dizon",Grade 11,"Grade 11 - St. Clare (ABM)",72.8,0,1,2
-109238475292,"Jerome Garcia",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",85.8,0,4,0
-109238475293,"Hannah Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",65.1,3,9,2
-109238475294,"Cedric Navarro",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",76.6,0,3,0
-109238475295,"Rochelle San Jose",Grade 12,"Grade 12 - St. Jude (ABM)",96.5,0,4,0
-109238475296,"Lucas De Leon",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",87.5,0,5,0
-109238475297,"Kristine Padilla",Grade 10,"Grade 10 - St. Francis",79,0,0,0
-109238475298,"Hannah Domingo",Grade 9,"Grade 9 - St. Benedict",68.5,2,11,2
-109238475299,"Gabriel Flores",Grade 8,"Grade 8 - St. Dominic",89.2,0,1,0
-109238475300,"Jasmine Pascual",Grade 7,"Grade 7 - St. Ignatius",87.1,0,2,0
-109238475301,"Nicole Torres",Grade 11,"Grade 11 - St. Augustine (STEM)",92.3,0,0,0
-109238475302,"Mariel Corpuz",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",75.3,0,5,0
-109238475303,"Joshua Pascual",Grade 11,"Grade 11 - St. Clare (ABM)",73.5,4,6,2
-109238475304,"Shaina Padilla",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",84.9,0,2,0
-109238475305,"Paolo Dizon",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",84.1,0,1,0
-109238475306,"Althea Lim",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",78.5,0,3,0
-109238475307,"Kristine Mendoza",Grade 12,"Grade 12 - St. Jude (ABM)",87.9,0,4,0
-109238475308,"Erika Ocampo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.9,0,3,0
-109238475309,"Vanessa Aquino",Grade 10,"Grade 10 - St. Francis",90.7,0,2,0
-109238475310,"Joshua Dizon",Grade 9,"Grade 9 - St. Benedict",76.5,0,0,0
-109238475311,"Daniel Tolentino",Grade 8,"Grade 8 - St. Dominic",78.9,0,1,0
-109238475312,"Paolo Ocampo",Grade 7,"Grade 7 - St. Ignatius",81.9,0,3,0
-109238475313,"Bea Patricia Salazar",Grade 11,"Grade 11 - St. Augustine (STEM)",83.6,0,5,0
-109238475314,"Ethan Castillo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",70.4,4,14,2
-109238475315,"Alyssa Alcantara",Grade 11,"Grade 11 - St. Clare (ABM)",88.9,0,1,0
-109238475316,"Nicole Mendoza",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",88.5,0,4,0
-109238475317,"Althea Bautista",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88.8,0,3,0
-109238475318,"Kyle Lim",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.8,0,0,0
-109238475319,"Daniel Navarro",Grade 12,"Grade 12 - St. Jude (ABM)",84.5,0,1,0
-109238475320,"Dominic Villanueva",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",94.8,0,0,0
-109238475321,"Ralph Rivera",Grade 10,"Grade 10 - St. Francis",88.7,0,5,0
-109238475322,"Karl Ocampo",Grade 9,"Grade 9 - St. Benedict",90.6,0,2,0
-109238475323,"Justin Flores",Grade 8,"Grade 8 - St. Dominic",95,0,0,0
-109238475324,"Cedric Villanueva",Grade 7,"Grade 7 - St. Ignatius",83.8,0,4,0
-109238475325,"Kathleen Tan",Grade 11,"Grade 11 - St. Augustine (STEM)",72.9,1,0,1
-109238475326,"Nicole Flores",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",76.3,1,5,0
-109238475327,"Kristine Santos",Grade 11,"Grade 11 - St. Clare (ABM)",73,3,9,3
-109238475328,"Althea Pascual",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",91.9,0,4,0
-109238475329,"Hannah Manalo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87,0,0,0
-109238475330,"Gabriel Torres",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",93.2,0,4,0
-109238475331,"Alyssa Santos",Grade 12,"Grade 12 - St. Jude (ABM)",88.4,0,1,0
-109238475332,"Daniel Castro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",81.1,0,3,0
-109238475333,"Sean Villanueva",Grade 10,"Grade 10 - St. Francis",73.4,0,1,0
-109238475334,"Lance Gonzales",Grade 9,"Grade 9 - St. Benedict",91.6,0,2,0
-109238475335,"Angelica San Jose",Grade 8,"Grade 8 - St. Dominic",79.8,0,3,0
-109238475336,"Princess Mae Rivera",Grade 7,"Grade 7 - St. Ignatius",88.5,0,1,0
-109238475337,"Patricia Flores",Grade 11,"Grade 11 - St. Augustine (STEM)",92.9,0,3,0
-109238475338,"Adrian Torres",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.2,0,1,0
-109238475339,"Paolo De Leon",Grade 11,"Grade 11 - St. Clare (ABM)",89.4,0,2,0
-109238475340,"John Carlo Padilla",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.2,0,2,0
-109238475341,"Shaina Flores",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",66.6,3,14,1
-109238475342,"Aaron De Leon",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.4,0,2,0
-109238475343,"Rafael Domingo",Grade 12,"Grade 12 - St. Jude (ABM)",75.4,0,3,0
-109238475344,"Danielle Dela Cruz",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93.6,0,5,0
-109238475345,"Vincent San Jose",Grade 10,"Grade 10 - St. Francis",75,0,5,0
-109238475346,"Justin Aquino",Grade 9,"Grade 9 - St. Benedict",76.1,0,5,0
-109238475347,"Karl Reyes",Grade 8,"Grade 8 - St. Dominic",88.6,0,1,0
-109238475348,"Jerome De Leon",Grade 7,"Grade 7 - St. Ignatius",93.4,0,3,0
-109238475349,"Bea Patricia Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",90.3,0,4,0
-109238475350,"Paolo Aquino",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",84.2,0,0,0
-109238475351,"Danielle Tolentino",Grade 11,"Grade 11 - St. Clare (ABM)",69.1,1,3,3
-109238475352,"Althea Reyes",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",91.7,0,2,0
-109238475353,"Princess Mae De Leon",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",89.1,0,0,0
-109238475354,"Sean Rivera",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",83.5,1,4,0
-109238475355,"Danielle De Leon",Grade 12,"Grade 12 - St. Jude (ABM)",83.1,0,1,0
-109238475356,"Nicole Castro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",92.4,0,1,0
-109238475357,"Christian Dave Tolentino",Grade 10,"Grade 10 - St. Francis",67.3,4,11,3
-109238475358,"Nicole Villanueva",Grade 9,"Grade 9 - St. Benedict",77.7,1,4,0
-109238475359,"Denise Valdez",Grade 8,"Grade 8 - St. Dominic",91.9,0,1,0
-109238475360,"Althea Santiago",Grade 7,"Grade 7 - St. Ignatius",88.6,0,2,0
-109238475361,"Bea Patricia Castillo",Grade 11,"Grade 11 - St. Augustine (STEM)",79.4,0,4,0
-109238475362,"Sean Tolentino",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",78.4,0,4,0
-109238475363,"Ethan San Jose",Grade 11,"Grade 11 - St. Clare (ABM)",86.2,0,3,0
-109238475364,"Matthew Domingo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",87.4,0,3,0
-109238475365,"Mariel Castillo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",79,0,1,0
-109238475366,"Lucas Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89,0,1,0
-109238475367,"Patricia Tan",Grade 12,"Grade 12 - St. Jude (ABM)",85.7,0,5,0
-109238475368,"Samantha Nicole Aquino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.4,0,1,0
-109238475369,"Mark Kenneth Bautista",Grade 10,"Grade 10 - St. Francis",87.4,0,4,0
-109238475370,"Lance Soriano",Grade 9,"Grade 9 - St. Benedict",70.1,3,7,3
-109238475371,"Alyssa Soriano",Grade 8,"Grade 8 - St. Dominic",68.6,0,2,1
-109238475372,"Angelo Gonzales",Grade 7,"Grade 7 - St. Ignatius",91.8,0,2,0
-109238475373,"Vincent Navarro",Grade 11,"Grade 11 - St. Augustine (STEM)",81.2,0,4,0
-109238475374,"Vanessa Gonzales",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",79.3,0,3,0
-109238475375,"Shaina Ocampo",Grade 11,"Grade 11 - St. Clare (ABM)",84.8,0,2,0
-109238475376,"Kristine Ocampo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",87.2,0,1,0
-109238475377,"Karl Torres",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",89,0,3,0
-109238475378,"Kristine Santiago",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",74.6,0,0,0
-109238475379,"Erika Castro",Grade 12,"Grade 12 - St. Jude (ABM)",87.7,0,1,0
-109238475380,"Ralph Castro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",78.8,0,5,0
-109238475381,"Kristine Domingo",Grade 10,"Grade 10 - St. Francis",88.6,0,4,0
-109238475382,"Erika Gonzales",Grade 9,"Grade 9 - St. Benedict",91.3,0,2,0
-109238475383,"Vanessa Mendoza",Grade 8,"Grade 8 - St. Dominic",78.1,1,2,0
-109238475384,"Bea Patricia Santos",Grade 7,"Grade 7 - St. Ignatius",89.5,0,3,0
-109238475385,"Danielle San Jose",Grade 11,"Grade 11 - St. Augustine (STEM)",69,3,8,1
-109238475386,"Aaron Mendoza",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91.1,0,4,0
-109238475387,"Samantha Nicole Tan",Grade 11,"Grade 11 - St. Clare (ABM)",66.3,2,9,2
-109238475388,"Paolo Tan",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",75.7,0,3,0
-109238475389,"Francis Reyes",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",89.7,0,0,0
-109238475390,"Ethan Lim",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",78.3,1,0,0
-109238475391,"Sean Alcantara",Grade 12,"Grade 12 - St. Jude (ABM)",81.3,0,3,0
-109238475392,"Nicole Tan",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",73.1,0,1,2
-109238475393,"Vincent Alcantara",Grade 10,"Grade 10 - St. Francis",88.4,0,4,0
-109238475394,"Kathleen Rivera",Grade 9,"Grade 9 - St. Benedict",76.5,0,3,0
-109238475395,"John Carlo Bautista",Grade 8,"Grade 8 - St. Dominic",78.2,0,4,0
-109238475396,"Matthew Padilla",Grade 7,"Grade 7 - St. Ignatius",74.2,0,2,2
-109238475397,"Angelica Torres",Grade 11,"Grade 11 - St. Augustine (STEM)",94.1,0,4,0
-109238475398,"Karl Lim",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",80.8,0,1,0
-109238475399,"Shaina Valdez",Grade 11,"Grade 11 - St. Clare (ABM)",88.2,0,3,0
-109238475400,"Trisha Alcantara",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",74,1,13,2
-109238475401,"Alexander Manalo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88.6,0,3,0
-109238475402,"Mariel Santiago",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",90.6,0,4,0
-109238475403,"John Carlo Dizon",Grade 12,"Grade 12 - St. Jude (ABM)",92.5,0,4,0
-109238475404,"Andrea Salazar",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75.6,0,4,0
-109238475405,"Bianca Manalo",Grade 10,"Grade 10 - St. Francis",93.8,0,1,0
-109238475406,"Samantha Nicole Soriano",Grade 9,"Grade 9 - St. Benedict",75.5,0,4,1
-109238475407,"Rochelle Bautista",Grade 8,"Grade 8 - St. Dominic",87,0,1,0
-109238475408,"Joshua Rivera",Grade 7,"Grade 7 - St. Ignatius",88,0,2,0
-109238475409,"Angelo Navarro",Grade 11,"Grade 11 - St. Augustine (STEM)",89.9,0,1,0
-109238475410,"Lance Corpuz",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",80.2,0,2,0
-109238475411,"Sofia Salazar",Grade 11,"Grade 11 - St. Clare (ABM)",91.7,0,0,0
-109238475412,"Paolo Villanueva",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",86.4,0,4,0
-109238475413,"Shaina Tan",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88.1,0,4,0
-109238475414,"Dominic Corpuz",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",77.2,1,5,0
-109238475415,"Patricia Torres",Grade 12,"Grade 12 - St. Jude (ABM)",85.6,0,4,0
-109238475416,"Joshua Santos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",69.7,0,2,2
-109238475417,"Ralph Castro",Grade 10,"Grade 10 - St. Francis",92.8,0,2,0
-109238475418,"Jasmine Torres",Grade 9,"Grade 9 - St. Benedict",92.1,0,2,0
-109238475419,"Denise Tolentino",Grade 8,"Grade 8 - St. Dominic",85.4,0,0,0
-109238475420,"Patricia Gonzales",Grade 7,"Grade 7 - St. Ignatius",92.2,0,1,0
-109238475421,"Ralph Reyes",Grade 11,"Grade 11 - St. Augustine (STEM)",94.8,0,3,0
-109238475422,"Nathan Santiago",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.6,0,3,0
-109238475423,"Karl Dela Cruz",Grade 11,"Grade 11 - St. Clare (ABM)",89.6,0,5,0
-109238475424,"Rochelle Villanueva",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",86.8,0,1,0
-109238475425,"Nicole Padilla",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",90.7,0,1,0
-109238475426,"Jerome Valdez",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",77.9,0,0,0
-109238475427,"Nicole Santos",Grade 12,"Grade 12 - St. Jude (ABM)",69.2,0,2,1
-109238475428,"Ralph Garcia",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",90,0,4,0
-109238475429,"Jerome Santiago",Grade 10,"Grade 10 - St. Francis",84.9,0,1,0
-109238475430,"Mariel Tan",Grade 9,"Grade 9 - St. Benedict",73,0,2,0
-109238475431,"Ralph Castro",Grade 8,"Grade 8 - St. Dominic",90.3,0,5,0
-109238475432,"Aaron Rivera",Grade 7,"Grade 7 - St. Ignatius",74.2,0,2,2
-109238475433,"Rafael Flores",Grade 11,"Grade 11 - St. Augustine (STEM)",89.6,0,5,0
-109238475434,"Angelica Soriano",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",79.3,0,1,0
-109238475435,"John Carlo Villanueva",Grade 11,"Grade 11 - St. Clare (ABM)",79.4,0,2,0
-109238475436,"Mark Kenneth Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",89.2,0,4,0
-109238475437,"Jerome Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",89.1,0,4,0
-109238475438,"Patricia Mendoza",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",94.6,0,1,0
-109238475439,"Lucas Valdez",Grade 12,"Grade 12 - St. Jude (ABM)",91.5,0,1,0
-109238475440,"Christian Dave San Jose",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.8,0,3,0
-109238475441,"Kathleen Bautista",Grade 10,"Grade 10 - St. Francis",77.7,0,1,0
-109238475442,"Aaron Dela Cruz",Grade 9,"Grade 9 - St. Benedict",82.6,0,3,0
-109238475443,"Kathleen San Jose",Grade 8,"Grade 8 - St. Dominic",92.7,0,0,0
-109238475444,"Angelo Garcia",Grade 7,"Grade 7 - St. Ignatius",89.7,0,3,0
-109238475445,"Bea Patricia Domingo",Grade 11,"Grade 11 - St. Augustine (STEM)",80.9,0,4,0
-109238475446,"Sean Castro",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",67.3,3,13,3
-109238475447,"Ralph Santos",Grade 11,"Grade 11 - St. Clare (ABM)",74.9,1,3,0
-109238475448,"Danielle Rivera",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",72.4,1,4,1
-109238475449,"Gabriel Alcantara",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",68.5,2,12,2
-109238475450,"Dominic Padilla",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",88.5,0,4,0
-109238475451,"Alyssa Corpuz",Grade 12,"Grade 12 - St. Jude (ABM)",81.2,0,4,0
-109238475452,"Joshua Tolentino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",82.4,1,4,0
-109238475453,"Vanessa Lim",Grade 10,"Grade 10 - St. Francis",85.9,0,1,0
-109238475454,"Alyssa Aquino",Grade 9,"Grade 9 - St. Benedict",92.6,0,0,0
-109238475455,"Ralph Padilla",Grade 8,"Grade 8 - St. Dominic",89.4,0,0,0
-109238475456,"Sean Flores",Grade 7,"Grade 7 - St. Ignatius",86.6,0,4,0
-109238475457,"Aaron Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",68.2,2,11,3
-109238475458,"Francis Mendoza",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.8,0,2,0
-109238475459,"Alexander Alcantara",Grade 11,"Grade 11 - St. Clare (ABM)",83.2,0,1,0
-109238475460,"Camille Ocampo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",89.6,0,4,0
-109238475461,"Matthew San Jose",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",74.1,1,5,0
-109238475462,"Alyssa Dizon",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",88.8,0,5,0
-109238475463,"Mark Kenneth Salazar",Grade 12,"Grade 12 - St. Jude (ABM)",90.8,0,4,0
-109238475464,"Lucas Tolentino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",90.2,0,4,0
-109238475465,"Princess Mae Santos",Grade 10,"Grade 10 - St. Francis",94,0,2,0
-109238475466,"Paolo Santiago",Grade 9,"Grade 9 - St. Benedict",85.5,0,3,0
-109238475467,"Andrea Dela Cruz",Grade 8,"Grade 8 - St. Dominic",88,0,3,0
-109238475468,"Denise Valdez",Grade 7,"Grade 7 - St. Ignatius",74.9,0,1,3
-109238475469,"Adrian Reyes",Grade 11,"Grade 11 - St. Augustine (STEM)",91.1,0,3,0
-109238475470,"Jasmine Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.5,0,1,0
-109238475471,"Lucas Santos",Grade 11,"Grade 11 - St. Clare (ABM)",93.2,0,2,0
-109238475472,"Justin Corpuz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",76.5,0,1,0
-109238475473,"Erika Garcia",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",94.1,0,2,0
-109238475474,"Alexander Gonzales",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",92.8,0,1,0
-109238475475,"Princess Mae Ocampo",Grade 12,"Grade 12 - St. Jude (ABM)",86.7,0,1,0
-109238475476,"Mariel Torres",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.8,0,0,0
-109238475477,"John Carlo Castro",Grade 10,"Grade 10 - St. Francis",67.6,1,4,2
-109238475478,"Francis Tan",Grade 9,"Grade 9 - St. Benedict",88.3,0,0,0
-109238475479,"Lance Castillo",Grade 8,"Grade 8 - St. Dominic",81.3,0,2,0
-109238475480,"Miguel Valdez",Grade 7,"Grade 7 - St. Ignatius",72.4,0,1,2
-109238475481,"Daniel Domingo",Grade 11,"Grade 11 - St. Augustine (STEM)",84.4,0,2,0
-109238475482,"Vanessa Castro",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",93.6,0,3,0
-109238475483,"Adrian De Leon",Grade 11,"Grade 11 - St. Clare (ABM)",90.6,0,1,0
-109238475484,"Andrea Dela Cruz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",87,0,4,0
-109238475485,"Angelica San Jose",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",74.8,0,1,3
-109238475486,"Nathan Ramos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.1,0,4,0
-109238475487,"Alyssa Alcantara",Grade 12,"Grade 12 - St. Jude (ABM)",65.2,4,11,2
-109238475488,"Camille De Leon",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",78.7,0,2,0
-109238475489,"Ralph Lim",Grade 10,"Grade 10 - St. Francis",72.3,1,5,0
-109238475490,"Miguel Mendoza",Grade 9,"Grade 9 - St. Benedict",94.1,0,2,0
-109238475491,"Vincent Tolentino",Grade 8,"Grade 8 - St. Dominic",94.1,0,0,0
-109238475492,"Karl Torres",Grade 7,"Grade 7 - St. Ignatius",90.2,0,1,0
-109238475493,"Adrian Aquino",Grade 11,"Grade 11 - St. Augustine (STEM)",77.4,0,4,0
-109238475494,"Althea Alcantara",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.6,0,0,0
-109238475495,"Francis Santos",Grade 11,"Grade 11 - St. Clare (ABM)",80.8,0,3,0
-109238475496,"Patricia Garcia",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",95,0,2,0
-109238475497,"Andrea Soriano",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87,0,3,0
-109238475498,"Kathleen Villanueva",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",84.9,0,3,0
-109238475499,"Francis Flores",Grade 12,"Grade 12 - St. Jude (ABM)",77.1,0,5,0
-109238475500,"Bea Patricia Navarro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",78.4,0,1,0
+lrn,student_name,grade_level,section,quarter_gpa,failing_subjects_count,days_absent,attendance_rate_pct,incomplete_requirements_count,extracurricular_club,club_participation_level,hobbies_interests
+109238475001,"Jerome Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",67.5,2,7,84.6,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475002,"Angelo Corpuz",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91.8,0,1,97.8,0,"Campus Journalism (The Padua Clarion)","Moderate","Acoustic Band & Guitar"
+109238475003,"Samantha Nicole Villanueva",Grade 11,"Grade 11 - St. Clare (ABM)",87.7,0,2,95.6,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
+109238475004,"Althea Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",87.6,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
+109238475005,"Erika Gonzales",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",70.7,0,1,97.8,1,"Peer Facilitators Wellness Circle","Low","Reading Novels & Webtoons"
+109238475006,"Lance Dizon",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",80,1,4,91.2,0,"TVL Skills & Hospitality Society","Low","Badminton & Cycling"
+109238475007,"Mariel Domingo",Grade 12,"Grade 12 - St. Jude (ABM)",89.7,0,0,100,0,"Red Cross Youth (RCY)","Moderate","Debate & Public Speaking"
+109238475008,"Sofia Manalo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.7,0,2,95.6,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
+109238475009,"Lance Mercado",Grade 10,"Grade 10 - St. Francis",77.5,0,1,97.8,0,"Teatro San Antonio (Drama Guild)","Moderate","Reading Novels & Webtoons"
+109238475010,"Miguel Mendoza",Grade 9,"Grade 9 - St. Benedict",93.5,0,0,100,0,"Young Entrepreneurs & ABM Club","High","Competitive Basketball"
+109238475011,"Justin Pascual",Grade 8,"Grade 8 - St. Dominic",90.1,0,5,89,0,"Campus Journalism (The Padua Clarion)","High","Robotics & Web Development"
+109238475012,"Vincent Alcantara",Grade 7,"Grade 7 - St. Ignatius",90.4,0,2,95.6,0,"Boy Scouts / Girl Scouts","High","Community Outreach Volunteering"
+109238475013,"Rafael De Leon",Grade 11,"Grade 11 - St. Augustine (STEM)",95.3,0,5,89,0,"Boy Scouts / Girl Scouts","High","Community Outreach Volunteering"
+109238475014,"Althea Bautista",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",92.9,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Reading Novels & Webtoons"
+109238475015,"Nicole Padilla",Grade 11,"Grade 11 - St. Clare (ABM)",89.6,0,5,89,0,"Campus Journalism (The Padua Clarion)","Moderate","Community Outreach Volunteering"
+109238475016,"Justin Torres",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93.3,0,5,89,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Mobile App Experimentation"
+109238475017,"John Carlo Corpuz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",73.7,0,0,100,2,"None / Non-Member","None","None / Disengaged"
+109238475018,"Rochelle Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",80.5,0,1,97.8,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475019,"Angelica Reyes",Grade 12,"Grade 12 - St. Jude (ABM)",70.4,1,11,75.8,2,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475020,"Nicole Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.3,0,4,91.2,0,"Robotics & Coding Society","Moderate","Community Outreach Volunteering"
+109238475021,"Kathleen Ocampo",Grade 10,"Grade 10 - St. Francis",78.3,0,1,97.8,0,"Boy Scouts / Girl Scouts","Low","Reading Novels & Webtoons"
+109238475022,"Daniel Santos",Grade 9,"Grade 9 - St. Benedict",95.3,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Campus Journalism & Creative Writing"
+109238475023,"Princess Mae Soriano",Grade 8,"Grade 8 - St. Dominic",84.5,0,3,93.4,0,"TVL Skills & Hospitality Society","Low","Reading Novels & Webtoons"
+109238475024,"Lance Soriano",Grade 7,"Grade 7 - St. Ignatius",66.4,4,12,73.6,2,"None / Non-Member","None","Casual Mobile Gaming"
+109238475025,"Bianca Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",95,0,1,97.8,0,"Young Entrepreneurs & ABM Club","Moderate","Acoustic Band & Guitar"
+109238475026,"Gabriel Pascual",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Cooking & Baking"
+109238475027,"Rafael De Leon",Grade 11,"Grade 11 - St. Clare (ABM)",82.9,0,1,97.8,0,"Boy Scouts / Girl Scouts","Low","Mobile App Experimentation"
+109238475028,"Nathan Dela Cruz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",75,0,4,91.2,0,"Badminton & Table Tennis Club","Moderate","Photography & Video Editing"
+109238475029,"Daniel Pascual",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",76.9,0,4,91.2,0,"Young Entrepreneurs & ABM Club","Low","Badminton & Cycling"
+109238475030,"Dominic Alcantara",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",69.4,0,4,91.2,2,"None / Non-Member","None","None / Disengaged"
+109238475031,"Samantha Nicole Gonzales",Grade 12,"Grade 12 - St. Jude (ABM)",84.8,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Mobile App Experimentation"
+109238475032,"Rafael Santos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",71.8,0,2,95.6,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475033,"Jasmine San Jose",Grade 10,"Grade 10 - St. Francis",91.8,0,4,91.2,0,"Red Cross Youth (RCY)","High","Digital Art & Graphic Design"
+109238475034,"Angelo Torres",Grade 9,"Grade 9 - St. Benedict",91,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Debate & Public Speaking"
+109238475035,"Rafael Domingo",Grade 8,"Grade 8 - St. Dominic",83.8,0,0,100,0,"Badminton & Table Tennis Club","High","Competitive Basketball"
+109238475036,"Gabriel Ramos",Grade 7,"Grade 7 - St. Ignatius",88.5,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","High","Photography & Video Editing"
+109238475037,"Chloe Soriano",Grade 11,"Grade 11 - St. Augustine (STEM)",85.9,0,1,97.8,0,"Red Cross Youth (RCY)","Moderate","Digital Art & Graphic Design"
+109238475038,"Kathleen Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",78.7,0,5,89,0,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
+109238475039,"Adrian Lim",Grade 11,"Grade 11 - St. Clare (ABM)",88.6,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Robotics & Web Development"
+109238475040,"Lucas Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",89.4,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
+109238475041,"Denise Torres",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",95.3,0,2,95.6,0,"Math & Science Guild","Moderate","Debate & Public Speaking"
+109238475042,"Andrea Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.8,0,0,100,0,"Varsity Athletics (Basketball/Volleyball)","High","Campus Journalism & Creative Writing"
+109238475043,"Denise Reyes",Grade 12,"Grade 12 - St. Jude (ABM)",78.9,0,3,93.4,0,"Badminton & Table Tennis Club","Low","Badminton & Cycling"
+109238475044,"Samantha Nicole Valdez",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.2,0,4,91.2,0,"Robotics & Coding Society","High","Debate & Public Speaking"
+109238475045,"Vanessa Corpuz",Grade 10,"Grade 10 - St. Francis",84.7,0,4,91.2,0,"Math & Science Guild","High","Robotics & Web Development"
+109238475046,"Aaron Ocampo",Grade 9,"Grade 9 - St. Benedict",89.6,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Acoustic Band & Guitar"
+109238475047,"Karl De Leon",Grade 8,"Grade 8 - St. Dominic",92,0,0,100,0,"Math & Science Guild","High","Debate & Public Speaking"
+109238475048,"Angelica Salazar",Grade 7,"Grade 7 - St. Ignatius",91.9,0,2,95.6,0,"Red Cross Youth (RCY)","High","Digital Art & Graphic Design"
+109238475049,"Vanessa San Jose",Grade 11,"Grade 11 - St. Augustine (STEM)",71.6,0,2,95.6,0,"TVL Skills & Hospitality Society","Moderate","Reading Novels & Webtoons"
+109238475050,"Alyssa Reyes",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",86.1,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Community Outreach Volunteering"
+109238475051,"Trisha Alcantara",Grade 11,"Grade 11 - St. Clare (ABM)",96,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Campus Journalism & Creative Writing"
+109238475052,"Bianca Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",81.2,0,3,93.4,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475053,"Rafael Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",76.5,0,3,93.4,0,"Boy Scouts / Girl Scouts","Low","Badminton & Cycling"
+109238475054,"Vincent Ramos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.8,0,1,97.8,0,"Young Entrepreneurs & ABM Club","Moderate","Mobile App Experimentation"
+109238475055,"Denise Manalo",Grade 12,"Grade 12 - St. Jude (ABM)",81.1,0,1,97.8,0,"Boy Scouts / Girl Scouts","Low","Mobile App Experimentation"
+109238475056,"Karl San Jose",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",86.6,0,5,89,0,"Boy Scouts / Girl Scouts","High","Community Outreach Volunteering"
+109238475057,"Angelo Alcantara",Grade 10,"Grade 10 - St. Francis",72.2,0,3,93.4,2,"None / Non-Member","None","Casual Mobile Gaming"
+109238475058,"Patricia San Jose",Grade 9,"Grade 9 - St. Benedict",65.4,1,3,93.4,2,"None / Non-Member","None","None / Disengaged"
+109238475059,"Kathleen Padilla",Grade 8,"Grade 8 - St. Dominic",92.1,0,0,100,0,"Math & Science Guild","High","Badminton & Cycling"
+109238475060,"Alyssa Castro",Grade 7,"Grade 7 - St. Ignatius",86.8,0,4,91.2,0,"Robotics & Coding Society","High","Mobile App Experimentation"
+109238475061,"Lucas Lim",Grade 11,"Grade 11 - St. Augustine (STEM)",82.7,0,5,89,0,"Badminton & Table Tennis Club","Low","Cooking & Baking"
+109238475062,"Bianca Villanueva",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.5,0,2,95.6,0,"Varsity Athletics (Basketball/Volleyball)","High","Acoustic Band & Guitar"
+109238475063,"Rafael San Jose",Grade 11,"Grade 11 - St. Clare (ABM)",86.7,0,2,95.6,0,"Boy Scouts / Girl Scouts","High","Digital Art & Graphic Design"
+109238475064,"Lucas Pascual",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93.9,0,5,89,0,"Campus Journalism (The Padua Clarion)","High","Robotics & Web Development"
+109238475065,"Kyle Bautista",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Debate & Public Speaking"
+109238475066,"Trisha Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",75.9,0,3,93.4,0,"Badminton & Table Tennis Club","Low","Photography & Video Editing"
+109238475067,"Daniel Padilla",Grade 12,"Grade 12 - St. Jude (ABM)",85.1,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","High","Robotics & Web Development"
+109238475068,"Mariel Tolentino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.3,0,4,91.2,0,"Badminton & Table Tennis Club","High","Acoustic Band & Guitar"
+109238475069,"Jasmine San Jose",Grade 10,"Grade 10 - St. Francis",87.5,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
+109238475070,"Danielle Garcia",Grade 9,"Grade 9 - St. Benedict",89.1,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Badminton & Cycling"
+109238475071,"Andrea Mercado",Grade 8,"Grade 8 - St. Dominic",80.7,0,1,97.8,0,"Peer Facilitators Wellness Circle","Moderate","Photography & Video Editing"
+109238475072,"Kathleen Castro",Grade 7,"Grade 7 - St. Ignatius",82.1,0,3,93.4,0,"Young Entrepreneurs & ABM Club","Moderate","Mobile App Experimentation"
+109238475073,"Vincent Valdez",Grade 11,"Grade 11 - St. Augustine (STEM)",87.6,0,5,89,0,"Campus Journalism (The Padua Clarion)","Moderate","Competitive Basketball"
+109238475074,"Camille Alcantara",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",92.1,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Badminton & Cycling"
+109238475075,"Kathleen Lim",Grade 11,"Grade 11 - St. Clare (ABM)",85,0,1,97.8,0,"Boy Scouts / Girl Scouts","High","Competitive Basketball"
+109238475076,"Matthew Santiago",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",81.7,1,1,97.8,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475077,"Joshua Pascual",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",94.7,0,1,97.8,0,"Glee Club & Chorale","High","Mobile App Experimentation"
+109238475078,"Lance Garcia",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91,0,1,97.8,0,"Math & Science Guild","High","Campus Journalism & Creative Writing"
+109238475079,"Mark Kenneth Villanueva",Grade 12,"Grade 12 - St. Jude (ABM)",84.2,0,0,100,0,"Varsity Athletics (Basketball/Volleyball)","High","Photography & Video Editing"
+109238475080,"Rafael De Leon",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",87.5,0,3,93.4,0,"Red Cross Youth (RCY)","High","Robotics & Web Development"
+109238475081,"Vincent Villanueva",Grade 10,"Grade 10 - St. Francis",87.1,0,4,91.2,0,"Boy Scouts / Girl Scouts","High","Acoustic Band & Guitar"
+109238475082,"Denise Corpuz",Grade 9,"Grade 9 - St. Benedict",76.9,0,3,93.4,0,"Boy Scouts / Girl Scouts","Low","Reading Novels & Webtoons"
+109238475083,"Camille Corpuz",Grade 8,"Grade 8 - St. Dominic",76,0,3,93.4,0,"Teatro San Antonio (Drama Guild)","Low","Cooking & Baking"
+109238475084,"Althea Reyes",Grade 7,"Grade 7 - St. Ignatius",66.1,0,5,89,3,"None / Non-Member","None","None / Disengaged"
+109238475085,"Karl Corpuz",Grade 11,"Grade 11 - St. Augustine (STEM)",80.7,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Mobile App Experimentation"
+109238475086,"Samantha Nicole Soriano",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91.3,0,2,95.6,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
+109238475087,"Princess Mae Reyes",Grade 11,"Grade 11 - St. Clare (ABM)",92.3,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Photography & Video Editing"
+109238475088,"Alyssa Ramos",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",69.5,1,0,100,2,"Peer Facilitators Wellness Circle","Low","Reading Novels & Webtoons"
+109238475089,"Vanessa Pascual",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",80.5,0,3,93.4,0,"Teatro San Antonio (Drama Guild)","Moderate","Photography & Video Editing"
+109238475090,"Patricia San Jose",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.4,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Debate & Public Speaking"
+109238475091,"John Carlo Reyes",Grade 12,"Grade 12 - St. Jude (ABM)",73.7,0,2,95.6,2,"None / Non-Member","None","Casual Mobile Gaming"
+109238475092,"Ethan Manalo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75.4,0,3,93.4,0,"Peer Facilitators Wellness Circle","Moderate","Photography & Video Editing"
+109238475093,"Alyssa Tolentino",Grade 10,"Grade 10 - St. Francis",79.8,0,4,91.2,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475094,"Aaron Navarro",Grade 9,"Grade 9 - St. Benedict",74.6,1,2,95.6,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475095,"Lance Tan",Grade 8,"Grade 8 - St. Dominic",91.3,0,1,97.8,0,"Math & Science Guild","High","Competitive Basketball"
+109238475096,"Angelica Flores",Grade 7,"Grade 7 - St. Ignatius",94,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","High","Debate & Public Speaking"
+109238475097,"Bianca Castro",Grade 11,"Grade 11 - St. Augustine (STEM)",73.5,2,13,71.4,2,"Peer Facilitators Wellness Circle","Low","Cooking & Baking"
+109238475098,"Sofia Dizon",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.9,0,4,91.2,0,"Robotics & Coding Society","Moderate","Photography & Video Editing"
+109238475099,"Gabriel Soriano",Grade 11,"Grade 11 - St. Clare (ABM)",73.2,0,1,97.8,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475100,"Patricia Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",88.4,0,5,89,0,"Teatro San Antonio (Drama Guild)","Moderate","Campus Journalism & Creative Writing"
+109238475101,"Jerome Castillo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",96.4,0,3,93.4,0,"Teatro San Antonio (Drama Guild)","Moderate","Acoustic Band & Guitar"
+109238475102,"Ralph Villanueva",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.7,0,1,97.8,0,"Math & Science Guild","High","Digital Art & Graphic Design"
+109238475103,"Princess Mae Soriano",Grade 12,"Grade 12 - St. Jude (ABM)",80.3,0,2,95.6,0,"Badminton & Table Tennis Club","Low","Badminton & Cycling"
+109238475104,"Vincent Torres",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93.5,0,4,91.2,0,"Red Cross Youth (RCY)","Moderate","Cooking & Baking"
+109238475105,"Francis Castillo",Grade 10,"Grade 10 - St. Francis",73.3,0,0,100,0,"TVL Skills & Hospitality Society","Moderate","Badminton & Cycling"
+109238475106,"Chloe Corpuz",Grade 9,"Grade 9 - St. Benedict",84.4,0,5,89,0,"Young Entrepreneurs & ABM Club","Moderate","Reading Novels & Webtoons"
+109238475107,"Bianca Castillo",Grade 8,"Grade 8 - St. Dominic",91.5,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Campus Journalism & Creative Writing"
+109238475108,"Ethan Ramos",Grade 7,"Grade 7 - St. Ignatius",89.3,0,1,97.8,0,"Math & Science Guild","High","Badminton & Cycling"
+109238475109,"Paolo Domingo",Grade 11,"Grade 11 - St. Augustine (STEM)",95.1,0,5,89,0,"TVL Skills & Hospitality Society","Moderate","Competitive Basketball"
+109238475110,"Nathan Gonzales",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",69,3,11,75.8,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475111,"Samantha Nicole Lim",Grade 11,"Grade 11 - St. Clare (ABM)",81.4,0,3,93.4,0,"Robotics & Coding Society","High","Acoustic Band & Guitar"
+109238475112,"Jerome Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",80.1,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475113,"Nicole Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",77.2,0,4,91.2,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475114,"Bea Patricia Corpuz",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.8,0,4,91.2,0,"Supreme Secondary Learner Government (SSLG)","High","Competitive Basketball"
+109238475115,"Christian Dave Santiago",Grade 12,"Grade 12 - St. Jude (ABM)",93.6,0,2,95.6,0,"Glee Club & Chorale","High","Badminton & Cycling"
+109238475116,"Erika Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",86.3,0,1,97.8,0,"Math & Science Guild","High","Community Outreach Volunteering"
+109238475117,"Lance Mendoza",Grade 10,"Grade 10 - St. Francis",85.4,0,1,97.8,0,"Red Cross Youth (RCY)","High","Robotics & Web Development"
+109238475118,"Kathleen Mendoza",Grade 9,"Grade 9 - St. Benedict",93.3,0,1,97.8,0,"Math & Science Guild","High","Debate & Public Speaking"
+109238475119,"John Carlo Castillo",Grade 8,"Grade 8 - St. Dominic",92.2,0,4,91.2,0,"Glee Club & Chorale","High","Competitive Basketball"
+109238475120,"Hannah Tolentino",Grade 7,"Grade 7 - St. Ignatius",86.9,0,3,93.4,0,"Red Cross Youth (RCY)","High","Robotics & Web Development"
+109238475121,"Sofia Ocampo",Grade 11,"Grade 11 - St. Augustine (STEM)",90.5,0,1,97.8,0,"Red Cross Youth (RCY)","High","Acoustic Band & Guitar"
+109238475122,"Bianca Pascual",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",85.7,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Competitive Basketball"
+109238475123,"Nicole Santos",Grade 11,"Grade 11 - St. Clare (ABM)",91.6,0,0,100,0,"Supreme Secondary Learner Government (SSLG)","High","Photography & Video Editing"
+109238475124,"Jasmine Manalo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",86.3,0,3,93.4,0,"Badminton & Table Tennis Club","High","Robotics & Web Development"
+109238475125,"Cedric Villanueva",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",90.3,0,0,100,0,"Peer Facilitators Wellness Circle","High","Debate & Public Speaking"
+109238475126,"Jerome Corpuz",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",95.6,0,1,97.8,0,"TVL Skills & Hospitality Society","High","Digital Art & Graphic Design"
+109238475127,"Jerome Salazar",Grade 12,"Grade 12 - St. Jude (ABM)",81.3,0,3,93.4,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475128,"Erika Villanueva",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.2,0,2,95.6,0,"Math & Science Guild","High","Photography & Video Editing"
+109238475129,"Cedric Santos",Grade 10,"Grade 10 - St. Francis",88.2,0,1,97.8,0,"Robotics & Coding Society","Moderate","Competitive Basketball"
+109238475130,"Vincent Torres",Grade 9,"Grade 9 - St. Benedict",94.8,0,2,95.6,0,"Math & Science Guild","High","Acoustic Band & Guitar"
+109238475131,"Mark Kenneth Santiago",Grade 8,"Grade 8 - St. Dominic",86.9,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Acoustic Band & Guitar"
+109238475132,"Lucas Domingo",Grade 7,"Grade 7 - St. Ignatius",92.9,0,2,95.6,0,"Supreme Secondary Learner Government (SSLG)","High","Acoustic Band & Guitar"
+109238475133,"Samantha Nicole Alcantara",Grade 11,"Grade 11 - St. Augustine (STEM)",86.7,0,5,89,0,"Glee Club & Chorale","High","Competitive Basketball"
+109238475134,"Mark Kenneth Salazar",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",75.2,0,0,100,0,"Badminton & Table Tennis Club","Low","Mobile App Experimentation"
+109238475135,"Miguel Garcia",Grade 11,"Grade 11 - St. Clare (ABM)",72.7,0,5,89,1,"Teatro San Antonio (Drama Guild)","Moderate","Mobile App Experimentation"
+109238475136,"Cedric Santos",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",78.8,0,4,91.2,0,"None / Non-Member","None","None / Disengaged"
+109238475137,"Chloe Villanueva",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",78.5,0,2,95.6,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475138,"John Carlo Flores",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.6,0,0,100,0,"Robotics & Coding Society","High","Digital Art & Graphic Design"
+109238475139,"Shaina Corpuz",Grade 12,"Grade 12 - St. Jude (ABM)",79,0,5,89,0,"TVL Skills & Hospitality Society","Moderate","Mobile App Experimentation"
+109238475140,"Andrea Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88,0,4,91.2,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
+109238475141,"Jerome Castillo",Grade 10,"Grade 10 - St. Francis",96.1,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Robotics & Web Development"
+109238475142,"Denise Soriano",Grade 9,"Grade 9 - St. Benedict",73.3,2,11,75.8,2,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
+109238475143,"Aaron Tolentino",Grade 8,"Grade 8 - St. Dominic",79,0,3,93.4,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475144,"Althea Padilla",Grade 7,"Grade 7 - St. Ignatius",81.6,0,2,95.6,0,"TVL Skills & Hospitality Society","Low","Mobile App Experimentation"
+109238475145,"Chloe Mercado",Grade 11,"Grade 11 - St. Augustine (STEM)",89.2,0,4,91.2,0,"Glee Club & Chorale","High","Robotics & Web Development"
+109238475146,"Lucas Soriano",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",76.9,0,3,93.4,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475147,"Patricia Alcantara",Grade 11,"Grade 11 - St. Clare (ABM)",79.1,1,5,89,0,"TVL Skills & Hospitality Society","Moderate","Cooking & Baking"
+109238475148,"Mariel Reyes",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",91.8,0,4,91.2,0,"Boy Scouts / Girl Scouts","High","Competitive Basketball"
+109238475149,"Mariel Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.6,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","High","Competitive Basketball"
+109238475150,"Shaina Navarro",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",64.7,4,13,71.4,1,"None / Non-Member","None","Casual Mobile Gaming"
+109238475151,"Sofia Dizon",Grade 12,"Grade 12 - St. Jude (ABM)",67.3,3,7,84.6,1,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475152,"Adrian Flores",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",70.4,1,1,97.8,2,"None / Non-Member","None","None / Disengaged"
+109238475153,"Kristine Lim",Grade 10,"Grade 10 - St. Francis",67.8,1,4,91.2,2,"Peer Facilitators Wellness Circle","Low","Photography & Video Editing"
+109238475154,"Lance Alcantara",Grade 9,"Grade 9 - St. Benedict",90.7,0,3,93.4,0,"Glee Club & Chorale","High","Campus Journalism & Creative Writing"
+109238475155,"Rochelle Santiago",Grade 8,"Grade 8 - St. Dominic",72.6,2,10,78,2,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475156,"Vanessa Rivera",Grade 7,"Grade 7 - St. Ignatius",92.4,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","High","Competitive Basketball"
+109238475157,"Chloe Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",73.7,0,5,89,2,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475158,"Hannah Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",93,0,5,89,0,"Boy Scouts / Girl Scouts","High","Digital Art & Graphic Design"
+109238475159,"Rafael Corpuz",Grade 11,"Grade 11 - St. Clare (ABM)",78.6,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Community Outreach Volunteering"
+109238475160,"Angelo Santiago",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.3,0,4,91.2,0,"Red Cross Youth (RCY)","High","Competitive Basketball"
+109238475161,"Miguel San Jose",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",70.9,1,14,69.2,3,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
+109238475162,"Rafael Soriano",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.5,0,3,93.4,0,"Glee Club & Chorale","High","Debate & Public Speaking"
+109238475163,"Kyle Dela Cruz",Grade 12,"Grade 12 - St. Jude (ABM)",87.1,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Community Outreach Volunteering"
+109238475164,"Francis Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",87.1,0,5,89,0,"Robotics & Coding Society","High","Digital Art & Graphic Design"
+109238475165,"Vanessa Santos",Grade 10,"Grade 10 - St. Francis",87,0,5,89,0,"Varsity Athletics (Basketball/Volleyball)","High","Digital Art & Graphic Design"
+109238475166,"John Carlo Tan",Grade 9,"Grade 9 - St. Benedict",86.8,0,3,93.4,0,"Red Cross Youth (RCY)","High","Acoustic Band & Guitar"
+109238475167,"Sofia Santos",Grade 8,"Grade 8 - St. Dominic",95.2,0,3,93.4,0,"Math & Science Guild","High","Robotics & Web Development"
+109238475168,"Francis Salazar",Grade 7,"Grade 7 - St. Ignatius",87.6,0,1,97.8,0,"Badminton & Table Tennis Club","High","Digital Art & Graphic Design"
+109238475169,"Ralph Garcia",Grade 11,"Grade 11 - St. Augustine (STEM)",87.6,0,5,89,0,"Robotics & Coding Society","Moderate","Digital Art & Graphic Design"
+109238475170,"Trisha Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",81.2,0,2,95.6,0,"Peer Facilitators Wellness Circle","Low","Badminton & Cycling"
+109238475171,"Camille Ramos",Grade 11,"Grade 11 - St. Clare (ABM)",94.7,0,4,91.2,0,"Supreme Secondary Learner Government (SSLG)","High","Robotics & Web Development"
+109238475172,"Cedric Corpuz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",85.7,0,2,95.6,0,"Robotics & Coding Society","High","Cooking & Baking"
+109238475173,"Shaina Dela Cruz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",71.5,3,14,69.2,1,"Peer Facilitators Wellness Circle","Low","Reading Novels & Webtoons"
+109238475174,"Dominic Soriano",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89,0,4,91.2,0,"Glee Club & Chorale","High","Debate & Public Speaking"
+109238475175,"Rochelle Gonzales",Grade 12,"Grade 12 - St. Jude (ABM)",78.1,0,2,95.6,0,"Teatro San Antonio (Drama Guild)","Low","Cooking & Baking"
+109238475176,"Danielle Santiago",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",95.2,0,1,97.8,0,"Robotics & Coding Society","High","Debate & Public Speaking"
+109238475177,"Justin Bautista",Grade 10,"Grade 10 - St. Francis",73.4,4,6,86.8,2,"None / Non-Member","None","None / Disengaged"
+109238475178,"Hannah Villanueva",Grade 9,"Grade 9 - St. Benedict",85,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Community Outreach Volunteering"
+109238475179,"Mark Kenneth Salazar",Grade 8,"Grade 8 - St. Dominic",78.1,1,1,97.8,0,"None / Non-Member","None","None / Disengaged"
+109238475180,"Angelo Bautista",Grade 7,"Grade 7 - St. Ignatius",85.5,0,0,100,0,"Glee Club & Chorale","Moderate","Acoustic Band & Guitar"
+109238475181,"Gabriel San Jose",Grade 11,"Grade 11 - St. Augustine (STEM)",88.1,0,4,91.2,0,"Supreme Secondary Learner Government (SSLG)","High","Community Outreach Volunteering"
+109238475182,"Danielle Torres",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",77.4,0,2,95.6,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475183,"Vanessa De Leon",Grade 11,"Grade 11 - St. Clare (ABM)",86.3,0,5,89,0,"Math & Science Guild","High","Acoustic Band & Guitar"
+109238475184,"Patricia Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",76.5,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Moderate","Reading Novels & Webtoons"
+109238475185,"Bianca Dizon",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",83,0,2,95.6,0,"Boy Scouts / Girl Scouts","Low","Reading Novels & Webtoons"
+109238475186,"Justin Dizon",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",83.2,0,2,95.6,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475187,"Adrian Bautista",Grade 12,"Grade 12 - St. Jude (ABM)",76.6,0,4,91.2,0,"None / Non-Member","None","None / Disengaged"
+109238475188,"Mariel Gonzales",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.8,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Robotics & Web Development"
+109238475189,"Ralph Mercado",Grade 10,"Grade 10 - St. Francis",89.8,0,1,97.8,0,"Young Entrepreneurs & ABM Club","Moderate","Competitive Basketball"
+109238475190,"Paolo Padilla",Grade 9,"Grade 9 - St. Benedict",94.9,0,4,91.2,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
+109238475191,"Samantha Nicole Valdez",Grade 8,"Grade 8 - St. Dominic",88.2,0,1,97.8,0,"Math & Science Guild","High","Acoustic Band & Guitar"
+109238475192,"John Carlo Ocampo",Grade 7,"Grade 7 - St. Ignatius",78,1,0,100,0,"Peer Facilitators Wellness Circle","Moderate","Photography & Video Editing"
+109238475193,"Rafael Padilla",Grade 11,"Grade 11 - St. Augustine (STEM)",92.3,0,2,95.6,0,"Young Entrepreneurs & ABM Club","High","Digital Art & Graphic Design"
+109238475194,"Lance Dizon",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.7,0,3,93.4,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475195,"Danielle Villanueva",Grade 11,"Grade 11 - St. Clare (ABM)",84.8,0,1,97.8,0,"Badminton & Table Tennis Club","Moderate","Photography & Video Editing"
+109238475196,"Patricia Castro",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.3,0,1,97.8,0,"Red Cross Youth (RCY)","High","Competitive Basketball"
+109238475197,"Vanessa Garcia",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",93.6,0,5,89,0,"Robotics & Coding Society","High","Campus Journalism & Creative Writing"
+109238475198,"Erika Pascual",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",93.2,0,0,100,0,"Supreme Secondary Learner Government (SSLG)","High","Community Outreach Volunteering"
+109238475199,"Chloe Mendoza",Grade 12,"Grade 12 - St. Jude (ABM)",78.5,0,0,100,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475200,"Kyle De Leon",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",84.2,0,4,91.2,0,"Young Entrepreneurs & ABM Club","Moderate","Mobile App Experimentation"
+109238475201,"Vincent Corpuz",Grade 10,"Grade 10 - St. Francis",87.1,0,3,93.4,0,"Math & Science Guild","High","Community Outreach Volunteering"
+109238475202,"Karl Pascual",Grade 9,"Grade 9 - St. Benedict",76.2,0,3,93.4,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475203,"Gabriel Castillo",Grade 8,"Grade 8 - St. Dominic",84.5,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
+109238475204,"Nicole De Leon",Grade 7,"Grade 7 - St. Ignatius",84.8,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","Moderate","Acoustic Band & Guitar"
+109238475205,"Danielle Dizon",Grade 11,"Grade 11 - St. Augustine (STEM)",75.8,1,4,91.2,0,"Peer Facilitators Wellness Circle","Low","Badminton & Cycling"
+109238475206,"Kristine Reyes",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.8,0,4,91.2,0,"Math & Science Guild","High","Digital Art & Graphic Design"
+109238475207,"Mark Kenneth Navarro",Grade 11,"Grade 11 - St. Clare (ABM)",80.2,0,4,91.2,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475208,"Joshua Corpuz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",87.6,0,3,93.4,0,"Robotics & Coding Society","High","Acoustic Band & Guitar"
+109238475209,"Nathan Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.3,0,2,95.6,0,"Teatro San Antonio (Drama Guild)","High","Reading Novels & Webtoons"
+109238475210,"Angelo Santiago",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",74,1,2,95.6,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475211,"Lucas Villanueva",Grade 12,"Grade 12 - St. Jude (ABM)",89.5,0,0,100,0,"Peer Facilitators Wellness Circle","High","Robotics & Web Development"
+109238475212,"Ethan Domingo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",94.9,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Digital Art & Graphic Design"
+109238475213,"Bea Patricia Dela Cruz",Grade 10,"Grade 10 - St. Francis",89.9,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Debate & Public Speaking"
+109238475214,"Kristine Castillo",Grade 9,"Grade 9 - St. Benedict",87.1,0,2,95.6,0,"Peer Facilitators Wellness Circle","High","Community Outreach Volunteering"
+109238475215,"Andrea Ramos",Grade 8,"Grade 8 - St. Dominic",75.5,0,4,91.2,0,"None / Non-Member","None","None / Disengaged"
+109238475216,"Lance Dela Cruz",Grade 7,"Grade 7 - St. Ignatius",87.8,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","Moderate","Robotics & Web Development"
+109238475217,"Angelica Dela Cruz",Grade 11,"Grade 11 - St. Augustine (STEM)",80.1,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Reading Novels & Webtoons"
+109238475218,"Paolo Reyes",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.9,0,1,97.8,0,"Boy Scouts / Girl Scouts","Low","Badminton & Cycling"
+109238475219,"Miguel Mendoza",Grade 11,"Grade 11 - St. Clare (ABM)",84.8,0,3,93.4,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
+109238475220,"Bianca Salazar",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93,0,4,91.2,0,"Supreme Secondary Learner Government (SSLG)","High","Campus Journalism & Creative Writing"
+109238475221,"Dominic Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",79.6,1,4,91.2,0,"Boy Scouts / Girl Scouts","Moderate","Mobile App Experimentation"
+109238475222,"Francis Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",66.9,2,13,71.4,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475223,"Althea Dizon",Grade 12,"Grade 12 - St. Jude (ABM)",95.9,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","High","Digital Art & Graphic Design"
+109238475224,"Mariel Aquino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",82,0,2,95.6,0,"Peer Facilitators Wellness Circle","Moderate","Reading Novels & Webtoons"
+109238475225,"Matthew Ocampo",Grade 10,"Grade 10 - St. Francis",80.7,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475226,"Jerome Domingo",Grade 9,"Grade 9 - St. Benedict",73.1,2,8,82.4,2,"None / Non-Member","None","None / Disengaged"
+109238475227,"Joshua Pascual",Grade 8,"Grade 8 - St. Dominic",73.5,4,6,86.8,2,"None / Non-Member","None","None / Disengaged"
+109238475228,"Sean Padilla",Grade 7,"Grade 7 - St. Ignatius",85.4,0,3,93.4,0,"Peer Facilitators Wellness Circle","High","Community Outreach Volunteering"
+109238475229,"Danielle Ocampo",Grade 11,"Grade 11 - St. Augustine (STEM)",94.9,0,2,95.6,0,"TVL Skills & Hospitality Society","High","Acoustic Band & Guitar"
+109238475230,"Kristine Mendoza",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.9,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Debate & Public Speaking"
+109238475231,"Matthew Ramos",Grade 11,"Grade 11 - St. Clare (ABM)",91.2,0,3,93.4,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
+109238475232,"Chloe Salazar",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",72.6,0,3,93.4,1,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475233,"Daniel Pascual",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91.5,0,3,93.4,0,"Robotics & Coding Society","Moderate","Community Outreach Volunteering"
+109238475234,"Christian Dave Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.1,0,3,93.4,0,"Math & Science Guild","High","Community Outreach Volunteering"
+109238475235,"Ethan Castillo",Grade 12,"Grade 12 - St. Jude (ABM)",70.4,4,14,69.2,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475236,"Shaina Rivera",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93.9,0,1,97.8,0,"TVL Skills & Hospitality Society","High","Community Outreach Volunteering"
+109238475237,"Cedric Ocampo",Grade 10,"Grade 10 - St. Francis",73.2,0,3,93.4,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475238,"Alexander Pascual",Grade 9,"Grade 9 - St. Benedict",93.1,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Moderate","Debate & Public Speaking"
+109238475239,"Erika Padilla",Grade 8,"Grade 8 - St. Dominic",85,0,4,91.2,0,"Boy Scouts / Girl Scouts","Moderate","Photography & Video Editing"
+109238475240,"Erika Pascual",Grade 7,"Grade 7 - St. Ignatius",83.7,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Moderate","Badminton & Cycling"
+109238475241,"Nathan Manalo",Grade 11,"Grade 11 - St. Augustine (STEM)",85.2,0,3,93.4,0,"Glee Club & Chorale","Moderate","Acoustic Band & Guitar"
+109238475242,"Camille Torres",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",76.3,1,5,89,0,"Boy Scouts / Girl Scouts","Moderate","Photography & Video Editing"
+109238475243,"Rochelle Rivera",Grade 11,"Grade 11 - St. Clare (ABM)",78,0,3,93.4,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475244,"Joshua Villanueva",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",91.3,0,1,97.8,0,"TVL Skills & Hospitality Society","High","Acoustic Band & Guitar"
+109238475245,"Joshua Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",72.6,0,4,91.2,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475246,"Lucas Bautista",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.6,0,2,95.6,0,"Glee Club & Chorale","High","Debate & Public Speaking"
+109238475247,"Kyle Salazar",Grade 12,"Grade 12 - St. Jude (ABM)",96.1,0,1,97.8,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
+109238475248,"Alyssa Santos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.4,0,1,97.8,0,"Math & Science Guild","High","Reading Novels & Webtoons"
+109238475249,"Nathan Garcia",Grade 10,"Grade 10 - St. Francis",87.6,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Competitive Basketball"
+109238475250,"Ethan Ramos",Grade 9,"Grade 9 - St. Benedict",84.7,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Reading Novels & Webtoons"
+109238475251,"Sean Pascual",Grade 8,"Grade 8 - St. Dominic",94.5,0,1,97.8,0,"Campus Journalism (The Padua Clarion)","High","Badminton & Cycling"
+109238475252,"Daniel Bautista",Grade 7,"Grade 7 - St. Ignatius",70.2,1,1,97.8,1,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475253,"Lucas Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",90.4,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Competitive Basketball"
+109238475254,"Dominic Valdez",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",92.9,0,4,91.2,0,"Red Cross Youth (RCY)","High","Debate & Public Speaking"
+109238475255,"John Carlo Dizon",Grade 11,"Grade 11 - St. Clare (ABM)",74.4,0,2,95.6,0,"Badminton & Table Tennis Club","Moderate","Mobile App Experimentation"
+109238475256,"Danielle Corpuz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",88.2,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Digital Art & Graphic Design"
+109238475257,"Mark Kenneth Corpuz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",95.9,0,3,93.4,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
+109238475258,"Mark Kenneth Manalo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",88,0,5,89,0,"Robotics & Coding Society","Moderate","Campus Journalism & Creative Writing"
+109238475259,"Jasmine Garcia",Grade 12,"Grade 12 - St. Jude (ABM)",83.5,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","High","Community Outreach Volunteering"
+109238475260,"Erika Flores",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.7,0,4,91.2,0,"Peer Facilitators Wellness Circle","High","Debate & Public Speaking"
+109238475261,"Mark Kenneth Reyes",Grade 10,"Grade 10 - St. Francis",87.8,0,0,100,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
+109238475262,"Jasmine Santiago",Grade 9,"Grade 9 - St. Benedict",80.6,0,0,100,0,"None / Non-Member","None","None / Disengaged"
+109238475263,"Patricia Soriano",Grade 8,"Grade 8 - St. Dominic",76.1,0,1,97.8,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475264,"Cedric Mercado",Grade 7,"Grade 7 - St. Ignatius",92.6,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","Moderate","Robotics & Web Development"
+109238475265,"Sean Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",83.5,1,4,91.2,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475266,"Justin Mendoza",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",94.6,0,1,97.8,0,"Glee Club & Chorale","High","Community Outreach Volunteering"
+109238475267,"Adrian Dela Cruz",Grade 11,"Grade 11 - St. Clare (ABM)",83.4,0,4,91.2,0,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
+109238475268,"Paolo San Jose",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",81,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Moderate","Badminton & Cycling"
+109238475269,"Denise Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91.9,0,1,97.8,0,"Math & Science Guild","High","Acoustic Band & Guitar"
+109238475270,"Erika Bautista",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",87.5,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Community Outreach Volunteering"
+109238475271,"Camille De Leon",Grade 12,"Grade 12 - St. Jude (ABM)",87.8,0,4,91.2,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
+109238475272,"Dominic San Jose",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.5,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Community Outreach Volunteering"
+109238475273,"Erika Valdez",Grade 10,"Grade 10 - St. Francis",93.6,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Debate & Public Speaking"
+109238475274,"Lucas Castillo",Grade 9,"Grade 9 - St. Benedict",89,0,1,97.8,0,"Peer Facilitators Wellness Circle","High","Community Outreach Volunteering"
+109238475275,"Chloe Dizon",Grade 8,"Grade 8 - St. Dominic",88.2,0,4,91.2,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
+109238475276,"Althea Santiago",Grade 7,"Grade 7 - St. Ignatius",73.7,4,10,78,2,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
+109238475277,"John Carlo Castro",Grade 11,"Grade 11 - St. Augustine (STEM)",91.3,0,5,89,0,"Badminton & Table Tennis Club","High","Badminton & Cycling"
+109238475278,"John Carlo Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.9,0,2,95.6,0,"Robotics & Coding Society","High","Robotics & Web Development"
+109238475279,"Mark Kenneth Lim",Grade 11,"Grade 11 - St. Clare (ABM)",72.3,0,2,95.6,0,"Teatro San Antonio (Drama Guild)","Moderate","Badminton & Cycling"
+109238475280,"Vanessa Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",79.3,0,3,93.4,0,"None / Non-Member","None","None / Disengaged"
+109238475281,"Daniel Dela Cruz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",75.7,1,4,91.2,0,"Boy Scouts / Girl Scouts","Low","Reading Novels & Webtoons"
+109238475282,"Justin Manalo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",92,0,4,91.2,0,"TVL Skills & Hospitality Society","High","Competitive Basketball"
+109238475283,"Kristine Santiago",Grade 12,"Grade 12 - St. Jude (ABM)",74.6,0,0,100,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475284,"Nathan Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",92.2,0,1,97.8,0,"Robotics & Coding Society","High","Digital Art & Graphic Design"
+109238475285,"Althea Manalo",Grade 10,"Grade 10 - St. Francis",88.3,0,1,97.8,0,"Math & Science Guild","High","Campus Journalism & Creative Writing"
+109238475286,"Erika Gonzales",Grade 9,"Grade 9 - St. Benedict",91.3,0,2,95.6,0,"Red Cross Youth (RCY)","Moderate","Campus Journalism & Creative Writing"
+109238475287,"Trisha Valdez",Grade 8,"Grade 8 - St. Dominic",73.7,1,3,93.4,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475288,"Adrian Navarro",Grade 7,"Grade 7 - St. Ignatius",93.3,0,1,97.8,0,"Red Cross Youth (RCY)","Moderate","Debate & Public Speaking"
+109238475289,"Bianca De Leon",Grade 11,"Grade 11 - St. Augustine (STEM)",72.5,0,4,91.2,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475290,"Samantha Nicole Tolentino",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",81.3,0,3,93.4,0,"Badminton & Table Tennis Club","Low","Photography & Video Editing"
+109238475291,"Jerome Corpuz",Grade 11,"Grade 11 - St. Clare (ABM)",88.4,0,1,97.8,0,"Campus Journalism (The Padua Clarion)","High","Acoustic Band & Guitar"
+109238475292,"Adrian Rivera",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",65.6,0,5,89,2,"None / Non-Member","None","None / Disengaged"
+109238475293,"Rochelle Castillo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",80.5,0,1,97.8,0,"Teatro San Antonio (Drama Guild)","Low","Photography & Video Editing"
+109238475294,"Patricia Flores",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",92.8,0,5,89,0,"Math & Science Guild","High","Debate & Public Speaking"
+109238475295,"Jasmine Torres",Grade 12,"Grade 12 - St. Jude (ABM)",89.6,0,0,100,0,"Young Entrepreneurs & ABM Club","High","Digital Art & Graphic Design"
+109238475296,"Alexander Bautista",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",69.4,0,4,91.2,3,"None / Non-Member","None","None / Disengaged"
+109238475297,"Hannah Villanueva",Grade 10,"Grade 10 - St. Francis",82,0,1,97.8,0,"Badminton & Table Tennis Club","High","Debate & Public Speaking"
+109238475298,"Justin De Leon",Grade 9,"Grade 9 - St. Benedict",74.4,2,12,73.6,3,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
+109238475299,"Daniel Lim",Grade 8,"Grade 8 - St. Dominic",89.6,0,3,93.4,0,"Badminton & Table Tennis Club","Moderate","Debate & Public Speaking"
+109238475300,"Nicole San Jose",Grade 7,"Grade 7 - St. Ignatius",94.2,0,3,93.4,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
+109238475301,"Sofia Lim",Grade 11,"Grade 11 - St. Augustine (STEM)",95.4,0,2,95.6,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Competitive Basketball"
+109238475302,"Francis Bautista",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",77.3,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Cooking & Baking"
+109238475303,"Kathleen Soriano",Grade 11,"Grade 11 - St. Clare (ABM)",69.5,1,5,89,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475304,"Erika Garcia",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",83.8,0,3,93.4,0,"Robotics & Coding Society","High","Reading Novels & Webtoons"
+109238475305,"Kyle Villanueva",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",95.9,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Badminton & Cycling"
+109238475306,"Dominic Tolentino",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",86.2,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","High","Community Outreach Volunteering"
+109238475307,"Karl Gonzales",Grade 12,"Grade 12 - St. Jude (ABM)",76.8,0,0,100,0,"Teatro San Antonio (Drama Guild)","Low","Reading Novels & Webtoons"
+109238475308,"Erika Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.3,0,3,93.4,0,"Math & Science Guild","High","Acoustic Band & Guitar"
+109238475309,"Lucas Mendoza",Grade 10,"Grade 10 - St. Francis",86.1,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Acoustic Band & Guitar"
+109238475310,"Rafael Domingo",Grade 9,"Grade 9 - St. Benedict",90.7,0,2,95.6,0,"Red Cross Youth (RCY)","High","Competitive Basketball"
+109238475311,"Rochelle Lim",Grade 8,"Grade 8 - St. Dominic",90.9,0,0,100,0,"Teatro San Antonio (Drama Guild)","High","Robotics & Web Development"
+109238475312,"Mariel Manalo",Grade 7,"Grade 7 - St. Ignatius",72.8,3,7,84.6,2,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475313,"Andrea Dizon",Grade 11,"Grade 11 - St. Augustine (STEM)",77.3,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475314,"Denise Tolentino",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",85.4,0,0,100,0,"Peer Facilitators Wellness Circle","Low","Badminton & Cycling"
+109238475315,"Andrea Ocampo",Grade 11,"Grade 11 - St. Clare (ABM)",81.1,1,1,97.8,0,"None / Non-Member","None","None / Disengaged"
+109238475316,"Chloe Garcia",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",74.6,1,2,95.6,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475317,"Rafael Torres",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",94.4,0,0,100,0,"Boy Scouts / Girl Scouts","Moderate","Debate & Public Speaking"
+109238475318,"Rafael Aquino",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",92.3,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Debate & Public Speaking"
+109238475319,"Camille Tan",Grade 12,"Grade 12 - St. Jude (ABM)",73.3,0,0,100,0,"Young Entrepreneurs & ABM Club","Moderate","Reading Novels & Webtoons"
+109238475320,"Nicole Santos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",69.2,0,2,95.6,1,"Teatro San Antonio (Drama Guild)","Low","Cooking & Baking"
+109238475321,"Ethan Manalo",Grade 10,"Grade 10 - St. Francis",84.2,0,5,89,0,"Glee Club & Chorale","Moderate","Robotics & Web Development"
+109238475322,"Lance Alcantara",Grade 9,"Grade 9 - St. Benedict",75.9,0,0,100,0,"Boy Scouts / Girl Scouts","Low","Cooking & Baking"
+109238475323,"Ralph Castro",Grade 8,"Grade 8 - St. Dominic",90.3,0,5,89,0,"Red Cross Youth (RCY)","High","Photography & Video Editing"
+109238475324,"Erika Bautista",Grade 7,"Grade 7 - St. Ignatius",89.8,0,2,95.6,0,"Math & Science Guild","High","Cooking & Baking"
+109238475325,"Denise Santiago",Grade 11,"Grade 11 - St. Augustine (STEM)",90.5,0,1,97.8,0,"TVL Skills & Hospitality Society","High","Mobile App Experimentation"
+109238475326,"Althea Castillo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",79.4,0,5,89,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475327,"Patricia Mendoza",Grade 11,"Grade 11 - St. Clare (ABM)",67,3,11,75.8,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475328,"Althea San Jose",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",85.5,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Photography & Video Editing"
+109238475329,"Lucas Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91.5,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Acoustic Band & Guitar"
+109238475330,"Justin Lim",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",87.5,0,3,93.4,0,"Robotics & Coding Society","High","Robotics & Web Development"
+109238475331,"Princess Mae Dizon",Grade 12,"Grade 12 - St. Jude (ABM)",87,0,1,97.8,0,"Badminton & Table Tennis Club","High","Competitive Basketball"
+109238475332,"Karl Navarro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",79.5,0,2,95.6,0,"None / Non-Member","None","None / Disengaged"
+109238475333,"Paolo Torres",Grade 10,"Grade 10 - St. Francis",87.3,0,2,95.6,0,"Badminton & Table Tennis Club","Moderate","Cooking & Baking"
+109238475334,"Francis Castro",Grade 9,"Grade 9 - St. Benedict",92.1,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Community Outreach Volunteering"
+109238475335,"Ralph Santos",Grade 8,"Grade 8 - St. Dominic",74.9,1,3,93.4,0,"Peer Facilitators Wellness Circle","Moderate","Reading Novels & Webtoons"
+109238475336,"Kathleen Ramos",Grade 7,"Grade 7 - St. Ignatius",68.2,2,8,82.4,1,"Peer Facilitators Wellness Circle","Low","Photography & Video Editing"
+109238475337,"Miguel Garcia",Grade 11,"Grade 11 - St. Augustine (STEM)",91.1,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","High","Digital Art & Graphic Design"
+109238475338,"Gabriel Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",66.3,1,12,73.6,2,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475339,"Kathleen Villanueva",Grade 11,"Grade 11 - St. Clare (ABM)",65.1,4,9,80.2,3,"None / Non-Member","None","Casual Mobile Gaming"
+109238475340,"Miguel Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",70.8,4,7,84.6,1,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475341,"Dominic Domingo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",67.2,3,13,71.4,2,"Peer Facilitators Wellness Circle","Low","Reading Novels & Webtoons"
+109238475342,"Sean Flores",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",86.6,0,4,91.2,0,"Red Cross Youth (RCY)","Moderate","Mobile App Experimentation"
+109238475343,"Ralph San Jose",Grade 12,"Grade 12 - St. Jude (ABM)",85.7,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Digital Art & Graphic Design"
+109238475344,"Ralph Soriano",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",86.9,0,2,95.6,0,"Peer Facilitators Wellness Circle","Moderate","Robotics & Web Development"
+109238475345,"Matthew Torres",Grade 10,"Grade 10 - St. Francis",78.9,0,3,93.4,0,"Boy Scouts / Girl Scouts","Low","Mobile App Experimentation"
+109238475346,"Aaron Gonzales",Grade 9,"Grade 9 - St. Benedict",94.7,0,3,93.4,0,"Robotics & Coding Society","Moderate","Competitive Basketball"
+109238475347,"Rochelle San Jose",Grade 8,"Grade 8 - St. Dominic",96.4,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Campus Journalism & Creative Writing"
+109238475348,"Ethan Salazar",Grade 7,"Grade 7 - St. Ignatius",88.8,0,1,97.8,0,"Badminton & Table Tennis Club","Moderate","Cooking & Baking"
+109238475349,"Dominic Reyes",Grade 11,"Grade 11 - St. Augustine (STEM)",80.9,0,5,89,0,"TVL Skills & Hospitality Society","Moderate","Cooking & Baking"
+109238475350,"Andrea Dela Cruz",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Reading Novels & Webtoons"
+109238475351,"Francis Flores",Grade 11,"Grade 11 - St. Clare (ABM)",79.8,0,0,100,0,"Young Entrepreneurs & ABM Club","Low","Badminton & Cycling"
+109238475352,"Vanessa Ramos",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",89.7,0,2,95.6,0,"Math & Science Guild","High","Debate & Public Speaking"
+109238475353,"Lucas Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",93.2,0,2,95.6,0,"Math & Science Guild","High","Campus Journalism & Creative Writing"
+109238475354,"Lance Valdez",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",72.2,1,1,97.8,2,"Peer Facilitators Wellness Circle","Moderate","Reading Novels & Webtoons"
+109238475355,"Chloe Valdez",Grade 12,"Grade 12 - St. Jude (ABM)",91.6,0,2,95.6,0,"Supreme Secondary Learner Government (SSLG)","High","Mobile App Experimentation"
+109238475356,"Rafael Mendoza",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",85.2,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
+109238475357,"Francis Torres",Grade 10,"Grade 10 - St. Francis",70,1,0,100,3,"None / Non-Member","None","None / Disengaged"
+109238475358,"Adrian Manalo",Grade 9,"Grade 9 - St. Benedict",90.8,0,5,89,0,"Young Entrepreneurs & ABM Club","High","Digital Art & Graphic Design"
+109238475359,"Patricia Tan",Grade 8,"Grade 8 - St. Dominic",93.6,0,3,93.4,0,"Teatro San Antonio (Drama Guild)","Moderate","Robotics & Web Development"
+109238475360,"Chloe Torres",Grade 7,"Grade 7 - St. Ignatius",83,0,0,100,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475361,"Vanessa Reyes",Grade 11,"Grade 11 - St. Augustine (STEM)",89.8,0,2,95.6,0,"Glee Club & Chorale","High","Campus Journalism & Creative Writing"
+109238475362,"Aaron Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.9,0,2,95.6,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475363,"Angelo Tan",Grade 11,"Grade 11 - St. Clare (ABM)",85.5,0,0,100,0,"Boy Scouts / Girl Scouts","High","Mobile App Experimentation"
+109238475364,"Jasmine Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",64.5,2,8,82.4,1,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475365,"Sean Rivera",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",84.6,0,3,93.4,0,"Badminton & Table Tennis Club","Low","Reading Novels & Webtoons"
+109238475366,"Aaron Ramos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",88.4,0,2,95.6,0,"Robotics & Coding Society","High","Community Outreach Volunteering"
+109238475367,"Jerome Aquino",Grade 12,"Grade 12 - St. Jude (ABM)",77.2,0,1,97.8,0,"Badminton & Table Tennis Club","Moderate","Mobile App Experimentation"
+109238475368,"Jasmine Castillo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.4,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Community Outreach Volunteering"
+109238475369,"Francis Flores",Grade 10,"Grade 10 - St. Francis",84.7,0,3,93.4,0,"Math & Science Guild","High","Cooking & Baking"
+109238475370,"Mark Kenneth Valdez",Grade 9,"Grade 9 - St. Benedict",66.2,1,1,97.8,3,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475371,"Kathleen Castro",Grade 8,"Grade 8 - St. Dominic",73.7,0,3,93.4,2,"None / Non-Member","None","Casual Mobile Gaming"
+109238475372,"Daniel Mercado",Grade 7,"Grade 7 - St. Ignatius",94.6,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Reading Novels & Webtoons"
+109238475373,"Joshua De Leon",Grade 11,"Grade 11 - St. Augustine (STEM)",94.1,0,3,93.4,0,"Robotics & Coding Society","High","Campus Journalism & Creative Writing"
+109238475374,"Miguel Dizon",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.7,0,0,100,0,"Peer Facilitators Wellness Circle","High","Competitive Basketball"
+109238475375,"Aaron Torres",Grade 11,"Grade 11 - St. Clare (ABM)",86,0,2,95.6,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Debate & Public Speaking"
+109238475376,"Vanessa Dela Cruz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.6,0,1,97.8,0,"Teatro San Antonio (Drama Guild)","High","Community Outreach Volunteering"
+109238475377,"Paolo Alcantara",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",96.2,0,3,93.4,0,"Young Entrepreneurs & ABM Club","High","Community Outreach Volunteering"
+109238475378,"Alyssa Tan",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",83.8,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Badminton & Cycling"
+109238475379,"Chloe De Leon",Grade 12,"Grade 12 - St. Jude (ABM)",94.1,0,1,97.8,0,"Red Cross Youth (RCY)","Moderate","Campus Journalism & Creative Writing"
+109238475380,"Jerome Castro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",92.9,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","High","Competitive Basketball"
+109238475381,"Kristine Castillo",Grade 10,"Grade 10 - St. Francis",91.9,0,3,93.4,0,"Glee Club & Chorale","High","Community Outreach Volunteering"
+109238475382,"Vanessa Garcia",Grade 9,"Grade 9 - St. Benedict",78.6,0,4,91.2,0,"TVL Skills & Hospitality Society","Low","Badminton & Cycling"
+109238475383,"Rochelle Garcia",Grade 8,"Grade 8 - St. Dominic",91.2,0,2,95.6,0,"Teatro San Antonio (Drama Guild)","High","Community Outreach Volunteering"
+109238475384,"John Carlo Dizon",Grade 7,"Grade 7 - St. Ignatius",72.8,3,8,82.4,2,"Peer Facilitators Wellness Circle","Low","Badminton & Cycling"
+109238475385,"Rafael Alcantara",Grade 11,"Grade 11 - St. Augustine (STEM)",75.1,1,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Mobile App Experimentation"
+109238475386,"Kyle Garcia",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",74.1,0,3,93.4,0,"Young Entrepreneurs & ABM Club","Moderate","Cooking & Baking"
+109238475387,"John Carlo Ramos",Grade 11,"Grade 11 - St. Clare (ABM)",90.1,0,3,93.4,0,"Red Cross Youth (RCY)","High","Digital Art & Graphic Design"
+109238475388,"Jerome Flores",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.1,0,1,97.8,0,"Campus Journalism (The Padua Clarion)","Moderate","Digital Art & Graphic Design"
+109238475389,"Camille Navarro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.9,0,2,95.6,0,"Red Cross Youth (RCY)","High","Debate & Public Speaking"
+109238475390,"Joshua Mendoza",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",70.7,4,10,78,2,"None / Non-Member","None","Casual Mobile Gaming"
+109238475391,"Lance Mercado",Grade 12,"Grade 12 - St. Jude (ABM)",84.6,0,3,93.4,0,"Robotics & Coding Society","High","Photography & Video Editing"
+109238475392,"Princess Mae Mercado",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",86.7,0,3,93.4,0,"Robotics & Coding Society","Moderate","Community Outreach Volunteering"
+109238475393,"Erika Torres",Grade 10,"Grade 10 - St. Francis",86.5,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
+109238475394,"Nathan Garcia",Grade 9,"Grade 9 - St. Benedict",80.7,0,2,95.6,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475395,"Nathan Aquino",Grade 8,"Grade 8 - St. Dominic",93,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Competitive Basketball"
+109238475396,"Shaina Manalo",Grade 7,"Grade 7 - St. Ignatius",92.4,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Digital Art & Graphic Design"
+109238475397,"Paolo Dizon",Grade 11,"Grade 11 - St. Augustine (STEM)",86.7,0,2,95.6,0,"Boy Scouts / Girl Scouts","Moderate","Robotics & Web Development"
+109238475398,"Justin Castillo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.4,0,1,97.8,0,"Red Cross Youth (RCY)","High","Badminton & Cycling"
+109238475399,"Shaina Aquino",Grade 11,"Grade 11 - St. Clare (ABM)",90.3,0,3,93.4,0,"Math & Science Guild","Moderate","Debate & Public Speaking"
+109238475400,"Andrea Tan",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",77.1,0,3,93.4,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475401,"Aaron Tan",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",89.2,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
+109238475402,"Alexander Mercado",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",66.8,2,9,80.2,2,"None / Non-Member","None","None / Disengaged"
+109238475403,"Danielle Santos",Grade 12,"Grade 12 - St. Jude (ABM)",91,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","Moderate","Badminton & Cycling"
+109238475404,"Christian Dave Navarro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",83.7,0,1,97.8,0,"Boy Scouts / Girl Scouts","High","Debate & Public Speaking"
+109238475405,"Patricia Ocampo",Grade 10,"Grade 10 - St. Francis",90.7,0,3,93.4,0,"Young Entrepreneurs & ABM Club","High","Acoustic Band & Guitar"
+109238475406,"Hannah Gonzales",Grade 9,"Grade 9 - St. Benedict",95.8,0,4,91.2,0,"Robotics & Coding Society","High","Debate & Public Speaking"
+109238475407,"Chloe Domingo",Grade 8,"Grade 8 - St. Dominic",86.5,0,1,97.8,0,"Peer Facilitators Wellness Circle","High","Robotics & Web Development"
+109238475408,"Justin Salazar",Grade 7,"Grade 7 - St. Ignatius",80.4,0,2,95.6,0,"None / Non-Member","None","None / Disengaged"
+109238475409,"Joshua Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",85,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Campus Journalism & Creative Writing"
+109238475410,"Chloe Valdez",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",68.4,3,15,67,3,"None / Non-Member","None","None / Disengaged"
+109238475411,"Althea Mercado",Grade 11,"Grade 11 - St. Clare (ABM)",80.4,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475412,"Miguel Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",84.8,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Debate & Public Speaking"
+109238475413,"Danielle Padilla",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88.4,0,3,93.4,0,"Math & Science Guild","High","Robotics & Web Development"
+109238475414,"Nathan San Jose",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",79.7,0,4,91.2,0,"Peer Facilitators Wellness Circle","Moderate","Photography & Video Editing"
+109238475415,"Bianca Flores",Grade 12,"Grade 12 - St. Jude (ABM)",89.6,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Campus Journalism & Creative Writing"
+109238475416,"Camille Domingo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",84.9,0,1,97.8,0,"Robotics & Coding Society","Moderate","Campus Journalism & Creative Writing"
+109238475417,"Andrea Reyes",Grade 10,"Grade 10 - St. Francis",92.6,0,5,89,0,"Robotics & Coding Society","High","Community Outreach Volunteering"
+109238475418,"Justin Ramos",Grade 9,"Grade 9 - St. Benedict",81.8,0,4,91.2,0,"TVL Skills & Hospitality Society","Moderate","Badminton & Cycling"
+109238475419,"Danielle Rivera",Grade 8,"Grade 8 - St. Dominic",80.9,0,4,91.2,0,"Boy Scouts / Girl Scouts","Low","Badminton & Cycling"
+109238475420,"Alyssa Navarro",Grade 7,"Grade 7 - St. Ignatius",92.6,0,3,93.4,0,"Glee Club & Chorale","High","Badminton & Cycling"
+109238475421,"Hannah Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",88.5,0,5,89,0,"Varsity Athletics (Basketball/Volleyball)","High","Robotics & Web Development"
+109238475422,"Bea Patricia Salazar",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.9,0,2,95.6,0,"TVL Skills & Hospitality Society","High","Community Outreach Volunteering"
+109238475423,"Jasmine Castillo",Grade 11,"Grade 11 - St. Clare (ABM)",68.7,2,13,71.4,1,"None / Non-Member","None","None / Disengaged"
+109238475424,"Danielle Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90,0,1,97.8,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
+109238475425,"Dominic Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.4,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Mobile App Experimentation"
+109238475426,"Rochelle Valdez",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",63.3,0,4,91.2,1,"None / Non-Member","None","Casual Mobile Gaming"
+109238475427,"Jasmine Santiago",Grade 12,"Grade 12 - St. Jude (ABM)",93.1,0,4,91.2,0,"Glee Club & Chorale","High","Photography & Video Editing"
+109238475428,"Adrian San Jose",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",94.1,0,1,97.8,0,"Peer Facilitators Wellness Circle","High","Competitive Basketball"
+109238475429,"Francis Mendoza",Grade 10,"Grade 10 - St. Francis",80.9,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475430,"Dominic Flores",Grade 9,"Grade 9 - St. Benedict",87.6,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","Moderate","Acoustic Band & Guitar"
+109238475431,"Kristine Tan",Grade 8,"Grade 8 - St. Dominic",96.4,0,4,91.2,0,"TVL Skills & Hospitality Society","Moderate","Competitive Basketball"
+109238475432,"Chloe Castro",Grade 7,"Grade 7 - St. Ignatius",80,0,2,95.6,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475433,"Sean Padilla",Grade 11,"Grade 11 - St. Augustine (STEM)",86.2,0,0,100,0,"TVL Skills & Hospitality Society","High","Photography & Video Editing"
+109238475434,"Denise Garcia",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.7,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Reading Novels & Webtoons"
+109238475435,"Bianca Mercado",Grade 11,"Grade 11 - St. Clare (ABM)",86.4,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Mobile App Experimentation"
+109238475436,"Rafael Salazar",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",75.8,0,3,93.4,0,"TVL Skills & Hospitality Society","Moderate","Mobile App Experimentation"
+109238475437,"Princess Mae Villanueva",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",70.6,0,2,95.6,2,"None / Non-Member","None","Casual Mobile Gaming"
+109238475438,"Karl Santiago",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",87.9,0,3,93.4,0,"Math & Science Guild","High","Debate & Public Speaking"
+109238475439,"Jasmine Santos",Grade 12,"Grade 12 - St. Jude (ABM)",80.4,0,0,100,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475440,"Karl Mercado",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",70.8,0,2,95.6,1,"None / Non-Member","None","None / Disengaged"
+109238475441,"Camille Manalo",Grade 10,"Grade 10 - St. Francis",76.7,0,1,97.8,0,"Badminton & Table Tennis Club","Low","Photography & Video Editing"
+109238475442,"Paolo Santiago",Grade 9,"Grade 9 - St. Benedict",76.8,0,5,89,0,"TVL Skills & Hospitality Society","Moderate","Badminton & Cycling"
+109238475443,"Vanessa Bautista",Grade 8,"Grade 8 - St. Dominic",76.8,1,0,100,0,"Badminton & Table Tennis Club","Low","Reading Novels & Webtoons"
+109238475444,"Lucas Tolentino",Grade 7,"Grade 7 - St. Ignatius",87.1,0,1,97.8,0,"Math & Science Guild","High","Competitive Basketball"
+109238475445,"Rochelle Gonzales",Grade 11,"Grade 11 - St. Augustine (STEM)",83.4,0,4,91.2,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475446,"Gabriel Pascual",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.4,0,5,89,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
+109238475447,"Hannah Tan",Grade 11,"Grade 11 - St. Clare (ABM)",71.2,1,3,93.4,2,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475448,"Sofia Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93.5,0,2,95.6,0,"Badminton & Table Tennis Club","High","Acoustic Band & Guitar"
+109238475449,"Kristine Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.7,0,5,89,0,"Young Entrepreneurs & ABM Club","High","Robotics & Web Development"
+109238475450,"Karl Reyes",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",90.7,0,2,95.6,0,"Peer Facilitators Wellness Circle","High","Acoustic Band & Guitar"
+109238475451,"Angelo Salazar",Grade 12,"Grade 12 - St. Jude (ABM)",63.8,4,11,75.8,1,"None / Non-Member","None","Casual Mobile Gaming"
+109238475452,"Angelica Bautista",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",77.6,0,2,95.6,0,"None / Non-Member","None","Casual Mobile Gaming"
+109238475453,"Kyle Valdez",Grade 10,"Grade 10 - St. Francis",85.3,0,3,93.4,0,"Peer Facilitators Wellness Circle","Moderate","Acoustic Band & Guitar"
+109238475454,"Christian Dave Ocampo",Grade 9,"Grade 9 - St. Benedict",92.5,0,0,100,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
+109238475455,"Cedric Tolentino",Grade 8,"Grade 8 - St. Dominic",91.6,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","High","Competitive Basketball"
+109238475456,"Angelo Mercado",Grade 7,"Grade 7 - St. Ignatius",78.1,0,1,97.8,0,"Young Entrepreneurs & ABM Club","Moderate","Cooking & Baking"
+109238475457,"Camille Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",71.5,3,7,84.6,2,"None / Non-Member","None","Casual Mobile Gaming"
+109238475458,"Bea Patricia Alcantara",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",65.2,2,6,86.8,2,"None / Non-Member","None","None / Disengaged"
+109238475459,"Samantha Nicole Bautista",Grade 11,"Grade 11 - St. Clare (ABM)",86.7,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","Moderate","Debate & Public Speaking"
+109238475460,"Cedric Manalo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",94.3,0,5,89,0,"Glee Club & Chorale","High","Campus Journalism & Creative Writing"
+109238475461,"Daniel Bautista",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",81.5,0,1,97.8,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238475462,"Erika Santos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",72.6,1,3,93.4,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475463,"Sean Santos",Grade 12,"Grade 12 - St. Jude (ABM)",73.9,2,15,67,3,"None / Non-Member","None","Casual Mobile Gaming"
+109238475464,"Alexander Tolentino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",85.5,0,1,97.8,0,"Young Entrepreneurs & ABM Club","High","Debate & Public Speaking"
+109238475465,"Daniel San Jose",Grade 10,"Grade 10 - St. Francis",92.8,0,4,91.2,0,"Glee Club & Chorale","High","Digital Art & Graphic Design"
+109238475466,"Angelo Aquino",Grade 9,"Grade 9 - St. Benedict",75.6,0,3,93.4,0,"Boy Scouts / Girl Scouts","Low","Photography & Video Editing"
+109238475467,"Joshua Santos",Grade 8,"Grade 8 - St. Dominic",72.8,1,2,95.6,2,"None / Non-Member","None","Casual Mobile Gaming"
+109238475468,"Denise De Leon",Grade 7,"Grade 7 - St. Ignatius",93.7,0,2,95.6,0,"TVL Skills & Hospitality Society","High","Competitive Basketball"
+109238475469,"Daniel Pascual",Grade 11,"Grade 11 - St. Augustine (STEM)",75.8,0,2,95.6,0,"Badminton & Table Tennis Club","Low","Mobile App Experimentation"
+109238475470,"Paolo Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",81.2,0,3,93.4,0,"Boy Scouts / Girl Scouts","Moderate","Photography & Video Editing"
+109238475471,"Kyle Ramos",Grade 11,"Grade 11 - St. Clare (ABM)",92.5,0,2,95.6,0,"Badminton & Table Tennis Club","Moderate","Debate & Public Speaking"
+109238475472,"Rochelle Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",80.8,0,1,97.8,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475473,"Adrian Santiago",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.1,0,1,97.8,0,"Young Entrepreneurs & ABM Club","High","Competitive Basketball"
+109238475474,"Adrian Rivera",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",93.3,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Acoustic Band & Guitar"
+109238475475,"Princess Mae Alcantara",Grade 12,"Grade 12 - St. Jude (ABM)",90.3,0,3,93.4,0,"Math & Science Guild","High","Badminton & Cycling"
+109238475476,"Rochelle Soriano",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.7,0,3,93.4,0,"Badminton & Table Tennis Club","High","Mobile App Experimentation"
+109238475477,"Sofia Salazar",Grade 10,"Grade 10 - St. Francis",77.2,0,1,97.8,0,"None / Non-Member","None","None / Disengaged"
+109238475478,"Alyssa San Jose",Grade 9,"Grade 9 - St. Benedict",95,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
+109238475479,"Denise Corpuz",Grade 8,"Grade 8 - St. Dominic",82.4,0,0,100,0,"TVL Skills & Hospitality Society","Low","Mobile App Experimentation"
+109238475480,"Dominic Pascual",Grade 7,"Grade 7 - St. Ignatius",88.2,0,3,93.4,0,"Badminton & Table Tennis Club","High","Acoustic Band & Guitar"
+109238475481,"Sofia Villanueva",Grade 11,"Grade 11 - St. Augustine (STEM)",93.6,0,1,97.8,0,"Teatro San Antonio (Drama Guild)","High","Debate & Public Speaking"
+109238475482,"John Carlo Valdez",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91.6,0,2,95.6,0,"Badminton & Table Tennis Club","Moderate","Cooking & Baking"
+109238475483,"Nathan Ocampo",Grade 11,"Grade 11 - St. Clare (ABM)",87.8,0,2,95.6,0,"Robotics & Coding Society","Moderate","Robotics & Web Development"
+109238475484,"Mark Kenneth Torres",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",94.5,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Debate & Public Speaking"
+109238475485,"Daniel Domingo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.7,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Digital Art & Graphic Design"
+109238475486,"Denise Mendoza",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",78.2,0,3,93.4,0,"None / Non-Member","None","None / Disengaged"
+109238475487,"Ethan Navarro",Grade 12,"Grade 12 - St. Jude (ABM)",96.8,0,2,95.6,0,"Red Cross Youth (RCY)","High","Cooking & Baking"
+109238475488,"Cedric Rivera",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93.4,0,5,89,0,"Glee Club & Chorale","High","Badminton & Cycling"
+109238475489,"Jasmine Domingo",Grade 10,"Grade 10 - St. Francis",80.2,0,1,97.8,0,"TVL Skills & Hospitality Society","Moderate","Badminton & Cycling"
+109238475490,"Camille Corpuz",Grade 9,"Grade 9 - St. Benedict",89,0,2,95.6,0,"Varsity Athletics (Basketball/Volleyball)","High","Robotics & Web Development"
+109238475491,"Mariel Tolentino",Grade 8,"Grade 8 - St. Dominic",95.2,0,2,95.6,0,"Badminton & Table Tennis Club","High","Campus Journalism & Creative Writing"
+109238475492,"Kathleen Lim",Grade 7,"Grade 7 - St. Ignatius",90.2,0,1,97.8,0,"Peer Facilitators Wellness Circle","High","Badminton & Cycling"
+109238475493,"Vincent Tolentino",Grade 11,"Grade 11 - St. Augustine (STEM)",75.5,1,3,93.4,0,"Teatro San Antonio (Drama Guild)","Low","Mobile App Experimentation"
+109238475494,"Princess Mae Santos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.4,0,2,95.6,0,"Math & Science Guild","High","Campus Journalism & Creative Writing"
+109238475495,"Karl Lim",Grade 11,"Grade 11 - St. Clare (ABM)",91.8,0,3,93.4,0,"TVL Skills & Hospitality Society","Moderate","Robotics & Web Development"
+109238475496,"Lance Dela Cruz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",80.6,0,1,97.8,0,"Peer Facilitators Wellness Circle","Moderate","Reading Novels & Webtoons"
+109238475497,"Trisha Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",94.8,0,5,89,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
+109238475498,"Nicole Santos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",79.8,0,1,97.8,0,"None / Non-Member","None","Passive Screen Time / Social Media"
+109238475499,"Christian Dave Santos",Grade 12,"Grade 12 - St. Jude (ABM)",67.5,3,11,75.8,1,"None / Non-Member","None","None / Disengaged"
+109238475500,"Alyssa Tan",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75.9,0,5,89,0,"None / Non-Member","None","Unstructured Rest / Inactive"

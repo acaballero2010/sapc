@@ -1,501 +1,501 @@
-lrn,student_name,overdue_installments,unpaid_balance_php,promissory_note_active,voucher_subsidy_status,alumni_grant_eligible
-109238475001,"Jerome Santos",1,10570,true,"Alumni Grantee",false
-109238475002,"Alyssa Castro",0,0,false,"ESC Scholar",false
-109238475003,"Shaina Soriano",0,0,false,"Full DepEd Voucher",false
-109238475004,"Hannah Tolentino",0,0,false,"ESC Scholar",false
-109238475005,"Danielle Torres",0,1226,false,"ESC Scholar",false
-109238475006,"Vincent Ocampo",1,9290,true,"Full DepEd Voucher",false
-109238475007,"Chloe San Jose",4,32441,true,"Partial ESC Subsidy",true
-109238475008,"Lucas Valdez",2,11277,false,"ESC Scholar",false
-109238475009,"Miguel Rivera",0,0,false,"Full DepEd Voucher",false
-109238475010,"Danielle Garcia",1,10580,true,"Alumni Grantee",false
-109238475011,"Danielle Corpuz",0,0,false,"Full DepEd Voucher",false
-109238475012,"Althea Ocampo",0,0,false,"ESC Scholar",false
-109238475013,"Princess Mae Soriano",0,1198,false,"Full DepEd Voucher",false
-109238475014,"Erika San Jose",0,0,false,"ESC Scholar",false
-109238475015,"Camille Padilla",0,263,false,"Full DepEd Voucher",false
-109238475016,"Angelo Ramos",1,11068,true,"Alumni Grantee",true
-109238475017,"Aaron Corpuz",0,1474,false,"ESC Scholar",false
-109238475018,"Trisha Bautista",0,0,false,"Full DepEd Voucher",false
-109238475019,"Mariel Rivera",0,0,false,"ESC Scholar",false
-109238475020,"Nicole Padilla",0,0,false,"Full DepEd Voucher",false
-109238475021,"Miguel Mendoza",0,0,false,"Full DepEd Voucher",false
-109238475022,"Gabriel Bautista",0,0,false,"ESC Scholar",false
-109238475023,"Jasmine De Leon",1,9047,true,"Alumni Grantee",false
-109238475024,"Gabriel Padilla",1,10839,false,"Full Pay / Private",true
-109238475025,"Sofia Reyes",2,8439,true,"Alumni Grantee",false
-109238475026,"Danielle Reyes",0,0,false,"Full DepEd Voucher",false
-109238475027,"Bea Patricia Flores",0,0,false,"Full DepEd Voucher",false
-109238475028,"Kathleen Ocampo",0,0,false,"Full DepEd Voucher",false
-109238475029,"Shaina Navarro",0,0,false,"Full DepEd Voucher",false
-109238475030,"Erika Mercado",0,0,false,"Full DepEd Voucher",false
-109238475031,"Rochelle Castillo",2,10317,false,"ESC Scholar",true
-109238475032,"Mark Kenneth San Jose",0,0,false,"Full DepEd Voucher",false
-109238475033,"Hannah Dela Cruz",0,0,false,"Full DepEd Voucher",false
-109238475034,"Althea Villanueva",2,10970,false,"Partial ESC Subsidy",false
-109238475035,"Francis Valdez",0,1321,false,"ESC Scholar",false
-109238475036,"Christian Dave Dizon",0,0,false,"ESC Scholar",false
-109238475037,"Shaina Torres",0,0,false,"Full DepEd Voucher",false
-109238475038,"Hannah Ocampo",0,0,false,"ESC Scholar",false
-109238475039,"Erika Corpuz",5,30528,true,"Partial ESC Subsidy",true
-109238475040,"Kathleen Castillo",0,0,false,"ESC Scholar",false
-109238475041,"Kyle Bautista",0,0,false,"ESC Scholar",false
-109238475042,"Erika Mendoza",1,10883,false,"Full DepEd Voucher",true
-109238475043,"Bea Patricia Mercado",0,0,false,"Full DepEd Voucher",false
-109238475044,"Alyssa Domingo",0,1165,false,"ESC Scholar",false
-109238475045,"Kristine Tan",0,1231,false,"ESC Scholar",false
-109238475046,"Kyle Dela Cruz",0,0,false,"Full DepEd Voucher",false
-109238475047,"Patricia Santos",0,0,false,"Full DepEd Voucher",false
-109238475048,"Althea Rivera",0,0,false,"Full DepEd Voucher",false
-109238475049,"Jerome Villanueva",1,9944,true,"ESC Scholar",false
-109238475050,"Mariel Ramos",2,10086,false,"Partial ESC Subsidy",true
-109238475051,"Daniel Valdez",0,0,false,"Full DepEd Voucher",false
-109238475052,"Adrian Lim",0,0,false,"Full DepEd Voucher",false
-109238475053,"Angelica Corpuz",0,0,false,"Full DepEd Voucher",false
-109238475054,"Kyle Corpuz",0,0,false,"ESC Scholar",false
-109238475055,"Vincent Dela Cruz",0,0,false,"ESC Scholar",false
-109238475056,"Denise Alcantara",2,11375,true,"Partial ESC Subsidy",false
-109238475057,"Chloe Bautista",0,0,false,"Full DepEd Voucher",false
-109238475058,"Christian Dave Bautista",0,0,false,"Full DepEd Voucher",false
-109238475059,"Samantha Nicole Valdez",0,0,false,"Full DepEd Voucher",false
-109238475060,"Ralph Valdez",0,0,false,"Full DepEd Voucher",false
-109238475061,"Alyssa Padilla",0,0,false,"Full DepEd Voucher",false
-109238475062,"Ethan Valdez",0,1451,false,"Full DepEd Voucher",false
-109238475063,"Denise Pascual",0,0,false,"Full DepEd Voucher",false
-109238475064,"Andrea Bautista",0,1468,false,"Full DepEd Voucher",false
-109238475065,"Vincent Mendoza",0,0,false,"Full DepEd Voucher",false
-109238475066,"Andrea San Jose",0,290,false,"Full DepEd Voucher",false
-109238475067,"Ralph Santiago",0,0,false,"Full DepEd Voucher",false
-109238475068,"Miguel Reyes",0,0,false,"ESC Scholar",false
-109238475069,"Kyle Gonzales",1,9691,false,"Partial ESC Subsidy",false
-109238475070,"Bianca Domingo",0,0,false,"Full DepEd Voucher",false
-109238475071,"Hannah Salazar",2,9874,true,"Alumni Grantee",false
-109238475072,"Francis Pascual",2,12063,true,"Full DepEd Voucher",false
-109238475073,"Kyle Salazar",0,0,false,"Full DepEd Voucher",false
-109238475074,"Justin Domingo",0,0,false,"ESC Scholar",false
-109238475075,"Kathleen Manalo",0,600,false,"Full DepEd Voucher",false
-109238475076,"Erika Corpuz",0,985,false,"Full DepEd Voucher",false
-109238475077,"Samantha Nicole Dizon",0,0,false,"Full DepEd Voucher",false
-109238475078,"Jasmine Aquino",2,11970,true,"Alumni Grantee",true
-109238475079,"Lance Valdez",0,0,false,"Full DepEd Voucher",false
-109238475080,"Andrea Tolentino",2,9315,false,"Full Pay / Private",true
-109238475081,"Francis Castro",0,0,false,"ESC Scholar",false
-109238475082,"Vanessa Santos",0,0,false,"Full DepEd Voucher",false
-109238475083,"Kristine Salazar",0,0,false,"ESC Scholar",false
-109238475084,"Paolo Reyes",1,11529,false,"Full DepEd Voucher",true
-109238475085,"Mariel Tolentino",0,0,false,"ESC Scholar",false
-109238475086,"Althea Manalo",0,0,false,"Full DepEd Voucher",false
-109238475087,"Cedric Corpuz",0,26,false,"ESC Scholar",false
-109238475088,"Samantha Nicole Gonzales",0,0,false,"ESC Scholar",false
-109238475089,"Francis Soriano",2,9237,true,"Full DepEd Voucher",true
-109238475090,"Aaron San Jose",0,0,false,"ESC Scholar",false
-109238475091,"Cedric Villanueva",0,0,false,"Full DepEd Voucher",false
-109238475092,"Nicole Soriano",0,0,false,"Full DepEd Voucher",false
-109238475093,"John Carlo Salazar",0,0,false,"Full DepEd Voucher",false
-109238475094,"Jerome Tolentino",2,10981,true,"ESC Scholar",true
-109238475095,"Sofia Tolentino",2,11739,true,"Full Pay / Private",true
-109238475096,"Dominic Mendoza",0,0,false,"ESC Scholar",false
-109238475097,"Ethan Pascual",1,11280,false,"ESC Scholar",true
-109238475098,"Rochelle Dizon",0,0,false,"Full DepEd Voucher",false
-109238475099,"Adrian Rivera",2,11534,false,"Partial ESC Subsidy",false
-109238475100,"Kyle Mercado",1,9154,false,"ESC Scholar",false
-109238475101,"Bianca Torres",2,9586,true,"Alumni Grantee",false
-109238475102,"Samantha Nicole Rivera",0,0,false,"Full DepEd Voucher",false
-109238475103,"Cedric Alcantara",2,10685,false,"Alumni Grantee",false
-109238475104,"Vanessa Santos",0,0,false,"ESC Scholar",false
-109238475105,"Rochelle Ocampo",0,0,false,"Full DepEd Voucher",false
-109238475106,"Ethan Manalo",1,10823,false,"ESC Scholar",false
-109238475107,"Althea Mercado",0,0,false,"Full DepEd Voucher",false
-109238475108,"Ralph Dela Cruz",1,10260,false,"ESC Scholar",false
-109238475109,"Rafael Pascual",0,0,false,"ESC Scholar",false
-109238475110,"Mark Kenneth Bautista",1,10724,true,"Partial ESC Subsidy",false
-109238475111,"Miguel Domingo",0,0,false,"ESC Scholar",false
-109238475112,"Alexander De Leon",2,10804,false,"Partial ESC Subsidy",true
-109238475113,"Erika Garcia",0,0,false,"Full DepEd Voucher",false
-109238475114,"Denise Castillo",1,9754,true,"Full Pay / Private",false
-109238475115,"Lance Lim",1,8734,true,"ESC Scholar",false
-109238475116,"Kristine Bautista",2,11008,true,"Alumni Grantee",false
-109238475117,"Adrian Padilla",0,0,false,"Full DepEd Voucher",false
-109238475118,"Camille Pascual",2,12365,true,"Partial ESC Subsidy",true
-109238475119,"Camille Dizon",3,31433,true,"Partial ESC Subsidy",true
-109238475120,"Justin Dizon",0,0,false,"Full DepEd Voucher",false
-109238475121,"Angelo Aquino",1,10046,true,"ESC Scholar",false
-109238475122,"Vincent Tan",0,0,false,"Full DepEd Voucher",false
-109238475123,"Joshua Soriano",0,0,false,"ESC Scholar",false
-109238475124,"Alyssa Valdez",1,9958,false,"Partial ESC Subsidy",false
-109238475125,"Samantha Nicole Rivera",0,0,false,"ESC Scholar",false
-109238475126,"Camille Santos",2,9888,false,"Full Pay / Private",false
-109238475127,"Angelo Castro",0,218,false,"ESC Scholar",false
-109238475128,"Angelo Padilla",2,9256,true,"Partial ESC Subsidy",false
-109238475129,"Chloe Torres",0,442,false,"ESC Scholar",false
-109238475130,"Chloe Flores",2,9886,true,"Alumni Grantee",true
-109238475131,"Gabriel Bautista",0,0,false,"Full DepEd Voucher",false
-109238475132,"Shaina Salazar",2,10503,false,"Full DepEd Voucher",false
-109238475133,"Kathleen Aquino",0,0,false,"Full DepEd Voucher",false
-109238475134,"Princess Mae Pascual",2,9638,false,"Alumni Grantee",false
-109238475135,"Rochelle San Jose",0,525,false,"Full DepEd Voucher",false
-109238475136,"Vanessa Valdez",2,9935,true,"Alumni Grantee",false
-109238475137,"Nicole Navarro",0,0,false,"ESC Scholar",false
-109238475138,"Danielle Navarro",1,10861,true,"Partial ESC Subsidy",false
-109238475139,"Angelica Garcia",0,647,false,"Full DepEd Voucher",false
-109238475140,"Kristine Lim",0,0,false,"ESC Scholar",false
-109238475141,"Matthew Castro",2,10195,false,"ESC Scholar",false
-109238475142,"Kristine Castro",0,1297,false,"Full DepEd Voucher",false
-109238475143,"Patricia De Leon",0,0,false,"ESC Scholar",false
-109238475144,"Chloe Bautista",0,0,false,"Full DepEd Voucher",false
-109238475145,"Francis Ocampo",0,0,false,"ESC Scholar",false
-109238475146,"Christian Dave Mendoza",0,0,false,"Full DepEd Voucher",false
-109238475147,"Erika Santos",0,0,false,"Full DepEd Voucher",false
-109238475148,"Lucas Pascual",0,384,false,"ESC Scholar",false
-109238475149,"Paolo Castro",0,0,false,"Full DepEd Voucher",false
-109238475150,"Patricia Salazar",2,9474,true,"ESC Scholar",true
-109238475151,"Sofia Mendoza",0,1040,false,"Full DepEd Voucher",false
-109238475152,"Alyssa Aquino",0,0,false,"Full DepEd Voucher",false
-109238475153,"Mark Kenneth Reyes",0,0,false,"Full DepEd Voucher",false
-109238475154,"Adrian Santos",2,10657,false,"Full Pay / Private",false
-109238475155,"Bianca Flores",2,11530,true,"Full Pay / Private",true
-109238475156,"Trisha Tan",0,0,false,"Full DepEd Voucher",false
-109238475157,"Lance Pascual",0,0,false,"Full DepEd Voucher",false
-109238475158,"Kyle Castillo",0,0,false,"Full DepEd Voucher",false
-109238475159,"Paolo Gonzales",0,764,false,"ESC Scholar",false
-109238475160,"John Carlo Castillo",0,0,false,"Full DepEd Voucher",false
-109238475161,"Camille De Leon",0,0,false,"ESC Scholar",false
-109238475162,"Trisha Valdez",0,0,false,"ESC Scholar",false
-109238475163,"Adrian Lim",0,0,false,"Full DepEd Voucher",false
-109238475164,"Matthew Navarro",1,10457,false,"Alumni Grantee",false
-109238475165,"Kyle Tolentino",4,28272,true,"Full Pay / Private",true
-109238475166,"Mark Kenneth Torres",0,0,false,"Full DepEd Voucher",false
-109238475167,"Matthew Mercado",0,0,false,"Full DepEd Voucher",false
-109238475168,"Kyle Dela Cruz",0,0,false,"Full DepEd Voucher",false
-109238475169,"Hannah Santos",4,29234,true,"Partial ESC Subsidy",true
-109238475170,"Shaina Mercado",0,0,false,"Full DepEd Voucher",false
-109238475171,"Erika Alcantara",0,0,false,"ESC Scholar",false
-109238475172,"Gabriel Salazar",1,11109,true,"Full DepEd Voucher",false
-109238475173,"Jerome Domingo",5,33570,true,"Full Pay / Private",true
-109238475174,"Cedric Reyes",0,0,false,"Full DepEd Voucher",false
-109238475175,"Sofia San Jose",0,490,false,"ESC Scholar",false
-109238475176,"Karl Dela Cruz",0,496,false,"Full DepEd Voucher",false
-109238475177,"Nathan Santos",4,29615,true,"Partial ESC Subsidy",true
-109238475178,"Vanessa Soriano",0,0,false,"ESC Scholar",false
-109238475179,"Vincent De Leon",2,11686,true,"Alumni Grantee",true
-109238475180,"Vincent Bautista",0,931,false,"Full DepEd Voucher",false
-109238475181,"Alyssa Soriano",0,0,false,"Full DepEd Voucher",false
-109238475182,"Angelo Dela Cruz",0,0,false,"ESC Scholar",false
-109238475183,"Joshua Dizon",2,10919,false,"Full Pay / Private",false
-109238475184,"Chloe Villanueva",2,9828,true,"ESC Scholar",false
-109238475185,"Princess Mae San Jose",2,10259,false,"Partial ESC Subsidy",true
-109238475186,"Hannah Manalo",0,0,false,"ESC Scholar",false
-109238475187,"Alexander Reyes",0,0,false,"Full DepEd Voucher",false
-109238475188,"Trisha Domingo",2,10346,false,"Full Pay / Private",false
-109238475189,"Kristine San Jose",0,647,false,"ESC Scholar",false
-109238475190,"Mariel Rivera",0,0,false,"Full DepEd Voucher",false
-109238475191,"Lucas Corpuz",1,10558,true,"Alumni Grantee",false
-109238475192,"Jasmine Aquino",1,10350,true,"Partial ESC Subsidy",false
-109238475193,"Althea Salazar",1,11232,true,"Partial ESC Subsidy",true
-109238475194,"Camille Rivera",0,0,false,"Full DepEd Voucher",false
-109238475195,"Lance Corpuz",1,10205,false,"Partial ESC Subsidy",false
-109238475196,"Adrian Tan",0,0,false,"Full DepEd Voucher",false
-109238475197,"Adrian Castro",0,0,false,"Full DepEd Voucher",false
-109238475198,"Jerome Ocampo",1,10263,true,"Full Pay / Private",true
-109238475199,"Alyssa Mendoza",0,1062,false,"ESC Scholar",false
-109238475200,"Mariel Gonzales",2,10826,false,"ESC Scholar",false
-109238475201,"Cedric Flores",0,0,false,"ESC Scholar",false
-109238475202,"Samantha Nicole Salazar",0,0,false,"Full DepEd Voucher",false
-109238475203,"Rafael Pascual",0,0,false,"Full DepEd Voucher",false
-109238475204,"Rafael Lim",0,0,false,"ESC Scholar",false
-109238475205,"Angelica Mendoza",2,10813,true,"Alumni Grantee",true
-109238475206,"Trisha Ramos",0,395,false,"Full DepEd Voucher",false
-109238475207,"Kyle De Leon",0,0,false,"Full DepEd Voucher",false
-109238475208,"Andrea Pascual",1,12321,true,"Full Pay / Private",true
-109238475209,"Bea Patricia Ocampo",0,308,false,"ESC Scholar",false
-109238475210,"Joshua Garcia",0,0,false,"Full DepEd Voucher",false
-109238475211,"Angelica Garcia",1,8772,false,"Alumni Grantee",true
-109238475212,"Trisha Ramos",0,0,false,"Full DepEd Voucher",false
-109238475213,"Patricia Reyes",1,10808,true,"Full Pay / Private",true
-109238475214,"Trisha De Leon",0,188,false,"ESC Scholar",false
-109238475215,"Matthew Salazar",0,0,false,"ESC Scholar",false
-109238475216,"Cedric Dela Cruz",2,10618,false,"Full Pay / Private",true
-109238475217,"Vanessa Garcia",1,11964,true,"Full Pay / Private",false
-109238475218,"Rochelle Rivera",0,0,false,"Full DepEd Voucher",false
-109238475219,"Kyle Santiago",0,0,false,"ESC Scholar",false
-109238475220,"Camille San Jose",0,0,false,"Full DepEd Voucher",false
-109238475221,"Cedric Mendoza",0,0,false,"Full DepEd Voucher",false
-109238475222,"Vanessa Reyes",2,8943,true,"ESC Scholar",false
-109238475223,"Aaron Soriano",0,0,false,"ESC Scholar",false
-109238475224,"Sofia Padilla",0,0,false,"Full DepEd Voucher",false
-109238475225,"Adrian Soriano",0,625,false,"Full DepEd Voucher",false
-109238475226,"Ethan Dizon",0,0,false,"Full DepEd Voucher",false
-109238475227,"Ethan Manalo",0,177,false,"Full DepEd Voucher",false
-109238475228,"Althea Rivera",0,0,false,"Full DepEd Voucher",false
-109238475229,"Daniel Navarro",0,1229,false,"Full DepEd Voucher",false
-109238475230,"Kristine Lim",3,31329,true,"Partial ESC Subsidy",true
-109238475231,"Hannah Padilla",2,9864,false,"ESC Scholar",false
-109238475232,"Matthew Santos",0,0,false,"ESC Scholar",false
-109238475233,"Paolo Navarro",0,1268,false,"ESC Scholar",false
-109238475234,"Cedric Salazar",2,9284,true,"Full Pay / Private",false
-109238475235,"Karl Ocampo",0,786,false,"ESC Scholar",false
-109238475236,"Samantha Nicole Alcantara",0,1149,false,"Full DepEd Voucher",false
-109238475237,"Sofia Manalo",0,0,false,"Full DepEd Voucher",false
-109238475238,"Lance Dela Cruz",0,0,false,"Full DepEd Voucher",false
-109238475239,"Ethan Reyes",0,1338,false,"ESC Scholar",false
-109238475240,"Erika Castillo",0,0,false,"Full DepEd Voucher",false
-109238475241,"Kristine Ocampo",2,11557,false,"ESC Scholar",true
-109238475242,"Erika Ocampo",1,10798,true,"ESC Scholar",false
-109238475243,"Patricia Manalo",0,0,false,"ESC Scholar",false
-109238475244,"Rochelle Aquino",1,10262,true,"Full Pay / Private",false
-109238475245,"Lucas Padilla",0,0,false,"Full DepEd Voucher",false
-109238475246,"Alyssa Aquino",0,0,false,"Full DepEd Voucher",false
-109238475247,"Nicole Mendoza",0,1098,false,"ESC Scholar",false
-109238475248,"Angelica Santiago",0,623,false,"Full DepEd Voucher",false
-109238475249,"Erika Villanueva",1,10339,false,"Alumni Grantee",false
-109238475250,"Hannah Reyes",0,0,false,"ESC Scholar",false
-109238475251,"Justin Villanueva",0,0,false,"Full DepEd Voucher",false
-109238475252,"Patricia Tan",0,0,false,"ESC Scholar",false
-109238475253,"Camille De Leon",0,0,false,"ESC Scholar",false
-109238475254,"Princess Mae Lim",0,0,false,"Full DepEd Voucher",false
-109238475255,"Bea Patricia Aquino",0,0,false,"Full DepEd Voucher",false
-109238475256,"Matthew Garcia",0,0,false,"Full DepEd Voucher",false
-109238475257,"Ethan Soriano",2,11218,true,"Alumni Grantee",false
-109238475258,"Mariel Navarro",0,0,false,"Full DepEd Voucher",false
-109238475259,"Lance Flores",0,0,false,"Full DepEd Voucher",false
-109238475260,"Sofia Lim",0,0,false,"ESC Scholar",false
-109238475261,"Danielle Villanueva",0,0,false,"ESC Scholar",false
-109238475262,"Kathleen Bautista",1,9190,true,"Alumni Grantee",true
-109238475263,"Paolo Villanueva",0,262,false,"ESC Scholar",false
-109238475264,"Kristine Tan",0,1357,false,"Full DepEd Voucher",false
-109238475265,"Nicole Domingo",5,30553,true,"Full Pay / Private",true
-109238475266,"Vanessa Santos",0,0,false,"ESC Scholar",false
-109238475267,"Sean Dela Cruz",0,0,false,"Full DepEd Voucher",false
-109238475268,"Kristine Mendoza",0,0,false,"Full DepEd Voucher",false
-109238475269,"Vincent Corpuz",0,0,false,"Full DepEd Voucher",false
-109238475270,"Nicole Flores",0,0,false,"Full DepEd Voucher",false
-109238475271,"Matthew Soriano",0,0,false,"Full DepEd Voucher",false
-109238475272,"Miguel Padilla",5,33403,true,"Full Pay / Private",true
-109238475273,"Rochelle Flores",0,0,false,"Full DepEd Voucher",false
-109238475274,"Angelica Tan",0,0,false,"Full DepEd Voucher",false
-109238475275,"Nathan Castillo",0,0,false,"Full DepEd Voucher",false
-109238475276,"Miguel Valdez",5,33935,true,"Partial ESC Subsidy",true
-109238475277,"Mark Kenneth Navarro",0,915,false,"ESC Scholar",false
-109238475278,"Bianca Padilla",3,31277,true,"Full Pay / Private",true
-109238475279,"Sean Torres",0,303,false,"Full DepEd Voucher",false
-109238475280,"Vanessa Navarro",0,0,false,"Full DepEd Voucher",false
-109238475281,"Kyle San Jose",0,0,false,"Full DepEd Voucher",false
-109238475282,"Rochelle Padilla",0,818,false,"Full DepEd Voucher",false
-109238475283,"Samantha Nicole Tan",1,10432,true,"Full DepEd Voucher",true
-109238475284,"Princess Mae Padilla",2,10403,false,"Full Pay / Private",false
-109238475285,"Samantha Nicole Ocampo",0,0,false,"ESC Scholar",false
-109238475286,"Princess Mae Navarro",2,9741,true,"Full DepEd Voucher",false
-109238475287,"Adrian Corpuz",0,0,false,"ESC Scholar",false
-109238475288,"Denise Bautista",2,10541,false,"Alumni Grantee",true
-109238475289,"Kathleen Salazar",0,0,false,"ESC Scholar",false
-109238475290,"Jasmine Bautista",1,9800,true,"Partial ESC Subsidy",true
-109238475291,"Rafael Dizon",1,11715,false,"Full DepEd Voucher",true
-109238475292,"Jerome Garcia",0,0,false,"ESC Scholar",false
-109238475293,"Hannah Castro",2,10602,true,"Full Pay / Private",false
-109238475294,"Cedric Navarro",1,11260,true,"Full Pay / Private",true
-109238475295,"Rochelle San Jose",0,0,false,"Full DepEd Voucher",false
-109238475296,"Lucas De Leon",0,0,false,"Full DepEd Voucher",false
-109238475297,"Kristine Padilla",0,0,false,"Full DepEd Voucher",false
-109238475298,"Hannah Domingo",5,28997,true,"Full Pay / Private",true
-109238475299,"Gabriel Flores",0,0,false,"Full DepEd Voucher",false
-109238475300,"Jasmine Pascual",0,0,false,"ESC Scholar",false
-109238475301,"Nicole Torres",0,0,false,"Full DepEd Voucher",false
-109238475302,"Mariel Corpuz",0,0,false,"ESC Scholar",false
-109238475303,"Joshua Pascual",4,30372,true,"Partial ESC Subsidy",true
-109238475304,"Shaina Padilla",0,0,false,"ESC Scholar",false
-109238475305,"Paolo Dizon",0,0,false,"Full DepEd Voucher",false
-109238475306,"Althea Lim",1,10234,false,"Partial ESC Subsidy",false
-109238475307,"Kristine Mendoza",0,0,false,"ESC Scholar",false
-109238475308,"Erika Ocampo",0,0,false,"Full DepEd Voucher",false
-109238475309,"Vanessa Aquino",0,0,false,"ESC Scholar",false
-109238475310,"Joshua Dizon",0,0,false,"Full DepEd Voucher",false
-109238475311,"Daniel Tolentino",0,0,false,"Full DepEd Voucher",false
-109238475312,"Paolo Ocampo",1,12182,true,"Full Pay / Private",true
-109238475313,"Bea Patricia Salazar",2,9490,true,"Full Pay / Private",false
-109238475314,"Ethan Castillo",3,32325,true,"Full Pay / Private",true
-109238475315,"Alyssa Alcantara",0,0,false,"Full DepEd Voucher",false
-109238475316,"Nicole Mendoza",0,0,false,"ESC Scholar",false
-109238475317,"Althea Bautista",0,0,false,"Full DepEd Voucher",false
-109238475318,"Kyle Lim",0,0,false,"ESC Scholar",false
-109238475319,"Daniel Navarro",0,0,false,"Full DepEd Voucher",false
-109238475320,"Dominic Villanueva",0,0,false,"ESC Scholar",false
-109238475321,"Ralph Rivera",0,0,false,"ESC Scholar",false
-109238475322,"Karl Ocampo",0,1423,false,"ESC Scholar",false
-109238475323,"Justin Flores",0,0,false,"Full DepEd Voucher",false
-109238475324,"Cedric Villanueva",0,0,false,"ESC Scholar",false
-109238475325,"Kathleen Tan",2,9657,true,"Alumni Grantee",true
-109238475326,"Nicole Flores",1,10233,false,"Partial ESC Subsidy",true
-109238475327,"Kristine Santos",1,10458,true,"Full Pay / Private",false
-109238475328,"Althea Pascual",0,1062,false,"ESC Scholar",false
-109238475329,"Hannah Manalo",0,629,false,"Full DepEd Voucher",false
-109238475330,"Gabriel Torres",0,0,false,"ESC Scholar",false
-109238475331,"Alyssa Santos",0,0,false,"ESC Scholar",false
-109238475332,"Daniel Castro",2,9127,true,"ESC Scholar",true
-109238475333,"Sean Villanueva",2,8864,true,"ESC Scholar",false
-109238475334,"Lance Gonzales",0,0,false,"Full DepEd Voucher",false
-109238475335,"Angelica San Jose",0,0,false,"Full DepEd Voucher",false
-109238475336,"Princess Mae Rivera",0,0,false,"ESC Scholar",false
-109238475337,"Patricia Flores",0,0,false,"Full DepEd Voucher",false
-109238475338,"Adrian Torres",0,560,false,"Full DepEd Voucher",false
-109238475339,"Paolo De Leon",0,0,false,"Full DepEd Voucher",false
-109238475340,"John Carlo Padilla",0,0,false,"ESC Scholar",false
-109238475341,"Shaina Flores",5,32104,true,"Partial ESC Subsidy",true
-109238475342,"Aaron De Leon",0,670,false,"Full DepEd Voucher",false
-109238475343,"Rafael Domingo",2,11535,false,"Partial ESC Subsidy",true
-109238475344,"Danielle Dela Cruz",0,0,false,"ESC Scholar",false
-109238475345,"Vincent San Jose",0,0,false,"ESC Scholar",false
-109238475346,"Justin Aquino",0,0,false,"Full DepEd Voucher",false
-109238475347,"Karl Reyes",0,3,false,"Full DepEd Voucher",false
-109238475348,"Jerome De Leon",0,0,false,"Full DepEd Voucher",false
-109238475349,"Bea Patricia Rivera",0,0,false,"Full DepEd Voucher",false
-109238475350,"Paolo Aquino",2,10953,true,"Full DepEd Voucher",false
-109238475351,"Danielle Tolentino",0,0,false,"Full DepEd Voucher",false
-109238475352,"Althea Reyes",0,1137,false,"Full DepEd Voucher",false
-109238475353,"Princess Mae De Leon",0,0,false,"ESC Scholar",false
-109238475354,"Sean Rivera",2,10903,false,"ESC Scholar",false
-109238475355,"Danielle De Leon",0,0,false,"Full DepEd Voucher",false
-109238475356,"Nicole Castro",0,1200,false,"ESC Scholar",false
-109238475357,"Christian Dave Tolentino",5,29595,true,"Partial ESC Subsidy",true
-109238475358,"Nicole Villanueva",0,0,false,"ESC Scholar",false
-109238475359,"Denise Valdez",0,0,false,"Full DepEd Voucher",false
-109238475360,"Althea Santiago",0,0,false,"ESC Scholar",false
-109238475361,"Bea Patricia Castillo",1,9864,false,"Partial ESC Subsidy",false
-109238475362,"Sean Tolentino",2,9622,true,"Full DepEd Voucher",false
-109238475363,"Ethan San Jose",0,0,false,"Full DepEd Voucher",false
-109238475364,"Matthew Domingo",0,0,false,"Full DepEd Voucher",false
-109238475365,"Mariel Castillo",1,9659,false,"Alumni Grantee",false
-109238475366,"Lucas Castillo",0,1218,false,"Full DepEd Voucher",false
-109238475367,"Patricia Tan",0,0,false,"Full DepEd Voucher",false
-109238475368,"Samantha Nicole Aquino",0,0,false,"ESC Scholar",false
-109238475369,"Mark Kenneth Bautista",0,0,false,"ESC Scholar",false
-109238475370,"Lance Soriano",1,10540,false,"Alumni Grantee",false
-109238475371,"Alyssa Soriano",0,0,false,"ESC Scholar",false
-109238475372,"Angelo Gonzales",0,0,false,"Full DepEd Voucher",false
-109238475373,"Vincent Navarro",2,11806,true,"ESC Scholar",false
-109238475374,"Vanessa Gonzales",1,9441,false,"Full Pay / Private",true
-109238475375,"Shaina Ocampo",2,10918,true,"Alumni Grantee",true
-109238475376,"Kristine Ocampo",0,1474,false,"Full DepEd Voucher",false
-109238475377,"Karl Torres",0,763,false,"Full DepEd Voucher",false
-109238475378,"Kristine Santiago",0,0,false,"ESC Scholar",false
-109238475379,"Erika Castro",0,0,false,"ESC Scholar",false
-109238475380,"Ralph Castro",1,8929,true,"ESC Scholar",false
-109238475381,"Kristine Domingo",0,0,false,"Full DepEd Voucher",false
-109238475382,"Erika Gonzales",0,1341,false,"ESC Scholar",false
-109238475383,"Vanessa Mendoza",1,10617,true,"Full DepEd Voucher",false
-109238475384,"Bea Patricia Santos",0,0,false,"ESC Scholar",false
-109238475385,"Danielle San Jose",2,10346,false,"Partial ESC Subsidy",false
-109238475386,"Aaron Mendoza",0,0,false,"ESC Scholar",false
-109238475387,"Samantha Nicole Tan",2,10858,false,"Full DepEd Voucher",false
-109238475388,"Paolo Tan",1,11976,true,"ESC Scholar",true
-109238475389,"Francis Reyes",0,0,false,"ESC Scholar",false
-109238475390,"Ethan Lim",2,11520,true,"ESC Scholar",true
-109238475391,"Sean Alcantara",0,0,false,"ESC Scholar",false
-109238475392,"Nicole Tan",1,12405,true,"Alumni Grantee",false
-109238475393,"Vincent Alcantara",0,0,false,"Full DepEd Voucher",false
-109238475394,"Kathleen Rivera",0,0,false,"Full DepEd Voucher",false
-109238475395,"John Carlo Bautista",0,0,false,"Full DepEd Voucher",false
-109238475396,"Matthew Padilla",2,9755,false,"Partial ESC Subsidy",false
-109238475397,"Angelica Torres",0,0,false,"ESC Scholar",false
-109238475398,"Karl Lim",2,10247,true,"Partial ESC Subsidy",true
-109238475399,"Shaina Valdez",0,0,false,"Full DepEd Voucher",false
-109238475400,"Trisha Alcantara",5,31147,true,"Partial ESC Subsidy",true
-109238475401,"Alexander Manalo",0,0,false,"Full DepEd Voucher",false
-109238475402,"Mariel Santiago",0,1129,false,"ESC Scholar",false
-109238475403,"John Carlo Dizon",0,0,false,"Full DepEd Voucher",false
-109238475404,"Andrea Salazar",0,0,false,"ESC Scholar",false
-109238475405,"Bianca Manalo",0,0,false,"Full DepEd Voucher",false
-109238475406,"Samantha Nicole Soriano",3,27744,true,"Full Pay / Private",true
-109238475407,"Rochelle Bautista",0,279,false,"Full DepEd Voucher",false
-109238475408,"Joshua Rivera",0,0,false,"Full DepEd Voucher",false
-109238475409,"Angelo Navarro",0,0,false,"Full DepEd Voucher",false
-109238475410,"Lance Corpuz",1,8802,true,"ESC Scholar",true
-109238475411,"Sofia Salazar",0,0,false,"ESC Scholar",false
-109238475412,"Paolo Villanueva",0,1259,false,"ESC Scholar",false
-109238475413,"Shaina Tan",0,0,false,"Full DepEd Voucher",false
-109238475414,"Dominic Corpuz",1,11255,true,"ESC Scholar",true
-109238475415,"Patricia Torres",0,732,false,"ESC Scholar",false
-109238475416,"Joshua Santos",2,10808,false,"Alumni Grantee",true
-109238475417,"Ralph Castro",0,1262,false,"Full DepEd Voucher",false
-109238475418,"Jasmine Torres",0,0,false,"ESC Scholar",false
-109238475419,"Denise Tolentino",0,1224,false,"Full DepEd Voucher",false
-109238475420,"Patricia Gonzales",0,0,false,"Full DepEd Voucher",false
-109238475421,"Ralph Reyes",0,0,false,"Full DepEd Voucher",false
-109238475422,"Nathan Santiago",0,0,false,"ESC Scholar",false
-109238475423,"Karl Dela Cruz",0,0,false,"Full DepEd Voucher",false
-109238475424,"Rochelle Villanueva",0,589,false,"Full DepEd Voucher",false
-109238475425,"Nicole Padilla",0,0,false,"ESC Scholar",false
-109238475426,"Jerome Valdez",2,10840,true,"Full DepEd Voucher",true
-109238475427,"Nicole Santos",2,9937,false,"Alumni Grantee",false
-109238475428,"Ralph Garcia",0,0,false,"ESC Scholar",false
-109238475429,"Jerome Santiago",0,0,false,"Full DepEd Voucher",false
-109238475430,"Mariel Tan",1,10202,false,"Alumni Grantee",true
-109238475431,"Ralph Castro",0,0,false,"ESC Scholar",false
-109238475432,"Aaron Rivera",1,11576,true,"Full Pay / Private",false
-109238475433,"Rafael Flores",0,0,false,"Full DepEd Voucher",false
-109238475434,"Angelica Soriano",1,11175,true,"Partial ESC Subsidy",false
-109238475435,"John Carlo Villanueva",0,0,false,"ESC Scholar",false
-109238475436,"Mark Kenneth Tolentino",0,0,false,"ESC Scholar",false
-109238475437,"Jerome Valdez",0,0,false,"ESC Scholar",false
-109238475438,"Patricia Mendoza",0,0,false,"ESC Scholar",false
-109238475439,"Lucas Valdez",0,0,false,"ESC Scholar",false
-109238475440,"Christian Dave San Jose",0,0,false,"ESC Scholar",false
-109238475441,"Kathleen Bautista",0,0,false,"Full DepEd Voucher",false
-109238475442,"Aaron Dela Cruz",0,0,false,"Full DepEd Voucher",false
-109238475443,"Kathleen San Jose",0,0,false,"Full DepEd Voucher",false
-109238475444,"Angelo Garcia",0,0,false,"Full DepEd Voucher",false
-109238475445,"Bea Patricia Domingo",0,0,false,"ESC Scholar",false
-109238475446,"Sean Castro",3,29290,true,"Partial ESC Subsidy",true
-109238475447,"Ralph Santos",0,0,false,"Full DepEd Voucher",false
-109238475448,"Danielle Rivera",1,10037,false,"Alumni Grantee",false
-109238475449,"Gabriel Alcantara",4,30994,true,"Full Pay / Private",true
-109238475450,"Dominic Padilla",0,0,false,"Full DepEd Voucher",false
-109238475451,"Alyssa Corpuz",0,0,false,"ESC Scholar",false
-109238475452,"Joshua Tolentino",1,10697,true,"Full DepEd Voucher",true
-109238475453,"Vanessa Lim",0,1011,false,"ESC Scholar",false
-109238475454,"Alyssa Aquino",0,0,false,"Full DepEd Voucher",false
-109238475455,"Ralph Padilla",0,0,false,"Full DepEd Voucher",false
-109238475456,"Sean Flores",0,0,false,"ESC Scholar",false
-109238475457,"Aaron Santos",2,10983,true,"Alumni Grantee",false
-109238475458,"Francis Mendoza",0,0,false,"ESC Scholar",false
-109238475459,"Alexander Alcantara",1,9707,true,"Partial ESC Subsidy",true
-109238475460,"Camille Ocampo",0,0,false,"ESC Scholar",false
-109238475461,"Matthew San Jose",2,12073,false,"Full Pay / Private",true
-109238475462,"Alyssa Dizon",0,0,false,"Full DepEd Voucher",false
-109238475463,"Mark Kenneth Salazar",0,0,false,"Full DepEd Voucher",false
-109238475464,"Lucas Tolentino",0,0,false,"Full DepEd Voucher",false
-109238475465,"Princess Mae Santos",0,0,false,"Full DepEd Voucher",false
-109238475466,"Paolo Santiago",0,0,false,"ESC Scholar",false
-109238475467,"Andrea Dela Cruz",0,0,false,"Full DepEd Voucher",false
-109238475468,"Denise Valdez",3,29542,true,"Full Pay / Private",true
-109238475469,"Adrian Reyes",0,0,false,"Full DepEd Voucher",false
-109238475470,"Jasmine Ramos",0,504,false,"ESC Scholar",false
-109238475471,"Lucas Santos",0,0,false,"Full DepEd Voucher",false
-109238475472,"Justin Corpuz",1,11574,true,"Alumni Grantee",false
-109238475473,"Erika Garcia",0,0,false,"Full DepEd Voucher",false
-109238475474,"Alexander Gonzales",0,0,false,"ESC Scholar",false
-109238475475,"Princess Mae Ocampo",0,0,false,"Full DepEd Voucher",false
-109238475476,"Mariel Torres",0,0,false,"ESC Scholar",false
-109238475477,"John Carlo Castro",2,10721,true,"Full Pay / Private",false
-109238475478,"Francis Tan",0,0,false,"Full DepEd Voucher",false
-109238475479,"Lance Castillo",1,8732,true,"Alumni Grantee",false
-109238475480,"Miguel Valdez",4,28409,true,"Full Pay / Private",true
-109238475481,"Daniel Domingo",0,0,false,"Full DepEd Voucher",false
-109238475482,"Vanessa Castro",0,1095,false,"Full DepEd Voucher",false
-109238475483,"Adrian De Leon",0,0,false,"Full DepEd Voucher",false
-109238475484,"Andrea Dela Cruz",0,868,false,"Full DepEd Voucher",false
-109238475485,"Angelica San Jose",2,9611,false,"Alumni Grantee",false
-109238475486,"Nathan Ramos",0,252,false,"ESC Scholar",false
-109238475487,"Alyssa Alcantara",2,11425,true,"Alumni Grantee",false
-109238475488,"Camille De Leon",2,10159,false,"Partial ESC Subsidy",false
-109238475489,"Ralph Lim",0,0,false,"ESC Scholar",false
-109238475490,"Miguel Mendoza",0,0,false,"ESC Scholar",false
-109238475491,"Vincent Tolentino",0,0,false,"Full DepEd Voucher",false
-109238475492,"Karl Torres",0,0,false,"Full DepEd Voucher",false
-109238475493,"Adrian Aquino",1,10298,false,"ESC Scholar",false
-109238475494,"Althea Alcantara",2,12067,true,"Full DepEd Voucher",false
-109238475495,"Francis Santos",2,10744,false,"Full DepEd Voucher",true
-109238475496,"Patricia Garcia",0,0,false,"Full DepEd Voucher",false
-109238475497,"Andrea Soriano",0,0,false,"ESC Scholar",false
-109238475498,"Kathleen Villanueva",0,0,false,"Full DepEd Voucher",false
-109238475499,"Francis Flores",2,9234,true,"Full DepEd Voucher",true
-109238475500,"Bea Patricia Navarro",1,10192,true,"Alumni Grantee",true
+lrn,student_name,monthly_household_income_php,income_bracket,is_4ps_beneficiary,breadwinner_occupation,financial_stress_level_1_to_5,primary_financial_stressor,daily_allowance_adequacy,student_part_time_work_status,voucher_subsidy_status,unpaid_balance_php,overdue_installments,promissory_note_active,alumni_grant_eligible,financial_assistance_recommendation
+109238475001,"Jerome Santos",12251,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",5,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",16227,4,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475002,"Angelo Corpuz",79936,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475003,"Samantha Nicole Villanueva",80513,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475004,"Althea Gonzales",49603,"₱25,000 - ₱49,999 (Middle)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475005,"Erika Gonzales",21522,"₱10,000 - ₱24,999 (Lower Middle)",true,"Tricycle / PUV Driver",4,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","None / Full-time Student","Non-Voucher / Private Payer",0,0,false,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475006,"Lance Dizon",9392,"Below ₱10,000 (Low Income)",false,"Construction Daily Laborer",5,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",21043,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475007,"Mariel Domingo",73934,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475008,"Sofia Manalo",61955,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475009,"Lance Mercado",13207,"₱10,000 - ₱24,999 (Lower Middle)",false,"Tricycle / PUV Driver",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",0,0,false,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475010,"Miguel Mendoza",80361,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475011,"Justin Pascual",83980,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475012,"Vincent Alcantara",76070,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475013,"Rafael De Leon",57610,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475014,"Althea Bautista",55463,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475015,"Nicole Padilla",66735,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475016,"Justin Torres",69916,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475017,"John Carlo Corpuz",14499,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",5,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",25727,4,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475018,"Rochelle Castillo",13000,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",4,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",16329,4,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475019,"Angelica Reyes",12854,"₱10,000 - ₱24,999 (Lower Middle)",true,"Unemployed / Seeking Work",5,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",20824,2,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475020,"Nicole Ramos",76801,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475021,"Kathleen Ocampo",19026,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",7637,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475022,"Daniel Santos",79539,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475023,"Princess Mae Soriano",8846,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",4,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",23714,2,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475024,"Lance Soriano",8412,"Below ₱10,000 (Low Income)",false,"Construction Daily Laborer",5,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",13113,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475025,"Bianca Santos",64094,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475026,"Gabriel Pascual",73763,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475027,"Rafael De Leon",26726,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",3,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","None / Full-time Student","Partial Subsidy",6164,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475028,"Nathan Dela Cruz",26974,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","None / Full-time Student","Partial Subsidy",4808,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475029,"Daniel Pascual",34860,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","ESC Scholar",4420,1,true,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475030,"Dominic Alcantara",9748,"Below ₱10,000 (Low Income)",false,"Informal Sector / Daily Wage Earner",4,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",23680,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475031,"Samantha Nicole Gonzales",73564,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475032,"Rafael Santos",9643,"Below ₱10,000 (Low Income)",true,"Informal Sector / Daily Wage Earner",5,"Overdue Tuition & Exam Permit Insecurity","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",22400,3,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475033,"Jasmine San Jose",74092,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475034,"Angelo Torres",80220,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475035,"Rafael Domingo",28149,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",4,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","None / Full-time Student","Partial Subsidy",0,0,false,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475036,"Gabriel Ramos",53876,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475037,"Chloe Soriano",82312,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475038,"Kathleen Ramos",7033,"Below ₱10,000 (Low Income)",false,"Informal Sector / Daily Wage Earner",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",13790,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475039,"Adrian Lim",72017,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475040,"Lucas Lim",56235,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475041,"Denise Torres",82913,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475042,"Andrea Castillo",79604,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475043,"Denise Reyes",63047,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475044,"Samantha Nicole Valdez",81560,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475045,"Vanessa Corpuz",80662,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475046,"Aaron Ocampo",54306,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475047,"Karl De Leon",50360,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475048,"Angelica Salazar",61708,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475049,"Vanessa San Jose",15970,"₱10,000 - ₱24,999 (Lower Middle)",false,"Tricycle / PUV Driver",4,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475050,"Alyssa Reyes",76816,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475051,"Trisha Alcantara",47229,"₱25,000 - ₱49,999 (Middle)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475052,"Bianca Tolentino",14503,"₱10,000 - ₱24,999 (Lower Middle)",true,"Construction Daily Laborer",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",12484,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475053,"Rafael Castro",9468,"Below ₱10,000 (Low Income)",true,"Informal Sector / Daily Wage Earner",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",25897,4,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475054,"Vincent Ramos",84622,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475055,"Denise Manalo",35886,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","ESC Scholar",0,0,false,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475056,"Karl San Jose",80118,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475057,"Angelo Alcantara",43997,"₱25,000 - ₱49,999 (Middle)",true,"Service Industry / Fast Food Crew",3,"Uniform & Textbook Expenses","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",7505,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475058,"Patricia San Jose",14654,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","ESC Scholar",7844,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475059,"Kathleen Padilla",80920,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475060,"Alyssa Castro",77345,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475061,"Lucas Lim",10004,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",4,"Emergency Family Medical Expenses","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",24189,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475062,"Bianca Villanueva",52068,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475063,"Rafael San Jose",82621,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475064,"Lucas Pascual",63020,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475065,"Kyle Bautista",68086,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475066,"Trisha Castillo",28323,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",4,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","None / Full-time Student","Alumni Grantee",9168,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475067,"Daniel Padilla",57690,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475068,"Mariel Tolentino",67057,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475069,"Jasmine San Jose",71719,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475070,"Danielle Garcia",74318,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475071,"Andrea Mercado",15844,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",5,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",22676,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475072,"Kathleen Castro",82256,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475073,"Vincent Valdez",62544,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475074,"Camille Alcantara",70725,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475075,"Kathleen Lim",67384,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475076,"Matthew Santiago",12762,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",5,"Multiple Siblings School Tuition Overload","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",26533,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475077,"Joshua Pascual",81760,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475078,"Lance Garcia",70368,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475079,"Mark Kenneth Villanueva",80672,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475080,"Rafael De Leon",72688,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475081,"Vincent Villanueva",69846,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475082,"Denise Corpuz",28426,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",4,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",6810,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475083,"Camille Corpuz",54295,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475084,"Althea Reyes",19386,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","ESC Scholar",0,0,false,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475085,"Karl Corpuz",9850,"Below ₱10,000 (Low Income)",false,"Small Sari-Sari Store Vendor",4,"Multiple Siblings School Tuition Overload","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",25452,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475086,"Samantha Nicole Soriano",84573,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475087,"Princess Mae Reyes",71744,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475088,"Alyssa Ramos",23119,"₱10,000 - ₱24,999 (Lower Middle)",false,"Tricycle / PUV Driver",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",8490,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475089,"Vanessa Pascual",8976,"Below ₱10,000 (Low Income)",true,"Tricycle / PUV Driver",4,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",15416,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475090,"Patricia San Jose",69295,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475091,"John Carlo Reyes",37283,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",4,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","None / Full-time Student","Alumni Grantee",8153,1,true,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475092,"Ethan Manalo",32364,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","ESC Scholar",10749,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475093,"Alyssa Tolentino",14829,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",4,"Daily Allowance (Baon) & Commute Shortage","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",25627,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475094,"Aaron Navarro",30355,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",3,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",4813,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475095,"Lance Tan",81202,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475096,"Angelica Flores",81211,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475097,"Bianca Castro",22383,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",0,0,false,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475098,"Sofia Dizon",81705,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475099,"Gabriel Soriano",26618,"₱25,000 - ₱49,999 (Middle)",true,"BPO / Call Center Agent",4,"Uniform & Textbook Expenses","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",8333,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475100,"Patricia Tolentino",72609,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475101,"Jerome Castillo",68133,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475102,"Ralph Villanueva",69126,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475103,"Princess Mae Soriano",19145,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",3,"Uniform & Textbook Expenses","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",6129,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475104,"Vincent Torres",50999,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475105,"Francis Castillo",33736,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Uniform & Textbook Expenses","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",4277,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475106,"Chloe Corpuz",70722,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475107,"Bianca Castillo",61953,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475108,"Ethan Ramos",73662,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475109,"Paolo Domingo",68388,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475110,"Nathan Gonzales",15475,"₱10,000 - ₱24,999 (Lower Middle)",false,"Tricycle / PUV Driver",4,"Overdue Tuition & Exam Permit Insecurity","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",18104,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475111,"Samantha Nicole Lim",76087,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475112,"Jerome Lim",9145,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",5,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",14303,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475113,"Nicole Valdez",32289,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",4585,1,true,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475114,"Bea Patricia Corpuz",78494,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475115,"Christian Dave Santiago",57091,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475116,"Erika Ramos",59492,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475117,"Lance Mendoza",61600,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475118,"Kathleen Mendoza",49383,"₱25,000 - ₱49,999 (Middle)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475119,"John Carlo Castillo",79804,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475120,"Hannah Tolentino",45207,"₱25,000 - ₱49,999 (Middle)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475121,"Sofia Ocampo",56324,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475122,"Bianca Pascual",71815,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475123,"Nicole Santos",74780,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475124,"Jasmine Manalo",75008,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475125,"Cedric Villanueva",62315,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475126,"Jerome Corpuz",83117,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475127,"Jerome Salazar",38522,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",4,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",6683,1,true,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475128,"Erika Villanueva",82723,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475129,"Cedric Santos",45097,"₱25,000 - ₱49,999 (Middle)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475130,"Vincent Torres",80184,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475131,"Mark Kenneth Santiago",83416,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475132,"Lucas Domingo",48141,"₱25,000 - ₱49,999 (Middle)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475133,"Samantha Nicole Alcantara",80777,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475134,"Mark Kenneth Salazar",35831,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",4,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","None / Full-time Student","Partial Subsidy",5809,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475135,"Miguel Garcia",8422,"Below ₱10,000 (Low Income)",true,"Informal Sector / Daily Wage Earner",5,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",15657,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475136,"Cedric Santos",37761,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",0,0,false,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475137,"Chloe Villanueva",7229,"Below ₱10,000 (Low Income)",false,"Small Sari-Sari Store Vendor",5,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",23109,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475138,"John Carlo Flores",83295,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475139,"Shaina Corpuz",8576,"Below ₱10,000 (Low Income)",false,"Unemployed / Seeking Work",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",17707,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475140,"Andrea Ramos",54403,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475141,"Jerome Castillo",52415,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475142,"Denise Soriano",9953,"Below ₱10,000 (Low Income)",false,"Construction Daily Laborer",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",24762,2,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475143,"Aaron Tolentino",36301,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",3,"Project & Special School Requirement Fees","Adequate (₱100+/day)","None / Full-time Student","Alumni Grantee",0,0,false,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475144,"Althea Padilla",52526,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475145,"Chloe Mercado",48427,"₱25,000 - ₱49,999 (Middle)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475146,"Lucas Soriano",34708,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",3,"Project & Special School Requirement Fees","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",0,0,false,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475147,"Patricia Alcantara",42400,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",3,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",4073,1,true,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475148,"Mariel Reyes",49587,"₱25,000 - ₱49,999 (Middle)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475149,"Mariel Castro",61647,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475150,"Shaina Navarro",7170,"Below ₱10,000 (Low Income)",true,"Tricycle / PUV Driver",4,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",22912,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475151,"Sofia Dizon",9415,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",4,"Daily Allowance (Baon) & Commute Shortage","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",16180,4,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475152,"Adrian Flores",13223,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",13065,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475153,"Kristine Lim",8902,"Below ₱10,000 (Low Income)",false,"Construction Daily Laborer",5,"Daily Allowance (Baon) & Commute Shortage","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",19822,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475154,"Lance Alcantara",76883,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475155,"Rochelle Santiago",11812,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",4,"Daily Allowance (Baon) & Commute Shortage","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",18976,2,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475156,"Vanessa Rivera",66416,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475157,"Chloe Rivera",17416,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","Partial Subsidy",6672,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475158,"Hannah Ramos",50295,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475159,"Rafael Corpuz",31052,"₱25,000 - ₱49,999 (Middle)",true,"BPO / Call Center Agent",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","ESC Scholar",0,0,false,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475160,"Angelo Santiago",69055,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475161,"Miguel San Jose",12877,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",5,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",25429,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475162,"Rafael Soriano",83478,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475163,"Kyle Dela Cruz",60581,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475164,"Francis Ramos",55770,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475165,"Vanessa Santos",45941,"₱25,000 - ₱49,999 (Middle)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475166,"John Carlo Tan",63650,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475167,"Sofia Santos",81060,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475168,"Francis Salazar",54104,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475169,"Ralph Garcia",73592,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475170,"Trisha Ocampo",8557,"Below ₱10,000 (Low Income)",true,"Unemployed / Seeking Work",5,"Overdue Tuition & Exam Permit Insecurity","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",14105,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475171,"Camille Ramos",53958,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475172,"Cedric Corpuz",66666,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475173,"Shaina Dela Cruz",8341,"Below ₱10,000 (Low Income)",true,"Informal Sector / Daily Wage Earner",5,"Emergency Family Medical Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",24436,2,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475174,"Dominic Soriano",62081,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475175,"Rochelle Gonzales",11293,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",4,"Multiple Siblings School Tuition Overload","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",19660,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475176,"Danielle Santiago",73352,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475177,"Justin Bautista",7527,"Below ₱10,000 (Low Income)",false,"Tricycle / PUV Driver",4,"Overdue Tuition & Exam Permit Insecurity","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",16391,3,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475178,"Hannah Villanueva",73636,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475179,"Mark Kenneth Salazar",10993,"₱10,000 - ₱24,999 (Lower Middle)",true,"Tricycle / PUV Driver",4,"Daily Allowance (Baon) & Commute Shortage","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",15547,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475180,"Angelo Bautista",71443,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475181,"Gabriel San Jose",45383,"₱25,000 - ₱49,999 (Middle)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475182,"Danielle Torres",29252,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",4,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","ESC Scholar",4385,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475183,"Vanessa De Leon",72627,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475184,"Patricia Gonzales",8946,"Below ₱10,000 (Low Income)",false,"Unemployed / Seeking Work",5,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",22615,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475185,"Bianca Dizon",8216,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",4,"Daily Allowance (Baon) & Commute Shortage","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",13909,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475186,"Justin Dizon",14449,"₱10,000 - ₱24,999 (Lower Middle)",true,"Unemployed / Seeking Work",4,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",26613,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475187,"Adrian Bautista",30635,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","None / Full-time Student","Partial Subsidy",10375,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475188,"Mariel Gonzales",50042,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475189,"Ralph Mercado",84314,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475190,"Paolo Padilla",72964,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475191,"Samantha Nicole Valdez",62772,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475192,"John Carlo Ocampo",27507,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",4,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","ESC Scholar",5984,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475193,"Rafael Padilla",65462,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475194,"Lance Dizon",16740,"₱10,000 - ₱24,999 (Lower Middle)",true,"Tricycle / PUV Driver",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Partial Subsidy",0,0,false,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475195,"Danielle Villanueva",73809,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475196,"Patricia Castro",47301,"₱25,000 - ₱49,999 (Middle)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475197,"Vanessa Garcia",69216,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475198,"Erika Pascual",83403,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475199,"Chloe Mendoza",43319,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",3,"Project & Special School Requirement Fees","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",0,0,false,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475200,"Kyle De Leon",14677,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",5992,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475201,"Vincent Corpuz",71561,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475202,"Karl Pascual",13957,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",22440,4,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475203,"Gabriel Castillo",54047,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475204,"Nicole De Leon",54016,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475205,"Danielle Dizon",12324,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",4,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",17025,3,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475206,"Kristine Reyes",76565,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475207,"Mark Kenneth Navarro",35571,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",4,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","ESC Scholar",0,0,false,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475208,"Joshua Corpuz",53045,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475209,"Nathan Santos",67026,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475210,"Angelo Santiago",12193,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",3,"Uniform & Textbook Expenses","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","ESC Scholar",8853,1,true,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475211,"Lucas Villanueva",64906,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475212,"Ethan Domingo",45375,"₱25,000 - ₱49,999 (Middle)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475213,"Bea Patricia Dela Cruz",72477,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475214,"Kristine Castillo",55818,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475215,"Andrea Ramos",30427,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","None / Full-time Student","Partial Subsidy",0,0,false,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475216,"Lance Dela Cruz",67623,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475217,"Angelica Dela Cruz",21053,"₱10,000 - ₱24,999 (Lower Middle)",false,"Tricycle / PUV Driver",3,"Household Utility Bill Catch-up","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",0,0,false,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475218,"Paolo Reyes",16957,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",4,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",0,0,false,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475219,"Miguel Mendoza",45691,"₱25,000 - ₱49,999 (Middle)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475220,"Bianca Salazar",68622,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475221,"Dominic Santos",9475,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",4,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",22206,2,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475222,"Francis Castillo",11674,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",5,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",14180,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475223,"Althea Dizon",55115,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475224,"Mariel Aquino",20077,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475225,"Matthew Ocampo",36019,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Partial Subsidy",0,0,false,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475226,"Jerome Domingo",12354,"₱10,000 - ₱24,999 (Lower Middle)",true,"Tricycle / PUV Driver",5,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",24849,4,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475227,"Joshua Pascual",14384,"₱10,000 - ₱24,999 (Lower Middle)",true,"Construction Daily Laborer",4,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",22811,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475228,"Sean Padilla",64664,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475229,"Danielle Ocampo",67099,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475230,"Kristine Mendoza",63400,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475231,"Matthew Ramos",46136,"₱25,000 - ₱49,999 (Middle)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475232,"Chloe Salazar",7451,"Below ₱10,000 (Low Income)",true,"Informal Sector / Daily Wage Earner",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",26871,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475233,"Daniel Pascual",45280,"₱25,000 - ₱49,999 (Middle)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475234,"Christian Dave Castillo",64518,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475235,"Ethan Castillo",14032,"₱10,000 - ₱24,999 (Lower Middle)",true,"Tricycle / PUV Driver",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",13900,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475236,"Shaina Rivera",74465,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475237,"Cedric Ocampo",32827,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","None / Full-time Student","Partial Subsidy",0,0,false,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475238,"Alexander Pascual",70263,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475239,"Erika Padilla",57448,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475240,"Erika Pascual",22899,"₱10,000 - ₱24,999 (Lower Middle)",true,"Tricycle / PUV Driver",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",0,0,false,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475241,"Nathan Manalo",82838,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475242,"Camille Torres",30723,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",4,"Household Utility Bill Catch-up","Adequate (₱100+/day)","None / Full-time Student","Alumni Grantee",9010,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475243,"Rochelle Rivera",77406,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475244,"Joshua Villanueva",78556,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475245,"Joshua Santos",15999,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",22219,3,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475246,"Lucas Bautista",60699,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475247,"Kyle Salazar",75961,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475248,"Alyssa Santos",65964,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475249,"Nathan Garcia",55318,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475250,"Ethan Ramos",71453,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475251,"Sean Pascual",79969,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475252,"Daniel Bautista",10041,"₱10,000 - ₱24,999 (Lower Middle)",false,"Tricycle / PUV Driver",4,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",15581,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475253,"Lucas Rivera",78361,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475254,"Dominic Valdez",47229,"₱25,000 - ₱49,999 (Middle)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475255,"John Carlo Dizon",63937,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475256,"Danielle Corpuz",59685,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475257,"Mark Kenneth Corpuz",74945,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475258,"Mark Kenneth Manalo",52563,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475259,"Jasmine Garcia",78576,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475260,"Erika Flores",82062,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475261,"Mark Kenneth Reyes",79269,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475262,"Jasmine Santiago",17780,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475263,"Patricia Soriano",10518,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",5,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",26814,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475264,"Cedric Mercado",76392,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475265,"Sean Rivera",12035,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",4,"Multiple Siblings School Tuition Overload","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",20543,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475266,"Justin Mendoza",51009,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475267,"Adrian Dela Cruz",27577,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",9073,1,true,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475268,"Paolo San Jose",27833,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",4,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",10813,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475269,"Denise Valdez",62846,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475270,"Erika Bautista",74339,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475271,"Camille De Leon",64348,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475272,"Dominic San Jose",68035,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475273,"Erika Valdez",59509,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475274,"Lucas Castillo",50694,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475275,"Chloe Dizon",65192,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475276,"Althea Santiago",9224,"Below ₱10,000 (Low Income)",false,"Unemployed / Seeking Work",4,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",17217,2,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475277,"John Carlo Castro",75279,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475278,"John Carlo Ramos",49001,"₱25,000 - ₱49,999 (Middle)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475279,"Mark Kenneth Lim",12206,"₱10,000 - ₱24,999 (Lower Middle)",false,"Tricycle / PUV Driver",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","ESC Scholar",10357,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475280,"Vanessa Gonzales",23788,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",4,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","Non-Voucher / Private Payer",10020,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475281,"Daniel Dela Cruz",22332,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Non-Voucher / Private Payer",10223,1,true,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475282,"Justin Manalo",65287,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475283,"Kristine Santiago",83026,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475284,"Nathan Padilla",74691,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475285,"Althea Manalo",77164,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475286,"Erika Gonzales",56935,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475287,"Trisha Valdez",10952,"₱10,000 - ₱24,999 (Lower Middle)",true,"Unemployed / Seeking Work",4,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",13969,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475288,"Adrian Navarro",57781,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475289,"Bianca De Leon",7336,"Below ₱10,000 (Low Income)",false,"Tricycle / PUV Driver",4,"Multiple Siblings School Tuition Overload","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",20694,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475290,"Samantha Nicole Tolentino",8160,"Below ₱10,000 (Low Income)",true,"Informal Sector / Daily Wage Earner",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",25463,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475291,"Jerome Corpuz",59387,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475292,"Adrian Rivera",22597,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",4,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",6662,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475293,"Rochelle Castillo",32124,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",3,"Household Utility Bill Catch-up","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",9575,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475294,"Patricia Flores",79520,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475295,"Jasmine Torres",70890,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475296,"Alexander Bautista",44978,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",7752,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475297,"Hannah Villanueva",51939,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475298,"Justin De Leon",10314,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",5,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",15495,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475299,"Daniel Lim",79449,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475300,"Nicole San Jose",57092,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475301,"Sofia Lim",67105,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475302,"Francis Bautista",23728,"₱10,000 - ₱24,999 (Lower Middle)",true,"Unemployed / Seeking Work",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",8106,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475303,"Kathleen Soriano",35730,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",4,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",8340,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475304,"Erika Garcia",73960,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475305,"Kyle Villanueva",82760,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475306,"Dominic Tolentino",54748,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475307,"Karl Gonzales",10213,"₱10,000 - ₱24,999 (Lower Middle)",true,"Small Sari-Sari Store Vendor",4,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",20511,3,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475308,"Erika Padilla",80616,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475309,"Lucas Mendoza",48020,"₱25,000 - ₱49,999 (Middle)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475310,"Rafael Domingo",47982,"₱25,000 - ₱49,999 (Middle)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475311,"Rochelle Lim",55025,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475312,"Mariel Manalo",12557,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",20020,4,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475313,"Andrea Dizon",44515,"₱25,000 - ₱49,999 (Middle)",true,"Auto Mechanic / Repair Technician",4,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","None / Full-time Student","Alumni Grantee",6177,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475314,"Denise Tolentino",55259,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475315,"Andrea Ocampo",8687,"Below ₱10,000 (Low Income)",true,"Informal Sector / Daily Wage Earner",5,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",20900,2,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475316,"Chloe Garcia",23645,"₱10,000 - ₱24,999 (Lower Middle)",true,"Tricycle / PUV Driver",3,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","None / Full-time Student","Non-Voucher / Private Payer",4762,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475317,"Rafael Torres",61120,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475318,"Rafael Aquino",73805,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475319,"Camille Tan",18135,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",3,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",5948,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475320,"Nicole Santos",43063,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",4,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",6112,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475321,"Ethan Manalo",81394,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475322,"Lance Alcantara",25738,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",4,"Household Utility Bill Catch-up","Adequate (₱100+/day)","None / Full-time Student","Partial Subsidy",0,0,false,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475323,"Ralph Castro",53203,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475324,"Erika Bautista",76395,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475325,"Denise Santiago",81039,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475326,"Althea Castillo",13519,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","ESC Scholar",7433,1,true,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475327,"Patricia Mendoza",15317,"₱10,000 - ₱24,999 (Lower Middle)",true,"Construction Daily Laborer",5,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",15085,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475328,"Althea San Jose",61930,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475329,"Lucas Valdez",64705,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475330,"Justin Lim",48613,"₱25,000 - ₱49,999 (Middle)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475331,"Princess Mae Dizon",50752,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475332,"Karl Navarro",15295,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",3,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",5292,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475333,"Paolo Torres",81006,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475334,"Francis Castro",79028,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475335,"Ralph Santos",41509,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",7691,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475336,"Kathleen Ramos",15299,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",17566,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475337,"Miguel Garcia",53234,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475338,"Gabriel Ocampo",41085,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",4,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",4682,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475339,"Kathleen Villanueva",12372,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",4,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",19069,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475340,"Miguel Gonzales",9615,"Below ₱10,000 (Low Income)",false,"Informal Sector / Daily Wage Earner",4,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",24153,3,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475341,"Dominic Domingo",8819,"Below ₱10,000 (Low Income)",true,"Unemployed / Seeking Work",4,"Multiple Siblings School Tuition Overload","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",18953,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475342,"Sean Flores",61833,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475343,"Ralph San Jose",82316,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475344,"Ralph Soriano",58202,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475345,"Matthew Torres",8140,"Below ₱10,000 (Low Income)",false,"Small Sari-Sari Store Vendor",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",17614,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475346,"Aaron Gonzales",56356,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475347,"Rochelle San Jose",84412,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475348,"Ethan Salazar",64233,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475349,"Dominic Reyes",28319,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",3,"Project & Special School Requirement Fees","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",0,0,false,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475350,"Andrea Dela Cruz",68486,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475351,"Francis Flores",12469,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",3,"Project & Special School Requirement Fees","Adequate (₱100+/day)","None / Full-time Student","Non-Voucher / Private Payer",10770,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475352,"Vanessa Ramos",61532,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475353,"Lucas Santos",78590,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475354,"Lance Valdez",32691,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",4,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",6562,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475355,"Chloe Valdez",63870,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475356,"Rafael Mendoza",60544,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475357,"Francis Torres",9502,"Below ₱10,000 (Low Income)",true,"Unemployed / Seeking Work",4,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",25050,4,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475358,"Adrian Manalo",82629,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475359,"Patricia Tan",67359,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475360,"Chloe Torres",7030,"Below ₱10,000 (Low Income)",false,"Tricycle / PUV Driver",5,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",15627,2,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475361,"Vanessa Reyes",46682,"₱25,000 - ₱49,999 (Middle)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475362,"Aaron Ocampo",13947,"₱10,000 - ₱24,999 (Lower Middle)",true,"Small Sari-Sari Store Vendor",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",26652,3,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475363,"Angelo Tan",54607,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475364,"Jasmine Lim",7926,"Below ₱10,000 (Low Income)",false,"Tricycle / PUV Driver",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",13333,3,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475365,"Sean Rivera",17847,"₱10,000 - ₱24,999 (Lower Middle)",true,"Construction Daily Laborer",4,"Uniform & Textbook Expenses","Adequate (₱100+/day)","None / Full-time Student","Alumni Grantee",0,0,false,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475366,"Aaron Ramos",82196,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475367,"Jerome Aquino",14454,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",19132,4,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475368,"Jasmine Castillo",50413,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475369,"Francis Flores",72122,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475370,"Mark Kenneth Valdez",18478,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",3,"Uniform & Textbook Expenses","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475371,"Kathleen Castro",8755,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",5,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",15591,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475372,"Daniel Mercado",69167,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475373,"Joshua De Leon",56687,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475374,"Miguel Dizon",57620,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475375,"Aaron Torres",67291,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475376,"Vanessa Dela Cruz",72149,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475377,"Paolo Alcantara",70293,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475378,"Alyssa Tan",32198,"₱25,000 - ₱49,999 (Middle)",true,"Auto Mechanic / Repair Technician",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","Non-Voucher / Private Payer",0,0,false,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475379,"Chloe De Leon",54444,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475380,"Jerome Castro",65653,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475381,"Kristine Castillo",80102,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475382,"Vanessa Garcia",11778,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",4,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",13818,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475383,"Rochelle Garcia",66233,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475384,"John Carlo Dizon",7500,"Below ₱10,000 (Low Income)",false,"Construction Daily Laborer",4,"Overdue Tuition & Exam Permit Insecurity","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",15766,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475385,"Rafael Alcantara",27893,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",9909,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475386,"Kyle Garcia",15200,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",20478,4,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475387,"John Carlo Ramos",53301,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475388,"Jerome Flores",78285,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475389,"Camille Navarro",75290,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475390,"Joshua Mendoza",14216,"₱10,000 - ₱24,999 (Lower Middle)",true,"Construction Daily Laborer",4,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",18081,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475391,"Lance Mercado",78995,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475392,"Princess Mae Mercado",81791,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475393,"Erika Torres",75827,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475394,"Nathan Garcia",28893,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",5490,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475395,"Nathan Aquino",65443,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475396,"Shaina Manalo",63299,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475397,"Paolo Dizon",59162,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475398,"Justin Castillo",83076,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475399,"Shaina Aquino",82498,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475400,"Andrea Tan",20418,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",6310,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475401,"Aaron Tan",78398,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475402,"Alexander Mercado",32392,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",3,"Project & Special School Requirement Fees","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",8089,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475403,"Danielle Santos",75878,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475404,"Christian Dave Navarro",46181,"₱25,000 - ₱49,999 (Middle)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475405,"Patricia Ocampo",46889,"₱25,000 - ₱49,999 (Middle)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475406,"Hannah Gonzales",67133,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475407,"Chloe Domingo",61351,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475408,"Justin Salazar",14656,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",5,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",18224,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475409,"Joshua Santos",60969,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475410,"Chloe Valdez",7587,"Below ₱10,000 (Low Income)",false,"Unemployed / Seeking Work",4,"Multiple Siblings School Tuition Overload","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",21248,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475411,"Althea Mercado",35973,"₱25,000 - ₱49,999 (Middle)",true,"Private Sector Office Staff",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",6816,1,true,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475412,"Miguel Lim",78673,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475413,"Danielle Padilla",48342,"₱25,000 - ₱49,999 (Middle)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475414,"Nathan San Jose",26237,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",4,"Household Utility Bill Catch-up","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",0,0,false,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475415,"Bianca Flores",47610,"₱25,000 - ₱49,999 (Middle)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475416,"Camille Domingo",47751,"₱25,000 - ₱49,999 (Middle)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475417,"Andrea Reyes",48895,"₱25,000 - ₱49,999 (Middle)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475418,"Justin Ramos",25288,"₱25,000 - ₱49,999 (Middle)",false,"Service Industry / Fast Food Crew",3,"Delayed Remittance / Seasonal Cash Flow","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475419,"Danielle Rivera",8005,"Below ₱10,000 (Low Income)",true,"Construction Daily Laborer",4,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",22233,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475420,"Alyssa Navarro",63903,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475421,"Hannah Rivera",66370,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475422,"Bea Patricia Salazar",50967,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475423,"Jasmine Castillo",9417,"Below ₱10,000 (Low Income)",false,"Small Sari-Sari Store Vendor",5,"Household Debt & Micro-loan Obligations","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",25894,3,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475424,"Danielle Lim",69736,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475425,"Dominic Valdez",60200,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475426,"Rochelle Valdez",11348,"₱10,000 - ₱24,999 (Lower Middle)",true,"Construction Daily Laborer",4,"Daily Allowance (Baon) & Commute Shortage","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",15354,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475427,"Jasmine Santiago",62647,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475428,"Adrian San Jose",47015,"₱25,000 - ₱49,999 (Middle)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475429,"Francis Mendoza",12738,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",4,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","None / Full-time Student","Alumni Grantee",5052,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475430,"Dominic Flores",56061,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475431,"Kristine Tan",54262,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475432,"Chloe Castro",16831,"₱10,000 - ₱24,999 (Lower Middle)",true,"Tricycle / PUV Driver",3,"Uniform & Textbook Expenses","Adequate (₱100+/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",7696,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475433,"Sean Padilla",70787,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475434,"Denise Garcia",67470,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475435,"Bianca Mercado",71841,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475436,"Rafael Salazar",21095,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",4,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",0,0,false,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475437,"Princess Mae Villanueva",39551,"₱25,000 - ₱49,999 (Middle)",true,"BPO / Call Center Agent",4,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",9598,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475438,"Karl Santiago",73807,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475439,"Jasmine Santos",7441,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",4,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",20639,3,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475440,"Karl Mercado",13973,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","ESC Scholar",4287,1,true,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475441,"Camille Manalo",34284,"₱25,000 - ₱49,999 (Middle)",true,"Private Sector Office Staff",3,"Uniform & Textbook Expenses","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",7807,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475442,"Paolo Santiago",16609,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",3,"Household Utility Bill Catch-up","Adequate (₱100+/day)","None / Full-time Student","Alumni Grantee",5978,1,true,false,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475443,"Vanessa Bautista",14510,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",3,"Household Utility Bill Catch-up","Adequate (₱100+/day)","None / Full-time Student","Non-Voucher / Private Payer",0,0,false,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475444,"Lucas Tolentino",61511,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475445,"Rochelle Gonzales",41058,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",0,0,false,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475446,"Gabriel Pascual",51356,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475447,"Hannah Tan",44675,"₱25,000 - ₱49,999 (Middle)",false,"Auto Mechanic / Repair Technician",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",9848,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475448,"Sofia Tolentino",80232,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475449,"Kristine Santos",58555,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475450,"Karl Reyes",62867,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475451,"Angelo Salazar",9698,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",5,"Overdue Tuition & Exam Permit Insecurity","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",18254,2,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475452,"Angelica Bautista",11067,"₱10,000 - ₱24,999 (Lower Middle)",false,"Unemployed / Seeking Work",5,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",20175,2,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475453,"Kyle Valdez",78779,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475454,"Christian Dave Ocampo",50097,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475455,"Cedric Tolentino",67827,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475456,"Angelo Mercado",11657,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Partial Subsidy",16961,4,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475457,"Camille Rivera",12949,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",4,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",12324,3,true,true,"Enroll student in SAPC Work-Study Assistance Program; coordinate with accounting for exam permit release."
+109238475458,"Bea Patricia Alcantara",20446,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",3,"Project & Special School Requirement Fees","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",5190,1,true,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475459,"Samantha Nicole Bautista",65013,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475460,"Cedric Manalo",54984,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475461,"Daniel Bautista",36264,"₱25,000 - ₱49,999 (Middle)",true,"Private Sector Office Staff",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",0,0,false,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475462,"Erika Santos",26676,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",3,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Full DepEd SHS Voucher",6475,1,true,true,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475463,"Sean Santos",11491,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",4,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",26896,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475464,"Alexander Tolentino",82230,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475465,"Daniel San Jose",53339,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475466,"Angelo Aquino",15123,"₱10,000 - ₱24,999 (Lower Middle)",true,"Small Sari-Sari Store Vendor",3,"Delayed Remittance / Seasonal Cash Flow","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",9629,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475467,"Joshua Santos",15333,"₱10,000 - ₱24,999 (Lower Middle)",true,"Small Sari-Sari Store Vendor",4,"Multiple Siblings School Tuition Overload","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Partial Subsidy",20119,3,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475468,"Denise De Leon",71615,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475469,"Daniel Pascual",35585,"₱25,000 - ₱49,999 (Middle)",false,"BPO / Call Center Agent",3,"Household Utility Bill Catch-up","Tight (₱50-₱80/day)","None / Full-time Student","Alumni Grantee",0,0,false,true,"Provide flexible installment catch-up schedule aligned with guardian salary payout cycles."
+109238475470,"Paolo Ocampo",12396,"₱10,000 - ₱24,999 (Lower Middle)",false,"Informal Sector / Daily Wage Earner",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Non-Voucher / Private Payer",10955,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475471,"Kyle Ramos",51412,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475472,"Rochelle Tolentino",26201,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",6020,1,true,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475473,"Adrian Santiago",65784,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475474,"Adrian Rivera",57204,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475475,"Princess Mae Alcantara",66402,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475476,"Rochelle Soriano",60831,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475477,"Sofia Salazar",8334,"Below ₱10,000 (Low Income)",true,"Construction Daily Laborer",4,"Emergency Family Medical Expenses","Tight (₱50-₱80/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",22912,2,true,true,"Endorse student for Alumni Educational Assistance Subsidy and provide subsidized daily meal coupons."
+109238475478,"Alyssa San Jose",60201,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475479,"Denise Corpuz",7086,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",4,"Emergency Family Medical Expenses","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",16153,4,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475480,"Dominic Pascual",79118,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475481,"Sofia Villanueva",59510,"₱50,000+ (Upper Middle/High)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475482,"John Carlo Valdez",55394,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475483,"Nathan Ocampo",58081,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475484,"Mark Kenneth Torres",63163,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475485,"Daniel Domingo",69189,"₱50,000+ (Upper Middle/High)",false,"OFW Senior Technical Worker",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475486,"Denise Mendoza",14160,"₱10,000 - ₱24,999 (Lower Middle)",false,"Small Sari-Sari Store Vendor",4,"Project & Special School Requirement Fees","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,true,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475487,"Ethan Navarro",84259,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475488,"Cedric Rivera",74940,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475489,"Jasmine Domingo",8530,"Below ₱10,000 (Low Income)",true,"Small Sari-Sari Store Vendor",4,"Household Debt & Micro-loan Obligations","Tight (₱50-₱80/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Non-Voucher / Private Payer",25480,4,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."
+109238475490,"Camille Corpuz",63417,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475491,"Mariel Tolentino",68204,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Regular tuition schedule maintained with prompt quarterly payments."
+109238475492,"Kathleen Lim",53735,"₱50,000+ (Upper Middle/High)",false,"IT / Software Engineer",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Financial profile in good standing. DepEd voucher / ESC scholarship active."
+109238475493,"Vincent Tolentino",67069,"₱50,000+ (Upper Middle/High)",false,"Small Business Owner / Merchant",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475494,"Princess Mae Santos",48766,"₱25,000 - ₱49,999 (Middle)",false,"Government Employee / Licensed Teacher",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475495,"Karl Lim",82189,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","Full DepEd SHS Voucher",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475496,"Lance Dela Cruz",10301,"₱10,000 - ₱24,999 (Lower Middle)",true,"Informal Sector / Daily Wage Earner",5,"Multiple Siblings School Tuition Overload","Inadequate / Skips Commute or Meals (<₱50/day)","Weekend Work / Gig (<10 hrs/wk)","Alumni Grantee",22650,2,true,true,"Award SAPC Emergency Tuition Relief Grant and restructure remaining balance into manageable zero-interest installments."
+109238475497,"Trisha Castro",50324,"₱50,000+ (Upper Middle/High)",false,"Healthcare / Registered Nurse",1,"None / Stable Finances","Adequate (₱100+/day)","None / Full-time Student","ESC Scholar",0,0,false,false,"Exemplary payment record; student fully cleared for all academic quarters."
+109238475498,"Nicole Santos",13403,"₱10,000 - ₱24,999 (Lower Middle)",false,"Construction Daily Laborer",3,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","Alumni Grantee",6795,1,true,false,"Recommend application for ESC tuition top-up grant and school supply material subsidy."
+109238475499,"Christian Dave Santos",34374,"₱25,000 - ₱49,999 (Middle)",false,"Private Sector Office Staff",4,"Uniform & Textbook Expenses","Tight (₱50-₱80/day)","None / Full-time Student","Full DepEd SHS Voucher",10354,1,true,false,"Monitor quarterly accounting clearance; accounting officer consultation scheduled."
+109238475500,"Alyssa Tan",9560,"Below ₱10,000 (Low Income)",false,"Small Sari-Sari Store Vendor",5,"Daily Allowance (Baon) & Commute Shortage","Inadequate / Skips Commute or Meals (<₱50/day)","Working Student (15-25 hrs/wk - High Fatigue Burden)","Alumni Grantee",12398,2,true,true,"Grant promissory note extension and assist guardian with DepEd voucher reconciliation."

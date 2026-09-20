@@ -29,11 +29,11 @@ class RiskScore(Base):
     health_score = Column(Float, nullable=False, default=0.0)
     
     # Weights used in computation (for auditability)
-    academic_weight = Column(Float, nullable=False, default=0.4017)
-    mental_health_weight = Column(Float, nullable=False, default=0.2442)
-    financial_weight = Column(Float, nullable=False, default=0.1373)
-    family_weight = Column(Float, nullable=False, default=0.1373)
-    health_weight = Column(Float, nullable=False, default=0.0794)
+    academic_weight = Column(Float, nullable=False, default=0.30)
+    family_weight = Column(Float, nullable=False, default=0.20)
+    health_weight = Column(Float, nullable=False, default=0.20)
+    mental_health_weight = Column(Float, nullable=False, default=0.15)
+    financial_weight = Column(Float, nullable=False, default=0.15)
     
     # Weighted Composite Risk Score (0-100 scale)
     composite_risk_score = Column(Float, nullable=False)

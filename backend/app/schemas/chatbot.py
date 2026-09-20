@@ -41,4 +41,9 @@ class ChatbotReplyResponse(BaseModel):
     sentiment: SentimentCategory
     distress_score: float
     counselor_flagged: bool
+    detected_emotion: Optional[str] = "neutral"
+    emotion_confidence: Optional[float] = 0.85
+    intent: Optional[str] = "reflection"
+    conversation_stage: Optional[str] = "context_gathering"
+    crisis_triggered: Optional[bool] = False
     suggested_resources: List[str] = []

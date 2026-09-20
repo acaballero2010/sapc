@@ -290,31 +290,31 @@ export const LandingPage: React.FC = () => {
                               <span className="font-bold text-slate-800 flex items-center gap-1.5">
                                 <BookOpen className="h-3.5 w-3.5 text-[#8B0014]" /> Academic Domain (w_AC)
                               </span>
-                              <strong className="text-[#8B0014] font-black">40.17% (0.4017)</strong>
-                            </div>
-                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
-                                <Brain className="h-3.5 w-3.5 text-rose-600" /> Mental Health Domain (w_MH)
-                              </span>
-                              <strong className="text-rose-700 font-black">24.42% (0.2442)</strong>
-                            </div>
-                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
-                                <Activity className="h-3.5 w-3.5 text-amber-600" /> Financial Overdue Domain (w_FI)
-                              </span>
-                              <strong className="text-amber-800 font-black">13.73% (0.1373)</strong>
+                              <strong className="text-[#8B0014] font-black">30.00% (0.3000)</strong>
                             </div>
                             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                               <span className="font-bold text-slate-800 flex items-center gap-1.5">
                                 <Users className="h-3.5 w-3.5 text-blue-600" /> Family Support Domain (w_FA)
                               </span>
-                              <strong className="text-blue-800 font-black">13.73% (0.1373)</strong>
+                              <strong className="text-blue-800 font-black">20.00% (0.2000)</strong>
                             </div>
                             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                               <span className="font-bold text-slate-800 flex items-center gap-1.5">
                                 <Activity className="h-3.5 w-3.5 text-emerald-600" /> Physical Wellness Domain (w_HE)
                               </span>
-                              <strong className="text-emerald-800 font-black">7.94% (0.0794)</strong>
+                              <strong className="text-emerald-800 font-black">20.00% (0.2000)</strong>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <Brain className="h-3.5 w-3.5 text-rose-600" /> Mental Health Domain (w_MH)
+                              </span>
+                              <strong className="text-rose-700 font-black">15.00% (0.1500)</strong>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                              <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                                <Activity className="h-3.5 w-3.5 text-amber-600" /> Financial Overdue Domain (w_FI)
+                              </span>
+                              <strong className="text-amber-800 font-black">15.00% (0.1500)</strong>
                             </div>
                           </div>
 
@@ -564,24 +564,24 @@ export const LandingPage: React.FC = () => {
 
             <div className="lg:col-span-6 grid grid-cols-2 gap-4">
               <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-[#8B0014]/40 transition">
-                <span className="text-4xl font-black text-[#8B0014] block">1,250+</span>
-                <strong className="text-sm font-bold text-slate-900 block">Students Monitored</strong>
-                <p className="text-xs text-slate-500">Across Senior High School & College strands</p>
+                <span className="text-3xl sm:text-4xl font-black text-[#8B0014] block">SAPC Ready</span>
+                <strong className="text-sm font-bold text-slate-900 block">Student Population Support</strong>
+                <p className="text-xs text-slate-500">Ready to support SAPC Senior High School &amp; College students</p>
               </div>
               <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-emerald-400 transition">
-                <span className="text-4xl font-black text-emerald-600 block">98.4%</span>
-                <strong className="text-sm font-bold text-slate-900 block">Early Intervention Resolution</strong>
-                <p className="text-xs text-slate-500">Timely proactive academic & wellness care plans</p>
+                <span className="text-3xl sm:text-4xl font-black text-emerald-600 block">5 Domains</span>
+                <strong className="text-sm font-bold text-slate-900 block">Holistic Risk Modeling</strong>
+                <p className="text-xs text-slate-500">Academic, Family, Health, Mental &amp; Financial evaluation</p>
               </div>
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-emerald-400 transition">
-                <span className="text-4xl font-black text-emerald-600 block">100%</span>
-                <strong className="text-sm font-bold text-slate-900 block">RA 10173 Privacy Sealed</strong>
-                <p className="text-xs text-slate-500">Encrypted role-based access for student data protection</p>
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-amber-400 transition">
+                <span className="text-3xl sm:text-4xl font-black text-amber-600 block">RA 10173</span>
+                <strong className="text-sm font-bold text-slate-900 block">Data Privacy Sealed</strong>
+                <p className="text-xs text-slate-500">Strict role-gated confidentiality for student psychological logs</p>
               </div>
               <div className="bg-white p-6 rounded-3xl border border-slate-200 text-center shadow-xs space-y-2 hover:border-blue-400 transition">
-                <span className="text-4xl font-black text-blue-600 block">24/7</span>
+                <span className="text-3xl sm:text-4xl font-black text-blue-600 block">Proactive</span>
                 <strong className="text-sm font-bold text-slate-900 block">Guidance Support</strong>
-                <p className="text-xs text-slate-500">Real-time student companion & crisis counselor alerts</p>
+                <p className="text-xs text-slate-500">Real-time student companion &amp; early counselor intervention</p>
               </div>
             </div>
           </div>

@@ -131,38 +131,38 @@ def get_institutional_summary(
     domain_metrics = [
         DomainMetric(
             domain="Academic Performance (S_AC)",
-            weight_pct=40.17,
+            weight_pct=30.0,
             cohort_avg=round(avg_acad, 2),
             risk_level=get_tier_label(avg_acad),
             target_threshold=40.0
         ),
         DomainMetric(
-            domain="Mental Health & Emotional Wellbeing (S_MH)",
-            weight_pct=24.42,
-            cohort_avg=round(avg_mental, 2),
-            risk_level=get_tier_label(avg_mental),
-            target_threshold=35.0
-        ),
-        DomainMetric(
-            domain="Financial Sustainability (S_FN)",
-            weight_pct=13.73,
-            cohort_avg=round(avg_fin, 2),
-            risk_level=get_tier_label(avg_fin),
-            target_threshold=40.0
-        ),
-        DomainMetric(
             domain="Family & Household Stability (S_FM)",
-            weight_pct=13.73,
+            weight_pct=20.0,
             cohort_avg=round(avg_fam, 2),
             risk_level=get_tier_label(avg_fam),
             target_threshold=40.0
         ),
         DomainMetric(
             domain="Physical Health & Well-being (S_PH)",
-            weight_pct=7.94,
+            weight_pct=20.0,
             cohort_avg=round(avg_health, 2),
             risk_level=get_tier_label(avg_health),
             target_threshold=30.0
+        ),
+        DomainMetric(
+            domain="Mental Health & Emotional Wellbeing (S_MH)",
+            weight_pct=15.0,
+            cohort_avg=round(avg_mental, 2),
+            risk_level=get_tier_label(avg_mental),
+            target_threshold=35.0
+        ),
+        DomainMetric(
+            domain="Financial Sustainability (S_FN)",
+            weight_pct=15.0,
+            cohort_avg=round(avg_fin, 2),
+            risk_level=get_tier_label(avg_fin),
+            target_threshold=40.0
         )
     ]
 

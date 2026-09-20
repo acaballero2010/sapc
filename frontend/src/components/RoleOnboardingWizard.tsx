@@ -238,7 +238,7 @@ export const RoleOnboardingWizard: React.FC<RoleOnboardingWizardProps> = ({ role
           iconColor: "text-[#D97706]",
           description: "Review and calibrate the Analytic Hierarchy Process pairwise weights for Academic, Mental Health, Financial, Family, and Physical Health domains.",
           highlights: [
-            "Academic (40.17%), Mental Health (24.42%), Financial (13.73%), Family (13.73%), Health (7.94%)",
+            "Academic (30.0%), Family (20.0%), Health (20.0%), Mental Health (15.0%), Financial (15.0%)",
             "Saaty Consistency Ratio: CR = 0.048 (Passes standard CR ≤ 0.10)",
             "Mathematical priority vector validation for all decision models"
           ]

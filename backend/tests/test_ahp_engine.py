@@ -19,11 +19,11 @@ client = TestClient(app)
 def test_ahp_weights_sum_to_one():
     total = sum(STANDARD_WEIGHTS.values())
     assert abs(total - 1.0) < 0.001
-    assert STANDARD_WEIGHTS["academic"] == 0.4017
-    assert STANDARD_WEIGHTS["mental_health"] == 0.2442
-    assert STANDARD_WEIGHTS["financial"] == 0.1373
-    assert STANDARD_WEIGHTS["family"] == 0.1373
-    assert STANDARD_WEIGHTS["health"] == 0.0794
+    assert STANDARD_WEIGHTS["academic"] == 0.30
+    assert STANDARD_WEIGHTS["family"] == 0.20
+    assert STANDARD_WEIGHTS["health"] == 0.20
+    assert STANDARD_WEIGHTS["mental_health"] == 0.15
+    assert STANDARD_WEIGHTS["financial"] == 0.15
 
 def test_compute_ahp_weights_consistency_ratio():
     weights, lambda_max, cr, is_consistent = compute_ahp_weights(DEFAULT_COMPARISON_MATRIX)
@@ -34,8 +34,8 @@ def test_compute_ahp_weights_consistency_ratio():
 
 def test_calculate_student_risk_formula():
     # Test case: Academic 80, Mental 70, Financial 50, Family 40, Health 30
-    # Expected: (0.4017*80) + (0.2442*70) + (0.1373*50) + (0.1373*40) + (0.0794*30)
-    # = 32.136 + 17.094 + 6.865 + 5.492 + 2.382 = 63.969 -> 63.97 (MEDIUM RISK)
+    # Expected: (0.30*80) + (0.15*70) + (0.15*50) + (0.20*40) + (0.20*30)
+    # = 24.0 + 10.5 + 7.5 + 8.0 + 6.0 = 56.00 (MEDIUM RISK)
     res = calculate_student_risk({
         "academic": 80.0,
         "mental_health": 70.0,
@@ -43,7 +43,7 @@ def test_calculate_student_risk_formula():
         "family": 40.0,
         "health": 30.0
     })
-    assert res["composite_risk_score"] == 63.97
+    assert res["composite_risk_score"] == 56.00
     assert res["risk_tier"] == RiskTier.MEDIUM
     assert res["dominant_domain"] == "academic"
 

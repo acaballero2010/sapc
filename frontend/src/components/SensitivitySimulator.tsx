@@ -20,21 +20,21 @@ export const SensitivitySimulator: React.FC<SensitivitySimulatorProps> = ({ isOp
   });
 
   const weights = {
-    academic: 0.4017,
-    mental_health: 0.2442,
-    financial: 0.1373,
-    family: 0.1373,
-    health: 0.0794
+    academic: 0.30,
+    family: 0.20,
+    health: 0.20,
+    mental_health: 0.15,
+    financial: 0.15
   };
 
   if (!isOpen) return null;
 
   const composite = (
     scores.academic * weights.academic +
-    scores.mental_health * weights.mental_health +
-    scores.financial * weights.financial +
     scores.family * weights.family +
-    scores.health * weights.health
+    scores.health * weights.health +
+    scores.mental_health * weights.mental_health +
+    scores.financial * weights.financial
   );
 
   const roundedScore = Math.min(100, Math.max(0, Math.round(composite * 10) / 10));
@@ -42,10 +42,10 @@ export const SensitivitySimulator: React.FC<SensitivitySimulatorProps> = ({ isOp
 
   const contributions = {
     Academic: (scores.academic * weights.academic).toFixed(1),
-    "Mental Health": (scores.mental_health * weights.mental_health).toFixed(1),
-    Financial: (scores.financial * weights.financial).toFixed(1),
     Family: (scores.family * weights.family).toFixed(1),
-    Health: (scores.health * weights.health).toFixed(1)
+    Health: (scores.health * weights.health).toFixed(1),
+    "Mental Health": (scores.mental_health * weights.mental_health).toFixed(1),
+    Financial: (scores.financial * weights.financial).toFixed(1)
   };
 
   return (
@@ -84,7 +84,7 @@ export const SensitivitySimulator: React.FC<SensitivitySimulatorProps> = ({ isOp
             <div className="text-xs sm:text-sm text-slate-700 text-left sm:text-right sm:max-w-xs">
               <span className="text-[#8B0014] font-extrabold block">AHP Matrix Formula:</span>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Composite = 0.4017(Acad) + 0.2442(MH) + 0.1373(Fin) + 0.1373(Fam) + 0.0794(Hlth)
+                Composite = 0.30(Acad) + 0.20(Fam) + 0.20(Hlth) + 0.15(MH) + 0.15(Fin)
               </p>
             </div>
           </div>
@@ -94,7 +94,7 @@ export const SensitivitySimulator: React.FC<SensitivitySimulatorProps> = ({ isOp
             <div className="space-y-4 text-sm">
               <div>
                 <div className="flex justify-between mb-1.5 font-bold">
-                  <span className="text-slate-900">Academic Risk (40.17%)</span>
+                  <span className="text-slate-900">Academic Risk (30.0%)</span>
                   <span className="text-[#8B0014]">{scores.academic} / 100 (+{contributions.Academic} pts)</span>
                 </div>
                 <input
@@ -109,37 +109,7 @@ export const SensitivitySimulator: React.FC<SensitivitySimulatorProps> = ({ isOp
 
               <div>
                 <div className="flex justify-between mb-1.5 font-bold">
-                  <span className="text-slate-900">Mental Health Distress (24.42%)</span>
-                  <span className="text-rose-600">{scores.mental_health} / 100 (+{contributions["Mental Health"]} pts)</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={scores.mental_health}
-                  onChange={(e) => setScores({ ...scores, mental_health: Number(e.target.value) })}
-                  className="w-full accent-rose-600 h-2 bg-slate-200 rounded-lg cursor-pointer"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between mb-1.5 font-bold">
-                  <span className="text-slate-900">Financial Strain (13.73%)</span>
-                  <span className="text-amber-700">{scores.financial} / 100 (+{contributions.Financial} pts)</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={scores.financial}
-                  onChange={(e) => setScores({ ...scores, financial: Number(e.target.value) })}
-                  className="w-full accent-amber-600 h-2 bg-slate-200 rounded-lg cursor-pointer"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between mb-1.5 font-bold">
-                  <span className="text-slate-900">Family Instability (13.73%)</span>
+                  <span className="text-slate-900">Family Instability (20.0%)</span>
                   <span className="text-amber-700">{scores.family} / 100 (+{contributions.Family} pts)</span>
                 </div>
                 <input
@@ -154,7 +124,7 @@ export const SensitivitySimulator: React.FC<SensitivitySimulatorProps> = ({ isOp
 
               <div>
                 <div className="flex justify-between mb-1.5 font-bold">
-                  <span className="text-slate-900">Health Vulnerability (7.94%)</span>
+                  <span className="text-slate-900">Health Vulnerability (20.0%)</span>
                   <span className="text-rose-700">{scores.health} / 100 (+{contributions.Health} pts)</span>
                 </div>
                 <input
@@ -164,6 +134,36 @@ export const SensitivitySimulator: React.FC<SensitivitySimulatorProps> = ({ isOp
                   value={scores.health}
                   onChange={(e) => setScores({ ...scores, health: Number(e.target.value) })}
                   className="w-full accent-rose-500 h-2 bg-slate-200 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1.5 font-bold">
+                  <span className="text-slate-900">Mental Health Distress (15.0%)</span>
+                  <span className="text-rose-600">{scores.mental_health} / 100 (+{contributions["Mental Health"]} pts)</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={scores.mental_health}
+                  onChange={(e) => setScores({ ...scores, mental_health: Number(e.target.value) })}
+                  className="w-full accent-rose-600 h-2 bg-slate-200 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1.5 font-bold">
+                  <span className="text-slate-900">Financial Strain (15.0%)</span>
+                  <span className="text-amber-700">{scores.financial} / 100 (+{contributions.Financial} pts)</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={scores.financial}
+                  onChange={(e) => setScores({ ...scores, financial: Number(e.target.value) })}
+                  className="w-full accent-amber-600 h-2 bg-slate-200 rounded-lg cursor-pointer"
                 />
               </div>
 

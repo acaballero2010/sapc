@@ -23,6 +23,11 @@ class AcademicRecord(Base):
     # Normalized Sub-score calculated for AHP (0-100, where 100 = maximum risk)
     normalized_academic_risk = Column(Float, default=0.0)
     
+    # Engagement Factors (Clubs, Hobbies, Extracurriculars)
+    extracurricular_club = Column(String(150), nullable=True, default="None / Non-Member")
+    club_participation_level = Column(String(50), nullable=True, default="None")
+    hobbies_interests = Column(String(255), nullable=True, default="None")
+    
     raw_details = Column(Text, nullable=True)        # JSON string of individual subjects & grades
     batch_import_id = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

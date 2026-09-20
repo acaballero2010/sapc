@@ -88,6 +88,24 @@ export default function LoginPage() {
     }
   };
 
+  const handleQuickDemoLogin = async (targetRole: RoleType) => {
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    try {
+      const demoEmail = 
+        targetRole === "guidance_counselor" ? "counselor@sapc.edu.ph" :
+        targetRole === "teacher" ? "teacher@sapc.edu.ph" :
+        targetRole === "parent" ? "parent@sapc.edu.ph" :
+        targetRole === "admin" ? "admin@sapc.edu.ph" : "student@sapc.edu.ph";
+      await login(demoEmail, "demo123", targetRole);
+      router.push(ROLE_ROUTES[targetRole]);
+    } catch {
+      router.push(ROLE_ROUTES[targetRole]);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-[#2D0005] to-[#120003] flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-sans text-slate-100">
       {/* Top Header Bar */}
@@ -119,13 +137,10 @@ export default function LoginPage() {
       </div>
 
       {/* Main Login Card */}
-      <div className="max-w-md w-full mx-auto my-auto py-6">
-        <div className="bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200/90 relative overflow-hidden space-y-6">
-          {/* Top Institutional Accent Strip */}
-          <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-[#8B0014] via-amber-400 to-[#8B0014]" />
-
+      <div className="max-w-md w-full mx-auto my-6 sm:my-8">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/20 text-slate-800 space-y-5">
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-2xl bg-[#8B0014]/10 border border-[#8B0014]/20 flex items-center justify-center">
                 <SapcLogo size={38} />
@@ -141,6 +156,67 @@ export default function LoginPage() {
               <ShieldCheck className="h-3 w-3" />
               <span>RA 10173</span>
             </span>
+          </div>
+
+          {/* Quick 1-Click Demo Profiles Selector */}
+          <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-300/80 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1">
+                🚀 Instant 1-Click Demo Logins
+              </span>
+              <span className="text-[10px] font-bold text-amber-800">No Password Needed</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleQuickDemoLogin("guidance_counselor")}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+              >
+                <div className="text-sm">🧠</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Counselor</div>
+                <div className="text-[9px] text-slate-500">RGC Portal</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickDemoLogin("teacher")}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+              >
+                <div className="text-sm">📚</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Teacher</div>
+                <div className="text-[9px] text-slate-500">Adviser View</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickDemoLogin("parent")}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+              >
+                <div className="text-sm">👨‍👩‍👦</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Parent</div>
+                <div className="text-[9px] text-slate-500">Guardian View</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickDemoLogin("student")}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+              >
+                <div className="text-sm">🎓</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Student</div>
+                <div className="text-[9px] text-slate-500">Joshua D.</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickDemoLogin("admin")}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group col-span-2 sm:col-span-2"
+              >
+                <div className="text-sm">⚙️</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">System Administrator</div>
+                <div className="text-[9px] text-slate-500">Master Ingestion &amp; AHP Config</div>
+              </button>
+            </div>
           </div>
 
           {errorMessage && (

@@ -177,10 +177,21 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
             const gad7 = parseFloat(rowMatch.gad7_anxiety_score) || 4;
             const phq9 = parseFloat(rowMatch.phq9_depression_score) || 3;
             const stress = parseFloat(rowMatch.stress_level_1_to_5) || 2;
-            const counselorFlag = rowMatch.counselor_case_flag?.toLowerCase() === "yes";
+            const counselorFlag = rowMatch.counselor_case_flag?.toLowerCase() === "yes" || rowMatch.counselor_case_flag?.toLowerCase() === "true";
+            const anhedonia = rowMatch.anhedonia_and_withdrawal_flag?.toLowerCase() === "true";
+            const isMaladaptive = rowMatch.coping_adaptiveness?.toLowerCase().includes("maladaptive");
+            const isAdaptive = rowMatch.coping_adaptiveness?.toLowerCase().includes("adaptive");
+            const resilience = parseFloat(rowMatch.resilience_score_1_to_5) || 3;
 
-            // GAD-7 (max 21) + PHQ-9 (max 27) scaled to 0-100
-            const psychRisk = ((gad7 / 21) * 0.5 + (phq9 / 27) * 0.5) * 80 + (stress * 4) + (counselorFlag ? 15 : 0);
+            // GAD-7 (max 21) + PHQ-9 (max 27) scaled + stress + coping + resilience
+            let psychRisk = ((gad7 / 21) * 0.45 + (phq9 / 27) * 0.45) * 75 + (stress * 4);
+            if (counselorFlag) psychRisk += 12;
+            if (anhedonia) psychRisk += 8;
+            if (isMaladaptive) psychRisk += 8;
+            else if (isAdaptive) psychRisk -= 5;
+            if (resilience <= 2) psychRisk += 6;
+            else if (resilience >= 4) psychRisk -= 5;
+
             newScores.mental_health = Math.min(100, Math.max(5, Math.round(psychRisk)));
           }
 
@@ -188,32 +199,81 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
             const overdue = parseInt(rowMatch.overdue_installments, 10) || 0;
             const balance = parseFloat(rowMatch.unpaid_balance_php) || 0;
             const promissory = rowMatch.promissory_note_active?.toLowerCase() === "true";
+            const finStress = parseFloat(rowMatch.financial_stress_level_1_to_5) || 2;
+            const is4Ps = rowMatch.is_4ps_beneficiary?.toLowerCase() === "true";
+            const income = parseFloat(rowMatch.monthly_household_income_php) || 30000;
+            const allowanceInadequate = rowMatch.daily_allowance_adequacy?.toLowerCase().includes("inadequate");
+            const isWorkingStudent = rowMatch.student_part_time_work_status?.toLowerCase().includes("working student");
 
-            const finRisk = Math.min(100, (overdue * 22) + (balance > 15000 ? 30 : balance > 5000 ? 15 : 0) + (promissory ? 20 : 0));
-            newScores.financial = Math.max(5, Math.round(finRisk));
+            // Blend institutional debt (accounting) + subjective family stress + hardship indicators
+            let finRisk = 10;
+            finRisk += (overdue * 16);
+            if (balance > 15000) finRisk += 20;
+            else if (balance > 5000) finRisk += 10;
+            if (promissory) finRisk += 12;
+
+            // Subjective Financial Stress (1-5)
+            finRisk += (finStress * 6);
+            if (is4Ps) finRisk += 10;
+            if (income < 12000) finRisk += 12;
+            else if (income < 25000) finRisk += 6;
+            if (allowanceInadequate) finRisk += 10;
+            if (isWorkingStudent) finRisk += 10; // High fatigue & reduced study time
+
+            newScores.financial = Math.min(100, Math.max(5, Math.round(finRisk)));
           }
 
           if (activeDomain === "family") {
-            const ofw = rowMatch.ofw_parent_status?.toLowerCase();
-            const guardianRating = rowMatch.guardian_contact_rating?.toLowerCase();
+            const ofw = rowMatch.ofw_parent_status?.toLowerCase() || "";
+            const guardianRating = rowMatch.guardian_contact_rating?.toLowerCase() || "";
             const distress = rowMatch.domestic_distress_flag?.toLowerCase() === "true";
+            const isEldest = rowMatch.is_eldest_child?.toLowerCase() === "true";
+            const is4Ps = rowMatch.is_4ps_beneficiary?.toLowerCase() === "true";
+            const singleParent = rowMatch.single_parent_status?.toLowerCase() === "true";
+            const ptaAttended = rowMatch.parent_conference_attended?.toLowerCase() === "true";
+            const living = rowMatch.living_arrangement?.toLowerCase() || "";
 
             let famRisk = 10;
-            if (ofw?.includes("both")) famRisk += 25;
-            else if (ofw?.includes("one")) famRisk += 15;
-            if (guardianRating === "low") famRisk += 30;
-            else if (guardianRating === "moderate") famRisk += 15;
-            if (distress) famRisk += 30;
+            if (ofw.includes("both")) famRisk += 20;
+            else if (ofw.includes("one") || ofw.includes("father") || ofw.includes("mother")) famRisk += 12;
+
+            if (guardianRating === "unresponsive") famRisk += 25;
+            else if (guardianRating === "low") famRisk += 18;
+            else if (guardianRating === "moderate") famRisk += 8;
+
+            if (distress) famRisk += 25;
+            if (isEldest) famRisk += 8; // Higher pressure / sibling caretaking
+            if (is4Ps) famRisk += 10;   // Socioeconomic hardship proxy
+            if (singleParent) famRisk += 10; // Reduced supervision / solo provider strain
+            if (!ptaAttended) famRisk += 8;
+            if (living.includes("relatives") || living.includes("boarding") || living.includes("independent")) famRisk += 12;
+
             newScores.family = Math.min(100, Math.max(5, famRisk));
           }
 
           if (activeDomain === "health") {
             const visits = parseInt(rowMatch.quarterly_clinic_visits, 10) || 0;
-            const chronic = rowMatch.chronic_condition?.toLowerCase() !== "none" && rowMatch.chronic_condition !== "";
+            const medAbsences = parseInt(rowMatch.medical_absences_count, 10) || 0;
+            const chronic = rowMatch.chronic_condition?.toLowerCase() !== "none" && rowMatch.chronic_condition !== "" && rowMatch.chronic_condition !== undefined;
             const cleared = rowMatch.physical_activity_clearance?.toLowerCase() === "cleared";
+            const bmi = rowMatch.bmi_category?.toLowerCase() || "";
+            const skipsBreakfast = rowMatch.breakfast_consistency?.toLowerCase().includes("skips") || rowMatch.daily_meal_frequency?.toLowerCase().includes("skips");
+            const sleepHours = parseFloat(rowMatch.avg_sleep_hours_per_night) || 7.5;
+            const daytimeFatigue = rowMatch.daytime_fatigue_or_somnolence?.toLowerCase().includes("frequent");
 
-            const healthRisk = Math.min(100, (visits * 12) + (chronic ? 25 : 0) + (!cleared ? 20 : 0));
-            newScores.health = Math.max(5, Math.round(healthRisk));
+            let healthRisk = 10;
+            if (chronic) healthRisk += 20;
+            if (visits >= 3) healthRisk += 18;
+            else if (visits >= 1) healthRisk += 8;
+            if (medAbsences >= 3) healthRisk += 15;
+            if (!cleared) healthRisk += 12;
+            if (bmi.includes("underweight") || bmi.includes("malnourished")) healthRisk += 12;
+            if (skipsBreakfast) healthRisk += 8;
+            if (sleepHours < 5.0) healthRisk += 18;
+            else if (sleepHours < 6.5) healthRisk += 10;
+            if (daytimeFatigue) healthRisk += 10;
+
+            newScores.health = Math.min(100, Math.max(5, Math.round(healthRisk)));
           }
 
           // Composite AHP synthesis: 0.35 Academic + 0.25 Mental Health + 0.15 Financial + 0.15 Family + 0.10 Health

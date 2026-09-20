@@ -51,7 +51,27 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.025em;
 }
 
-/* Custom Clean Scrollbar for Light Theme */
+/* Dark Mode Root & Body Styles */
+.dark {
+  --background: #090D16;
+  --foreground: #F8FAFC;
+  --color-surface-base: #0F172A;
+  --color-surface-card: #1E293B;
+  --color-surface-card-hover: #334155;
+  --color-surface-card-subtle: #1E293B;
+  --color-surface-border: #334155;
+  --color-surface-border-light: #475569;
+}
+
+.dark body {
+  background-color: #090D16;
+  color: #F8FAFC;
+  background-image: 
+    radial-gradient(ellipse 80% 30% at 50% -5%, rgba(139, 0, 20, 0.15), transparent),
+    radial-gradient(circle at 95% 15%, rgba(217, 119, 6, 0.08), transparent);
+}
+
+/* Custom Clean Scrollbar for Light & Dark Theme */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -61,12 +81,35 @@ h1, h2, h3, h4, h5, h6 {
   background: #F8FAFC;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
   border-radius: 4px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Print Specific Rules */
+@media print {
+  header, nav, button, .no-print {
+    display: none !important;
+  }
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
 }
 

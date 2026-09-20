@@ -119,7 +119,7 @@ export default function DashboardLayout({
                   </div>
                 )}
                 <div className="text-left hidden sm:block">
-                  <p className="text-xs font-bold text-slate-900 group-hover:text-[#8B0014] leading-tight truncate max-w-[120px]">
+                  <p className="text-xs font-bold text-slate-900 group-hover:text-[#8B0014] leading-tight truncate max-w-[160px] md:max-w-[220px]">
                     {user?.full_name || "Account"}
                   </p>
                   <p className="text-[9px] text-slate-500 font-medium leading-none mt-0.5">Manage Profile →</p>

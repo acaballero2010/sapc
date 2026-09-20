@@ -3,28 +3,28 @@ from typing import Dict, Any, Tuple, Union, List, Optional
 from app.models.risk import RiskTier
 from app.core.config import settings
 
-# Criteria order: [Academic, Mental Health, Financial, Family, Health]
-CRITERIA_KEYS = ["academic", "mental_health", "financial", "family", "health"]
+# Criteria order: [Academic, Family, Health, Mental Health, Financial]
+CRITERIA_KEYS = ["academic", "family", "health", "mental_health", "financial"]
 
-# Standard IntellySys Comparison Matrix (A) for SAPC Decision Support
+# Validated Psychometrician Comparison Matrix (A) for SAPC Decision Support
 DEFAULT_COMPARISON_MATRIX = np.array([
-    [1.0,     2.0,     3.0,     3.0,     5.0],
-    [1/2.0,   1.0,     2.0,     2.0,     3.0],
-    [1/3.0,   1/2.0,   1.0,     1.0,     2.0],
-    [1/3.0,   1/2.0,   1.0,     1.0,     2.0],
-    [1/5.0,   1/3.0,   1/2.0,   1/2.0,   1.0]
+    [1.0,     1.5,     1.5,     2.0,     2.0],     # Academic (30%)
+    [1/1.5,   1.0,     1.0,     4/3.0,   4/3.0],   # Family (20%)
+    [1/1.5,   1.0,     1.0,     4/3.0,   4/3.0],   # Health (20%)
+    [1/2.0,   3/4.0,   3/4.0,   1.0,     1.0],     # Mental Health (15%)
+    [1/2.0,   3/4.0,   3/4.0,   1.0,     1.0]      # Financial (15%)
 ])
 
 # Random Inconsistency Index (RI) table for n=1 to 10
 RI_TABLE = {1: 0.0, 2: 0.0, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49}
 
-# Validated IntellySys weights
+# Validated IntellySys weights (Psychometrician Validated Model)
 STANDARD_WEIGHTS = {
-    "academic": 0.4017,
-    "mental_health": 0.2442,
-    "financial": 0.1373,
-    "family": 0.1373,
-    "health": 0.0794
+    "academic": 0.30,
+    "family": 0.20,
+    "health": 0.20,
+    "mental_health": 0.15,
+    "financial": 0.15
 }
 
 INTERVENTION_MATRIX = {
@@ -108,7 +108,7 @@ def compute_ahp_weights(matrix: Optional[np.ndarray] = None) -> Tuple[np.ndarray
 def calculate_student_risk(domain_scores: Union[Dict[str, float], List[float]]) -> Dict[str, Any]:
     """
     Calculates composite multi-criteria risk score:
-    Total Risk Score = (0.4017 * S_AC) + (0.2442 * S_MH) + (0.1373 * S_FI) + (0.1373 * S_FA) + (0.0794 * S_HE)
+    Total Risk Score = (0.30 * S_AC) + (0.20 * S_FA) + (0.20 * S_HE) + (0.15 * S_MH) + (0.15 * S_FI)
     
     Risk Classification:
     - Low Risk: Score < 40.0

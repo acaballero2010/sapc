@@ -27,12 +27,12 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8000"
     ]
     
-    # AHP Domain Default Weights
-    AHP_WEIGHT_ACADEMIC: float = 0.4017
-    AHP_WEIGHT_MENTAL_HEALTH: float = 0.2442
-    AHP_WEIGHT_FINANCIAL: float = 0.1373
-    AHP_WEIGHT_FAMILY: float = 0.1373
-    AHP_WEIGHT_HEALTH: float = 0.0794
+    # AHP Domain Default Weights (Validated Psychometrician Matrix)
+    AHP_WEIGHT_ACADEMIC: float = 0.30
+    AHP_WEIGHT_FAMILY: float = 0.20
+    AHP_WEIGHT_HEALTH: float = 0.20
+    AHP_WEIGHT_MENTAL_HEALTH: float = 0.15
+    AHP_WEIGHT_FINANCIAL: float = 0.15
     
     # Risk Tier Thresholds
     RISK_LOW_MAX: float = 39.9

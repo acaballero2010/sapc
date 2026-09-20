@@ -304,7 +304,7 @@ def simulate_academic_recovery(
         "recommended_min_gpa": 82.0,
         "recommended_max_absences": 2,
         "recommended_failing_cleared": 0,
-        "achievable_composite_score": round((0.4017 * 0.0) + (0.2442 * sim_mental) + (0.1373 * sim_financial) + (0.1373 * sim_family) + (0.0794 * sim_health), 2),
+        "achievable_composite_score": round((0.30 * 0.0) + (0.15 * sim_mental) + (0.15 * sim_financial) + (0.20 * sim_family) + (0.20 * sim_health), 2),
         "target_risk_tier": "low"
     }
 
