@@ -91,7 +91,7 @@ export const LandingPage: React.FC = () => {
     },
     {
       id: "stakeholder-ecosystem",
-      tag: "5 Dedicated Institutional Roles • Connected Campus",
+      tag: "4 Dedicated Institutional Roles • Connected Campus",
       tagIcon: <Users className="h-4 w-4 text-blue-600" />,
       tagColor: "bg-blue-50 text-blue-900 border-blue-300",
       headline: "Empowering Students, Parents, Faculty & Administration",
@@ -99,7 +99,7 @@ export const LandingPage: React.FC = () => {
       subhead: "Unified Portals: Student Wellness Radars, Parent SMS Alerts & Longitudinal Trends",
       description: "Connecting the entire SAPC family in a unified multi-role portal: students track wellness goals, parents receive automated consultation alerts, teachers manage advisory classes, and counselors deliver proactive care plans.",
       pillars: [
-        { label: "5 Role Portals", sub: "Tailored Dashboards", icon: <Users className="h-4.5 w-4.5 text-blue-600" />, bg: "bg-blue-50 border-blue-200" },
+        { label: "4 Role Portals", sub: "Tailored Dashboards", icon: <Users className="h-4.5 w-4.5 text-blue-600" />, bg: "bg-blue-50 border-blue-200" },
         { label: "Parent Progress", sub: "SMS & Consultation", icon: <HeartHandshake className="h-4.5 w-4.5 text-emerald-600" />, bg: "bg-emerald-50 border-emerald-200" },
         { label: "Longitudinal Trends", sub: "Multi-Term Analytics", icon: <Layers className="h-4.5 w-4.5 text-purple-600" />, bg: "bg-purple-50 border-purple-200" }
       ],
@@ -425,7 +425,7 @@ export const LandingPage: React.FC = () => {
                                 <Users className="h-4 w-4" />
                               </div>
                               <div>
-                                <h3 className="font-extrabold text-sm text-slate-900">5 Institutional Role Portals</h3>
+                                <h3 className="font-extrabold text-sm text-slate-900">4 Institutional Role Portals</h3>
                                 <span className="text-[11px] text-slate-500">Select any role to explore live</span>
                               </div>
                             </div>
