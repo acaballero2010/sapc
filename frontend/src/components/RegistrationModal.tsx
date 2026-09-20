@@ -118,6 +118,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState<string | null>(null);
   const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpSentTo, setOtpSentTo] = useState<string | null>(null);
+  const [otpSendError, setOtpSendError] = useState<string | null>(null);
 
   // Helper: translate Firebase error codes to user-friendly messages
   const getFirebaseErrorMsg = (err: any): string | null => {
@@ -157,22 +159,45 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     }
   };
 
-  const handleStudentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    formTimerRef.current = setTimeout(() => {
-      setIsSubmitting(false);
-      setStep("otp");
-    }, 600);
+  // Centralized OTP dispatch — calls /api/send-otp and advances to OTP step on success
+  const sendOtp = async (email: string, name: string, role: string): Promise<boolean> => {
+    setOtpSendError(null);
+    try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, role })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setOtpSendError(data.error || "Failed to send verification code. Please try again.");
+        return false;
+      }
+      setOtpSentTo(email);
+      return true;
+    } catch (err: any) {
+      setOtpSendError("Network error sending OTP. Please check your connection.");
+      return false;
+    }
   };
 
-  const handleParentSubmit = (e: React.FormEvent) => {
+  const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    formTimerRef.current = setTimeout(() => {
-      setIsSubmitting(false);
-      setStep("otp");
-    }, 600);
+    const email = studentEmail || `${lrn}@student.sapc.edu.ph`;
+    const sent = await sendOtp(email, `Student ${lrn}`, "student");
+    setIsSubmitting(false);
+    if (sent) setStep("otp");
+  };
+
+  const handleParentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const sanitizedPhone = parentPhone.replace(/\D/g, "") || "09170000000";
+    const email = `${sanitizedPhone}@parent.sapc.edu.ph`;
+    const sent = await sendOtp(email, parentName, "parent");
+    setIsSubmitting(false);
+    if (sent) setStep("otp");
   };
 
   const handleTeacherSubmit = async (e: React.FormEvent) => {
@@ -284,6 +309,20 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     setOtpError(null);
     setIsSubmitting(true);
     try {
+      // Step 1: Verify OTP against server
+      const verifyRes = await fetch("/api/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: otpSentTo, code: otp.join("") })
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        setOtpError(verifyData.error || "Incorrect verification code. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Step 2: OTP verified — create Firebase account
       if (activeTab === "student") {
         const finalEmail = studentEmail || `${lrn}@student.sapc.edu.ph`;
         const finalPass = studentPassword || "Student@SAPC2026!";
@@ -834,9 +873,17 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
               <div className="space-y-1 max-w-sm mx-auto">
                 <h4 className="text-lg font-black text-slate-900">Enter 6-Digit One-Time PIN</h4>
                 <p className="text-xs text-slate-500">
-                  We&apos;ve sent a 6-digit verification code to your registered mobile number / email for authentication.
+                  A 6-digit verification code was sent to{" "}
+                  <strong className="text-slate-700 font-mono">{otpSentTo || "your email"}</strong>.
+                  Check your inbox (and spam folder).
                 </p>
               </div>
+
+              {otpSendError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center">
+                  {otpSendError}
+                </div>
+              )}
 
               <div className="flex justify-center gap-2 sm:gap-3">
                 {otp.map((digit, idx) => (
@@ -844,6 +891,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     key={idx}
                     id={`otp-${idx}`}
                     type="text"
+                    inputMode="numeric"
                     maxLength={1}
                     value={digit}
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
@@ -857,6 +905,25 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                   {otpError}
                 </div>
               )}
+
+              <div className="text-xs text-slate-500">
+                Didn&apos;t receive it?{" "}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (otpSentTo) {
+                      setIsSubmitting(true);
+                      const role = activeTab === "student" ? "student" : "parent";
+                      await sendOtp(otpSentTo, "", role);
+                      setIsSubmitting(false);
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className="font-bold text-[#8B0014] hover:underline disabled:opacity-40"
+                >
+                  Resend Code
+                </button>
+              </div>
 
               <div className="flex items-center gap-3 pt-2">
                 <button

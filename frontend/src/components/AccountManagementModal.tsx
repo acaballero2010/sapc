@@ -275,8 +275,10 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            <GraduationCap className="h-4 w-4 text-[#8B0014]" />
-            <span>Profile & Photo</span>
+            {user?.role === "student" || user?.role === "parent"
+              ? <GraduationCap className="h-4 w-4 text-[#8B0014]" />
+              : <Settings className="h-4 w-4 text-[#8B0014]" />}
+            <span>Profile &amp; Photo</span>
           </button>
           <button
             type="button"
@@ -288,7 +290,11 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
             }`}
           >
             <Building className="h-4 w-4 text-amber-600" />
-            <span>Academic & Family</span>
+            <span>
+              {user?.role === "student" ? "Academic & Family"
+                : user?.role === "parent" ? "Linked Students"
+                : "Office & Assignment"}
+            </span>
           </button>
           <button
             type="button"
@@ -329,8 +335,18 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="block text-xs font-bold text-slate-800">Student Profile Photo</label>
-                    <p className="text-[11px] text-slate-500">Upload a custom headshot or pick an institutional avatar</p>
+                    <label className="block text-xs font-bold text-slate-800">
+                      {user?.role === "student" ? "Student Profile Photo"
+                        : user?.role === "parent" ? "Parent / Guardian Photo"
+                        : user?.role === "teacher" ? "Staff Profile Photo"
+                        : user?.role === "guidance_counselor" ? "Counselor Profile Photo"
+                        : "Administrator Profile Photo"}
+                    </label>
+                    <p className="text-[11px] text-slate-500">
+                      {user?.role === "student" || user?.role === "parent"
+                        ? "Upload a custom headshot or pick an institutional avatar"
+                        : "Upload your official staff headshot or select an avatar"}
+                    </p>
                   </div>
                   <span className="text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full">
                     PNG, JPG, WebP ≤ 4MB
@@ -413,7 +429,8 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                 </div>
               </div>
 
-              {/* Institutional / School Branding Logo Upload Section */}
+              {/* Institutional / School Branding Logo Upload Section — Admin & Counselor only */}
+              {(user?.role === "admin" || user?.role === "guidance_counselor") && (
               <div className="p-4 bg-gradient-to-r from-amber-50/70 to-rose-50/50 border border-amber-200/80 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
@@ -474,6 +491,7 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Text Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -503,12 +521,17 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">DepEd LRN (12-Digit)</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    {user?.role === "student" ? "DepEd LRN (12-Digit)"
+                      : user?.role === "guidance_counselor" ? "PRC License No."
+                      : user?.role === "teacher" ? "Faculty ID / DepEd No."
+                      : user?.role === "parent" ? "Parent ID / PTCA No."
+                      : "Admin Employee ID"}
+                  </label>
                   <input
                     type="text"
-                    maxLength={12}
                     value={lrn}
-                    onChange={(e) => setLrn(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) => setLrn(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-mono font-bold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                   />
                 </div>
@@ -538,7 +561,13 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
           {activeTab === "academic" && (
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Academic Track / Strand</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  {user?.role === "student" ? "Academic Track / Strand"
+                    : user?.role === "teacher" ? "Subject / Department"
+                    : user?.role === "guidance_counselor" ? "Specialization / Department"
+                    : user?.role === "parent" ? "Linked Student Strand"
+                    : "Administrative Role / Division"}
+                </label>
                 <input
                   type="text"
                   value={strand}
@@ -548,7 +577,13 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Section & Class Adviser</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  {user?.role === "student" ? "Section & Class Adviser"
+                    : user?.role === "teacher" ? "Assigned Section(s) / Advisory"
+                    : user?.role === "guidance_counselor" ? "Office Room / Schedule"
+                    : user?.role === "parent" ? "Child's Section"
+                    : "Office / Campus Location"}
+                </label>
                 <input
                   type="text"
                   value={section}
@@ -559,7 +594,11 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Linked Parent / Guardian</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    {user?.role === "student" ? "Linked Parent / Guardian"
+                      : user?.role === "parent" ? "Linked Child / Student"
+                      : "Direct Supervisor / Office"}
+                  </label>
                   <input
                     type="text"
                     value={guardianName}
@@ -568,7 +607,9 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Emergency Mobile Number</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    {user?.role === "student" || user?.role === "parent" ? "Emergency Mobile Number" : "Office / Direct Line"}
+                  </label>
                   <input
                     type="text"
                     value={guardianContact}

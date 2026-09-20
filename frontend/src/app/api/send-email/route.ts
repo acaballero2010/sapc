@@ -6,13 +6,13 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { to, subject, html, studentName, meetingDate, meetingTime, type, venue } = body;
 
-    const apiKey = process.env.RESEND_API_KEY || "re_mock_sapc_demo_key";
+    const apiKey = process.env.RESEND_API_KEY;
 
     // In production or demo with valid key:
     if (apiKey && apiKey.startsWith("re_") && apiKey !== "re_mock_sapc_demo_key") {
       const resend = new Resend(apiKey);
       const data = await resend.emails.send({
-        from: "SAPC Guidance Center <guidance@sapc.edu.ph>",
+        from: "SAPC Guidance Center <onboarding@resend.dev>",
         to: Array.isArray(to) ? to : [to || "parent@sapc.edu.ph"],
         subject: subject || `SAPC Guidance Advisory: Case Conference for ${studentName || "Student"}`,
         html: html || `
