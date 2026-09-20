@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { SAPC_500_STUDENTS } from "@/data/students500";
 import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
@@ -52,13 +53,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
     const loadProfile = async () => {
       setIsLoading(true);
       try {
-        const studentsList = await fetchWithAuth("/students");
+        const studentsList = (await fetchWithAuth("/students").catch(() => null)) || SAPC_500_STUDENTS;
         if (studentsList && studentsList.length > 0) {
           const s = studentsList.find((st: any) => 
             (user?.student_id && st.id === user.student_id) ||
             (user?.email && st.email?.toLowerCase() === user.email.toLowerCase()) ||
             (user?.full_name && `${st.first_name} ${st.last_name}`.toLowerCase() === user.full_name.toLowerCase())
-          ) || studentsList[0];
+          ) || {
+            id: user?.student_id || 1,
+            first_name: user?.full_name ? user.full_name.split(" ")[0] : "Enrolled",
+            last_name: user?.full_name && user.full_name.split(" ").length > 1 ? user.full_name.split(" ").slice(1).join(" ") : "Student",
+            full_name: user?.full_name || "Enrolled Student",
+            lrn: "109238475999",
+            grade_level: 11,
+            strand: "STEM",
+            section_name: "Grade 11 - St. Augustine (STEM)",
+            adviser_name: "Mr. Roberto Santos, LPT",
+            email: user?.email || "student@sapc.edu.ph"
+          };
           setStudent(s);
 
           const [rRes, aRes] = await Promise.all([
@@ -67,13 +79,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
           ]);
 
           setRiskData(rRes || {
-            composite_risk_score: 24.5,
-            risk_tier: "low",
-            academic_score: 18.0,
-            mental_health_score: 15.0,
-            financial_score: 12.0,
-            family_score: 14.0,
-            health_score: 10.0
+            composite_risk_score: s.latest_risk_score || 24.5,
+            risk_tier: s.latest_risk_tier || "low",
+            academic_score: s.domain_scores?.academic || 18.0,
+            mental_health_score: s.domain_scores?.mental_health || 15.0,
+            financial_score: s.domain_scores?.financial || 12.0,
+            family_score: s.domain_scores?.family || 14.0,
+            health_score: s.domain_scores?.health || 10.0
           });
           
           setAcademicRecords(aRes && aRes.length > 0 ? aRes : [
@@ -81,55 +93,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
               id: 1,
               school_year: "2025-2026",
               semester: "2nd",
-              gpa: 87.5,
+              gpa: s.sass_metrics?.gpa || 88.5,
               attendance_rate: 96.5,
-              absences_count: 1,
-              incomplete_subjects_count: 0
+              absences_count: s.sass_metrics?.days_absent || 1,
+              incomplete_subjects_count: s.sass_metrics?.incomplete_requirements_count || 0
             },
             {
               id: 2,
               school_year: "2025-2026",
               semester: "1st",
-              gpa: 85.0,
+              gpa: 86.0,
               attendance_rate: 95.0,
               absences_count: 2,
               incomplete_subjects_count: 0
             }
           ]);
-        } else {
-          // Default data for new Google accounts
-          setRiskData({
-            composite_risk_score: 22.0,
-            risk_tier: "low",
-            academic_score: 16.0,
-            mental_health_score: 14.0,
-            financial_score: 12.0,
-            family_score: 12.0,
-            health_score: 10.0
-          });
-          setAcademicRecords([
-            {
-              id: 1,
-              school_year: "2025-2026",
-              semester: "2nd",
-              gpa: 88.0,
-              attendance_rate: 97.2,
-              absences_count: 1,
-              incomplete_subjects_count: 0
-            }
-          ]);
         }
       } catch (err) {
-        console.error("Failed to load student dashboard:", err);
-        setRiskData({
-          composite_risk_score: 22.0,
-          risk_tier: "low",
-          academic_score: 16.0,
-          mental_health_score: 14.0,
-          financial_score: 12.0,
-          family_score: 12.0,
-          health_score: 10.0
-        });
+        console.warn("Student dashboard loaded in local mode:", err);
       } finally {
         setIsLoading(false);
       }
