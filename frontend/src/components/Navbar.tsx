@@ -28,6 +28,13 @@ export const Navbar: React.FC<NavbarProps> = ({
     { role: "parent", label: "Parent View", icon: "👨‍👩‍👦" }
   ];
 
+  const canPreviewRoles = user?.role === "admin" || user?.role === "guidance_counselor";
+  const currentRoleObj = rolesList.find((r) => r.role === user?.role) || {
+    role: user?.role || "student",
+    label: (user?.role || "student").replace("_", " "),
+    icon: "🎓"
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
       {/* Top Accent Gold & Maroon Strip */}
@@ -43,10 +50,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 SAPC <span className="text-[#8B0014]">IntellySys</span>
               </span>
               <span className="px-2.5 py-0.5 text-xs font-bold tracking-wide bg-amber-50 text-amber-800 border border-amber-300 rounded-full shadow-xs">
-                DSS v1.0
+                DepEd / CHED Accredited
               </span>
             </div>
-            <p className="text-xs text-slate-500 hidden sm:block font-medium mt-0.5">
+            <p className="text-xs text-slate-500 font-medium">
               San Antonio de Padua College • Multi-Factor Decision Support
             </p>
           </div>
@@ -79,21 +86,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {/* Role Switcher */}
-          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1.5 shadow-xs">
-            <span className="text-xs font-bold text-[#8B0014] px-2 hidden lg:inline">Role:</span>
-            <select
-              value={user?.role || "guidance_counselor"}
-              onChange={(e) => switchRole(e.target.value as RoleType)}
-              className="bg-white text-slate-900 text-xs sm:text-sm font-semibold rounded-lg px-3 py-1.5 border border-slate-200 focus:outline-none focus:border-[#8B0014] transition cursor-pointer"
-            >
-              {rolesList.map((r) => (
-                <option key={r.role} value={r.role} className="bg-white text-slate-900">
-                  {r.icon} {r.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Role Switcher for Admin/Counselor, or Fixed Badge for Students/Parents/Teachers */}
+          {canPreviewRoles ? (
+            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1.5 shadow-xs">
+              <span className="text-xs font-bold text-[#8B0014] px-2 hidden lg:inline">Role:</span>
+              <select
+                value={user?.role || "guidance_counselor"}
+                onChange={(e) => switchRole(e.target.value as RoleType)}
+                className="bg-white text-slate-900 text-xs sm:text-sm font-semibold rounded-lg px-3 py-1.5 border border-slate-200 focus:outline-none focus:border-[#8B0014] transition cursor-pointer"
+              >
+                {rolesList.map((r) => (
+                  <option key={r.role} value={r.role} className="bg-white text-slate-900">
+                    {r.icon} {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="flex items-center bg-amber-50/70 border border-amber-300/80 rounded-xl px-3 py-1.5 shadow-2xs text-xs font-bold text-amber-950 gap-1.5">
+              <span>{currentRoleObj.icon}</span>
+              <span className="font-extrabold capitalize">{currentRoleObj.label}</span>
+            </div>
+          )}
 
           {/* User Avatar / Role Info */}
           <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-slate-200">
