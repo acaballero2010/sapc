@@ -28,10 +28,15 @@ interface AuditLogEntry {
   compliance_basis?: string;
 }
 
+// Fixed reference point for seed log timestamps — prevents SSR/client hydration mismatch
+// that would occur if Date.now() were called at module evaluation time (different on server vs client).
+const SEED_ANCHOR = new Date("2026-09-20T08:00:00Z").getTime();
+const seedTs = (offsetMs: number) => new Date(SEED_ANCHOR - offsetMs).toISOString();
+
 const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
   {
     id: "LOG-2026-9481",
-    timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    timestamp: seedTs(5 * 60 * 1000),
     actor_role: "guidance_counselor",
     actor_name: "Maria Theresa Cruz, RGC",
     actor_email: "counselor@sapc.edu.ph",
@@ -44,7 +49,7 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
   },
   {
     id: "LOG-2026-9480",
-    timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+    timestamp: seedTs(25 * 60 * 1000),
     actor_role: "teacher",
     actor_name: "Prof. Ernesto Bautista",
     actor_email: "teacher@sapc.edu.ph",
@@ -57,7 +62,7 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
   },
   {
     id: "LOG-2026-9479",
-    timestamp: new Date(Date.now() - 75 * 60 * 1000).toISOString(),
+    timestamp: seedTs(75 * 60 * 1000),
     actor_role: "admin",
     actor_name: "Dr. Remedios Santos, Ed.D.",
     actor_email: "admin@sapc.edu.ph",
@@ -70,7 +75,7 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
   },
   {
     id: "LOG-2026-9478",
-    timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+    timestamp: seedTs(3 * 3600 * 1000),
     actor_role: "guidance_counselor",
     actor_name: "Maria Theresa Cruz, RGC",
     actor_email: "counselor@sapc.edu.ph",
@@ -83,7 +88,7 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
   },
   {
     id: "LOG-2026-9477",
-    timestamp: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
+    timestamp: seedTs(5 * 3600 * 1000),
     actor_role: "teacher",
     actor_name: "Prof. Ernesto Bautista",
     actor_email: "teacher@sapc.edu.ph",
@@ -96,7 +101,7 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
   },
   {
     id: "LOG-2026-9476",
-    timestamp: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+    timestamp: seedTs(12 * 3600 * 1000),
     actor_role: "student",
     actor_name: "Joshua Dimaculangan",
     actor_email: "student@sapc.edu.ph",
@@ -109,7 +114,7 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
   },
   {
     id: "LOG-2026-9475",
-    timestamp: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+    timestamp: seedTs(24 * 3600 * 1000),
     actor_role: "parent",
     actor_name: "Mrs. Elena Dimaculangan",
     actor_email: "parent@sapc.edu.ph",
@@ -122,7 +127,7 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
   },
   {
     id: "LOG-2026-9474",
-    timestamp: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
+    timestamp: seedTs(36 * 3600 * 1000),
     actor_role: "admin",
     actor_name: "Dr. Remedios Santos, Ed.D.",
     actor_email: "admin@sapc.edu.ph",
@@ -131,7 +136,6 @@ const DEFAULT_AUDIT_LOGS: AuditLogEntry[] = [
     details: "Exported Institutional DepEd/CHED At-Risk Demographic & Retention Summary PDF",
     ip_address: "192.168.10.2",
     hash_digest: "3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d",
-    compliance_basis: "RA 10173 Sec. 4(e) - Regulatory Mandate Reporting"
   }
 ];
 

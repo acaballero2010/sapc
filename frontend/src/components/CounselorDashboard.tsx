@@ -233,20 +233,34 @@ export const CounselorDashboard: React.FC = () => {
         baseStudents = studentsRes;
       }
       
-      // Merge with custom client-side ingested multi-domain updates if present
+      // Merge with custom client-side ingested multi-domain updates if present.
+      // Note: sapc_custom_student_data is stored as StudentRecord[] (array), not a map.
+      // We build a Map<id, StudentRecord> from it for O(1) lookup during merge.
       if (typeof window !== "undefined") {
         const customData = localStorage.getItem("sapc_custom_student_data");
         if (customData) {
           try {
-            const customMap = JSON.parse(customData);
-            baseStudents = baseStudents.map((s: any) => {
-              if (customMap[s.id]) {
-                return { ...s, ...customMap[s.id] };
-              }
-              return s;
-            });
+            const customArray: StudentRecord[] = JSON.parse(customData);
+            if (Array.isArray(customArray) && customArray.length > 0) {
+              const customMap = new Map<number, StudentRecord>(
+                customArray.map((s: StudentRecord) => [s.id, s])
+              );
+              baseStudents = baseStudents.map((s: StudentRecord) => {
+                const override = customMap.get(s.id);
+                if (override) {
+                  // Deep-merge nested objects so partial domain updates don't wipe siblings
+                  return {
+                    ...s,
+                    ...override,
+                    domain_scores: { ...s.domain_scores, ...override.domain_scores },
+                    sass_metrics: { ...s.sass_metrics, ...override.sass_metrics }
+                  };
+                }
+                return s;
+              });
+            }
           } catch {
-            // Ignore parse error
+            // Ignore corrupt storage — fall back to base dataset
           }
         }
       }
@@ -402,6 +416,30 @@ export const CounselorDashboard: React.FC = () => {
     };
   }, [loadData]);
 
+  // Memoised filtering — only recomputes when inputs change, must be declared unconditionally before any early returns (Rules of Hooks)
+  const filteredStudents = React.useMemo(() =>
+    students.filter((s: StudentRecord) => {
+      const q = search.toLowerCase();
+      const matchesSearch =
+        s.first_name.toLowerCase().includes(q) ||
+        s.last_name.toLowerCase().includes(q) ||
+        s.lrn.includes(search) ||
+        (Boolean(s.section_name) && s.section_name.toLowerCase().includes(q));
+      const matchesTier = filterTier === "all" || s.latest_risk_tier?.toLowerCase() === filterTier;
+      const matchesStrand = filterStrand === "all" || s.strand === filterStrand;
+      const matchesSection = filterSection === "all" || s.section_name === filterSection;
+      return matchesSearch && matchesTier && matchesStrand && matchesSection;
+    }),
+    [students, search, filterTier, filterStrand, filterSection]
+  );
+
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / pageSize));
+
+  const paginatedStudents = React.useMemo(
+    () => filteredStudents.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredStudents, currentPage, pageSize]
+  );
+
   if (!isMounted) {
     return (
       <div className="space-y-8 pb-12 font-sans animate-pulse">
@@ -415,21 +453,6 @@ export const CounselorDashboard: React.FC = () => {
       </div>
     );
   }
-
-  const filteredStudents = students.filter((s: StudentRecord) => {
-    const matchesSearch =
-      s.first_name.toLowerCase().includes(search.toLowerCase()) ||
-      s.last_name.toLowerCase().includes(search.toLowerCase()) ||
-      s.lrn.includes(search) ||
-      (Boolean(s.section_name) && s.section_name.toLowerCase().includes(search.toLowerCase()));
-    const matchesTier = filterTier === "all" || s.latest_risk_tier?.toLowerCase() === filterTier;
-    const matchesStrand = filterStrand === "all" || s.strand === filterStrand;
-    const matchesSection = filterSection === "all" || s.section_name === filterSection;
-    return matchesSearch && matchesTier && matchesStrand && matchesSection;
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / pageSize));
-  const paginatedStudents = filteredStudents.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <div className="space-y-8 pb-12 font-sans min-w-0">
