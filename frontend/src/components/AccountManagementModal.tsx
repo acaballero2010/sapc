@@ -220,7 +220,6 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const handleLogout = () => {
     onClose();
     logout();
-    router.push("/");
   };
 
   return (

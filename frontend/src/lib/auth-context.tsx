@@ -287,6 +287,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    // Clear state first to prevent any re-renders showing stale data
+    setToken(null);
+    setUser(null);
     try {
       await signOut(auth);
     } catch (err) {
@@ -295,9 +298,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (typeof window !== "undefined") {
       localStorage.removeItem("sapc_token");
       localStorage.removeItem("sapc_custom_profile");
+      localStorage.removeItem("sapc_user");
+      localStorage.removeItem("sapc_last_chat_topic");
+      localStorage.removeItem("sapc_crisis_alerts");
+      // Hard redirect — bypasses Next.js router cache so login page loads fresh
+      window.location.replace("/login");
     }
-    setToken(null);
-    setUser(null);
   };
 
   const retryConnection = async () => {
@@ -315,7 +321,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const customSaved = typeof window !== "undefined" ? localStorage.getItem("sapc_custom_profile") : null;
           const parsed = customSaved ? JSON.parse(customSaved) : null;
 
-          setUser({
+          const restoredUser: UserProfile = {
             id: 1,
             email: fbUser.email || "",
             full_name: parsed?.full_name || userData?.name || fbUser.displayName || fbUser.email?.split("@")[0] || "Authenticated User",
@@ -324,16 +330,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             student_id: userData?.student_id || parsed?.student_id || null,
             firebaseUid: fbUser.uid,
             avatar_url: parsed?.avatar_url || userData?.avatar_url || fbUser.photoURL || null
-          });
+          };
+          setUser(restoredUser);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("sapc_user", JSON.stringify(restoredUser));
+          }
           setIsLoading(false);
         } catch {
           // Firestore read failed — keep whatever state we have, still unblock loading
           setIsLoading(false);
         }
       } else {
-        // No Firebase session — fall back to demo mode for immediate usability
+        // No active Firebase session — check if there is an explicit saved custom session in localStorage
+        if (typeof window !== "undefined") {
+          const savedToken = localStorage.getItem("sapc_token");
+          const customSaved = localStorage.getItem("sapc_custom_profile");
+          if (savedToken && customSaved) {
+            try {
+              const parsed = JSON.parse(customSaved);
+              setUser(parsed);
+              setToken(savedToken);
+            } catch {
+              setUser(null);
+              setToken(null);
+            }
+          } else {
+            setUser(null);
+            setToken(null);
+          }
+        } else {
+          setUser(null);
+          setToken(null);
+        }
         setIsLoading(false);
-        switchRole("guidance_counselor");
       }
     });
 
