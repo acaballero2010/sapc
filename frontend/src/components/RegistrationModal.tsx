@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   X, 
   CheckCircle2, 
@@ -12,7 +12,10 @@ import {
   KeyRound,
   HeartHandshake,
   School,
-  Lock
+  Lock,
+  Clock,
+  RotateCw,
+  AlertCircle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -79,10 +82,38 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // OTP Timer and Resend State
+  const [expirySeconds, setExpirySeconds] = useState<number>(600); // 10 minutes overall TTL
+  const [resendCooldown, setResendCooldown] = useState<number>(60); // 60 seconds resend cooldown
+  const [resendSuccessMsg, setResendSuccessMsg] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState<boolean>(false);
+
+  // Live timer decrementing every second when in OTP verification step
+  useEffect(() => {
+    if (step !== "otp") return;
+
+    const timer = setInterval(() => {
+      setExpirySeconds(prev => (prev > 0 ? prev - 1 : 0));
+      setResendCooldown(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [step]);
+
+  // Format seconds into MM:SS
+  const formatTimer = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
   // Track pending form-transition timers so they can be cleared on unmount
   const formTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   React.useEffect(() => {
-    return () => { if (formTimerRef.current) clearTimeout(formTimerRef.current); };
+    const timerRef = formTimerRef;
+    return () => { 
+      if (timerRef.current) clearTimeout(timerRef.current); 
+    };
   }, []);
 
   // Student form state
@@ -159,6 +190,35 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     }
   };
 
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+
+    const newOtp = [...otp];
+    for (let i = 0; i < 6; i++) {
+      newOtp[i] = pasted[i] || "";
+    }
+    setOtp(newOtp);
+
+    const targetIdx = Math.min(pasted.length, 5);
+    const el = document.getElementById(`otp-${targetIdx}`);
+    el?.focus();
+  };
+
   // Centralized OTP dispatch — calls /api/send-otp and advances to OTP step on success
   const sendOtp = async (email: string, name: string, role: string): Promise<boolean> => {
     setOtpSendError(null);
@@ -175,10 +235,33 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       }
       setOtpSentTo(email);
       return true;
-    } catch (err: any) {
+    } catch {
       setOtpSendError("Network error sending OTP. Please check your connection.");
       return false;
     }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || isResending || isSubmitting || !otpSentTo) return;
+    setIsResending(true);
+    setOtpError(null);
+    setOtpSendError(null);
+    setResendSuccessMsg(null);
+
+    const role = activeTab === "student" ? "student" : "parent";
+    const name = activeTab === "student" ? `Student ${lrn}` : parentName;
+    const sent = await sendOtp(otpSentTo, name, role);
+
+    if (sent) {
+      setExpirySeconds(600);
+      setResendCooldown(60);
+      setOtp(["", "", "", "", "", ""]);
+      setResendSuccessMsg("A new 6-digit verification PIN has been dispatched to your email.");
+      const firstInput = document.getElementById("otp-0");
+      firstInput?.focus();
+      setTimeout(() => setResendSuccessMsg(null), 5000);
+    }
+    setIsResending(false);
   };
 
   const handleStudentSubmit = async (e: React.FormEvent) => {
@@ -187,7 +270,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     const email = studentEmail || `${lrn}@student.sapc.edu.ph`;
     const sent = await sendOtp(email, `Student ${lrn}`, "student");
     setIsSubmitting(false);
-    if (sent) setStep("otp");
+    if (sent) {
+      setExpirySeconds(600);
+      setResendCooldown(60);
+      setOtp(["", "", "", "", "", ""]);
+      setResendSuccessMsg(null);
+      setStep("otp");
+    }
   };
 
   const handleParentSubmit = async (e: React.FormEvent) => {
@@ -197,7 +286,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     const email = `${sanitizedPhone}@parent.sapc.edu.ph`;
     const sent = await sendOtp(email, parentName, "parent");
     setIsSubmitting(false);
-    if (sent) setStep("otp");
+    if (sent) {
+      setExpirySeconds(600);
+      setResendCooldown(60);
+      setOtp(["", "", "", "", "", ""]);
+      setResendSuccessMsg(null);
+      setStep("otp");
+    }
   };
 
   const handleTeacherSubmit = async (e: React.FormEvent) => {
@@ -865,67 +960,113 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
 
           {/* STEP 2: OTP VERIFICATION */}
           {step === "otp" && (
-            <div className="space-y-6 text-center py-3">
-              <div className="w-14 h-14 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-center mx-auto text-[#8B0014]">
+            <div className="space-y-5 text-center py-2">
+              <div className="w-14 h-14 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-center mx-auto text-[#8B0014] shadow-xs">
                 <KeyRound className="h-7 w-7" />
               </div>
 
-              <div className="space-y-1 max-w-sm mx-auto">
+              <div className="space-y-1.5 max-w-sm mx-auto">
                 <h4 className="text-lg font-black text-slate-900">Enter 6-Digit One-Time PIN</h4>
                 <p className="text-xs text-slate-500">
-                  A 6-digit verification code was sent to{" "}
-                  <strong className="text-slate-700 font-mono">{otpSentTo || "your email"}</strong>.
-                  Check your inbox (and spam folder).
+                  A verification code was dispatched to{" "}
+                  <strong className="text-slate-800 font-mono bg-slate-100 px-1.5 py-0.5 rounded-md">{otpSentTo || "your email"}</strong>.
+                </p>
+
+                {/* Expiration Timer Status Pill */}
+                <div className="pt-1 flex items-center justify-center">
+                  {expirySeconds > 120 ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                      <Clock className="h-3.5 w-3.5 text-emerald-600" />
+                      Code expires in <span className="font-mono font-bold">{formatTimer(expirySeconds)}</span>
+                    </span>
+                  ) : expirySeconds > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 animate-pulse shadow-2xs">
+                      <Clock className="h-3.5 w-3.5 text-amber-600" />
+                      Expiring soon: <span className="font-mono">{formatTimer(expirySeconds)}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs">
+                      <AlertCircle className="h-3.5 w-3.5 text-rose-600" />
+                      Code Expired — Please request a new PIN
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {resendSuccessMsg && (
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold text-center flex items-center justify-center gap-2 animate-fadeIn">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>{resendSuccessMsg}</span>
+                </div>
+              )}
+
+              {otpSendError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center flex items-center justify-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+                  <span>{otpSendError}</span>
+                </div>
+              )}
+
+              {/* 6-Digit OTP Inputs */}
+              <div>
+                <div className="flex justify-center gap-2 sm:gap-3">
+                  {otp.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      id={`otp-${idx}`}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      disabled={isSubmitting || expirySeconds === 0}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                      onPaste={handleOtpPaste}
+                      className={`w-11 h-14 text-center text-2xl font-mono font-black rounded-xl border-2 transition shadow-xs focus:outline-none ${
+                        expirySeconds === 0
+                          ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                          : "bg-slate-50 border-slate-300 text-slate-900 focus:border-[#8B0014] focus:bg-white focus:ring-2 focus:ring-[#8B0014]/20"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-[11px] text-slate-400 mt-2">
+                  Tip: You can paste the entire 6-digit code directly
                 </p>
               </div>
 
-              {otpSendError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center">
-                  {otpSendError}
-                </div>
-              )}
-
-              <div className="flex justify-center gap-2 sm:gap-3">
-                {otp.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    id={`otp-${idx}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    className="w-11 h-13 text-center text-xl font-mono font-black text-slate-900 bg-slate-50 border-2 border-slate-200 focus:border-[#8B0014] focus:bg-white rounded-xl focus:outline-none transition shadow-2xs"
-                  />
-                ))}
-              </div>
-
               {otpError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center">
-                  {otpError}
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center flex items-center justify-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+                  <span>{otpError}</span>
                 </div>
               )}
 
-              <div className="text-xs text-slate-500">
-                Didn&apos;t receive it?{" "}
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (otpSentTo) {
-                      setIsSubmitting(true);
-                      const role = activeTab === "student" ? "student" : "parent";
-                      await sendOtp(otpSentTo, "", role);
-                      setIsSubmitting(false);
-                    }
-                  }}
-                  disabled={isSubmitting}
-                  className="font-bold text-[#8B0014] hover:underline disabled:opacity-40"
-                >
-                  Resend Code
-                </button>
+              {/* Resend Option with Cooldown Timer */}
+              <div className="text-xs text-slate-500 pt-1">
+                {resendCooldown > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 text-slate-500 font-medium">
+                    <Clock className="h-3.5 w-3.5 text-slate-400" />
+                    Didn&apos;t receive the code? Resend available in{" "}
+                    <strong className="font-mono text-slate-700">{resendCooldown}s</strong>
+                  </span>
+                ) : (
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span>Didn&apos;t receive it?</span>
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={isResending || isSubmitting}
+                      className="inline-flex items-center gap-1 font-bold text-[#8B0014] hover:text-[#5A000D] hover:underline transition disabled:opacity-50"
+                    >
+                      <RotateCw className={`h-3.5 w-3.5 ${isResending ? "animate-spin" : ""}`} />
+                      <span>{isResending ? "Dispatching PIN..." : "Resend Verification Code"}</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setStep("form")}
@@ -936,10 +1077,19 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 <button
                   type="button"
                   onClick={handleVerifyOtp}
-                  disabled={isSubmitting || otp.some(d => d.length !== 1)}
-                  className="flex-2 py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50"
+                  disabled={isSubmitting || expirySeconds === 0 || otp.some(d => d.length !== 1)}
+                  className="flex-2 py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-40 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? "Verifying PIN..." : "Verify & Complete Onboarding →"}
+                  {isSubmitting ? (
+                    <>
+                      <RotateCw className="h-4 w-4 animate-spin" />
+                      <span>Verifying PIN...</span>
+                    </>
+                  ) : expirySeconds === 0 ? (
+                    "PIN Expired — Please Resend"
+                  ) : (
+                    "Verify & Complete Onboarding →"
+                  )}
                 </button>
               </div>
             </div>

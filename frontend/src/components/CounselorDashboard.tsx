@@ -13,7 +13,6 @@ import {
   HeartHandshake,
   PlusCircle,
   CheckCircle2,
-  ChevronDown,
   Layers,
   Brain,
   MessageSquare,
@@ -31,10 +30,13 @@ import {
   PhoneCall,
   FileSpreadsheet,
   Volume2,
-  VolumeX
+  VolumeX,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { playTone } from "@/lib/audio-alert";
+import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
 import { StudentDetailModal } from "./StudentDetailModal";
 import { InterventionModal } from "./InterventionModal";
@@ -288,6 +290,8 @@ export const CounselorDashboard: React.FC = () => {
   const [showIngestionHub, setShowIngestionHub] = useState(false);
   const [parentAlertStudent, setParentAlertStudent] = useState<StudentRecord | null>(null);
   const [isParentAlertOpen, setIsParentAlertOpen] = useState(false);
+  const catDrag = useDragScroll();
+  const tabsDrag = useDragScroll();
 
   // Search & Filtering States
   const [search, setSearch] = useState("");
@@ -531,6 +535,60 @@ export const CounselorDashboard: React.FC = () => {
     }
   }, [loadData]);
 
+  // Navigation Items
+  const CATEGORIES = useMemo(() => [
+    { id: "all", label: "All Modules (20)" },
+    { id: "crisis", label: "Crisis Response & Triage (3)", tabIds: ["dashboard", "crisis_alerts", "crisis_detail"] },
+    { id: "casework", label: "Student Profiles & Screenings (5)", tabIds: ["students", "student_profile", "student_progress", "chat_history", "assessments"] },
+    { id: "care", label: "Interventions & Approvals (5)", tabIds: ["interventions", "intervention_detail", "intervention_approvals", "risk_reviews", "intervention_analytics"] },
+    { id: "collab", label: "Referrals & Sessions (4)", tabIds: ["validate_recommendations", "recommendation_feedback", "referrals", "sessions"] },
+    { id: "insights", label: "Analytics & Reports (3)", tabIds: ["analytics", "reports", "notifications"] }
+  ], []);
+
+  // Auto-scroll active tab and category into view smoothly when activeTab changes
+  useEffect(() => {
+    if (!isMounted) return;
+
+    // Check if the current tab belongs to a category
+    const parentCat = CATEGORIES.find(
+      (c) => c.id !== "all" && c.tabIds?.includes(activeTab)
+    );
+
+    // If currently filtered to a category that does NOT contain this tab, reset category or sync it
+    if (
+      selectedNavCategory !== "all" &&
+      parentCat &&
+      !CATEGORIES.find((c) => c.id === selectedNavCategory)?.tabIds?.includes(activeTab)
+    ) {
+      setSelectedNavCategory("all");
+    }
+
+    const timer = setTimeout(() => {
+      // 1. Auto-scroll active tab into view
+      const activeTabEl = document.getElementById(`counselor-tab-${activeTab}`);
+      if (activeTabEl && tabsDrag.ref.current) {
+        activeTabEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+
+      // 2. Auto-scroll active category into view
+      const targetCatId = selectedNavCategory === "all" ? (parentCat?.id || "all") : selectedNavCategory;
+      const activeCatEl = document.getElementById(`counselor-cat-${targetCatId}`);
+      if (activeCatEl && catDrag.ref.current) {
+        activeCatEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+    }, 60);
+
+    return () => clearTimeout(timer);
+  }, [activeTab, selectedNavCategory, isMounted, CATEGORIES, catDrag.ref, tabsDrag.ref]);
+
   // Filtered Students Roster
   const filteredStudents = useMemo(() => {
     return students.filter((s: StudentRecord) => {
@@ -553,16 +611,6 @@ export const CounselorDashboard: React.FC = () => {
     const start = (currentPage - 1) * pageSize;
     return filteredStudents.slice(start, start + pageSize);
   }, [filteredStudents, currentPage, pageSize]);
-
-  // Navigation Items
-  const CATEGORIES = [
-    { id: "all", label: "All Modules (20)" },
-    { id: "crisis", label: "Crisis Response & Triage (3)", tabIds: ["dashboard", "crisis_alerts", "crisis_detail"] },
-    { id: "casework", label: "Student Profiles & Screenings (5)", tabIds: ["students", "student_profile", "student_progress", "chat_history", "assessments"] },
-    { id: "care", label: "Interventions & Approvals (5)", tabIds: ["interventions", "intervention_detail", "intervention_approvals", "risk_reviews", "intervention_analytics"] },
-    { id: "collab", label: "Referrals & Sessions (4)", tabIds: ["validate_recommendations", "recommendation_feedback", "referrals", "sessions"] },
-    { id: "insights", label: "Analytics & Reports (3)", tabIds: ["analytics", "reports", "notifications"] }
-  ];
 
   const TAB_ITEMS: Array<{ id: CounselorTabType; label: string; icon: any; badge?: string; category: string }> = [
     { id: "dashboard", label: "Command Center", icon: Brain, badge: "Live", category: "crisis" },
@@ -628,60 +676,64 @@ export const CounselorDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Top Banner - Institutional Maroon & Gold (Tablet & Mobile Optimized) */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] p-5 sm:p-7 md:p-8 shadow-md text-white border-t-4 border-amber-400">
-        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-          <div className="max-w-3xl space-y-2.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-400/25 text-amber-200 border border-amber-400/50 shadow-xs inline-flex items-center gap-1.5">
-                <GraduationCap className="h-4 w-4 text-amber-300" />
+      {/* Top Banner — compact single-row layout */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] px-5 py-4 shadow-md text-white border-t-4 border-amber-400">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Left: title block */}
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400/25 text-amber-200 border border-amber-400/50 inline-flex items-center gap-1">
+                <GraduationCap className="h-3 w-3 text-amber-300" />
                 San Antonio de Padua College
               </span>
-              <span className="text-xs sm:text-sm text-rose-100 font-semibold">• Guidance &amp; Counseling Central</span>
+              <span className="text-[11px] text-rose-200 font-semibold">• Guidance &amp; Counseling Central</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-snug">
+            <h1 className="text-base sm:text-lg font-extrabold text-white tracking-tight leading-snug">
               Guidance Counselor Command &amp; Triage Portal
             </h1>
-            <p className="text-xs sm:text-sm md:text-base text-rose-50/95 leading-relaxed font-normal">
-              Empowering proactive multi-domain failure prevention with AI crisis detection, psychometric screening analytics (PHQ-9/GAD-7), and validated intervention casework.
+            <p className="text-[11px] text-rose-100/90 leading-relaxed mt-0.5 hidden sm:block max-w-xl">
+              Proactive multi-domain failure prevention with AI crisis detection, PHQ-9/GAD-7 analytics, and validated intervention casework.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0 pt-2 xl:pt-0">
+          {/* Right: action buttons + risk score */}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
               onClick={() => setShowIngestionHub((prev) => !prev)}
-              className={`min-h-[44px] px-4 py-2.5 rounded-2xl font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 ${
-                showIngestionHub 
-                  ? "bg-amber-400 text-amber-950 ring-2 ring-white" 
+              className={`h-9 px-3.5 rounded-xl font-bold text-xs shadow transition flex items-center gap-1.5 ${
+                showIngestionHub
+                  ? "bg-amber-400 text-amber-950 ring-2 ring-white"
                   : "bg-white/15 hover:bg-white/25 text-white border border-white/20"
               }`}
             >
-              <Layers className="h-4 w-4 text-amber-300" />
-              <span>{showIngestionHub ? "Close Ingestion Hub" : "Multi-Domain Data Hub"}</span>
+              <Layers className="h-3.5 w-3.5 text-amber-300" />
+              <span className="hidden sm:inline">{showIngestionHub ? "Close Hub" : "Data Hub"}</span>
+              <span className="sm:hidden">Hub</span>
             </button>
 
             <button
               onClick={() => exportActiveDatasetToCSV(students, "Guidance_Active_Cohort_Dataset.csv")}
-              className="min-h-[44px] px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-extrabold text-xs sm:text-sm transition flex items-center justify-center gap-2"
+              className="h-9 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-bold text-xs transition flex items-center gap-1.5"
               title="Export complete 5-domain cohort dataset to CSV"
             >
-              <Download className="h-4 w-4 text-amber-300" />
+              <Download className="h-3.5 w-3.5 text-amber-300" />
               <span>Export CSV</span>
             </button>
 
             <button
               onClick={() => setIsReportOpen(true)}
-              className="min-h-[44px] px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2"
+              className="h-9 px-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs shadow transition flex items-center gap-1.5"
             >
-              <Award className="h-4 w-4 text-[#8B0014]" />
-              <span>DepEd / CHED Report</span>
+              <Award className="h-3.5 w-3.5 text-[#8B0014]" />
+              <span className="hidden sm:inline">DepEd / CHED Report</span>
+              <span className="sm:hidden">Report</span>
             </button>
 
-            <div className="bg-black/35 backdrop-blur-md border border-white/25 rounded-2xl p-3 sm:p-4 text-center shadow-lg min-w-[130px]">
-              <span className="text-[10px] sm:text-xs text-amber-200 font-extrabold uppercase tracking-wider block">Cohort Risk Avg</span>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-black text-[#FBBF24] mt-0.5">
+            <div className="bg-black/35 backdrop-blur-md border border-white/25 rounded-xl px-3 py-1.5 text-center shadow">
+              <span className="text-[9px] text-amber-200 font-extrabold uppercase tracking-wider block">Cohort Risk Avg</span>
+              <p className="text-lg font-black text-[#FBBF24] leading-tight">
                 {cohortStats.avgRiskScore ? Number(cohortStats.avgRiskScore).toFixed(1) : "0.0"}
-                <span className="text-xs font-bold text-slate-300 ml-1">/ 100</span>
+                <span className="text-[10px] font-bold text-slate-300 ml-0.5">/ 100</span>
               </p>
             </div>
           </div>
@@ -760,74 +812,98 @@ export const CounselorDashboard: React.FC = () => {
 
       {/* Navigation Hub: Category Switcher + Tabs */}
       <div className="space-y-2.5">
-        {/* Category Filter Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {CATEGORIES.map((cat) => {
-            const isCatActive = selectedNavCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => {
-                  setSelectedNavCategory(cat.id);
-                  if (cat.id !== "all" && cat.tabIds && !cat.tabIds.includes(activeTab)) {
-                    handleTabChange(cat.tabIds[0] as CounselorTabType);
-                  }
-                }}
-                className={`min-h-[34px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition ${
-                  isCatActive
-                    ? "bg-[#8B0014] text-white shadow-2xs ring-2 ring-rose-200"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Mobile / Tablet Quick Select Dropdown */}
-        <div className="block xl:hidden bg-white border border-slate-200 rounded-2xl p-3 shadow-xs">
-          <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 block mb-1">
-            Current Counselor Module:
-          </label>
-          <div className="relative">
-            <select
-              value={activeTab}
-              onChange={(e) => handleTabChange(e.target.value as CounselorTabType)}
-              className="w-full min-h-[44px] p-2.5 pr-10 rounded-xl border border-slate-300 bg-slate-50 font-bold text-sm text-slate-900 appearance-none focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+        {/* Category Filter Chips with Scroll Controls */}
+        <div className="relative flex items-center">
+          {catDrag.canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => catDrag.scrollBy(-220)}
+              className="flex absolute -left-2 z-10 h-7 w-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md items-center justify-center text-slate-600 dark:text-slate-300 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer"
+              title="Scroll categories left"
             >
-              {TAB_ITEMS.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label} {item.badge ? `(${item.badge})` : ""}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3.5 top-3.5 h-5 w-5 text-slate-400 pointer-events-none" />
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+          
+          <div 
+            ref={catDrag.ref}
+            {...catDrag.events}
+            className="flex items-center gap-1.5 overflow-x-auto scroll-smooth pb-1 px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none w-full"
+          >
+            {CATEGORIES.map((cat) => {
+              const isCatActive = selectedNavCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  id={`counselor-cat-${cat.id}`}
+                  type="button"
+                  onClick={() => {
+                    setSelectedNavCategory(cat.id);
+                    if (cat.id !== "all" && cat.tabIds && !cat.tabIds.includes(activeTab)) {
+                      handleTabChange(cat.tabIds[0] as CounselorTabType);
+                    }
+                  }}
+                  className={`min-h-[34px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+                    isCatActive
+                      ? "bg-[#8B0014] text-white shadow-2xs ring-2 ring-rose-200"
+                      : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
+
+          {catDrag.canScrollRight && (
+            <button
+              type="button"
+              onClick={() => catDrag.scrollBy(220)}
+              className="flex absolute -right-2 z-10 h-7 w-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md items-center justify-center text-slate-600 dark:text-slate-300 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer"
+              title="Scroll categories right"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
-        {/* Categorized Navigation Tabs Bar (Scrollable Pill Strip on Desktop/Tablet) */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-2 shadow-sm">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-xs font-bold">
+        {/* Categorized Navigation Tabs Bar (Scrollable Pill Strip with Left/Right Buttons) */}
+        <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 shadow-sm flex items-center">
+          {tabsDrag.canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => tabsDrag.scrollBy(-260)}
+              className="flex absolute left-2 z-10 h-8 w-8 rounded-xl bg-white/95 dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 shadow-md items-center justify-center text-slate-600 dark:text-slate-300 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer backdrop-blur-xs"
+              title="Scroll modules left"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+
+          <div 
+            ref={tabsDrag.ref}
+            {...tabsDrag.events}
+            className="flex items-center gap-1.5 overflow-x-auto scroll-smooth px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none text-xs font-bold w-full"
+          >
             {visibleTabs.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
+                  id={`counselor-tab-${item.id}`}
                   onClick={() => handleTabChange(item.id)}
-                  className={`min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 sm:gap-2 shrink-0 ${
+                  className={`min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-[#8B0014] text-white shadow-xs"
-                      : "text-slate-600 hover:bg-slate-100"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                   <span>{item.label}</span>
                   {item.badge && (
                     <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase ${
-                      isActive ? "bg-amber-400 text-amber-950" : "bg-slate-200 text-slate-700"
+                      isActive ? "bg-amber-400 text-amber-950" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
                     }`}>
                       {item.badge}
                     </span>
@@ -836,6 +912,17 @@ export const CounselorDashboard: React.FC = () => {
               );
             })}
           </div>
+
+          {tabsDrag.canScrollRight && (
+            <button
+              type="button"
+              onClick={() => tabsDrag.scrollBy(260)}
+              className="flex absolute right-2 z-10 h-8 w-8 rounded-xl bg-white/95 dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 shadow-md items-center justify-center text-slate-600 dark:text-slate-300 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer backdrop-blur-xs"
+              title="Scroll modules right"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -1018,14 +1105,14 @@ export const CounselorDashboard: React.FC = () => {
       {/* ========================================================= */}
       {activeTab === "crisis_alerts" && (
         <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
-                  <AlertTriangle className="h-6 w-6 text-rose-600" />
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+                  <AlertTriangle className="h-6 w-6 text-rose-600 dark:text-rose-400" />
                   Real-Time NLP Crisis Notifications &amp; Triage Queue
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                   Color-coded crisis flags: Red (Urgent / Suicidal Ideation), Orange (Moderate / Self-Harm), Yellow (Watchlist)
                 </p>
               </div>
@@ -1038,12 +1125,12 @@ export const CounselorDashboard: React.FC = () => {
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition cursor-pointer ${
                     isAudioAlertsEnabled 
-                      ? "bg-emerald-50 text-emerald-800 border-emerald-300" 
-                      : "bg-slate-100 text-slate-500 border-slate-300"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/60" 
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-700"
                   }`}
                   title="Toggle Audio Notifications for Urgent Distress Flags"
                 >
-                  {isAudioAlertsEnabled ? <Volume2 className="h-3.5 w-3.5 text-emerald-600" /> : <VolumeX className="h-3.5 w-3.5 text-slate-400" />}
+                  {isAudioAlertsEnabled ? <Volume2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> : <VolumeX className="h-3.5 w-3.5 text-slate-400" />}
                   <span>{isAudioAlertsEnabled ? "Audio Chime On" : "Muted"}</span>
                 </button>
 
@@ -1053,13 +1140,13 @@ export const CounselorDashboard: React.FC = () => {
                     playTone("crisis");
                     showToast("Playing Level 1 Crisis Audio Synthesizer Chime");
                   }}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200 transition flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-100 dark:bg-rose-950/50 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-700/60 hover:bg-rose-200 dark:hover:bg-rose-900/60 transition flex items-center gap-1 cursor-pointer"
                   title="Test Urgent Audio Chime"
                 >
                   Test Alarm 🚨
                 </button>
 
-                <span className="px-3 py-1.5 rounded-full bg-rose-50 text-rose-800 border border-rose-200 font-extrabold text-xs">
+                <span className="px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 font-extrabold text-xs">
                   {flaggedSessions.length} Monitored Alerts
                 </span>
               </div>
@@ -1071,10 +1158,10 @@ export const CounselorDashboard: React.FC = () => {
                   key={alert.id}
                   className={`p-5 rounded-3xl border-2 transition space-y-3.5 flex flex-col justify-between ${
                     alert.severity === "urgent"
-                      ? "bg-rose-50/50 border-rose-300 hover:border-rose-400"
+                      ? "bg-rose-50/50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800/80 hover:border-rose-400 dark:hover:border-rose-600"
                       : alert.severity === "moderate"
-                      ? "bg-amber-50/50 border-amber-300 hover:border-amber-400"
-                      : "bg-yellow-50/50 border-yellow-300 hover:border-yellow-400"
+                      ? "bg-amber-50/50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800/80 hover:border-amber-400 dark:hover:border-amber-600"
+                      : "bg-yellow-50/50 dark:bg-yellow-950/30 border-yellow-300 dark:border-yellow-700/80 hover:border-yellow-400 dark:hover:border-yellow-500"
                   }`}
                 >
                   <div className="space-y-2">
@@ -1088,28 +1175,28 @@ export const CounselorDashboard: React.FC = () => {
                       }`}>
                         {alert.severity} Priority
                       </span>
-                      <span className="text-[11px] font-bold text-slate-500">
-                        Distress: {alert.aggregate_distress_score}/100
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-300">
+                        Distress: <strong className="text-slate-800 dark:text-slate-100">{alert.aggregate_distress_score}/100</strong>
                       </span>
                     </div>
 
-                    <h4 className="text-base font-extrabold text-slate-900">{alert.student_name}</h4>
-                    <p className="text-xs text-slate-600 font-medium">{alert.grade_section}</p>
+                    <h4 className="text-base font-extrabold text-slate-900 dark:text-white">{alert.student_name}</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">{alert.grade_section}</p>
 
-                    <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-xs space-y-1">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase">Trigger Phrase Detected:</span>
-                      <p className="font-mono text-rose-800 font-bold">&quot;{alert.keyword_detected}&quot;</p>
+                    <div className="p-2.5 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs space-y-1">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trigger Phrase Detected:</span>
+                      <p className="font-mono text-rose-800 dark:text-rose-300 font-bold bg-rose-50 dark:bg-rose-950/60 px-2 py-1 rounded-lg border border-rose-200/60 dark:border-rose-800/60">&quot;{alert.keyword_detected}&quot;</p>
                     </div>
 
-                    <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
                       {alert.flag_reason}
                     </p>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-200/80">
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>Consent: <strong className="text-emerald-700">{alert.consent_status}</strong></span>
-                      <span>Prev Alerts: {alert.previous_flags_count}</span>
+                  <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800">
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                      <span>Consent: <strong className="text-emerald-700 dark:text-emerald-400">{alert.consent_status}</strong></span>
+                      <span>Prev Alerts: <strong className="text-slate-700 dark:text-slate-200">{alert.previous_flags_count}</strong></span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 pt-1">
@@ -1119,7 +1206,7 @@ export const CounselorDashboard: React.FC = () => {
                           setSelectedStudentId(alert.student_id);
                           handleTabChange("crisis_detail");
                         }}
-                        className="py-2 px-3 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition text-center"
+                        className="py-2 px-3 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-bold transition text-center border border-slate-700/80 shadow-xs"
                       >
                         Deep Dive Case
                       </button>
@@ -1129,7 +1216,7 @@ export const CounselorDashboard: React.FC = () => {
                           setInterventionStudent(targetStudent);
                           setIsInterventionOpen(true);
                         }}
-                        className="py-2 px-3 rounded-xl bg-[#8B0014] text-white text-xs font-bold hover:bg-[#6D0010] transition text-center"
+                        className="py-2 px-3 rounded-xl bg-[#8B0014] hover:bg-[#A30018] text-white text-xs font-bold transition text-center shadow-xs border border-rose-900/50"
                       >
                         + Care Plan
                       </button>
@@ -1758,14 +1845,14 @@ export const CounselorDashboard: React.FC = () => {
       {/* ========================================================= */}
       {activeTab === "interventions" && (
         <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <ShieldCheck className="h-6 w-6 text-[#8B0014]" />
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <ShieldCheck className="h-6 w-6 text-[#8B0014] dark:text-rose-400" />
                   Master Intervention Caseload Tracker ({interventions.length})
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-500">
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                   Active care plans, multi-stakeholder assignments, and resolution statuses
                 </p>
               </div>
@@ -1777,7 +1864,7 @@ export const CounselorDashboard: React.FC = () => {
                     setInterventionStudent(st);
                     setIsInterventionOpen(true);
                   }}
-                  className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-extrabold text-xs sm:text-sm hover:bg-[#6D0010] transition flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#A30018] text-white font-extrabold text-xs sm:text-sm transition flex items-center gap-2 shadow-xs"
                 >
                   <PlusCircle className="h-4 w-4" />
                   <span>+ Create Care Plan</span>
@@ -1787,31 +1874,33 @@ export const CounselorDashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {interventions.map((plan) => (
-                <div key={plan.id} className="p-5 sm:p-6 rounded-3xl bg-slate-50/80 border border-slate-200 space-y-3.5 hover:shadow-md transition flex flex-col justify-between">
+                <div key={plan.id} className="p-5 sm:p-6 rounded-3xl bg-slate-50/80 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-3.5 hover:shadow-md transition flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h4 className="font-black text-base text-slate-900">{plan.student_name}</h4>
-                        <span className="text-xs text-[#8B0014] font-bold">{plan.target_domain}</span>
+                        <h4 className="font-black text-base text-slate-900 dark:text-white">{plan.student_name}</h4>
+                        <span className="text-xs text-[#8B0014] dark:text-rose-400 font-bold">{plan.target_domain}</span>
                       </div>
                       <span className={`px-2.5 py-1 rounded-xl text-xs font-bold ${
-                        plan.status === "Completed" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"
+                        plan.status === "Completed" 
+                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/80" 
+                          : "bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800/80"
                       }`}>
                         {plan.status}
                       </span>
                     </div>
-                    <p className="text-xs font-bold text-slate-800">{plan.title}</p>
-                    <p className="text-xs text-slate-600 line-clamp-2">{plan.description}</p>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{plan.title}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">{plan.description}</p>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">Counselor: <strong className="text-slate-800">{plan.assigned_counselor}</strong></span>
+                  <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                    <span className="text-slate-500 dark:text-slate-400">Counselor: <strong className="text-slate-800 dark:text-slate-200">{plan.assigned_counselor}</strong></span>
                     <button
                       onClick={() => {
                         setSelectedStudentId(plan.student_id);
                         handleTabChange("intervention_detail");
                       }}
-                      className="font-bold text-[#8B0014] hover:underline"
+                      className="font-bold text-[#8B0014] dark:text-rose-400 hover:underline"
                     >
                       View Record →
                     </button>

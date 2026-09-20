@@ -291,32 +291,32 @@ export const CohortTrendAnalytics: React.FC<CohortTrendAnalyticsProps> = ({ onSe
   });
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-7">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-7">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-rose-100 text-[#8B0014] border border-rose-200 flex items-center gap-1">
+            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-rose-100 dark:bg-rose-950/60 text-[#8B0014] dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 flex items-center gap-1">
               <Activity className="h-3.5 w-3.5" /> Longitudinal AI Insights
             </span>
-            <span className="text-xs text-slate-500 font-semibold">• Multi-Semester Cohort Analytics</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">• Multi-Semester Cohort Analytics</span>
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Retention Trajectory & AHP Impact Measurement
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Retention Trajectory &amp; AHP Impact Measurement
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Evaluating multi-year risk reduction and early intervention efficacy across San Antonio de Padua College cohorts.
           </p>
         </div>
 
         {/* Metric Selector Tabs */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-2xl self-start lg:self-center border border-slate-200 text-xs font-bold">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl self-start lg:self-center border border-slate-200 dark:border-slate-700 text-xs font-bold">
           <button
             onClick={() => setViewMetric("risk_distribution")}
             className={`px-3.5 py-2 rounded-xl transition ${
               viewMetric === "risk_distribution" 
-                ? "bg-white text-slate-900 shadow-xs border border-slate-200/80" 
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs border border-slate-200/80 dark:border-slate-700 font-extrabold" 
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             Risk Stratification
@@ -325,8 +325,8 @@ export const CohortTrendAnalytics: React.FC<CohortTrendAnalyticsProps> = ({ onSe
             onClick={() => setViewMetric("domain_breakdown")}
             className={`px-3.5 py-2 rounded-xl transition ${
               viewMetric === "domain_breakdown" 
-                ? "bg-white text-slate-900 shadow-xs border border-slate-200/80" 
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs border border-slate-200/80 dark:border-slate-700 font-extrabold" 
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             Domain Breakdown
@@ -335,11 +335,11 @@ export const CohortTrendAnalytics: React.FC<CohortTrendAnalyticsProps> = ({ onSe
             onClick={() => setViewMetric("gpa_resolution")}
             className={`px-3.5 py-2 rounded-xl transition ${
               viewMetric === "gpa_resolution" 
-                ? "bg-white text-slate-900 shadow-xs border border-slate-200/80" 
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs border border-slate-200/80 dark:border-slate-700 font-extrabold" 
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            GPA & Resolution Rate
+            GPA &amp; Resolution Rate
           </button>
         </div>
       </div>
@@ -347,99 +347,99 @@ export const CohortTrendAnalytics: React.FC<CohortTrendAnalyticsProps> = ({ onSe
       {/* Institutional KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Retention Gain */}
-        <div className="bg-gradient-to-br from-emerald-50 to-white border-2 border-emerald-200/80 rounded-2xl p-5 shadow-2xs">
+        <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/40 dark:to-slate-900 border-2 border-emerald-200/80 dark:border-emerald-800/80 rounded-2xl p-5 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-800">Retention Gain</span>
-            <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">Retention Gain</span>
+            <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300">
               <TrendingUp className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-1.5">
-              <p className="text-3xl font-black text-emerald-700">+{data.retention_gain_pct}%</p>
-              <span className="text-xs font-bold text-emerald-700">YoY improvement</span>
+              <p className="text-3xl font-black text-emerald-700 dark:text-emerald-400">+{data.retention_gain_pct}%</p>
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">YoY improvement</span>
             </div>
-            <span className="text-xs text-emerald-800/90 font-medium block mt-1">Institutional stay rate</span>
+            <span className="text-xs text-emerald-800/90 dark:text-emerald-300/80 font-medium block mt-1">Institutional stay rate</span>
           </div>
         </div>
 
         {/* Dropouts Prevented */}
-        <div className="bg-gradient-to-br from-amber-50 to-white border-2 border-amber-200/80 rounded-2xl p-5 shadow-2xs">
+        <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/40 dark:to-slate-900 border-2 border-amber-200/80 dark:border-amber-800/80 rounded-2xl p-5 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900">Dropouts Intercepted</span>
-            <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900 dark:text-amber-300">Dropouts Intercepted</span>
+            <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300">
               <ShieldCheck className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-1.5">
-              <p className="text-3xl font-black text-[#8B0014]">{data.total_dropouts_prevented}</p>
-              <span className="text-xs font-bold text-amber-900">Students Saved</span>
+              <p className="text-3xl font-black text-[#8B0014] dark:text-rose-400">{data.total_dropouts_prevented}</p>
+              <span className="text-xs font-bold text-amber-900 dark:text-amber-300">Students Saved</span>
             </div>
-            <span className="text-xs text-amber-900/90 font-medium block mt-1">Via AHP early warning</span>
+            <span className="text-xs text-amber-900/90 dark:text-amber-300/80 font-medium block mt-1">Via AHP early warning</span>
           </div>
         </div>
 
         {/* Early Interception SLA */}
-        <div className="bg-gradient-to-br from-rose-50 to-white border-2 border-rose-200/80 rounded-2xl p-5 shadow-2xs">
+        <div className="bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/40 dark:to-slate-900 border-2 border-rose-200/80 dark:border-rose-800/80 rounded-2xl p-5 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-rose-800">Intervention SLA</span>
-            <div className="p-2 rounded-xl bg-rose-100 text-rose-700">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-rose-800 dark:text-rose-300">Intervention SLA</span>
+            <div className="p-2 rounded-xl bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300">
               <Clock className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-1.5">
-              <p className="text-3xl font-black text-rose-700">{data.early_interception_sla_pct}%</p>
-              <span className="text-xs font-bold text-rose-700">Target: &gt;95%</span>
+              <p className="text-3xl font-black text-rose-700 dark:text-rose-400">{data.early_interception_sla_pct}%</p>
+              <span className="text-xs font-bold text-rose-700 dark:text-rose-400">Target: &gt;95%</span>
             </div>
-            <span className="text-xs text-rose-800/90 font-medium block mt-1">&lt;48hr care plan response</span>
+            <span className="text-xs text-rose-800/90 dark:text-rose-300/80 font-medium block mt-1">&lt;48hr care plan response</span>
           </div>
         </div>
 
         {/* Avg Risk Reduction */}
-        <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-2xl p-5 shadow-2xs">
+        <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700">Risk Reduction</span>
-            <div className="p-2 rounded-xl bg-slate-200/80 text-slate-800">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">Risk Reduction</span>
+            <div className="p-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
               <TrendingDown className="h-4 w-4" />
             </div>
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-1.5">
-              <p className="text-3xl font-black text-slate-900">-{data.avg_risk_reduction_pts}</p>
-              <span className="text-xs font-bold text-emerald-700">points drop</span>
+              <p className="text-3xl font-black text-slate-900 dark:text-white">-{data.avg_risk_reduction_pts}</p>
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">points drop</span>
             </div>
-            <span className="text-xs text-slate-600 font-medium block mt-1">Across monitored cohorts</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium block mt-1">Across monitored cohorts</span>
           </div>
         </div>
       </div>
 
       {/* Main Interactive Progression Visualization */}
-      <div className="bg-slate-50/80 border border-slate-200 rounded-3xl p-6 sm:p-7 space-y-6">
+      <div className="bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-[#8B0014]" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-[#8B0014] dark:text-rose-400" />
               {viewMetric === "risk_distribution" && "Cohort Risk Stratification Trend (Quarter-over-Quarter)"}
               {viewMetric === "domain_breakdown" && "Multi-Domain Average Vulnerability Trajectory"}
               {viewMetric === "gpa_resolution" && "Academic GPA vs. Intervention Resolution Rate"}
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Click any semester below to inspect granular cohort telemetry
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
+          <div className="flex items-center gap-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
             {viewMetric === "risk_distribution" && (
-              <div className="flex items-center gap-4 bg-white px-3.5 py-1.5 rounded-xl border border-slate-200">
+              <div className="flex items-center gap-4 bg-white dark:bg-slate-900 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> Low Risk</span>
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> Medium Risk</span>
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block" /> High Risk</span>
               </div>
             )}
             {viewMetric === "gpa_resolution" && (
-              <div className="flex items-center gap-4 bg-white px-3.5 py-1.5 rounded-xl border border-slate-200">
+              <div className="flex items-center gap-4 bg-white dark:bg-slate-900 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#8B0014] inline-block" /> Average GPA (%)</span>
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" /> Resolution Rate (%)</span>
               </div>

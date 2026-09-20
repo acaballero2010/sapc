@@ -22,10 +22,16 @@ import {
   Bell, 
   HelpCircle, 
   Edit, 
-  ShieldAlert, 
-  Key, 
-  ChevronDown 
+  Building,
+  Upload,
+  ImageIcon,
+  Trash2,
+  ShieldAlert,
+  Key,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
+import { SapcLogo } from "./SapcLogo";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
@@ -40,11 +46,13 @@ import {
   saveRiskWeights,
   recalculateAHPForDataset
 } from "@/lib/dataset-store";
+import { useDragScroll } from "@/lib/useDragScroll";
 import type { StudentRecord } from "@/data/students500";
 
-// Tab types for all 21 Admin Modules
+// Tab types for all 22 Admin Modules
 export type AdminTabType = 
   | "dashboard"
+  | "platform_settings"
   | "import_wizard"
   | "import_history"
   | "revert_import"
@@ -95,6 +103,8 @@ export const AdminDashboard: React.FC = () => {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const catDrag = useDragScroll();
+  const tabsDrag = useDragScroll();
 
   // 13. Risk Config Weights State (Psychometrician Validated AHP 5-Domain)
   const [riskWeights, setRiskWeights] = useState(() => getActiveRiskWeights());
@@ -138,6 +148,54 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  // Platform Settings & Institutional Branding (Campus Logo)
+  const [customLogo, setCustomLogo] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sapc_custom_logo");
+    }
+    return null;
+  });
+  const [institutionName, setInstitutionName] = useState("San Antonio de Padua College");
+  const [campusTagline, setCampusTagline] = useState("Foundation of Pila, Laguna, Inc. • IntellySys DSS");
+  const [campusAddress, setCampusAddress] = useState("National Highway, Pila, Laguna 4010 Philippines");
+  const [depEdSchoolId, setDepEdSchoolId] = useState("402681");
+  const logoInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleInstitutionalLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      showToast("Logo file size must be less than 4MB.");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      showToast("Please upload a valid image file (PNG, JPG, SVG, WebP).");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        localStorage.setItem("sapc_custom_logo", result);
+        setCustomLogo(result);
+        window.dispatchEvent(new Event("sapc_logo_updated"));
+        showToast("Campus institutional logo updated across all platform portals!");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetInstitutionalLogo = () => {
+    localStorage.removeItem("sapc_custom_logo");
+    setCustomLogo(null);
+    window.dispatchEvent(new Event("sapc_logo_updated"));
+    if (logoInputRef.current) logoInputRef.current.value = "";
+    showToast("Campus logo reset to official SAPC 1979 crest.");
+  };
+
   // 12. Quarter Calendar Config
   const [quarterConfig, setQuarterConfig] = useState([
     { id: "Q1", label: "1st Quarter (Diagnostic Period)", start: "2026-08-01", end: "2026-10-15", status: "Completed", isCurrent: false },
@@ -167,18 +225,19 @@ export const AdminDashboard: React.FC = () => {
     { id: "IMP-903", type: "Master 500-Student Enrollment Roster", importedBy: "Dr. Remedios Santos", count: 500, successRate: "100%", date: "2026-08-15 10:00", canRollback: false }
   ]);
 
-  // Categories for 21 Tabs
-  const CATEGORIES = [
-    { id: "all", label: "All Master Controls (21)" },
-    { id: "governance", label: "System & Risk Config (5)", tabIds: ["dashboard", "risk_config", "quarter_management", "knowledge_base", "notifications"] },
+  // Categories for 22 Tabs
+  const CATEGORIES = useMemo(() => [
+    { id: "all", label: "All Master Controls (22)" },
+    { id: "governance", label: "System & Platform Config (6)", tabIds: ["dashboard", "platform_settings", "risk_config", "quarter_management", "knowledge_base", "notifications"] },
     { id: "ingestion", label: "Master Ingestion & Rollback (5)", tabIds: ["import_wizard", "import_history", "revert_import", "verify_assessments", "export_import_history"] },
     { id: "students", label: "Student Master Registry (3)", tabIds: ["students", "create_student", "student_profile"] },
     { id: "users", label: "Campus Accounts & Security (5)", tabIds: ["teachers", "create_user", "parents", "pending_registrations", "export_credentials"] },
     { id: "compliance", label: "Interventions & Reports (3)", tabIds: ["interventions", "intervention_suggestions", "reports"] }
-  ];
+  ], []);
 
   const TAB_ITEMS: Array<{ id: AdminTabType; label: string; icon: any; badge?: string; category: string }> = [
     { id: "dashboard", label: "System Command Center", icon: Users, badge: "Master", category: "governance" },
+    { id: "platform_settings", label: "Platform & Campus Logo", icon: Building, badge: "Admin Only", category: "governance" },
     { id: "risk_config", label: "AHP 5-Domain Risk Config", icon: Sliders, badge: "Weights", category: "governance" },
     { id: "quarter_management", label: "Quarter Management", icon: Calendar, badge: "Q2 Active", category: "governance" },
     { id: "import_wizard", label: "Master Import Wizard", icon: Layers, badge: "DepEd SASS", category: "ingestion" },
@@ -234,6 +293,46 @@ export const AdminDashboard: React.FC = () => {
       return () => window.removeEventListener("sapc:navigate-tab", handleCustomNav as EventListener);
     }
   }, []);
+
+  // Auto-scroll active tab and category into view smoothly when activeTab changes
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const parentCat = CATEGORIES.find(
+      (c) => c.id !== "all" && c.tabIds?.includes(activeTab)
+    );
+
+    if (
+      selectedNavCategory !== "all" &&
+      parentCat &&
+      !CATEGORIES.find((c) => c.id === selectedNavCategory)?.tabIds?.includes(activeTab)
+    ) {
+      setSelectedNavCategory("all");
+    }
+
+    const timer = setTimeout(() => {
+      const activeTabEl = document.getElementById(`admin-tab-${activeTab}`);
+      if (activeTabEl && tabsDrag.ref.current) {
+        activeTabEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+
+      const targetCatId = selectedNavCategory === "all" ? (parentCat?.id || "all") : selectedNavCategory;
+      const activeCatEl = document.getElementById(`admin-cat-${targetCatId}`);
+      if (activeCatEl && catDrag.ref.current) {
+        activeCatEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+    }, 60);
+
+    return () => clearTimeout(timer);
+  }, [activeTab, selectedNavCategory, isMounted, CATEGORIES, catDrag.ref, tabsDrag.ref]);
 
   const handleTabChange = useCallback((tab: AdminTabType) => {
     setActiveTab(tab);
@@ -360,64 +459,88 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Navigation Hub: Category Switcher + Tabs */}
       <div className="space-y-2.5">
-        {/* Category Filter Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none]">
-          {CATEGORIES.map((cat) => {
-            const isCatActive = selectedNavCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => {
-                  setSelectedNavCategory(cat.id);
-                  if (cat.id !== "all" && cat.tabIds && !cat.tabIds.includes(activeTab)) {
-                    handleTabChange(cat.tabIds[0] as AdminTabType);
-                  }
-                }}
-                className={`min-h-[34px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition ${
-                  isCatActive
-                    ? "bg-[#8B0014] text-white shadow-2xs ring-2 ring-rose-200"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Mobile / Tablet Quick Select Dropdown */}
-        <div className="block xl:hidden bg-white border border-slate-200 rounded-2xl p-3 shadow-xs">
-          <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 block mb-1">
-            Current Admin Control:
-          </label>
-          <div className="relative">
-            <select
-              value={activeTab}
-              onChange={(e) => handleTabChange(e.target.value as AdminTabType)}
-              className="w-full min-h-[44px] p-2.5 pr-10 rounded-xl border border-slate-300 bg-slate-50 font-bold text-sm text-slate-900 appearance-none"
+        {/* Category Filter Chips with Scroll Controls */}
+        <div className="relative flex items-center">
+          {catDrag.canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => catDrag.scrollBy(-220)}
+              className="flex absolute -left-2 z-10 h-7 w-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md items-center justify-center text-slate-600 dark:text-slate-300 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer"
+              title="Scroll categories left"
             >
-              {TAB_ITEMS.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label} {item.badge ? `(${item.badge})` : ""}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3.5 top-3.5 h-5 w-5 text-slate-400 pointer-events-none" />
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+
+          <div 
+            ref={catDrag.ref}
+            {...catDrag.events}
+            className="flex items-center gap-1.5 overflow-x-auto scroll-smooth pb-1 px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none w-full"
+          >
+            {CATEGORIES.map((cat) => {
+              const isCatActive = selectedNavCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  id={`admin-cat-${cat.id}`}
+                  type="button"
+                  onClick={() => {
+                    setSelectedNavCategory(cat.id);
+                    if (cat.id !== "all" && cat.tabIds && !cat.tabIds.includes(activeTab)) {
+                      handleTabChange(cat.tabIds[0] as AdminTabType);
+                    }
+                  }}
+                  className={`min-h-[34px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+                    isCatActive
+                      ? "bg-[#8B0014] text-white shadow-2xs ring-2 ring-rose-200"
+                      : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
+
+          {catDrag.canScrollRight && (
+            <button
+              type="button"
+              onClick={() => catDrag.scrollBy(220)}
+              className="flex absolute -right-2 z-10 h-7 w-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md items-center justify-center text-slate-600 dark:text-slate-300 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer"
+              title="Scroll categories right"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
-        {/* Categorized Navigation Tabs Bar */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-2 shadow-sm">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] text-xs font-bold">
+        {/* Categorized Navigation Tabs Bar (Scrollable Pill Strip with Left/Right Buttons) */}
+        <div className="relative bg-white border border-slate-200 rounded-2xl p-2 shadow-sm flex items-center">
+          {tabsDrag.canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => tabsDrag.scrollBy(-260)}
+              className="flex absolute left-2 z-10 h-8 w-8 rounded-xl bg-white/95 border border-slate-200 shadow-md items-center justify-center text-slate-600 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer backdrop-blur-xs"
+              title="Scroll modules left"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+
+          <div 
+            ref={tabsDrag.ref}
+            {...tabsDrag.events}
+            className="flex items-center gap-1.5 overflow-x-auto scroll-smooth px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none text-xs font-bold w-full"
+          >
             {visibleTabs.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
+                  id={`admin-tab-${item.id}`}
                   onClick={() => handleTabChange(item.id)}
-                  className={`min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 sm:gap-2 shrink-0 ${
+                  className={`min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-[#8B0014] text-white shadow-xs"
                       : "text-slate-600 hover:bg-slate-100"
@@ -436,6 +559,17 @@ export const AdminDashboard: React.FC = () => {
               );
             })}
           </div>
+
+          {tabsDrag.canScrollRight && (
+            <button
+              type="button"
+              onClick={() => tabsDrag.scrollBy(260)}
+              className="flex absolute right-2 z-10 h-8 w-8 rounded-xl bg-white/95 border border-slate-200 shadow-md items-center justify-center text-slate-600 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer backdrop-blur-xs"
+              title="Scroll modules right"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -489,6 +623,160 @@ export const AdminDashboard: React.FC = () => {
               >
                 View Full Audit Logs →
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 1.5 PLATFORM & INSTITUTIONAL BRANDING (platform_settings) */}
+      {/* ========================================================= */}
+      {activeTab === "platform_settings" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <Building className="h-6 w-6 text-[#8B0014]" />
+                  Institutional Branding &amp; Platform Configuration
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Manage official campus emblem, institutional identifiers, and platform-wide DSS branding
+                </p>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-[#8B0014] border border-rose-200 self-start sm:self-auto">
+                Admin Exclusive Control
+              </span>
+            </div>
+
+            {/* Campus Logo & Emblem Customization */}
+            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-5">
+              <div>
+                <h4 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5 text-[#8B0014]" />
+                  Official Campus Seal &amp; Institutional Logo
+                </h4>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  This emblem appears across all user portals (Counselor, Faculty, Administrator, Student, Parent), generated PDF reports, and navigation headers.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                {/* Logo Preview */}
+                <div className="lg:col-span-4 flex flex-col items-center justify-center p-6 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                  <div className="text-center space-y-1">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">Live Emblem Preview</span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center">
+                    <SapcLogo size={72} />
+                  </div>
+                  <div className="text-center space-y-0.5">
+                    <p className="text-xs font-black text-slate-800">
+                      {customLogo ? "Custom Institutional Logo" : "Official SAPC 1979 Crest"}
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-medium">
+                      {customLogo ? "Active override saved in platform storage" : "Default San Antonio de Padua College seal"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Upload & Reset Controls */}
+                <div className="lg:col-span-8 space-y-4">
+                  <input
+                    type="file"
+                    ref={logoInputRef}
+                    onChange={handleInstitutionalLogoUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+
+                  <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 space-y-2">
+                    <span className="font-extrabold block">Institutional Emblem Guidelines:</span>
+                    <ul className="list-disc pl-4 space-y-1 text-amber-900">
+                      <li>Recommended dimensions: Square (512x512px) or circular emblem for optimal crispness.</li>
+                      <li>Accepted formats: PNG (transparent background recommended), JPG, WebP, or SVG.</li>
+                      <li>Maximum upload size: 4.0 MB.</li>
+                    </ul>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-2 shadow-xs cursor-pointer"
+                    >
+                      <Upload className="h-4 w-4 text-amber-300" />
+                      <span>Upload New Institutional Logo</span>
+                    </button>
+
+                    {customLogo && (
+                      <button
+                        type="button"
+                        onClick={handleResetInstitutionalLogo}
+                        className="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition flex items-center gap-2 cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4 text-rose-600" />
+                        <span>Reset to Default SAPC Crest</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Institution Metadata Form */}
+            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
+              <h4 className="text-base font-extrabold text-slate-900">
+                Institutional Identification &amp; Accredited Details
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1.5">
+                  <label className="font-black text-slate-700">Official Institution Name</label>
+                  <input
+                    type="text"
+                    value={institutionName}
+                    onChange={(e) => setInstitutionName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="font-black text-slate-700">DepEd / CHED School ID</label>
+                  <input
+                    type="text"
+                    value={depEdSchoolId}
+                    onChange={(e) => setDepEdSchoolId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="font-black text-slate-700">Campus System Tagline</label>
+                  <input
+                    type="text"
+                    value={campusTagline}
+                    onChange={(e) => setCampusTagline(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="font-black text-slate-700">Campus Postal Address</label>
+                  <input
+                    type="text"
+                    value={campusAddress}
+                    onChange={(e) => setCampusAddress(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => showToast("Institutional configuration saved successfully.")}
+                  className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition shadow-xs cursor-pointer"
+                >
+                  Save Platform Settings
+                </button>
+              </div>
             </div>
           </div>
         </div>

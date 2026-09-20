@@ -88,14 +88,14 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
 
   if (!isOpen) return null;
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
-    const userText = input.trim();
+  const handleSend = async (customText?: string) => {
+    const textToSend = customText !== undefined ? customText.trim() : input.trim();
+    if (!textToSend || isLoading) return;
     setInput("");
 
     const newMsg: Message = {
       sender: "student",
-      text: userText,
+      text: textToSend,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
     setMessages((prev) => [...prev, newMsg]);
@@ -105,7 +105,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
       const res = await fetchWithAuth("/chatbot/message", {
         method: "POST",
         body: JSON.stringify({
-          message: userText,
+          message: textToSend,
           session_token: sessionToken
         })
       });
@@ -145,14 +145,22 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
       setMessages((prev) => [...prev, botMsg]);
 
       // Save cross-session topic
-      if (typeof window !== "undefined" && userText.length > 10) {
-        localStorage.setItem("sapc_last_chat_topic", userText.slice(0, 40) + "...");
+      if (typeof window !== "undefined" && textToSend.length > 10) {
+        localStorage.setItem("sapc_last_chat_topic", textToSend.slice(0, 40) + "...");
       }
     } catch {
-      // Fallback offline mock response with Filipino guidance
+      // Fallback dynamic offline response
+      const cleanLower = textToSend.toLowerCase();
+      let fallbackText = "Naririnig kita at nandito ako para sa iyo. Ligtas ang espasyong ito para sa iyong nararamdaman. Huwag mag-atubiling lumapit sa Guidance Office sa Room 204.";
+      if (cleanLower.includes("kausap") || cleanLower.includes("lonely") || cleanLower.includes("mag-isa")) {
+        fallbackText = "Nandito ako at handang makinig sa iyo nang buong puso. Ano ang mga naiisip o nararamdaman mo ngayon? Pwede mong ikwento sa akin nang malaya.";
+      } else if (cleanLower.includes("bagsak") || cleanLower.includes("nahihirapan") || cleanLower.includes("subject")) {
+        fallbackText = "Normal na magkaroon ng hamon sa academic journey. May libreng peer tutoring ang SAPC sa Room 104 Learning Commons. Gusto mo bang pag-usapan ang review plan?";
+      }
+
       const botMsg: Message = {
         sender: "bot",
-        text: "Naririnig kita at nandito ako para sa iyo. Kung nakakaranas ka ng matinding stress o pangamba, huwag mag-atubiling lumapit sa Guidance Office sa Room 204 o tumawag sa NCMH 1553.",
+        text: fallbackText,
         time: "Just now",
         resources: [
           "SAPC Guidance & Counseling Office (Room 204, Bldg A)",
@@ -341,8 +349,28 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           </div>
         )}
 
-        {/* Input Bar */}
+        {/* Input Bar & Quick Suggestions */}
         <div className="p-4 sm:p-5 border-t border-slate-200 bg-white">
+          {/* Quick Prompts */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {[
+              "Gusto ko ng kausap",
+              "Nahihirapan po ako sa subjects ko",
+              "Saan ang Guidance Office?",
+              "Kinakabahan ako sa exams"
+            ].map((suggestion, sIdx) => (
+              <button
+                key={sIdx}
+                type="button"
+                onClick={() => handleSend(suggestion)}
+                disabled={isLoading}
+                className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-rose-50 hover:text-[#8B0014] hover:border-rose-200 border border-slate-200 text-slate-700 text-xs font-semibold whitespace-nowrap transition cursor-pointer disabled:opacity-50 shrink-0"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -360,7 +388,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="px-5 py-3 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold flex items-center gap-2 transition disabled:opacity-50 active:scale-95 shadow-xs text-sm sm:text-base"
+              className="px-5 py-3 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold flex items-center gap-2 transition disabled:opacity-50 active:scale-95 shadow-xs text-sm sm:text-base cursor-pointer"
             >
               <Send className="h-5 w-5 text-white" />
               <span className="hidden sm:inline">Send</span>

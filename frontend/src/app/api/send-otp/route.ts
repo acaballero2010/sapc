@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// Module-level in-memory OTP store: email -> { code, expiresAt }
+// Module-level in-memory OTP store: email -> { code, expiresAt, sentAt }
 // This persists across requests within the same Node.js process instance.
 // For multi-instance production, replace with Redis or Firestore.
-export const otpStore = new Map<string, { code: string; expiresAt: number }>();
+export const otpStore = new Map<string, { code: string; expiresAt: number; sentAt: number }>();
 
 function generateOtp(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -26,9 +26,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Email is required." }, { status: 400 });
     }
 
+    const emailKey = email.toLowerCase().trim();
+    const existing = otpStore.get(emailKey);
+
+    // Rate-limit spamming: Minimum 10 seconds between resend requests
+    if (existing && Date.now() - existing.sentAt < 10 * 1000) {
+      const waitRemaining = Math.ceil((10 * 1000 - (Date.now() - existing.sentAt)) / 1000);
+      return NextResponse.json({
+        success: false,
+        error: `Please wait ${waitRemaining}s before requesting another verification code.`
+      }, { status: 429 });
+    }
+
     const code = generateOtp();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10-minute TTL
-    otpStore.set(email.toLowerCase().trim(), { code, expiresAt });
+    otpStore.set(emailKey, { code, expiresAt, sentAt: Date.now() });
 
     const apiKey = process.env.RESEND_API_KEY;
 
@@ -38,6 +50,8 @@ export async function POST(req: Request) {
       return NextResponse.json({
         success: true,
         mode: "dev_console",
+        expiresIn: 600,
+        resendCooldown: 60,
         _dev_otp: process.env.NODE_ENV !== "production" ? code : undefined
       });
     }

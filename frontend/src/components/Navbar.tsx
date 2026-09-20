@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import { useLanguage, SupportedLanguage } from "@/lib/language-context";
@@ -42,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenChat, 
   onOpenSimulator
 }) => {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
@@ -301,7 +303,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {/* Common: My Account */}
                   <div className="py-1.5">
                     <button
-                      onClick={() => { setIsUserMenuOpen(false); setIsAccountModalOpen(true); }}
+                      onClick={() => { setIsUserMenuOpen(false); router.push("/dashboard/profile"); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                     >
                       <UserCircle className="h-4 w-4 text-slate-400" />
@@ -397,7 +399,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                         >
                           <BookOpen className="h-4 w-4 text-blue-500" />
-                          Child's Progress
+                          Child&apos;s Progress
                         </button>
                       </>
                     )}

@@ -23,7 +23,8 @@ import {
   Key, 
   MessageSquare, 
   FileSpreadsheet, 
-  ChevronDown, 
+  ChevronLeft,
+  ChevronRight,
   BarChart3, 
   Plus, 
   Trash2, 
@@ -38,6 +39,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { getActiveStudentDataset } from "@/lib/dataset-store";
+import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
 import { StudentDetailModal } from "./StudentDetailModal";
 import { TeacherReferralModal } from "./TeacherReferralModal";
@@ -116,6 +118,8 @@ export const TeacherDashboard: React.FC = () => {
   const [referralStudent, setReferralStudent] = useState<any | null>(null);
   const [isReferralOpen, setIsReferralOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const catDrag = useDragScroll();
+  const tabsDrag = useDragScroll();
 
   // ---------------------------------------------------------------------------
   // 1. IMPORT WIZARD (3-Step Process)
@@ -604,13 +608,13 @@ export const TeacherDashboard: React.FC = () => {
   };
 
   // Navigation Categories
-  const CATEGORIES = [
+  const CATEGORIES = useMemo(() => [
     { id: "all", label: "All Modules (21)" },
     { id: "overview", label: "Advisory & Roster (5)", tabIds: ["dashboard", "students", "at_risk", "student_profile", "student_progress"] },
     { id: "import", label: "CSV Ingestion Hub (7)", tabIds: ["import_wizard", "import_students", "import_grades", "import_attendance", "import_history", "revert_import", "csv_editor"] },
     { id: "care", label: "Interventions & Care (4)", tabIds: ["interventions", "suggestions", "log_progress", "complete_intervention"] },
     { id: "records", label: "DepEd Records & Messages (5)", tabIds: ["class_record", "attendance_record", "notifications", "export_credentials", "messages"] }
-  ];
+  ], []);
   const [selectedNavCategory, setSelectedNavCategory] = useState<string>("all");
 
   const TAB_ITEMS: Array<{ id: TeacherTabType; label: string; icon: any; badge?: string; category: string }> = [
@@ -640,6 +644,46 @@ export const TeacherDashboard: React.FC = () => {
   const visibleTabs = selectedNavCategory === "all" 
     ? TAB_ITEMS 
     : TAB_ITEMS.filter(t => t.category === selectedNavCategory);
+
+  // Auto-scroll active tab and category into view smoothly when activeTab changes
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const parentCat = CATEGORIES.find(
+      (c) => c.id !== "all" && c.tabIds?.includes(activeTab)
+    );
+
+    if (
+      selectedNavCategory !== "all" &&
+      parentCat &&
+      !CATEGORIES.find((c) => c.id === selectedNavCategory)?.tabIds?.includes(activeTab)
+    ) {
+      setSelectedNavCategory("all");
+    }
+
+    const timer = setTimeout(() => {
+      const activeTabEl = document.getElementById(`teacher-tab-${activeTab}`);
+      if (activeTabEl && tabsDrag.ref.current) {
+        activeTabEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+
+      const targetCatId = selectedNavCategory === "all" ? (parentCat?.id || "all") : selectedNavCategory;
+      const activeCatEl = document.getElementById(`teacher-cat-${targetCatId}`);
+      if (activeCatEl && catDrag.ref.current) {
+        activeCatEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+    }, 60);
+
+    return () => clearTimeout(timer);
+  }, [activeTab, selectedNavCategory, isMounted, CATEGORIES, catDrag.ref, tabsDrag.ref]);
 
   if (!isMounted) {
     return (
@@ -763,64 +807,88 @@ export const TeacherDashboard: React.FC = () => {
 
       {/* Navigation Hub: Category Switcher + Tabs */}
       <div className="space-y-2.5">
-        {/* Category Filter Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {CATEGORIES.map((cat) => {
-            const isCatActive = selectedNavCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => {
-                  setSelectedNavCategory(cat.id);
-                  if (cat.id !== "all" && cat.tabIds && !cat.tabIds.includes(activeTab)) {
-                    handleTabChange(cat.tabIds[0] as TeacherTabType);
-                  }
-                }}
-                className={`min-h-[34px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition ${
-                  isCatActive
-                    ? "bg-[#8B0014] text-white shadow-2xs ring-2 ring-rose-200"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Mobile / Tablet Quick Select Dropdown */}
-        <div className="block xl:hidden bg-white border border-slate-200 rounded-2xl p-3 shadow-xs">
-          <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 block mb-1">
-            Current Module View:
-          </label>
-          <div className="relative">
-            <select
-              value={activeTab}
-              onChange={(e) => handleTabChange(e.target.value as TeacherTabType)}
-              className="w-full min-h-[44px] p-2.5 pr-10 rounded-xl border border-slate-300 bg-slate-50 font-bold text-sm text-slate-900 appearance-none focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+        {/* Category Filter Chips with Scroll Controls */}
+        <div className="relative flex items-center">
+          {catDrag.canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => catDrag.scrollBy(-220)}
+              className="flex absolute -left-2 z-10 h-7 w-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md items-center justify-center text-slate-600 dark:text-slate-300 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer"
+              title="Scroll categories left"
             >
-              {TAB_ITEMS.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label} {item.badge ? `(${item.badge})` : ""}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3.5 top-3.5 h-5 w-5 text-slate-400 pointer-events-none" />
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+
+          <div 
+            ref={catDrag.ref}
+            {...catDrag.events}
+            className="flex items-center gap-1.5 overflow-x-auto scroll-smooth pb-1 px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none w-full"
+          >
+            {CATEGORIES.map((cat) => {
+              const isCatActive = selectedNavCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  id={`teacher-cat-${cat.id}`}
+                  type="button"
+                  onClick={() => {
+                    setSelectedNavCategory(cat.id);
+                    if (cat.id !== "all" && cat.tabIds && !cat.tabIds.includes(activeTab)) {
+                      handleTabChange(cat.tabIds[0] as TeacherTabType);
+                    }
+                  }}
+                  className={`min-h-[34px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+                    isCatActive
+                      ? "bg-[#8B0014] text-white shadow-2xs ring-2 ring-rose-200"
+                      : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
+
+          {catDrag.canScrollRight && (
+            <button
+              type="button"
+              onClick={() => catDrag.scrollBy(220)}
+              className="flex absolute -right-2 z-10 h-7 w-7 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md items-center justify-center text-slate-600 dark:text-slate-300 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer"
+              title="Scroll categories right"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
-        {/* Categorized Navigation Tabs Bar (Scrollable Pill Strip on Desktop/Tablet) */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-2 shadow-sm">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-xs font-bold">
+        {/* Categorized Navigation Tabs Bar (Scrollable Pill Strip with Left/Right Buttons) */}
+        <div className="relative bg-white border border-slate-200 rounded-2xl p-2 shadow-sm flex items-center">
+          {tabsDrag.canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => tabsDrag.scrollBy(-260)}
+              className="flex absolute left-2 z-10 h-8 w-8 rounded-xl bg-white/95 border border-slate-200 shadow-md items-center justify-center text-slate-600 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer backdrop-blur-xs"
+              title="Scroll modules left"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+
+          <div 
+            ref={tabsDrag.ref}
+            {...tabsDrag.events}
+            className="flex items-center gap-1.5 overflow-x-auto scroll-smooth px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none text-xs font-bold w-full"
+          >
             {visibleTabs.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
+                  id={`teacher-tab-${item.id}`}
                   onClick={() => handleTabChange(item.id)}
-                  className={`min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 sm:gap-2 shrink-0 ${
+                  className={`min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl whitespace-nowrap transition flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-[#8B0014] text-white shadow-xs"
                       : "text-slate-600 hover:bg-slate-100"
@@ -839,6 +907,17 @@ export const TeacherDashboard: React.FC = () => {
               );
             })}
           </div>
+
+          {tabsDrag.canScrollRight && (
+            <button
+              type="button"
+              onClick={() => tabsDrag.scrollBy(260)}
+              className="flex absolute right-2 z-10 h-8 w-8 rounded-xl bg-white/95 border border-slate-200 shadow-md items-center justify-center text-slate-600 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer backdrop-blur-xs"
+              title="Scroll modules right"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 

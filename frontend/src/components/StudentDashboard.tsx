@@ -26,7 +26,9 @@ import {
   Info, 
   Shield, 
   Edit3, 
-  ChevronDown 
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -35,6 +37,7 @@ import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
 import { AccountManagementModal } from "./AccountManagementModal";
+import { useDragScroll } from "@/lib/useDragScroll";
 
 interface StudentDashboardProps {
   onOpenChat: () => void;
@@ -62,6 +65,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
   // Default first tab is Student Profile
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const tabsDrag = useDragScroll<HTMLDivElement>();
   const [student, setStudent] = useState<any | null>(null);
   const [riskData, setRiskData] = useState<any | null>(null);
   const [academicRecords, setAcademicRecords] = useState<any[]>([]);
@@ -228,6 +232,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
       window.history.replaceState({}, "", url.toString());
     }
   };
+
+  // Auto-scroll active tab into view smoothly when activeTab changes
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const timer = setTimeout(() => {
+      const activeTabEl = document.getElementById(`student-tab-${activeTab}`);
+      if (activeTabEl && tabsDrag.ref.current) {
+        activeTabEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+    }, 60);
+
+    return () => clearTimeout(timer);
+  }, [activeTab, isMounted, tabsDrag.ref]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -530,17 +552,33 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
         </div>
       </div>
 
-      {/* Categorized Navigation Tabs Bar (Scrollable Pill Strip on Desktop/Tablet) */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-2 sm:p-2.5 shadow-sm">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs font-bold">
+      {/* Categorized Navigation Tabs Bar (Scrollable Pill Strip) */}
+      <div className="relative bg-white border border-slate-200 rounded-3xl p-2 sm:p-2.5 shadow-sm flex items-center">
+        {tabsDrag.canScrollLeft && (
+          <button
+            type="button"
+            onClick={() => tabsDrag.scrollBy(-260)}
+            className="flex absolute left-2 z-10 h-8 w-8 rounded-xl bg-white/95 border border-slate-200 shadow-md items-center justify-center text-slate-600 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer backdrop-blur-xs"
+            title="Scroll tabs left"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        )}
+
+        <div 
+          ref={tabsDrag.ref}
+          {...tabsDrag.events}
+          className="flex items-center gap-1.5 overflow-x-auto scroll-smooth px-3 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden select-none cursor-grab active:cursor-grabbing text-xs font-bold w-full"
+        >
           {TAB_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
+                id={`student-tab-${item.id}`}
                 onClick={() => handleTabChange(item.id)}
-                className={`min-h-[40px] px-3.5 sm:px-4 py-2 rounded-2xl whitespace-nowrap transition flex items-center gap-1.5 sm:gap-2 ${
+                className={`min-h-[40px] px-3.5 sm:px-4 py-2 rounded-2xl whitespace-nowrap transition flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer ${
                   isActive
                     ? "bg-[#8B0014] text-white shadow-xs"
                     : "text-slate-600 hover:bg-slate-100"
@@ -559,6 +597,17 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
             );
           })}
         </div>
+
+        {tabsDrag.canScrollRight && (
+          <button
+            type="button"
+            onClick={() => tabsDrag.scrollBy(260)}
+            className="flex absolute right-2 z-10 h-8 w-8 rounded-xl bg-white/95 border border-slate-200 shadow-md items-center justify-center text-slate-600 hover:text-[#8B0014] hover:bg-rose-50 transition cursor-pointer backdrop-blur-xs"
+            title="Scroll tabs right"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {assessmentSuccessMsg && (

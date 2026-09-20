@@ -1,5 +1,5 @@
 import os
-from typing import List, Union
+from typing import List, Union, Optional
 from pydantic_settings import BaseSettings
 from pydantic import AnyHttpUrl, validator
 
@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     SECRET_KEY: str = os.getenv("SECRET_KEY", "sapc-intellysys-super-secret-key-change-in-production-2026")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
+    
+    # AI & External Services
+    GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY", None)
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
     
     # Database
     DATABASE_URL: str = os.getenv(
