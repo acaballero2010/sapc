@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Users, 
   BookOpen, 
@@ -27,6 +27,11 @@ export const ParentDashboard: React.FC = () => {
   const [messageText, setMessageText] = useState("");
   const [isSent, setIsSent] = useState(false);
   const [_isLoading, setIsLoading] = useState(true);
+  const sentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => { if (sentTimerRef.current) clearTimeout(sentTimerRef.current); };
+  }, []);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -117,7 +122,7 @@ export const ParentDashboard: React.FC = () => {
     if (!messageText.trim()) return;
     setIsSent(true);
     setMessageText("");
-    setTimeout(() => setIsSent(false), 5000);
+    sentTimerRef.current = setTimeout(() => setIsSent(false), 5000);
   };
 
   const domainScores = {

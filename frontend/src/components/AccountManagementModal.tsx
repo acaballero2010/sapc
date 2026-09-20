@@ -64,6 +64,11 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  // Track success-flash timers so they're cleared if the modal closes early
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, []);
 
   // Sync state whenever modal opens or active user changes
   useEffect(() => {
@@ -131,7 +136,7 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
         setCustomLogo(result);
         window.dispatchEvent(new Event("sapc_logo_updated"));
         setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
+        saveTimerRef.current = setTimeout(() => setSaveSuccess(false), 3000);
       }
     };
     reader.readAsDataURL(file);
@@ -205,10 +210,10 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
       full_name: fullName,
       avatar_url: avatarUrl
     });
-    setTimeout(() => {
+    saveTimerRef.current = setTimeout(() => {
       setIsSaving(false);
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      saveTimerRef.current = setTimeout(() => setSaveSuccess(false), 3000);
     }, 600);
   };
 

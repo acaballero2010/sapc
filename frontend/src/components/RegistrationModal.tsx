@@ -79,6 +79,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Track pending form-transition timers so they can be cleared on unmount
+  const formTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    return () => { if (formTimerRef.current) clearTimeout(formTimerRef.current); };
+  }, []);
+
   // Student form state
   const [lrn, setLrn] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
@@ -154,7 +160,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const handleStudentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    formTimerRef.current = setTimeout(() => {
       setIsSubmitting(false);
       setStep("otp");
     }, 600);
@@ -163,7 +169,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const handleParentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    formTimerRef.current = setTimeout(() => {
       setIsSubmitting(false);
       setStep("otp");
     }, 600);

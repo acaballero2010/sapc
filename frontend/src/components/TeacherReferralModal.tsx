@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   X, 
   Send, 
@@ -36,6 +36,17 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  // Track timers so we can clear them if the modal unmounts before they fire
+  const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear any pending timers when modal unmounts
+  useEffect(() => {
+    return () => {
+      if (timer1Ref.current) clearTimeout(timer1Ref.current);
+      if (timer2Ref.current) clearTimeout(timer2Ref.current);
+    };
+  }, []);
 
   // Sync selected student when prop changes
   React.useEffect(() => {
@@ -83,10 +94,10 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
       localStorage.setItem("sapc_teacher_referrals", JSON.stringify([referralPayload, ...existing]));
     }
 
-    setTimeout(() => {
+    timer1Ref.current = setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
-      setTimeout(() => {
+      timer2Ref.current = setTimeout(() => {
         setIsSuccess(false);
         setObservations("");
         if (onSuccess) onSuccess();

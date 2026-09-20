@@ -217,7 +217,7 @@ export const CounselorDashboard: React.FC = () => {
     return [];
   };
 
-  const loadData = async () => {
+  const loadData = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const [analyticsRes, studentsRes, flaggedRes, interventionsRes] = await Promise.all([
@@ -315,7 +315,7 @@ export const CounselorDashboard: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTogglePlanTask = async (planId: number, taskId: string) => {
     setInterventions((prev: InterventionCarePlan[]) => {
@@ -364,8 +364,8 @@ export const CounselorDashboard: React.FC = () => {
     setIsMounted(true);
     loadData();
 
-    const handleCarePlanUpdate = (e: any) => {
-      const newOrUpdatedPlan = e.detail as InterventionCarePlan;
+    const handleCarePlanUpdate = (e: CustomEvent<InterventionCarePlan | null>) => {
+      const newOrUpdatedPlan = e.detail;
       if (newOrUpdatedPlan) {
         setInterventions((prev: InterventionCarePlan[]) => {
           const exists = prev.some((p: InterventionCarePlan) => p.id === newOrUpdatedPlan.id);
@@ -379,27 +379,28 @@ export const CounselorDashboard: React.FC = () => {
       }
     };
 
+    const checkHash = () => {
+      if (window.location.hash === "#data-ingestion-hub" || window.location.hash === "#ingestion-hub") {
+        setShowIngestionHub(true);
+      }
+    };
+
     if (typeof window !== "undefined") {
       window.addEventListener("sapc_interventions_updated", handleCarePlanUpdate as EventListener);
       window.addEventListener("sapc:data-ingested", loadData as EventListener);
-      
-      const checkHash = () => {
-        if (window.location.hash === "#data-ingestion-hub" || window.location.hash === "#ingestion-hub") {
-          setShowIngestionHub(true);
-        }
-      };
       checkHash();
       window.addEventListener("hashchange", checkHash);
     }
 
     return () => {
       if (typeof window !== "undefined") {
+        // Use the same named references that were registered — not new inline functions
         window.removeEventListener("sapc_interventions_updated", handleCarePlanUpdate as EventListener);
         window.removeEventListener("sapc:data-ingested", loadData as EventListener);
-        window.removeEventListener("hashchange", () => {});
+        window.removeEventListener("hashchange", checkHash);
       }
     };
-  }, []);
+  }, [loadData]);
 
   if (!isMounted) {
     return (
