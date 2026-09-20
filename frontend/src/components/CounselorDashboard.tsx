@@ -20,7 +20,8 @@ import {
   CheckSquare,
   Square,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Layers
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
@@ -29,6 +30,7 @@ import { InterventionModal } from "./InterventionModal";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { ParentAlertModal } from "./ParentAlertModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
+import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { SAPC_500_STUDENTS, SAPC_COHORT_SUMMARY } from "@/data/students500";
 import type { StudentRecord } from "@/data/students500";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -167,6 +169,7 @@ export const CounselorDashboard: React.FC = () => {
   const [interventionStudent, setInterventionStudent] = useState<StudentRecord | null>(null);
   const [isInterventionOpen, setIsInterventionOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [showIngestionHub, setShowIngestionHub] = useState(false);
   const [parentAlertStudent, setParentAlertStudent] = useState<StudentRecord | null>(null);
   const [isParentAlertOpen, setIsParentAlertOpen] = useState(false);
   const [_isLoading, setIsLoading] = useState(true);
@@ -224,7 +227,31 @@ export const CounselorDashboard: React.FC = () => {
         fetchWithAuth("/risk/interventions").catch(() => null)
       ]);
       if (analyticsRes) setAnalytics(analyticsRes);
-      if (studentsRes && Array.isArray(studentsRes) && studentsRes.length > 0) setStudents(studentsRes);
+      
+      let baseStudents = DEFAULT_STUDENTS;
+      if (studentsRes && Array.isArray(studentsRes) && studentsRes.length > 0) {
+        baseStudents = studentsRes;
+      }
+      
+      // Merge with custom client-side ingested multi-domain updates if present
+      if (typeof window !== "undefined") {
+        const customData = localStorage.getItem("sapc_custom_student_data");
+        if (customData) {
+          try {
+            const customMap = JSON.parse(customData);
+            baseStudents = baseStudents.map((s: any) => {
+              if (customMap[s.id]) {
+                return { ...s, ...customMap[s.id] };
+              }
+              return s;
+            });
+          } catch {
+            // Ignore parse error
+          }
+        }
+      }
+      setStudents(baseStudents);
+
       if (flaggedRes && Array.isArray(flaggedRes)) setFlaggedSessions(flaggedRes);
 
       // Load Interventions from localStorage merged with API or default mock
@@ -354,11 +381,22 @@ export const CounselorDashboard: React.FC = () => {
 
     if (typeof window !== "undefined") {
       window.addEventListener("sapc_interventions_updated", handleCarePlanUpdate as EventListener);
+      window.addEventListener("sapc:data-ingested", loadData as EventListener);
+      
+      const checkHash = () => {
+        if (window.location.hash === "#data-ingestion-hub" || window.location.hash === "#ingestion-hub") {
+          setShowIngestionHub(true);
+        }
+      };
+      checkHash();
+      window.addEventListener("hashchange", checkHash);
     }
 
     return () => {
       if (typeof window !== "undefined") {
         window.removeEventListener("sapc_interventions_updated", handleCarePlanUpdate as EventListener);
+        window.removeEventListener("sapc:data-ingested", loadData as EventListener);
+        window.removeEventListener("hashchange", () => {});
       }
     };
   }, []);
@@ -415,6 +453,18 @@ export const CounselorDashboard: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
             <button
+              onClick={() => setShowIngestionHub((prev) => !prev)}
+              className={`px-4 py-3 rounded-2xl font-extrabold text-sm shadow-md transition flex items-center justify-center gap-2 ${
+                showIngestionHub 
+                  ? "bg-amber-400 text-amber-950 ring-2 ring-white" 
+                  : "bg-white/15 hover:bg-white/25 text-white border border-white/20"
+              }`}
+            >
+              <Layers className="h-4 w-4 text-amber-300" />
+              <span>{showIngestionHub ? "Close Ingestion Hub" : "Multi-Domain Data Hub"}</span>
+            </button>
+
+            <button
               onClick={() => setIsReportOpen(true)}
               className="px-4 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-extrabold text-sm shadow-md transition flex items-center justify-center gap-2"
             >
@@ -432,6 +482,13 @@ export const CounselorDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Multi-Domain Ingestion Hub Section */}
+      {showIngestionHub && (
+        <div id="data-ingestion-hub" className="scroll-mt-24 transition-all duration-300">
+          <MultiDomainIngestionHub defaultDomain="mental_health" onSuccess={loadData} />
+        </div>
+      )}
 
       {/* Analytics KPI Metric Cards */}
       <div id="triage-overview" className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 scroll-mt-24">

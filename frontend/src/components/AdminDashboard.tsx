@@ -13,11 +13,13 @@ import {
   Activity, 
   Eye, 
   X, 
-  Check
+  Check,
+  Layers
 } from "lucide-react";
 import { AuditLogViewer } from "./AuditLogViewer";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
+import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 
 const CAMPUS_USERS = [
   {
@@ -136,6 +138,7 @@ export const AdminDashboard: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isMatrixModalOpen, setIsMatrixModalOpen] = useState(false);
+  const [showIngestionHub, setShowIngestionHub] = useState(false);
   const [selectedUser, setSelectedUser] = useState<typeof CAMPUS_USERS[0] | null>(null);
   const [userSearch, setUserSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -146,6 +149,9 @@ export const AdminDashboard: React.FC = () => {
     // Check if there is a hash in the URL on mount or navigation
     if (typeof window !== "undefined" && window.location.hash) {
       const targetId = window.location.hash.replace("#", "");
+      if (targetId === "institutional-ingestion" || targetId === "data-ingestion-hub" || targetId === "ingestion-hub") {
+        setShowIngestionHub(true);
+      }
       setTimeout(() => {
         const el = document.getElementById(targetId);
         if (el) {
@@ -194,7 +200,18 @@ export const AdminDashboard: React.FC = () => {
               Configure decision engine criteria weights, manage campus user role boundaries, and monitor immutable data access audit trails.
             </p>
           </div>
-          <div className="flex items-center gap-3 shrink-0 self-start md:self-center">
+          <div className="flex items-center gap-3 shrink-0 self-start md:self-center flex-wrap sm:flex-nowrap">
+            <button
+              onClick={() => setShowIngestionHub((prev) => !prev)}
+              className={`px-4 py-3 rounded-2xl font-extrabold text-sm shadow-md transition flex items-center gap-2 ${
+                showIngestionHub 
+                  ? "bg-amber-400 text-amber-950 ring-2 ring-white" 
+                  : "bg-white/15 hover:bg-white/25 text-white border border-white/20"
+              }`}
+            >
+              <Layers className="h-4 w-4 text-amber-300" />
+              <span>{showIngestionHub ? "Close Ingestion Hub" : "Multi-Domain Ingestion"}</span>
+            </button>
             <button
               onClick={() => setIsMatrixModalOpen(true)}
               className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 transition flex items-center gap-2"
@@ -212,6 +229,13 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Institutional Multi-Domain Ingestion Hub */}
+      {showIngestionHub && (
+        <div id="institutional-ingestion" className="scroll-mt-24 transition-all duration-300">
+          <MultiDomainIngestionHub defaultDomain="academic" />
+        </div>
+      )}
 
       {/* System Health & Synchronization Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Search, BookOpen, HeartHandshake, Eye } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
-import { SassCsvUploader } from "./SassCsvUploader";
+import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { StudentDetailModal } from "./StudentDetailModal";
 import { TeacherReferralModal } from "./TeacherReferralModal";
 
@@ -80,14 +80,47 @@ export const TeacherDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const data = await fetchWithAuth("/students");
+      let active = DEFAULT_TEACHER_STUDENTS;
       if (data && Array.isArray(data) && data.length > 0) {
-        setStudents(data);
-      } else {
-        setStudents(DEFAULT_TEACHER_STUDENTS);
+        active = data;
       }
+      if (typeof window !== "undefined") {
+        const customData = localStorage.getItem("sapc_custom_student_data");
+        if (customData) {
+          try {
+            const customMap = JSON.parse(customData);
+            active = active.map((s: any) => {
+              if (customMap[s.id]) {
+                return { ...s, ...customMap[s.id] };
+              }
+              return s;
+            });
+          } catch {
+            // Ignore error
+          }
+        }
+      }
+      setStudents(active);
     } catch (err) {
       console.warn("Using default teacher roster due to API offline status:", err);
-      setStudents(DEFAULT_TEACHER_STUDENTS);
+      let active = DEFAULT_TEACHER_STUDENTS;
+      if (typeof window !== "undefined") {
+        const customData = localStorage.getItem("sapc_custom_student_data");
+        if (customData) {
+          try {
+            const customMap = JSON.parse(customData);
+            active = active.map((s: any) => {
+              if (customMap[s.id]) {
+                return { ...s, ...customMap[s.id] };
+              }
+              return s;
+            });
+          } catch {
+            // Ignore error
+          }
+        }
+      }
+      setStudents(active);
     } finally {
       setIsLoading(false);
     }
@@ -96,6 +129,10 @@ export const TeacherDashboard: React.FC = () => {
   useEffect(() => {
     setIsMounted(true);
     loadData();
+
+    const handleDataIngested = () => {
+      loadData();
+    };
 
     const handleOpenReferral = () => {
       setReferralStudent(students[0] || null);
@@ -112,6 +149,7 @@ export const TeacherDashboard: React.FC = () => {
     };
 
     window.addEventListener("sapc:open-teacher-referral", handleOpenReferral);
+    window.addEventListener("sapc:data-ingested", handleDataIngested);
     window.addEventListener("hashchange", handleHashCheck);
 
     // Initial check
@@ -119,6 +157,7 @@ export const TeacherDashboard: React.FC = () => {
 
     return () => {
       window.removeEventListener("sapc:open-teacher-referral", handleOpenReferral);
+      window.removeEventListener("sapc:data-ingested", handleDataIngested);
       window.removeEventListener("hashchange", handleHashCheck);
     };
   }, [students]);
@@ -174,9 +213,9 @@ export const TeacherDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* SASS Ingestion Component */}
+      {/* Multi-Domain Ingestion Component */}
       <div id="uploader" className="scroll-mt-24 min-w-0">
-        <SassCsvUploader onSuccess={loadData} />
+        <MultiDomainIngestionHub defaultDomain="academic" onSuccess={loadData} />
       </div>
 
       {/* Advisory Class Roster */}
