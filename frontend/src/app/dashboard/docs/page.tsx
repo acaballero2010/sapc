@@ -156,6 +156,16 @@ export default function DocumentationPage() {
           >
             v2.5 Notes
           </button>
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("sapc:open-dataset-archive"));
+              }
+            }}
+            className="px-2.5 py-1 rounded-lg bg-[#8B0014] hover:bg-[#700010] text-white text-[11px] font-bold shrink-0 shadow-2xs cursor-pointer flex items-center gap-1"
+          >
+            <span>📦 Archive Datasets</span>
+          </button>
         </div>
       </div>
 

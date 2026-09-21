@@ -9,6 +9,7 @@ import { RoleOnboardingWizard } from "@/components/RoleOnboardingWizard";
 import { UserMenuPopover } from "@/components/UserMenuPopover";
 import { GlobalNotificationDrawer } from "@/components/GlobalNotificationDrawer";
 import { CommandPalette } from "@/components/CommandPalette";
+import { DatasetArchiveModal } from "@/components/DatasetArchiveModal";
 import { useAuth } from "@/lib/auth-context";
 import { ShieldCheck, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
 
@@ -24,6 +25,7 @@ export default function DashboardLayout({
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   useEffect(() => {
@@ -49,8 +51,14 @@ export default function DashboardLayout({
       }
 
       const handleOpenCommand = () => setIsCommandOpen(true);
+      const handleOpenArchive = () => setIsArchiveOpen(true);
+
       window.addEventListener("sapc:open-command-palette", handleOpenCommand);
-      return () => window.removeEventListener("sapc:open-command-palette", handleOpenCommand);
+      window.addEventListener("sapc:open-dataset-archive", handleOpenArchive);
+      return () => {
+        window.removeEventListener("sapc:open-command-palette", handleOpenCommand);
+        window.removeEventListener("sapc:open-dataset-archive", handleOpenArchive);
+      };
     }
   }, []);
 
@@ -154,6 +162,12 @@ export default function DashboardLayout({
         onClose={() => setIsCommandOpen(false)}
         onOpenChat={() => setIsChatOpen(true)}
         onOpenSimulator={() => setIsSimulatorOpen(true)}
+        onOpenArchive={() => setIsArchiveOpen(true)}
+      />
+
+      <DatasetArchiveModal
+        isOpen={isArchiveOpen}
+        onClose={() => setIsArchiveOpen(false)}
       />
 
       <ChatbotModal

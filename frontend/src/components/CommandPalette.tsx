@@ -21,7 +21,8 @@ import {
   Sliders,
   RotateCcw,
   Calendar,
-  Command
+  Command,
+  Archive
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -30,6 +31,7 @@ interface CommandPaletteProps {
   onClose: () => void;
   onOpenChat?: () => void;
   onOpenSimulator?: () => void;
+  onOpenArchive?: () => void;
 }
 
 interface CommandItem {
@@ -46,7 +48,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   isOpen,
   onClose,
   onOpenChat,
-  onOpenSimulator
+  onOpenSimulator,
+  onOpenArchive
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -90,6 +93,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   // Build command items list
   const defaultItems: CommandItem[] = [
     // Actions
+    {
+      id: "action-archive",
+      title: "Archive & Export Sample Datasets",
+      category: "Actions",
+      description: "Download 500-student database JSON, 5-domain CSVs, and manage snapshot backups",
+      icon: Archive,
+      action: () => {
+        onClose();
+        if (onOpenArchive) onOpenArchive();
+      },
+      badge: "BACKUP"
+    },
     {
       id: "action-chat",
       title: "Talk to AI Guidance Counselor",
