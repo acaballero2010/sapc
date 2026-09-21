@@ -252,11 +252,14 @@ export default function DocumentationPage() {
                 <Layers className="h-6 w-6" />
               </div>
               <div>
+                <span className="px-2.5 py-0.5 rounded-full bg-[#8B0014] text-white text-[10px] font-black uppercase tracking-wider inline-block mb-1">
+                  Part 1 • Holistic Decision Support System
+                </span>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">
-                  Multi-Criteria Risk Assessment Engine (AHP)
+                  Multi-Criteria Risk Assessment Engine (Saaty AHP)
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  Mathematical formulation, 5 validated domains, attribute penalties, and consistency verification.
+                  Mathematical formulation, 5 validated domains, deterministic penalty thresholds, and consistency verification.
                 </p>
               </div>
             </div>
@@ -269,7 +272,7 @@ export default function DocumentationPage() {
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
               <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-[#8B0014] dark:text-rose-400">Academic</span>
+                  <span className="text-xs font-black uppercase text-[#8B0014] dark:text-rose-400">1. Academic</span>
                   <span className="px-2 py-0.5 rounded-full bg-[#8B0014] text-white text-[10px] font-black">30% (0.30)</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
@@ -282,7 +285,7 @@ export default function DocumentationPage() {
 
               <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-blue-700 dark:text-blue-400">Family</span>
+                  <span className="text-xs font-black uppercase text-blue-700 dark:text-blue-400">2. Family</span>
                   <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black">20% (0.20)</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
@@ -295,7 +298,7 @@ export default function DocumentationPage() {
 
               <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-emerald-700 dark:text-emerald-400">Health</span>
+                  <span className="text-xs font-black uppercase text-emerald-700 dark:text-emerald-400">3. Health</span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black">20% (0.20)</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
@@ -308,11 +311,11 @@ export default function DocumentationPage() {
 
               <div className="p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/50 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-purple-700 dark:text-purple-400">Mental Health</span>
+                  <span className="text-xs font-black uppercase text-purple-700 dark:text-purple-400">4. Mental Health</span>
                   <span className="px-2 py-0.5 rounded-full bg-purple-600 text-white text-[10px] font-black">15% (0.15)</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
-                  PHQ-9 depression index, GAD-7 anxiety index, AI companion distress.
+                  PHQ-9 depression index, GAD-7 anxiety index, clinical intake notes.
                 </p>
                 <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 pt-1">
                   Source: Clinical Screeners
@@ -321,7 +324,7 @@ export default function DocumentationPage() {
 
               <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase text-amber-700 dark:text-amber-400">Financial</span>
+                  <span className="text-xs font-black uppercase text-amber-700 dark:text-amber-400">5. Financial</span>
                   <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white text-[10px] font-black">15% (0.15)</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
@@ -341,7 +344,7 @@ export default function DocumentationPage() {
               <div className="flex items-center gap-2 text-[#8B0014] dark:text-rose-400">
                 <Calculator className="h-5 w-5" />
                 <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-                  1. Academic Risk Sub-Score (S_AC)
+                  1.1 Academic Risk Sub-Score Formulation (S_AC)
                 </h3>
               </div>
 
@@ -405,7 +408,7 @@ export default function DocumentationPage() {
               <div className="flex items-center gap-2 text-[#8B0014] dark:text-rose-400">
                 <BarChart3 className="h-5 w-5" />
                 <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-                  2. AHP Composite Synthesis & Tiers
+                  1.2 Composite Synthesis (R_composite) &amp; Tiers
                 </h3>
               </div>
 
@@ -481,7 +484,7 @@ export default function DocumentationPage() {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-white">
-                    Live AHP Calculation Demo (Interactive Sandbox)
+                    1.3 Live AHP Calculation Demo (Interactive Sandbox)
                   </h3>
                   <p className="text-xs text-slate-400">
                     Adjust academic parameters and non-academic screeners to observe real-time score synthesis.
@@ -661,7 +664,7 @@ export default function DocumentationPage() {
                 </div>
                 <div>
                   <h3 className="font-black text-slate-900 dark:text-white text-lg">
-                    3. Pairwise Comparison Matrix &amp; Consistency Ratio (CR)
+                    1.4 Pairwise Comparison Matrix &amp; Consistency Ratio (CR)
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Validated 5×5 judgement matrix showing mathematical transitivity and Saaty consistency.
@@ -760,6 +763,9 @@ export default function DocumentationPage() {
                 <BookOpen className="h-6 w-6" />
               </div>
               <div>
+                <span className="px-2.5 py-0.5 rounded-full bg-[#8B0014] text-white text-[10px] font-black uppercase tracking-wider inline-block mb-1">
+                  Part 2 • Subject-Level Failure Predictive Engine
+                </span>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">
                   Subject-Level Academic Failure Risk Prediction Model
                 </h2>
@@ -814,22 +820,6 @@ export default function DocumentationPage() {
                     Uses eigenvector-derived weights validated by psychometricians to synthesize domain screenings into mathematically consistent sub-scores.
                   </p>
                 </div>
-              </div>
-            </div>
-
-            {/* Formula Callout */}
-            <div className="p-5 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs space-y-3 border border-slate-800">
-              <div className="text-amber-400 font-bold uppercase tracking-wider text-[11px]">
-                Failure Probability &amp; Grade Forecast Formulations
-              </div>
-              <div className="text-emerald-400">
-                P_fail(s) = 1.0 / (1.0 + exp(-0.18 &times; (75.0 - G_projected)))
-              </div>
-              <div className="text-rose-300">
-                G_projected = (w_WW &times; S_WW + w_PT &times; S_PT + w_QA &times; S_QA) - &Delta;_Tasks - &Delta;_Attendance - &Delta;_CrossDomain
-              </div>
-              <div className="text-slate-400 text-[11px] pt-1">
-                Where: Passing_Threshold = 75.0, k = 0.18, &Delta;_Tasks = 8.0 pts per missing task, &Delta;_Attendance = 2.5 pts per cut past 2.
               </div>
             </div>
 
