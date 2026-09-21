@@ -35,14 +35,18 @@ import {
   Key,
   Download,
   RotateCcw,
-  Search
+  Search,
+  FileSpreadsheet
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { INGESTION_DOMAINS } from "@/data/sample_templates";
 
 export default function DocumentationPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"risk" | "system" | "tech" | "users" | "howtos" | "releases" | "privacy">("risk");
+  const [activeTab, setActiveTab] = useState<"risk" | "datasets" | "system" | "tech" | "users" | "howtos" | "releases" | "privacy">("risk");
   const [searchFilter, setSearchFilter] = useState("");
+  const [datasetDomainFilter, setDatasetDomainFilter] = useState("all");
+  const [attributeSearch, setAttributeSearch] = useState("");
 
   // Mini live AHP calculator state for interactive demonstration
   const [calcGpa, setCalcGpa] = useState<number>(78);
@@ -181,6 +185,18 @@ export default function DocumentationPage() {
         >
           <Layers className="h-4 w-4" />
           <span>AHP Risk Engine</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("datasets")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
+            activeTab === "datasets"
+              ? "bg-[#8B0014] text-white shadow-md"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <Database className="h-4 w-4" />
+          <span>Data Dictionary &amp; Datasets</span>
         </button>
 
         <button
@@ -772,7 +788,228 @@ export default function DocumentationPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: SYSTEM DESIGN SPECIFICATION */}
+      {/* TAB 2: DATASETS & DATA DICTIONARY */}
+      {/* ========================================================================= */}
+      {activeTab === "datasets" && (
+        <div className="space-y-6">
+          {/* Header Card */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-[#8B0014]/10 text-[#8B0014] dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">
+                  <Database className="h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                    Datasets &amp; Data Dictionary Specification
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    Comprehensive catalog of all 6 datasets, CSV schemas, attribute types, and clinical definitions.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("sapc:open-dataset-archive"));
+                  }
+                }}
+                className="px-4 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white text-xs font-bold transition flex items-center gap-2 shadow-xs cursor-pointer shrink-0 self-start sm:self-auto"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                <span>Open Archive &amp; Export Manager</span>
+              </button>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Every student record in SAPC IntellySys is keyed by their immutable <strong>12-digit DepEd Learner Reference Number (LRN)</strong>. 
+              The system ingests data across 5 distinct institutional domains, normalizes indicators to a unified 0–100 scale, and computes the AHP composite failure risk index.
+            </p>
+
+            {/* Ingestion Templates Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>👑</span>
+                    <span>Master 500-Student Database</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-mono font-bold">
+                    25 Cols
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                  Complete cohort dataset with demographics, SASS GPA, absences, 5-domain scores, and risk tiers.
+                </p>
+                <div className="text-[10px] text-slate-400 font-mono">
+                  SAPC_Master_500_Students_Archive.csv
+                </div>
+              </div>
+
+              {Object.entries(INGESTION_DOMAINS).map(([key, domain]) => (
+                <div 
+                  key={key}
+                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <span>{domain.icon}</span>
+                      <span>{domain.title}</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-[#8B0014] dark:text-rose-300 text-[10px] font-bold">
+                      {domain.weight}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                    {domain.description}
+                  </p>
+                  <div className="text-[10px] text-slate-400 font-mono">
+                    {domain.csvFileName}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Search & Domain Filter Bar */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="relative w-full sm:w-80">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search attributes (e.g. gpa, gad7, income, lrn)..."
+                  value={attributeSearch}
+                  onChange={(e) => setAttributeSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#8B0014]/20"
+                />
+              </div>
+
+              <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1">
+                {[
+                  { id: "all", label: "All Attributes" },
+                  { id: "academic", label: "Academic (SASS)" },
+                  { id: "mental_health", label: "Mental Health" },
+                  { id: "financial", label: "Financial" },
+                  { id: "family", label: "Family" },
+                  { id: "health", label: "Physical Health" }
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setDatasetDomainFilter(f.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                      datasetDomainFilter === f.id
+                        ? "bg-[#8B0014] text-white shadow-2xs"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Data Dictionary Attributes Table */}
+            <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+              <table className="min-w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-extrabold uppercase border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th className="py-3 px-4">Attribute Key</th>
+                    <th className="py-3 px-3">Data Type</th>
+                    <th className="py-3 px-3">Domain</th>
+                    <th className="py-3 px-3">Allowed Values / Range</th>
+                    <th className="py-3 px-4">Institutional &amp; Clinical Purpose</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                  {[
+                    // Master Demographics
+                    { key: "lrn", type: "String(12)", domain: "Master Key", values: "12 Digits (e.g. 109238475001)", desc: "Unique DepEd Learner Reference Number. Master entity relational key across all tables." },
+                    { key: "full_name", type: "String", domain: "Demographics", values: "Legal Name Text", desc: "Full student name for official records, report cards, and guidance files." },
+                    { key: "grade_level", type: "Integer", domain: "Demographics", values: "7, 8, 9, 10, 11, 12", desc: "Current enrolled grade level in Junior High or Senior High School." },
+                    { key: "strand", type: "String", domain: "Demographics", values: "STEM, HUMSS, ABM, GAS, TVL", desc: "Senior High School academic track determining curriculum specialization." },
+                    { key: "section_name", type: "String", domain: "Demographics", values: "Section Name Text", desc: "Assigned class section name (e.g. Grade 11 - St. Augustine)." },
+                    { key: "adviser_name", type: "String", domain: "Demographics", values: "Faculty Name Text", desc: "Licensed teacher overseeing homeroom guidance and advisory monitoring." },
+                    
+                    // Academic
+                    { key: "quarter_gpa", type: "Float", domain: "Academic (30%)", values: "60.00 – 100.00", desc: "Quarterly General Weighted Average across learning areas. Passing threshold is 75.0." },
+                    { key: "failing_subjects_count", type: "Integer", domain: "Academic (30%)", values: "0 – 10", desc: "Count of learning areas below 75.0. Primary driver of non-promotion risk." },
+                    { key: "days_absent", type: "Integer", domain: "Academic (30%)", values: "0 – 60 days", desc: "Total school days missed during the active grading period." },
+                    { key: "attendance_rate_pct", type: "Float", domain: "Academic (30%)", values: "0.0% – 100.0%", desc: "Ratio of days present to total school days: (Present / Total) × 100." },
+                    { key: "incomplete_requirements_count", type: "Integer", domain: "Academic (30%)", values: "0 – 20", desc: "Pending Written Works (WW) or Performance Tasks (PT) causing grade withholding." },
+                    
+                    // Mental Health
+                    { key: "gad7_anxiety_score", type: "Integer", domain: "Mental Health (15%)", values: "0 – 21", desc: "Standardized GAD-7 Anxiety screener: Minimal (0-4), Mild (5-9), Moderate (10-14), Severe (15-21)." },
+                    { key: "phq9_depression_score", type: "Integer", domain: "Mental Health (15%)", values: "0 – 27", desc: "Standardized PHQ-9 Depression screener: Minimal (0-4), Mild (5-9), Moderate (10-14), Mod Severe (15-19), Severe (20-27)." },
+                    { key: "stress_level_1_to_5", type: "Integer", domain: "Mental Health (15%)", values: "1 to 5 Likert", desc: "Self-reported chronic academic and environmental stress index." },
+                    { key: "coping_adaptiveness", type: "String", domain: "Mental Health (15%)", values: "Adaptive, Neutral, Maladaptive", desc: "Quality of emotional regulation and task engagement under pressure." },
+                    { key: "counselor_case_flag", type: "Boolean", domain: "Mental Health (15%)", values: "true / false", desc: "Priority clinical flag set by RGC triggering immediate 1-on-1 counselor intake." },
+
+                    // Financial
+                    { key: "monthly_household_income_php", type: "Float", domain: "Financial (15%)", values: "PHP (≥ 0.0)", desc: "Gross monthly household income determining socio-economic quintile." },
+                    { key: "income_bracket", type: "String", domain: "Financial (15%)", values: "Low (<₱10k), Lower Mid (₱10k-25k), Mid, Upper Mid", desc: "DepEd / PSA socio-economic classification." },
+                    { key: "is_4ps_beneficiary", type: "Boolean", domain: "Financial (15%)", values: "true / false", desc: "DSWD Pantawid Pamilyang Pilipino Program indigent beneficiary status." },
+                    { key: "unpaid_balance_php", type: "Float", domain: "Financial (15%)", values: "PHP (≥ 0.0)", desc: "Current outstanding tuition and fee balance in accounting records." },
+                    { key: "student_part_time_work_status", type: "String", domain: "Financial (15%)", values: "None, Light, Working Student (>20h/wk)", desc: "External employment fatigue burden affecting homework completion and alertness." },
+
+                    // Family
+                    { key: "ofw_parent_status", type: "String", domain: "Family (20%)", values: "None, One Parent, Both Parents", desc: "Parental overseas employment separation status." },
+                    { key: "is_eldest_child", type: "Boolean", domain: "Family (20%)", values: "true / false", desc: "Eldest child indicator; correlates with domestic childcare and household burdens." },
+                    { key: "guardian_contact_rating", type: "String", domain: "Family (20%)", values: "High, Moderate, Low, Unresponsive", desc: "Parental communication responsiveness to school advisories and conferences." },
+                    { key: "domestic_distress_flag", type: "Boolean", domain: "Family (20%)", values: "true / false", desc: "Documented domestic conflict, guardian illness, or unstable study setting." },
+
+                    // Health
+                    { key: "chronic_condition", type: "String", domain: "Health (20%)", values: "Asthma, Migraine, Epilepsy, None", desc: "Persistent medical diagnoses requiring clinic management and PE modifications." },
+                    { key: "avg_sleep_hours_per_night", type: "Float", domain: "Health (20%)", values: "2.0 – 12.0 hours", desc: "Nightly sleep duration. Chronic deprivation (<5h) causes severe cognitive fatigue." },
+                    { key: "quarterly_clinic_visits", type: "Integer", domain: "Health (20%)", values: "0 – 20 visits", desc: "Frequency of class disruptions for acute medical treatments at the school clinic." },
+                    { key: "daytime_fatigue_or_somnolence", type: "String", domain: "Health (20%)", values: "None, Occasional, Frequent", desc: "Classroom drowsiness and alertness flags logged by teachers." }
+                  ]
+                    .filter((item) => {
+                      const matchQuery =
+                        attributeSearch === "" ||
+                        item.key.toLowerCase().includes(attributeSearch.toLowerCase()) ||
+                        item.desc.toLowerCase().includes(attributeSearch.toLowerCase()) ||
+                        item.domain.toLowerCase().includes(attributeSearch.toLowerCase());
+                      const matchDomain =
+                        datasetDomainFilter === "all" ||
+                        item.domain.toLowerCase().includes(datasetDomainFilter.toLowerCase());
+                      return matchQuery && matchDomain;
+                    })
+                    .map((item, idx) => (
+                      <tr 
+                        key={item.key} 
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                      >
+                        <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">
+                          <code className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[#8B0014] dark:text-rose-400">
+                            {item.key}
+                          </code>
+                        </td>
+                        <td className="py-3 px-3 font-mono text-slate-500 dark:text-slate-400 text-[11px]">
+                          {item.type}
+                        </td>
+                        <td className="py-3 px-3 font-bold text-slate-700 dark:text-slate-300">
+                          {item.domain}
+                        </td>
+                        <td className="py-3 px-3 text-slate-600 dark:text-slate-300 text-[11px]">
+                          {item.values}
+                        </td>
+                        <td className="py-3 px-4 text-slate-600 dark:text-slate-300 text-xs">
+                          {item.desc}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 3: SYSTEM DESIGN SPECIFICATION */}
       {/* ========================================================================= */}
       {activeTab === "system" && (
         <div className="space-y-6">
