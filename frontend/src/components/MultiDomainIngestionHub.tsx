@@ -89,7 +89,40 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
     return { headers, rows };
   };
 
-  // Handle File Drag / Selection
+  const [detectedDomainInfo, setDetectedDomainInfo] = useState<string | null>(null);
+
+  // Helper: Detect domain from CSV column headers
+  const detectDomainFromHeaders = (headers: string[]): { domain: IngestionDomain | "master_cohort"; title: string } | null => {
+    const h = headers.map(x => x.toLowerCase().trim().replace(/^"|"$/g, ""));
+    
+    // Check for Master / Full 5-Domain Cohort export
+    if (h.includes("academic_score") && (h.includes("family_score") || h.includes("health_score") || h.includes("mental_health_score"))) {
+      return { domain: "master_cohort", title: "Full 5-Domain Master Cohort" };
+    }
+    // Check Academic SASS
+    if (h.includes("quarter_gpa") || h.includes("failing_subjects_count") || h.includes("days_absent") || h.includes("extracurricular_club")) {
+      return { domain: "academic", title: "Academic & Attendance (SASS)" };
+    }
+    // Check Mental Health
+    if (h.includes("gad7_anxiety_score") || h.includes("phq9_depression_score") || h.includes("stress_level_1_to_5") || h.includes("counselor_case_flag")) {
+      return { domain: "mental_health", title: "Mental Health & Psychological Wellbeing" };
+    }
+    // Check Financial
+    if (h.includes("overdue_installments") || h.includes("unpaid_balance_php") || h.includes("financial_stress_level_1_to_5") || h.includes("promissory_note_active")) {
+      return { domain: "financial", title: "Financial & Scholarship Records" };
+    }
+    // Check Family & Social
+    if (h.includes("ofw_parent_status") || h.includes("guardian_contact_rating") || h.includes("domestic_distress_flag") || h.includes("single_parent_status")) {
+      return { domain: "family", title: "Family Structure & Social Dynamics" };
+    }
+    // Check Clinic / Health
+    if (h.includes("quarterly_clinic_visits") || h.includes("medical_absences_count") || h.includes("chronic_condition") || h.includes("physical_activity_clearance")) {
+      return { domain: "health", title: "Physical Health & School Clinic Logs" };
+    }
+    return null;
+  };
+
+  // Handle File Drag / Selection with Intelligent Schema Auto-Detection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -97,6 +130,7 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
       setSuccessResult(null);
       setErrorMsg(null);
       setValidationErrors([]);
+      setDetectedDomainInfo(null);
       
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -104,10 +138,32 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           const content = event.target?.result as string;
           const { headers, rows } = parseCSV(content);
 
-          // Validate required headers
-          const missing = domainMeta.requiredColumns.filter(col => !headers.includes(col.toLowerCase()));
-          if (missing.length > 0) {
-            setValidationErrors([`Missing required CSV column(s): ${missing.join(", ")}`]);
+          if (rows.length === 0) {
+            setValidationErrors(["CSV file is empty or contains no data rows."]);
+            setParsedRows([]);
+            return;
+          }
+
+          // Auto-detect schema
+          const detected = detectDomainFromHeaders(headers);
+          
+          if (detected) {
+            if (detected.domain === "master_cohort") {
+              setDetectedDomainInfo("✨ Auto-detected Full 5-Domain Master Cohort dataset. All 5 domains will be updated simultaneously.");
+            } else {
+              if (detected.domain !== activeDomain) {
+                setActiveDomain(detected.domain);
+                setDetectedDomainInfo(`✨ Auto-detected Schema: ${detected.title}. Switched active tab automatically!`);
+              } else {
+                setDetectedDomainInfo(`✨ Verified Schema: ${detected.title}`);
+              }
+            }
+          }
+
+          // Check if at least LRN or student_name or student_id is present
+          const hasIdentifier = headers.includes("lrn") || headers.includes("student_id") || headers.includes("student_name") || headers.includes("full_name");
+          if (!hasIdentifier) {
+            setValidationErrors(["CSV must contain at least an 'lrn', 'student_id', or 'student_name' column to identify students."]);
             setParsedRows([]);
             return;
           }
@@ -143,14 +199,17 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
       }
 
       // 2. Perform Client-Side AHP Multi-Factor Recalculation across 500-student database
+      // 2. Perform Client-Side AHP Multi-Factor Recalculation across 500-student database
       let updatedCount = 0;
       const baseStudents = getActiveStudentDataset();
 
       const updatedStudentList = baseStudents.map(student => {
-        // Find matching row in parsed CSV by LRN or Name
+        // Find matching row in parsed CSV by LRN or Name or ID
         const rowMatch = parsedRows.find(r => 
-          (r.lrn && r.lrn.trim() === student.lrn.trim()) ||
-          (r.student_name && r.student_name.toLowerCase().trim() === student.full_name.toLowerCase().trim())
+          (r.lrn && String(r.lrn).trim() === String(student.lrn).trim()) ||
+          (r.student_id && String(r.student_id).trim() === String(student.id)) ||
+          (r.student_name && r.student_name.toLowerCase().trim() === student.full_name.toLowerCase().trim()) ||
+          (r.full_name && r.full_name.toLowerCase().trim() === student.full_name.toLowerCase().trim())
         );
 
         if (!rowMatch) return student;
@@ -159,7 +218,25 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
         const newScores = { ...student.domain_scores };
         const newSass = { ...student.sass_metrics };
 
-        if (activeDomain === "academic") {
+        // 1. Direct Domain Scores (Master Cohort / Export CSV format)
+        if (rowMatch.academic_score !== undefined && rowMatch.academic_score !== "") {
+          newScores.academic = parseFloat(rowMatch.academic_score) || newScores.academic;
+        }
+        if (rowMatch.mental_health_score !== undefined && rowMatch.mental_health_score !== "") {
+          newScores.mental_health = parseFloat(rowMatch.mental_health_score) || newScores.mental_health;
+        }
+        if (rowMatch.financial_score !== undefined && rowMatch.financial_score !== "") {
+          newScores.financial = parseFloat(rowMatch.financial_score) || newScores.financial;
+        }
+        if (rowMatch.family_score !== undefined && rowMatch.family_score !== "") {
+          newScores.family = parseFloat(rowMatch.family_score) || newScores.family;
+        }
+        if (rowMatch.health_score !== undefined && rowMatch.health_score !== "") {
+          newScores.health = parseFloat(rowMatch.health_score) || newScores.health;
+        }
+
+        // 2. SASS Academic & Attendance Attributes
+        if (rowMatch.quarter_gpa !== undefined && rowMatch.quarter_gpa !== "") {
           const gpa = parseFloat(rowMatch.quarter_gpa) || student.sass_metrics.gpa;
           const failing = parseInt(rowMatch.failing_subjects_count, 10) || 0;
           const absent = parseInt(rowMatch.days_absent, 10) || 0;
@@ -170,6 +247,10 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           newSass.days_absent = absent;
           newSass.incomplete_requirements_count = incomplete;
 
+          if (rowMatch.extracurricular_club) newSass.extracurricular_club = rowMatch.extracurricular_club;
+          if (rowMatch.club_participation_level) newSass.club_participation_level = rowMatch.club_participation_level;
+          if (rowMatch.hobbies_interests) newSass.hobbies_interests = rowMatch.hobbies_interests;
+
           // Compute deterministic Academic Risk Score (0-100)
           const gpaPenalty = Math.max(0, (85 - gpa) * 3);
           const failPenalty = failing * 18;
@@ -177,7 +258,8 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           newScores.academic = Math.min(100, Math.max(5, Math.round(gpaPenalty + failPenalty + absentPenalty)));
         }
 
-        if (activeDomain === "mental_health") {
+        // 3. Mental Health & Psychometric Attributes
+        if (rowMatch.gad7_anxiety_score !== undefined || rowMatch.phq9_depression_score !== undefined || rowMatch.stress_level_1_to_5 !== undefined) {
           const gad7 = parseFloat(rowMatch.gad7_anxiety_score) || 4;
           const phq9 = parseFloat(rowMatch.phq9_depression_score) || 3;
           const stress = parseFloat(rowMatch.stress_level_1_to_5) || 2;
@@ -187,7 +269,6 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           const isAdaptive = rowMatch.coping_adaptiveness?.toLowerCase().includes("adaptive");
           const resilience = parseFloat(rowMatch.resilience_score_1_to_5) || 3;
 
-          // GAD-7 (max 21) + PHQ-9 (max 27) scaled + stress + coping + resilience
           let psychRisk = ((gad7 / 21) * 0.45 + (phq9 / 27) * 0.45) * 75 + (stress * 4);
           if (counselorFlag) psychRisk += 12;
           if (anhedonia) psychRisk += 8;
@@ -199,7 +280,8 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           newScores.mental_health = Math.min(100, Math.max(5, Math.round(psychRisk)));
         }
 
-        if (activeDomain === "financial") {
+        // 4. Financial Hardship Attributes
+        if (rowMatch.overdue_installments !== undefined || rowMatch.unpaid_balance_php !== undefined || rowMatch.financial_stress_level_1_to_5 !== undefined) {
           const overdue = parseInt(rowMatch.overdue_installments, 10) || 0;
           const balance = parseFloat(rowMatch.unpaid_balance_php) || 0;
           const promissory = rowMatch.promissory_note_active?.toLowerCase() === "true";
@@ -209,25 +291,24 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           const allowanceInadequate = rowMatch.daily_allowance_adequacy?.toLowerCase().includes("inadequate");
           const isWorkingStudent = rowMatch.student_part_time_work_status?.toLowerCase().includes("working student");
 
-          // Blend institutional debt (accounting) + subjective family stress + hardship indicators
           let finRisk = 10;
           finRisk += (overdue * 16);
           if (balance > 15000) finRisk += 20;
           else if (balance > 5000) finRisk += 10;
           if (promissory) finRisk += 12;
 
-          // Subjective Financial Stress (1-5)
           finRisk += (finStress * 6);
           if (is4Ps) finRisk += 10;
           if (income < 12000) finRisk += 12;
           else if (income < 25000) finRisk += 6;
           if (allowanceInadequate) finRisk += 10;
-          if (isWorkingStudent) finRisk += 10; // High fatigue & reduced study time
+          if (isWorkingStudent) finRisk += 10;
 
           newScores.financial = Math.min(100, Math.max(5, Math.round(finRisk)));
         }
 
-        if (activeDomain === "family") {
+        // 5. Family & Social Dynamics
+        if (rowMatch.ofw_parent_status !== undefined || rowMatch.guardian_contact_rating !== undefined || rowMatch.domestic_distress_flag !== undefined) {
           const ofw = rowMatch.ofw_parent_status?.toLowerCase() || "";
           const guardianRating = rowMatch.guardian_contact_rating?.toLowerCase() || "";
           const distress = rowMatch.domestic_distress_flag?.toLowerCase() === "true";
@@ -246,16 +327,17 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           else if (guardianRating === "moderate") famRisk += 8;
 
           if (distress) famRisk += 25;
-          if (isEldest) famRisk += 8; // Higher pressure / sibling caretaking
-          if (is4Ps) famRisk += 10;   // Socioeconomic hardship proxy
-          if (singleParent) famRisk += 10; // Reduced supervision / solo provider strain
+          if (isEldest) famRisk += 8;
+          if (is4Ps) famRisk += 10;
+          if (singleParent) famRisk += 10;
           if (!ptaAttended) famRisk += 8;
           if (living.includes("relatives") || living.includes("boarding") || living.includes("independent")) famRisk += 12;
 
           newScores.family = Math.min(100, Math.max(5, famRisk));
         }
 
-        if (activeDomain === "health") {
+        // 6. Clinic & Health Records
+        if (rowMatch.quarterly_clinic_visits !== undefined || rowMatch.medical_absences_count !== undefined || rowMatch.chronic_condition !== undefined) {
           const visits = parseInt(rowMatch.quarterly_clinic_visits, 10) || 0;
           const medAbsences = parseInt(rowMatch.medical_absences_count, 10) || 0;
           const chronic = rowMatch.chronic_condition?.toLowerCase() !== "none" && rowMatch.chronic_condition !== "" && rowMatch.chronic_condition !== undefined;
@@ -280,7 +362,11 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           newScores.health = Math.min(100, Math.max(5, Math.round(healthRisk)));
         }
 
-        return student;
+        return {
+          ...student,
+          domain_scores: newScores,
+          sass_metrics: newSass
+        };
       });
 
       const finalCalculatedList = recalculateAHPForDataset(updatedStudentList);
@@ -579,6 +665,11 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
                   Must follow the standard schema with <code className="font-mono font-bold text-slate-700">lrn</code> and <code className="font-mono font-bold text-slate-700">student_name</code>
                 </p>
               </div>
+              {detectedDomainInfo && (
+                <div className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 shadow-2xs">
+                  {detectedDomainInfo}
+                </div>
+              )}
               {file && (
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                   ✓ {parsedRows.length} valid records ready for ingestion
