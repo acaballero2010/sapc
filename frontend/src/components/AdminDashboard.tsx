@@ -44,12 +44,14 @@ import {
   importFullCohortCSV,
   getActiveRiskWeights,
   saveRiskWeights,
-  recalculateAHPForDataset
+  recalculateAHPForDataset,
+  subscribeToStudentDataset,
+  loadStudentDatasetFromFirestore
 } from "@/lib/dataset-store";
 import { useDragScroll } from "@/lib/useDragScroll";
 import type { StudentRecord } from "@/data/students500";
 
-// Tab types for all 22 Admin Modules
+// Tab types for all Admin Modules
 export type AdminTabType = 
   | "dashboard"
   | "platform_settings"
@@ -72,7 +74,11 @@ export type AdminTabType =
   | "knowledge_base"
   | "verify_assessments"
   | "export_credentials"
-  | "export_import_history";
+  | "export_import_history"
+  | "audit_logs"
+  | "data_integrity"
+  | "system_health"
+  | "admin_actions";
 
 export const AdminDashboard: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -84,12 +90,27 @@ export const AdminDashboard: React.FC = () => {
   const [students, setStudents] = useState<StudentRecord[]>([]);
 
   useEffect(() => {
+    // 1. Initial state from local store
     setStudents(getActiveStudentDataset());
+
+    // 2. Load latest from Firestore cloud
+    loadStudentDatasetFromFirestore().then((all) => {
+      if (all && all.length > 0) setStudents(all);
+    });
+
+    // 3. Real-time multi-user subscription
+    const unsubscribe = subscribeToStudentDataset((all) => {
+      setStudents(all);
+    });
+
     const handleDatasetUpdate = () => {
       setStudents(getActiveStudentDataset());
     };
     window.addEventListener("sapc:dataset-updated", handleDatasetUpdate);
-    return () => window.removeEventListener("sapc:dataset-updated", handleDatasetUpdate);
+    return () => {
+      window.removeEventListener("sapc:dataset-updated", handleDatasetUpdate);
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
   }, []);
 
   const cohortStats = useMemo(() => computeCohortAggregates(students), [students]);
@@ -121,27 +142,27 @@ export const AdminDashboard: React.FC = () => {
     }
     saveRiskWeights(riskWeights);
     const recalculated = recalculateAHPForDataset(students, riskWeights);
-    saveStudentDataset(recalculated);
+    saveStudentDataset(recalculated, true);
     setStudents(recalculated);
-    showToast(`Successfully recalculated AHP risk scores across ${recalculated.length} students.`);
+    showToast(`Successfully recalculated AHP risk scores across ${recalculated.length} students with Cloud sync.`);
   };
 
   // Handle full CSV import
-  const handleFullCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFullCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         try {
           const content = event.target?.result as string;
-          const result = importFullCohortCSV(content);
+          const result = await importFullCohortCSV(content);
           if (result.success) {
-            showToast(`Imported and recalculated ${result.count} students from ${file.name}.`);
+            showToast(`Imported and synced ${result.count} students from ${file.name} to Cloud Firestore.`);
           } else {
-            showToast(`Import failed: ${result.error || "Invalid CSV"}`);
+            showToast(`Import Error: ${result.error}`);
           }
         } catch {
-          showToast("Failed to process CSV file.");
+          showToast("Failed to parse CSV file.");
         }
       };
       reader.readAsText(file);

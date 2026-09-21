@@ -17,6 +17,12 @@ import { INGESTION_DOMAINS, IngestionDomain, DomainMetadata } from "@/data/sampl
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { 
+  getActiveStudentDataset, 
+  saveStudentDataset, 
+  logCloudAuditEvent, 
+  recalculateAHPForDataset 
+} from "@/lib/dataset-store";
 
 interface MultiDomainIngestionHubProps {
   onSuccess?: () => void;
@@ -138,197 +144,162 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
 
       // 2. Perform Client-Side AHP Multi-Factor Recalculation across 500-student database
       let updatedCount = 0;
+      const baseStudents = getActiveStudentDataset();
+
+      const updatedStudentList = baseStudents.map(student => {
+        // Find matching row in parsed CSV by LRN or Name
+        const rowMatch = parsedRows.find(r => 
+          (r.lrn && r.lrn.trim() === student.lrn.trim()) ||
+          (r.student_name && r.student_name.toLowerCase().trim() === student.full_name.toLowerCase().trim())
+        );
+
+        if (!rowMatch) return student;
+        updatedCount++;
+
+        const newScores = { ...student.domain_scores };
+        const newSass = { ...student.sass_metrics };
+
+        if (activeDomain === "academic") {
+          const gpa = parseFloat(rowMatch.quarter_gpa) || student.sass_metrics.gpa;
+          const failing = parseInt(rowMatch.failing_subjects_count, 10) || 0;
+          const absent = parseInt(rowMatch.days_absent, 10) || 0;
+          const incomplete = parseInt(rowMatch.incomplete_requirements_count, 10) || 0;
+
+          newSass.gpa = gpa;
+          newSass.failing_subjects_count = failing;
+          newSass.days_absent = absent;
+          newSass.incomplete_requirements_count = incomplete;
+
+          // Compute deterministic Academic Risk Score (0-100)
+          const gpaPenalty = Math.max(0, (85 - gpa) * 3);
+          const failPenalty = failing * 18;
+          const absentPenalty = Math.min(30, absent * 2.5);
+          newScores.academic = Math.min(100, Math.max(5, Math.round(gpaPenalty + failPenalty + absentPenalty)));
+        }
+
+        if (activeDomain === "mental_health") {
+          const gad7 = parseFloat(rowMatch.gad7_anxiety_score) || 4;
+          const phq9 = parseFloat(rowMatch.phq9_depression_score) || 3;
+          const stress = parseFloat(rowMatch.stress_level_1_to_5) || 2;
+          const counselorFlag = rowMatch.counselor_case_flag?.toLowerCase() === "yes" || rowMatch.counselor_case_flag?.toLowerCase() === "true";
+          const anhedonia = rowMatch.anhedonia_and_withdrawal_flag?.toLowerCase() === "true";
+          const isMaladaptive = rowMatch.coping_adaptiveness?.toLowerCase().includes("maladaptive");
+          const isAdaptive = rowMatch.coping_adaptiveness?.toLowerCase().includes("adaptive");
+          const resilience = parseFloat(rowMatch.resilience_score_1_to_5) || 3;
+
+          // GAD-7 (max 21) + PHQ-9 (max 27) scaled + stress + coping + resilience
+          let psychRisk = ((gad7 / 21) * 0.45 + (phq9 / 27) * 0.45) * 75 + (stress * 4);
+          if (counselorFlag) psychRisk += 12;
+          if (anhedonia) psychRisk += 8;
+          if (isMaladaptive) psychRisk += 8;
+          else if (isAdaptive) psychRisk -= 5;
+          if (resilience <= 2) psychRisk += 6;
+          else if (resilience >= 4) psychRisk -= 5;
+
+          newScores.mental_health = Math.min(100, Math.max(5, Math.round(psychRisk)));
+        }
+
+        if (activeDomain === "financial") {
+          const overdue = parseInt(rowMatch.overdue_installments, 10) || 0;
+          const balance = parseFloat(rowMatch.unpaid_balance_php) || 0;
+          const promissory = rowMatch.promissory_note_active?.toLowerCase() === "true";
+          const finStress = parseFloat(rowMatch.financial_stress_level_1_to_5) || 2;
+          const is4Ps = rowMatch.is_4ps_beneficiary?.toLowerCase() === "true";
+          const income = parseFloat(rowMatch.monthly_household_income_php) || 30000;
+          const allowanceInadequate = rowMatch.daily_allowance_adequacy?.toLowerCase().includes("inadequate");
+          const isWorkingStudent = rowMatch.student_part_time_work_status?.toLowerCase().includes("working student");
+
+          // Blend institutional debt (accounting) + subjective family stress + hardship indicators
+          let finRisk = 10;
+          finRisk += (overdue * 16);
+          if (balance > 15000) finRisk += 20;
+          else if (balance > 5000) finRisk += 10;
+          if (promissory) finRisk += 12;
+
+          // Subjective Financial Stress (1-5)
+          finRisk += (finStress * 6);
+          if (is4Ps) finRisk += 10;
+          if (income < 12000) finRisk += 12;
+          else if (income < 25000) finRisk += 6;
+          if (allowanceInadequate) finRisk += 10;
+          if (isWorkingStudent) finRisk += 10; // High fatigue & reduced study time
+
+          newScores.financial = Math.min(100, Math.max(5, Math.round(finRisk)));
+        }
+
+        if (activeDomain === "family") {
+          const ofw = rowMatch.ofw_parent_status?.toLowerCase() || "";
+          const guardianRating = rowMatch.guardian_contact_rating?.toLowerCase() || "";
+          const distress = rowMatch.domestic_distress_flag?.toLowerCase() === "true";
+          const isEldest = rowMatch.is_eldest_child?.toLowerCase() === "true";
+          const is4Ps = rowMatch.is_4ps_beneficiary?.toLowerCase() === "true";
+          const singleParent = rowMatch.single_parent_status?.toLowerCase() === "true";
+          const ptaAttended = rowMatch.parent_conference_attended?.toLowerCase() === "true";
+          const living = rowMatch.living_arrangement?.toLowerCase() || "";
+
+          let famRisk = 10;
+          if (ofw.includes("both")) famRisk += 20;
+          else if (ofw.includes("one") || ofw.includes("father") || ofw.includes("mother")) famRisk += 12;
+
+          if (guardianRating === "unresponsive") famRisk += 25;
+          else if (guardianRating === "low") famRisk += 18;
+          else if (guardianRating === "moderate") famRisk += 8;
+
+          if (distress) famRisk += 25;
+          if (isEldest) famRisk += 8; // Higher pressure / sibling caretaking
+          if (is4Ps) famRisk += 10;   // Socioeconomic hardship proxy
+          if (singleParent) famRisk += 10; // Reduced supervision / solo provider strain
+          if (!ptaAttended) famRisk += 8;
+          if (living.includes("relatives") || living.includes("boarding") || living.includes("independent")) famRisk += 12;
+
+          newScores.family = Math.min(100, Math.max(5, famRisk));
+        }
+
+        if (activeDomain === "health") {
+          const visits = parseInt(rowMatch.quarterly_clinic_visits, 10) || 0;
+          const medAbsences = parseInt(rowMatch.medical_absences_count, 10) || 0;
+          const chronic = rowMatch.chronic_condition?.toLowerCase() !== "none" && rowMatch.chronic_condition !== "" && rowMatch.chronic_condition !== undefined;
+          const cleared = rowMatch.physical_activity_clearance?.toLowerCase() === "cleared";
+          const bmi = rowMatch.bmi_category?.toLowerCase() || "";
+          const skipsBreakfast = rowMatch.breakfast_consistency?.toLowerCase().includes("skips") || rowMatch.daily_meal_frequency?.toLowerCase().includes("skips");
+          const sleepHours = parseFloat(rowMatch.avg_sleep_hours_per_night) || 7.5;
+          const daytimeFatigue = rowMatch.daytime_fatigue_or_somnolence?.toLowerCase().includes("frequent");
+
+          let healthRisk = 10;
+          if (chronic) healthRisk += 20;
+          if (visits >= 3) healthRisk += 18;
+          else if (visits >= 1) healthRisk += 8;
+          if (medAbsences >= 3) healthRisk += 15;
+          if (!cleared) healthRisk += 12;
+          if (bmi.includes("underweight") || bmi.includes("malnourished")) healthRisk += 12;
+          if (skipsBreakfast) healthRisk += 8;
+          if (sleepHours < 5.0) healthRisk += 18;
+          else if (sleepHours < 6.5) healthRisk += 10;
+          if (daytimeFatigue) healthRisk += 10;
+
+          newScores.health = Math.min(100, Math.max(5, Math.round(healthRisk)));
+        }
+
+        return student;
+      });
+
+      const finalCalculatedList = recalculateAHPForDataset(updatedStudentList);
+      
+      // Save locally & sync to Firebase Cloud Firestore
+      saveStudentDataset(finalCalculatedList, true);
+
+      // Log RA 10173 Audit Record in Firestore & local audit trail
+      await logCloudAuditEvent({
+        actor_name: user?.full_name || "Authorized Staff",
+        actor_role: user?.role || "guidance_counselor",
+        action: "BATCH_DATA_INGESTION_CSV",
+        target_resource: `Domain: ${domainMeta.title}`,
+        details: `Processed ${parsedRows.length} records. Updated ${updatedCount || parsedRows.length} cohort student risk profiles with cloud Firestore sync. Academic Year: ${academicYear}, Quarter: ${quarter}.`,
+        ip_address: "127.0.0.1 (Campus LAN)"
+      });
+
+      // Dispatch window event for live dashboard reactivity
       if (typeof window !== "undefined") {
-        const storedCustomStudents = localStorage.getItem("sapc_custom_student_data");
-        const baseStudents: StudentRecord[] = storedCustomStudents ? JSON.parse(storedCustomStudents) : SAPC_500_STUDENTS;
-
-        const updatedStudentList = baseStudents.map(student => {
-          // Find matching row in parsed CSV by LRN or Name
-          const rowMatch = parsedRows.find(r => 
-            (r.lrn && r.lrn.trim() === student.lrn.trim()) ||
-            (r.student_name && r.student_name.toLowerCase().trim() === student.full_name.toLowerCase().trim())
-          );
-
-          if (!rowMatch) return student;
-          updatedCount++;
-
-          const newScores = { ...student.domain_scores };
-          const newSass = { ...student.sass_metrics };
-
-          if (activeDomain === "academic") {
-            const gpa = parseFloat(rowMatch.quarter_gpa) || student.sass_metrics.gpa;
-            const failing = parseInt(rowMatch.failing_subjects_count, 10) || 0;
-            const absent = parseInt(rowMatch.days_absent, 10) || 0;
-            const incomplete = parseInt(rowMatch.incomplete_requirements_count, 10) || 0;
-
-            newSass.gpa = gpa;
-            newSass.failing_subjects_count = failing;
-            newSass.days_absent = absent;
-            newSass.incomplete_requirements_count = incomplete;
-
-            // Compute deterministic Academic Risk Score (0-100)
-            const gpaPenalty = Math.max(0, (85 - gpa) * 3);
-            const failPenalty = failing * 18;
-            const absentPenalty = Math.min(30, absent * 2.5);
-            newScores.academic = Math.min(100, Math.max(5, Math.round(gpaPenalty + failPenalty + absentPenalty)));
-          }
-
-          if (activeDomain === "mental_health") {
-            const gad7 = parseFloat(rowMatch.gad7_anxiety_score) || 4;
-            const phq9 = parseFloat(rowMatch.phq9_depression_score) || 3;
-            const stress = parseFloat(rowMatch.stress_level_1_to_5) || 2;
-            const counselorFlag = rowMatch.counselor_case_flag?.toLowerCase() === "yes" || rowMatch.counselor_case_flag?.toLowerCase() === "true";
-            const anhedonia = rowMatch.anhedonia_and_withdrawal_flag?.toLowerCase() === "true";
-            const isMaladaptive = rowMatch.coping_adaptiveness?.toLowerCase().includes("maladaptive");
-            const isAdaptive = rowMatch.coping_adaptiveness?.toLowerCase().includes("adaptive");
-            const resilience = parseFloat(rowMatch.resilience_score_1_to_5) || 3;
-
-            // GAD-7 (max 21) + PHQ-9 (max 27) scaled + stress + coping + resilience
-            let psychRisk = ((gad7 / 21) * 0.45 + (phq9 / 27) * 0.45) * 75 + (stress * 4);
-            if (counselorFlag) psychRisk += 12;
-            if (anhedonia) psychRisk += 8;
-            if (isMaladaptive) psychRisk += 8;
-            else if (isAdaptive) psychRisk -= 5;
-            if (resilience <= 2) psychRisk += 6;
-            else if (resilience >= 4) psychRisk -= 5;
-
-            newScores.mental_health = Math.min(100, Math.max(5, Math.round(psychRisk)));
-          }
-
-          if (activeDomain === "financial") {
-            const overdue = parseInt(rowMatch.overdue_installments, 10) || 0;
-            const balance = parseFloat(rowMatch.unpaid_balance_php) || 0;
-            const promissory = rowMatch.promissory_note_active?.toLowerCase() === "true";
-            const finStress = parseFloat(rowMatch.financial_stress_level_1_to_5) || 2;
-            const is4Ps = rowMatch.is_4ps_beneficiary?.toLowerCase() === "true";
-            const income = parseFloat(rowMatch.monthly_household_income_php) || 30000;
-            const allowanceInadequate = rowMatch.daily_allowance_adequacy?.toLowerCase().includes("inadequate");
-            const isWorkingStudent = rowMatch.student_part_time_work_status?.toLowerCase().includes("working student");
-
-            // Blend institutional debt (accounting) + subjective family stress + hardship indicators
-            let finRisk = 10;
-            finRisk += (overdue * 16);
-            if (balance > 15000) finRisk += 20;
-            else if (balance > 5000) finRisk += 10;
-            if (promissory) finRisk += 12;
-
-            // Subjective Financial Stress (1-5)
-            finRisk += (finStress * 6);
-            if (is4Ps) finRisk += 10;
-            if (income < 12000) finRisk += 12;
-            else if (income < 25000) finRisk += 6;
-            if (allowanceInadequate) finRisk += 10;
-            if (isWorkingStudent) finRisk += 10; // High fatigue & reduced study time
-
-            newScores.financial = Math.min(100, Math.max(5, Math.round(finRisk)));
-          }
-
-          if (activeDomain === "family") {
-            const ofw = rowMatch.ofw_parent_status?.toLowerCase() || "";
-            const guardianRating = rowMatch.guardian_contact_rating?.toLowerCase() || "";
-            const distress = rowMatch.domestic_distress_flag?.toLowerCase() === "true";
-            const isEldest = rowMatch.is_eldest_child?.toLowerCase() === "true";
-            const is4Ps = rowMatch.is_4ps_beneficiary?.toLowerCase() === "true";
-            const singleParent = rowMatch.single_parent_status?.toLowerCase() === "true";
-            const ptaAttended = rowMatch.parent_conference_attended?.toLowerCase() === "true";
-            const living = rowMatch.living_arrangement?.toLowerCase() || "";
-
-            let famRisk = 10;
-            if (ofw.includes("both")) famRisk += 20;
-            else if (ofw.includes("one") || ofw.includes("father") || ofw.includes("mother")) famRisk += 12;
-
-            if (guardianRating === "unresponsive") famRisk += 25;
-            else if (guardianRating === "low") famRisk += 18;
-            else if (guardianRating === "moderate") famRisk += 8;
-
-            if (distress) famRisk += 25;
-            if (isEldest) famRisk += 8; // Higher pressure / sibling caretaking
-            if (is4Ps) famRisk += 10;   // Socioeconomic hardship proxy
-            if (singleParent) famRisk += 10; // Reduced supervision / solo provider strain
-            if (!ptaAttended) famRisk += 8;
-            if (living.includes("relatives") || living.includes("boarding") || living.includes("independent")) famRisk += 12;
-
-            newScores.family = Math.min(100, Math.max(5, famRisk));
-          }
-
-          if (activeDomain === "health") {
-            const visits = parseInt(rowMatch.quarterly_clinic_visits, 10) || 0;
-            const medAbsences = parseInt(rowMatch.medical_absences_count, 10) || 0;
-            const chronic = rowMatch.chronic_condition?.toLowerCase() !== "none" && rowMatch.chronic_condition !== "" && rowMatch.chronic_condition !== undefined;
-            const cleared = rowMatch.physical_activity_clearance?.toLowerCase() === "cleared";
-            const bmi = rowMatch.bmi_category?.toLowerCase() || "";
-            const skipsBreakfast = rowMatch.breakfast_consistency?.toLowerCase().includes("skips") || rowMatch.daily_meal_frequency?.toLowerCase().includes("skips");
-            const sleepHours = parseFloat(rowMatch.avg_sleep_hours_per_night) || 7.5;
-            const daytimeFatigue = rowMatch.daytime_fatigue_or_somnolence?.toLowerCase().includes("frequent");
-
-            let healthRisk = 10;
-            if (chronic) healthRisk += 20;
-            if (visits >= 3) healthRisk += 18;
-            else if (visits >= 1) healthRisk += 8;
-            if (medAbsences >= 3) healthRisk += 15;
-            if (!cleared) healthRisk += 12;
-            if (bmi.includes("underweight") || bmi.includes("malnourished")) healthRisk += 12;
-            if (skipsBreakfast) healthRisk += 8;
-            if (sleepHours < 5.0) healthRisk += 18;
-            else if (sleepHours < 6.5) healthRisk += 10;
-            if (daytimeFatigue) healthRisk += 10;
-
-            newScores.health = Math.min(100, Math.max(5, Math.round(healthRisk)));
-          }
-
-          // Composite AHP synthesis (Psychometrician Validated Baseline): 
-          // 0.30 Academic + 0.20 Family + 0.20 Health + 0.15 Mental Health + 0.15 Financial
-          const composite = (
-            newScores.academic * 0.30 +
-            newScores.family * 0.20 +
-            newScores.health * 0.20 +
-            newScores.mental_health * 0.15 +
-            newScores.financial * 0.15
-          );
-
-          const compositeRounded = Math.round(composite * 10) / 10;
-          const tier: "high" | "medium" | "low" = compositeRounded >= 70 ? "high" : compositeRounded >= 40 ? "medium" : "low";
-
-          // Determine primary risk driver
-          const drivers = [
-            { name: "Academic", val: newScores.academic },
-            { name: "Family", val: newScores.family },
-            { name: "Health", val: newScores.health },
-            { name: "Mental Health", val: newScores.mental_health },
-            { name: "Financial", val: newScores.financial }
-          ].sort((a, b) => b.val - a.val);
-
-          const primaryDriver = drivers[0].val >= 40 ? drivers[0].name : "Academic";
-
-          return {
-            ...student,
-            domain_scores: newScores,
-            sass_metrics: newSass,
-            latest_risk_score: compositeRounded,
-            latest_risk_tier: tier,
-            primary_risk_driver: primaryDriver
-          };
-        });
-
-        localStorage.setItem("sapc_custom_student_data", JSON.stringify(updatedStudentList));
-        window.dispatchEvent(new CustomEvent("sapc:dataset-updated", { detail: { count: updatedStudentList.length } }));
-
-        // Log RA 10173 Audit Record
-        const storedLogs = localStorage.getItem("sapc_audit_logs");
-        const currentLogs = storedLogs ? JSON.parse(storedLogs) : [];
-        const newLogEntry = {
-          id: `audit-${Date.now()}`,
-          timestamp: new Date().toISOString(),
-          actor_name: user?.full_name || "Authorized Staff",
-          actor_role: user?.role || "guidance_counselor",
-          action: "BATCH_DATA_INGESTION_CSV",
-          target_resource: `Domain: ${domainMeta.title}`,
-          details: `Processed ${parsedRows.length} records. Updated ${updatedCount || parsedRows.length} cohort student risk profiles. Academic Year: ${academicYear}, Quarter: ${quarter}.`,
-          ip_address: "127.0.0.1 (Campus LAN)"
-        };
-        localStorage.setItem("sapc_audit_logs", JSON.stringify([newLogEntry, ...currentLogs]));
-
-        // Dispatch window event for live dashboard reactivity
         window.dispatchEvent(new CustomEvent("sapc:data-ingested", { detail: { domain: activeDomain } }));
       }
 
@@ -349,71 +320,75 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
   };
 
   // Manual Quick Entry Submission
-  const handleSaveManualEntry = () => {
+  const handleSaveManualEntry = async () => {
     if (!selectedStudent) return;
 
+    const baseStudents = getActiveStudentDataset();
+
+    const updated = baseStudents.map(s => {
+      if (s.id !== selectedStudent.id) return s;
+
+      const scores = { ...s.domain_scores };
+      const sass = { ...s.sass_metrics };
+
+      if (activeDomain === "academic") {
+        if (manualFormData.quarter_gpa) sass.gpa = parseFloat(manualFormData.quarter_gpa);
+        if (manualFormData.failing_count !== undefined) sass.failing_subjects_count = parseInt(manualFormData.failing_count, 10);
+        if (manualFormData.days_absent !== undefined) sass.days_absent = parseInt(manualFormData.days_absent, 10);
+        
+        const gpaPenalty = Math.max(0, (85 - sass.gpa) * 3);
+        scores.academic = Math.min(100, Math.max(5, Math.round(gpaPenalty + (sass.failing_subjects_count * 18) + (sass.days_absent * 2.5))));
+      }
+
+      if (activeDomain === "mental_health") {
+        const gad7 = parseFloat(manualFormData.gad7 || 5);
+        const phq9 = parseFloat(manualFormData.phq9 || 4);
+        const stress = parseFloat(manualFormData.stress || 2);
+        scores.mental_health = Math.min(100, Math.max(5, Math.round(((gad7 / 21) * 0.5 + (phq9 / 27) * 0.5) * 80 + (stress * 4))));
+      }
+
+      if (activeDomain === "financial") {
+        const overdue = parseInt(manualFormData.overdue || 0, 10);
+        scores.financial = Math.min(100, Math.max(5, overdue * 25 + (manualFormData.balance > 10000 ? 30 : 10)));
+      }
+
+      if (activeDomain === "family") {
+        let famRisk = 10;
+        if (manualFormData.ofw === "both") famRisk += 25;
+        if (manualFormData.guardianRating === "low") famRisk += 30;
+        if (manualFormData.distress) famRisk += 30;
+        scores.family = Math.min(100, Math.max(5, famRisk));
+      }
+
+      if (activeDomain === "health") {
+        const visits = parseInt(manualFormData.clinicVisits || 0, 10);
+        scores.health = Math.min(100, Math.max(5, visits * 15 + (manualFormData.chronic ? 25 : 0)));
+      }
+
+      return {
+        ...s,
+        domain_scores: scores,
+        sass_metrics: sass
+      };
+    });
+
+    const finalCalculatedList = recalculateAHPForDataset(updated);
+    saveStudentDataset(finalCalculatedList, true);
+
+    await logCloudAuditEvent({
+      actor_name: user?.full_name || "Authorized Staff",
+      actor_role: user?.role || "guidance_counselor",
+      action: "INDIVIDUAL_STUDENT_METRIC_UPDATE",
+      target_resource: `Student: ${selectedStudent.full_name} (${selectedStudent.lrn})`,
+      details: `Updated ${domainMeta.title} metrics with real-time cloud sync.`,
+      ip_address: "127.0.0.1 (Campus LAN)"
+    });
+
     if (typeof window !== "undefined") {
-      const storedCustomStudents = localStorage.getItem("sapc_custom_student_data");
-      const baseStudents: StudentRecord[] = storedCustomStudents ? JSON.parse(storedCustomStudents) : SAPC_500_STUDENTS;
-
-      const updated = baseStudents.map(s => {
-        if (s.id !== selectedStudent.id) return s;
-
-        const scores = { ...s.domain_scores };
-        const sass = { ...s.sass_metrics };
-
-        if (activeDomain === "academic") {
-          if (manualFormData.quarter_gpa) sass.gpa = parseFloat(manualFormData.quarter_gpa);
-          if (manualFormData.failing_count !== undefined) sass.failing_subjects_count = parseInt(manualFormData.failing_count, 10);
-          if (manualFormData.days_absent !== undefined) sass.days_absent = parseInt(manualFormData.days_absent, 10);
-          
-          const gpaPenalty = Math.max(0, (85 - sass.gpa) * 3);
-          scores.academic = Math.min(100, Math.max(5, Math.round(gpaPenalty + (sass.failing_subjects_count * 18) + (sass.days_absent * 2.5))));
-        }
-
-        if (activeDomain === "mental_health") {
-          const gad7 = parseFloat(manualFormData.gad7 || 5);
-          const phq9 = parseFloat(manualFormData.phq9 || 4);
-          const stress = parseFloat(manualFormData.stress || 2);
-          scores.mental_health = Math.min(100, Math.max(5, Math.round(((gad7 / 21) * 0.5 + (phq9 / 27) * 0.5) * 80 + (stress * 4))));
-        }
-
-        if (activeDomain === "financial") {
-          const overdue = parseInt(manualFormData.overdue || 0, 10);
-          scores.financial = Math.min(100, Math.max(5, overdue * 25 + (manualFormData.balance > 10000 ? 30 : 10)));
-        }
-
-        if (activeDomain === "family") {
-          let famRisk = 10;
-          if (manualFormData.ofw === "both") famRisk += 25;
-          if (manualFormData.guardianRating === "low") famRisk += 30;
-          if (manualFormData.distress) famRisk += 30;
-          scores.family = Math.min(100, Math.max(5, famRisk));
-        }
-
-        if (activeDomain === "health") {
-          const visits = parseInt(manualFormData.clinicVisits || 0, 10);
-          scores.health = Math.min(100, Math.max(5, visits * 15 + (manualFormData.chronic ? 25 : 0)));
-        }
-
-        const composite = scores.academic * 0.35 + scores.mental_health * 0.25 + scores.financial * 0.15 + scores.family * 0.15 + scores.health * 0.10;
-        const compositeRounded = Math.round(composite * 10) / 10;
-        const tier: "high" | "medium" | "low" = compositeRounded >= 70 ? "high" : compositeRounded >= 40 ? "medium" : "low";
-
-        return {
-          ...s,
-          domain_scores: scores,
-          sass_metrics: sass,
-          latest_risk_score: compositeRounded,
-          latest_risk_tier: tier
-        };
-      });
-
-      localStorage.setItem("sapc_custom_student_data", JSON.stringify(updated));
       window.dispatchEvent(new CustomEvent("sapc:data-ingested", { detail: { domain: activeDomain } }));
     }
 
-    setManualSuccessMsg(`Updated ${selectedStudent.full_name} (${selectedStudent.lrn}) with new ${domainMeta.title} metrics.`);
+    setManualSuccessMsg(`Updated ${selectedStudent.full_name} (${selectedStudent.lrn}) and synced to Firestore.`);
     setTimeout(() => setManualSuccessMsg(null), 4000);
     if (onSuccess) onSuccess();
   };

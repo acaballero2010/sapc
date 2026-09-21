@@ -163,28 +163,79 @@ export const AuditLogViewer: React.FC = () => {
     setAccessError(null);
     setReferenceTime(Date.now());
     try {
-      const data = await fetchWithAuth("/audit/logs?limit=50");
-      if (Array.isArray(data) && data.length > 0) {
-        // Merge with rich metadata if backend returned basic records
-        const enriched = data.map((item: any, idx: number) => ({
-          id: item.id || `LOG-2026-${9480 - idx}`,
-          timestamp: item.timestamp || new Date().toISOString(),
-          actor_role: item.actor_role || "guidance_counselor",
-          actor_name: item.actor_name || (item.actor_role === "admin" ? "Dr. Remedios Santos, Ed.D." : item.actor_role === "teacher" ? "Prof. Ernesto Bautista" : "Maria Theresa Cruz, RGC"),
-          actor_email: item.actor_email || `${item.actor_role || "user"}@sapc.edu.ph`,
-          action: item.action || "STUDENT_RECORD_ACCESS",
-          target_resource: item.target_resource || "STD-2024-00129",
-          details: item.details || "Accessed student academic and multi-domain profile",
-          ip_address: item.ip_address || "192.168.10.45",
-          hash_digest: item.hash_digest || "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          compliance_basis: item.compliance_basis || "RA 10173 Sec. 12(f) - Legitimate Educational & Pastoral Interest"
-        }));
-        setLogs(enriched);
-      } else {
-        setLogs(DEFAULT_AUDIT_LOGS);
+      let combined: AuditLogEntry[] = [];
+
+      // 1. Try Firestore /audit_logs collection
+      try {
+        const { db } = await import("@/lib/firebase");
+        const { collection, getDocs, query, orderBy, limit } = await import("firebase/firestore");
+        if (db) {
+          const auditRef = collection(db, "audit_logs");
+          const q = query(auditRef, orderBy("timestamp", "desc"), limit(50));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            snap.forEach((d) => {
+              const data = d.data();
+              combined.push({
+                id: d.id,
+                timestamp: data.timestamp || new Date().toISOString(),
+                actor_role: data.actor_role || "guidance_counselor",
+                actor_name: data.actor_name || "Authorized Staff",
+                actor_email: data.actor_email || `${data.actor_role || "staff"}@sapc.edu.ph`,
+                action: data.action || "DATA_ACCESS",
+                target_resource: data.target_resource || "SYSTEM_RESOURCE",
+                details: data.details || "Compliance logged action",
+                ip_address: data.ip_address || "127.0.0.1 (Campus LAN)",
+                compliance_basis: "RA 10173 Sec. 12(f) - Legitimate Educational & Pastoral Interest"
+              });
+            });
+          }
+        }
+      } catch (fsErr) {
+        console.warn("Firestore audit logs query:", fsErr);
       }
+
+      // 2. Try LocalStorage logs
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("sapc_audit_logs");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+              parsed.forEach((item: any) => {
+                if (!combined.some(c => c.id === item.id)) {
+                  combined.push({
+                    id: item.id || `LOG-${Date.now()}`,
+                    timestamp: item.timestamp || new Date().toISOString(),
+                    actor_role: item.actor_role || "guidance_counselor",
+                    actor_name: item.actor_name || "Authorized Staff",
+                    actor_email: `${item.actor_role || "staff"}@sapc.edu.ph`,
+                    action: item.action || "DATA_INGESTION",
+                    target_resource: item.target_resource || "STUDENT_RECORDS",
+                    details: item.details || "Processed records",
+                    ip_address: item.ip_address || "127.0.0.1 (Campus LAN)",
+                    compliance_basis: "RA 10173 Sec. 12(f) - Legitimate Educational & Pastoral Interest"
+                  });
+                }
+              });
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      // 3. Fallback / Merge with Seed logs
+      DEFAULT_AUDIT_LOGS.forEach((seed) => {
+        if (!combined.some(c => c.id === seed.id)) {
+          combined.push(seed);
+        }
+      });
+
+      // Sort by timestamp descending
+      combined.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setLogs(combined);
     } catch {
-      // Fallback to institutional default logs for demonstration
       setLogs(DEFAULT_AUDIT_LOGS);
     } finally {
       setIsLoading(false);

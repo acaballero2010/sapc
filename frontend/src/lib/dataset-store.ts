@@ -1,4 +1,18 @@
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+import { db } from "@/lib/firebase";
+import { 
+  collection, 
+  doc, 
+  writeBatch, 
+  getDocs, 
+  onSnapshot, 
+  addDoc, 
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
+  Unsubscribe
+} from "firebase/firestore";
 
 export interface CohortAggregates {
   total: number;
@@ -37,6 +51,18 @@ export interface RiskWeightsConfig {
   financial: number;
 }
 
+export interface CloudAuditLogEntry {
+  id?: string;
+  timestamp: string;
+  actor_name: string;
+  actor_role: string;
+  action: string;
+  target_resource: string;
+  details: string;
+  ip_address?: string;
+  createdAt?: any;
+}
+
 export const DEFAULT_RISK_WEIGHTS: RiskWeightsConfig = {
   academic: 30.0,
   family: 20.0,
@@ -47,6 +73,7 @@ export const DEFAULT_RISK_WEIGHTS: RiskWeightsConfig = {
 
 const STORAGE_KEY = "sapc_custom_student_data";
 const WEIGHTS_KEY = "sapc_custom_risk_weights";
+const AUDIT_STORAGE_KEY = "sapc_audit_logs";
 
 export function getActiveRiskWeights(): RiskWeightsConfig {
   if (typeof window !== "undefined") {
@@ -126,19 +153,193 @@ export function getActiveStudentDataset(): StudentRecord[] {
         }
       }
     } catch (e) {
-      console.warn("Could not load custom student dataset, falling back to baseline:", e);
+      console.warn("Could not load custom student dataset from local storage, falling back to baseline:", e);
     }
   }
   return SAPC_500_STUDENTS;
 }
 
-export function saveStudentDataset(students: StudentRecord[]): void {
+/**
+ * Persists the student dataset to client localStorage and optionally syncs to Firebase Cloud Firestore.
+ */
+export function saveStudentDataset(students: StudentRecord[], syncToCloud = true): void {
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
       window.dispatchEvent(new CustomEvent("sapc:dataset-updated", { detail: { count: students.length } }));
     } catch (e) {
-      console.error("Failed to persist updated student dataset:", e);
+      console.error("Failed to persist updated student dataset locally:", e);
+    }
+  }
+
+  if (syncToCloud && typeof window !== "undefined") {
+    // Non-blocking background cloud sync
+    syncStudentDatasetToFirestore(students).catch((err) => {
+      console.warn("Background Firestore cloud sync encountered an issue:", err);
+    });
+  }
+}
+
+/**
+ * Synchronizes the student dataset to Firebase Cloud Firestore using chunked batch writes (max 400 per batch).
+ */
+export async function syncStudentDatasetToFirestore(students: StudentRecord[]): Promise<{ success: boolean; syncedCount: number; error?: string }> {
+  if (!db) {
+    return { success: false, syncedCount: 0, error: "Firestore instance not available" };
+  }
+
+  try {
+    const studentsCol = collection(db, "students");
+    const CHUNK_SIZE = 400; // Safe threshold under Firestore 500-op limit
+    let totalSynced = 0;
+
+    for (let i = 0; i < students.length; i += CHUNK_SIZE) {
+      const chunk = students.slice(i, i + CHUNK_SIZE);
+      const batch = writeBatch(db);
+
+      for (const student of chunk) {
+        const docId = student.lrn ? String(student.lrn).trim() : `student_${student.id}`;
+        const studentRef = doc(studentsCol, docId);
+        batch.set(studentRef, {
+          ...student,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      await batch.commit();
+      totalSynced += chunk.length;
+    }
+
+    console.log(`[Firestore Sync] Successfully committed ${totalSynced} student records to Cloud Firestore.`);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("sapc:cloud-synced", { detail: { count: totalSynced } }));
+    }
+    return { success: true, syncedCount: totalSynced };
+  } catch (err: any) {
+    console.error("[Firestore Sync Error]:", err);
+    return { success: false, syncedCount: 0, error: err.message || "Cloud sync failed" };
+  }
+}
+
+/**
+ * Fetches the latest student dataset from Firebase Cloud Firestore, updating local cache.
+ */
+export async function loadStudentDatasetFromFirestore(): Promise<StudentRecord[]> {
+  if (!db) return getActiveStudentDataset();
+
+  try {
+    const studentsCol = collection(db, "students");
+    const snapshot = await getDocs(studentsCol);
+
+    if (!snapshot.empty) {
+      const cloudStudents: StudentRecord[] = [];
+      snapshot.forEach((d) => {
+        const data = d.data() as StudentRecord;
+        cloudStudents.push(data);
+      });
+
+      // Sort by ID or Grade/Section
+      cloudStudents.sort((a, b) => Number(a.id) - Number(b.id));
+
+      if (cloudStudents.length > 0) {
+        saveStudentDataset(cloudStudents, false); // Cache locally without echoing back to cloud
+        return cloudStudents;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load students from Firestore, using local baseline:", err);
+  }
+
+  return getActiveStudentDataset();
+}
+
+/**
+ * Subscribes to real-time updates from Firebase Cloud Firestore for all connected dashboards.
+ */
+export function subscribeToStudentDataset(
+  onUpdate: (students: StudentRecord[]) => void
+): Unsubscribe | (() => void) {
+  if (!db || typeof window === "undefined") {
+    return () => {};
+  }
+
+  try {
+    const studentsCol = collection(db, "students");
+    const unsubscribe = onSnapshot(
+      studentsCol,
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const updated: StudentRecord[] = [];
+          snapshot.forEach((d) => {
+            updated.push(d.data() as StudentRecord);
+          });
+          updated.sort((a, b) => Number(a.id) - Number(b.id));
+          
+          if (updated.length > 0) {
+            // Update local cache silently
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            } catch {
+              // Ignore
+            }
+            onUpdate(updated);
+          }
+        }
+      },
+      (error) => {
+        console.warn("Firestore real-time subscription error:", error);
+      }
+    );
+
+    return unsubscribe;
+  } catch (e) {
+    console.warn("Could not initiate Firestore subscription:", e);
+    return () => {};
+  }
+}
+
+/**
+ * Logs an RA 10173 compliance event to Firebase Cloud Firestore `/audit_logs` and local storage.
+ */
+export async function logCloudAuditEvent(entry: {
+  actor_name: string;
+  actor_role: string;
+  action: string;
+  target_resource: string;
+  details: string;
+  ip_address?: string;
+}): Promise<void> {
+  const logId = `audit-${Date.now()}`;
+  const timestamp = new Date().toISOString();
+  const fullEntry: CloudAuditLogEntry = {
+    id: logId,
+    timestamp,
+    ...entry,
+    ip_address: entry.ip_address || "127.0.0.1 (Campus LAN)"
+  };
+
+  // 1. Local storage fallback
+  if (typeof window !== "undefined") {
+    try {
+      const storedLogs = localStorage.getItem(AUDIT_STORAGE_KEY);
+      const currentLogs = storedLogs ? JSON.parse(storedLogs) : [];
+      localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify([fullEntry, ...currentLogs]));
+    } catch {
+      // Ignore
+    }
+  }
+
+  // 2. Cloud Firestore persistence
+  if (db) {
+    try {
+      const auditCol = collection(db, "audit_logs");
+      await addDoc(auditCol, {
+        ...fullEntry,
+        createdAt: serverTimestamp()
+      });
+      console.log(`[Audit Log] RA 10173 Audit Record logged to Firestore: ${entry.action}`);
+    } catch (err) {
+      console.warn("Could not persist audit log to Firestore:", err);
     }
   }
 }
@@ -321,7 +522,7 @@ export function exportActiveDatasetToCSV(customStudents?: StudentRecord[], filen
   URL.revokeObjectURL(url);
 }
 
-export function importFullCohortCSV(csvText: string): { success: boolean; count: number; error?: string } {
+export async function importFullCohortCSV(csvText: string): Promise<{ success: boolean; count: number; error?: string }> {
   try {
     const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
     if (lines.length < 2) {
@@ -340,7 +541,6 @@ export function importFullCohortCSV(csvText: string): { success: boolean; count:
 
     for (let i = 1; i < lines.length; i++) {
       const rawLine = lines[i];
-      // Simple regex CSV parser for quoted and unquoted cells
       const values: string[] = [];
       let inQuote = false;
       let currentVal = "";
@@ -412,7 +612,7 @@ export function importFullCohortCSV(csvText: string): { success: boolean; count:
     }
 
     const updatedList = recalculateAHPForDataset(Array.from(new Set(Array.from(studentMap.values()))));
-    saveStudentDataset(updatedList);
+    saveStudentDataset(updatedList, true);
 
     return { success: true, count: updatedCount };
   } catch (err: any) {

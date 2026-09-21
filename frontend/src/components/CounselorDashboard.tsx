@@ -50,7 +50,9 @@ import type { StudentRecord } from "@/data/students500";
 import { 
   getActiveStudentDataset, 
   computeCohortAggregates, 
-  exportActiveDatasetToCSV 
+  exportActiveDatasetToCSV,
+  subscribeToStudentDataset,
+  loadStudentDatasetFromFirestore
 } from "@/lib/dataset-store";
 
 // Tab types for all 20 Counselor modules
@@ -274,6 +276,29 @@ export const CounselorDashboard: React.FC = () => {
     }
     return DEFAULT_STUDENTS;
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+    // 1. Initial async load from Cloud Firestore
+    loadStudentDatasetFromFirestore().then((all) => {
+      if (all && all.length > 0) setStudents(all);
+    });
+
+    // 2. Real-time multi-user subscription
+    const unsubscribe = subscribeToStudentDataset((all) => {
+      setStudents(all);
+    });
+
+    const handleDatasetUpdate = () => {
+      setStudents(getActiveStudentDataset());
+    };
+    window.addEventListener("sapc:dataset-updated", handleDatasetUpdate);
+    return () => {
+      window.removeEventListener("sapc:dataset-updated", handleDatasetUpdate);
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, []);
+
   const [_analytics, setAnalytics] = useState<any | null>(DEFAULT_ANALYTICS);
   const [flaggedSessions] = useState<FlaggedAlert[]>(DEFAULT_FLAGGED_ALERTS);
   const [interventions] = useState<InterventionCarePlan[]>(DEFAULT_INTERVENTIONS);
