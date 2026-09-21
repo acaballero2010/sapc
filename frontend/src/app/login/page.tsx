@@ -158,68 +158,99 @@ export default function LoginPage() {
             </span>
           </div>
 
-          {/* Quick 1-Click Demo Profiles Selector (Hidden by default in production) */}
-          {process.env.NEXT_PUBLIC_SHOW_DEMO_LOGINS === "true" && (
-            <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-300/80 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1">
-                  🚀 Instant 1-Click Demo Logins
-                </span>
-                <span className="text-[10px] font-bold text-amber-800">No Password Needed</span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin("guidance_counselor")}
-                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
-                >
-                  <div className="text-sm">🧠</div>
-                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Counselor</div>
-                  <div className="text-[9px] text-slate-500">RGC Portal</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin("teacher")}
-                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
-                >
-                  <div className="text-sm">📚</div>
-                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Teacher</div>
-                  <div className="text-[9px] text-slate-500">Adviser View</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin("parent")}
-                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
-                >
-                  <div className="text-sm">👨‍👩‍👦</div>
-                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Parent</div>
-                  <div className="text-[9px] text-slate-500">Guardian View</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin("student")}
-                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
-                >
-                  <div className="text-sm">🎓</div>
-                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Student</div>
-                  <div className="text-[9px] text-slate-500">Joshua D.</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin("admin")}
-                  className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-left transition shadow-2xs cursor-pointer group col-span-2 sm:col-span-2"
-                >
-                  <div className="text-sm">⚙️</div>
-                  <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">System Administrator</div>
-                  <div className="text-[9px] text-slate-500">Master Ingestion &amp; AHP Config</div>
-                </button>
-              </div>
+          {/* Predefined Institutional Access & Quick Logins */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 via-amber-50/50 to-orange-50/50 border border-amber-300/80 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1.5">
+                <span>🔑 Predefined Institutional Logins</span>
+              </span>
+              <span className="text-[10px] font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded-full">
+                Default Accounts
+              </span>
             </div>
-          )}
+            <p className="text-[11px] text-amber-900/80 leading-snug">
+              Pre-configured accounts for teachers, parents, counselors, and students. Select a profile below for 1-click access or manual sign-in:
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("teacher@sapc.edu.ph");
+                  setPassword("teacher123");
+                  handleQuickDemoLogin("teacher");
+                }}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/70 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+                title="Email: teacher@sapc.edu.ph | Password: teacher123"
+              >
+                <div className="text-sm">📚</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Teacher / Adviser</div>
+                <div className="text-[9px] text-slate-500 font-mono">teacher@sapc.edu.ph</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("parent@sapc.edu.ph");
+                  setPassword("parent123");
+                  handleQuickDemoLogin("parent");
+                }}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/70 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+                title="Email: parent@sapc.edu.ph | Password: parent123"
+              >
+                <div className="text-sm">👨‍👩‍👦</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Parent / Guardian</div>
+                <div className="text-[9px] text-slate-500 font-mono">parent@sapc.edu.ph</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("counselor@sapc.edu.ph");
+                  setPassword("counselor123");
+                  handleQuickDemoLogin("guidance_counselor");
+                }}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/70 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+                title="Email: counselor@sapc.edu.ph | Password: counselor123"
+              >
+                <div className="text-sm">🧠</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Counselor (RGC)</div>
+                <div className="text-[9px] text-slate-500 font-mono">counselor@sapc.edu.ph</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("student@sapc.edu.ph");
+                  setPassword("student123");
+                  handleQuickDemoLogin("student");
+                }}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/70 border border-amber-200 text-left transition shadow-2xs cursor-pointer group"
+                title="Email: student@sapc.edu.ph or LRN | Password: student123"
+              >
+                <div className="text-sm">🎓</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">Student (Joshua D.)</div>
+                <div className="text-[9px] text-slate-500 font-mono">student@sapc.edu.ph</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("admin@sapc.edu.ph");
+                  setPassword("admin123");
+                  handleQuickDemoLogin("admin");
+                }}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/70 border border-amber-200 text-left transition shadow-2xs cursor-pointer group col-span-2 sm:col-span-2"
+                title="Email: admin@sapc.edu.ph | Password: admin123"
+              >
+                <div className="text-sm">⚙️</div>
+                <div className="font-black text-[11px] text-slate-900 group-hover:text-[#8B0014]">System Administrator</div>
+                <div className="text-[9px] text-slate-500 font-mono">admin@sapc.edu.ph • Master Governance</div>
+              </button>
+            </div>
+            <p className="text-[10px] text-amber-800/80 pt-1 italic">
+              💡 Tip: Initial default passwords are <code className="font-mono font-bold bg-amber-100 px-1 rounded text-amber-900">[role]123</code> (e.g. <code className="font-mono">teacher123</code>, <code className="font-mono">parent123</code>). Change your password anytime in <strong>Profile &gt; Security Settings</strong>.
+            </p>
+          </div>
 
           {errorMessage && (
             <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium">
