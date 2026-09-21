@@ -222,6 +222,176 @@ export async function syncStudentDatasetToFirestore(students: StudentRecord[]): 
 }
 
 /**
+ * CRUD (Create): Adds a new student record to both local state and Firebase Cloud Firestore.
+ */
+export async function addStudentRecord(newStudent: Partial<StudentRecord>): Promise<StudentRecord> {
+  const current = getActiveStudentDataset();
+  const nextId = current.length > 0 ? Math.max(...current.map(s => Number(s.id) || 0)) + 1 : 1;
+  
+  const fullRecord: StudentRecord = {
+    id: nextId,
+    lrn: newStudent.lrn || `1092384${String(nextId).padStart(5, "0")}`,
+    full_name: newStudent.full_name || `${newStudent.last_name || "Student"}, ${newStudent.first_name || "New"}`,
+    first_name: newStudent.first_name || "New",
+    last_name: newStudent.last_name || "Student",
+    grade_level: newStudent.grade_level || 11,
+    strand: newStudent.strand || "STEM",
+    section_name: newStudent.section_name || "Grade 11 - St. Augustine (STEM)",
+    adviser_name: newStudent.adviser_name || "Adviser",
+    email: newStudent.email || `student${nextId}@sapc.edu.ph`,
+    latest_risk_score: newStudent.latest_risk_score || 25.0,
+    latest_risk_tier: newStudent.latest_risk_tier || "low",
+    primary_risk_driver: newStudent.primary_risk_driver || "Academic",
+    domain_scores: newStudent.domain_scores || {
+      academic: 20,
+      family: 15,
+      health: 15,
+      mental_health: 15,
+      financial: 15
+    },
+    sass_metrics: {
+      gpa: 85.0,
+      failing_subjects_count: 0,
+      days_absent: 0,
+      attendance_rate_pct: 100,
+      incomplete_requirements_count: 0,
+      extracurricular_club: "Academic Club",
+      club_participation_level: "Moderate",
+      hobbies_interests: "Reading, STEM",
+      ...(newStudent.sass_metrics || {})
+    }
+  };
+
+  const updatedList = recalculateAHPForDataset([fullRecord, ...current]);
+  saveStudentDataset(updatedList, true);
+
+  if (db) {
+    try {
+      const docId = fullRecord.lrn ? String(fullRecord.lrn).trim() : `student_${fullRecord.id}`;
+      const studentRef = doc(collection(db, "students"), docId);
+      const { setDoc } = await import("firebase/firestore");
+      await setDoc(studentRef, {
+        ...fullRecord,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.warn("Could not save new student doc to Firestore:", err);
+    }
+  }
+
+  await logCloudAuditEvent({
+    actor_name: "Authorized Staff",
+    actor_role: "admin",
+    action: "STUDENT_RECORD_CREATED",
+    target_resource: `Student: ${fullRecord.full_name} (LRN: ${fullRecord.lrn})`,
+    details: `Created new student record in ${fullRecord.section_name}.`,
+    ip_address: "127.0.0.1 (Campus LAN)"
+  });
+
+  return fullRecord;
+}
+
+/**
+ * CRUD (Read): Fetches a specific student record by ID or LRN.
+ */
+export function getStudentRecord(idOrLrn: string | number): StudentRecord | undefined {
+  const current = getActiveStudentDataset();
+  const searchStr = String(idOrLrn).trim();
+  return current.find(s => String(s.id) === searchStr || String(s.lrn).trim() === searchStr);
+}
+
+/**
+ * CRUD (Update): Updates an existing student record in local state and Firestore.
+ */
+export async function updateStudentRecord(idOrLrn: string | number, updates: Partial<StudentRecord>): Promise<StudentRecord | null> {
+  const current = getActiveStudentDataset();
+  const searchStr = String(idOrLrn).trim();
+  const index = current.findIndex(s => String(s.id) === searchStr || String(s.lrn).trim() === searchStr);
+
+  if (index === -1) return null;
+
+  const existing = current[index];
+  const updated: StudentRecord = {
+    ...existing,
+    ...updates,
+    domain_scores: {
+      ...existing.domain_scores,
+      ...(updates.domain_scores || {})
+    },
+    sass_metrics: {
+      ...existing.sass_metrics,
+      ...(updates.sass_metrics || {})
+    }
+  };
+
+  current[index] = updated;
+  const recalculated = recalculateAHPForDataset(current);
+  saveStudentDataset(recalculated, true);
+
+  if (db) {
+    try {
+      const docId = updated.lrn ? String(updated.lrn).trim() : `student_${updated.id}`;
+      const studentRef = doc(collection(db, "students"), docId);
+      const { setDoc } = await import("firebase/firestore");
+      await setDoc(studentRef, {
+        ...updated,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (err) {
+      console.warn("Could not update student doc in Firestore:", err);
+    }
+  }
+
+  await logCloudAuditEvent({
+    actor_name: "Authorized Staff",
+    actor_role: "teacher",
+    action: "STUDENT_RECORD_UPDATED",
+    target_resource: `Student: ${updated.full_name} (LRN: ${updated.lrn})`,
+    details: `Updated student attributes and recalculated AHP risk score.`,
+    ip_address: "127.0.0.1 (Campus LAN)"
+  });
+
+  return updated;
+}
+
+/**
+ * CRUD (Delete): Removes a student record from both local state and Firebase Cloud Firestore.
+ */
+export async function deleteStudentRecord(idOrLrn: string | number): Promise<boolean> {
+  const current = getActiveStudentDataset();
+  const searchStr = String(idOrLrn).trim();
+  const target = current.find(s => String(s.id) === searchStr || String(s.lrn).trim() === searchStr);
+
+  if (!target) return false;
+
+  const filtered = current.filter(s => String(s.id) !== searchStr && String(s.lrn).trim() !== searchStr);
+  saveStudentDataset(filtered, true);
+
+  if (db) {
+    try {
+      const docId = target.lrn ? String(target.lrn).trim() : `student_${target.id}`;
+      const studentRef = doc(collection(db, "students"), docId);
+      const { deleteDoc } = await import("firebase/firestore");
+      await deleteDoc(studentRef);
+    } catch (err) {
+      console.warn("Could not delete student doc from Firestore:", err);
+    }
+  }
+
+  await logCloudAuditEvent({
+    actor_name: "Authorized Administrator",
+    actor_role: "admin",
+    action: "STUDENT_RECORD_DELETED",
+    target_resource: `Student: ${target.full_name} (LRN: ${target.lrn})`,
+    details: `Removed student record from active registry.`,
+    ip_address: "127.0.0.1 (Campus LAN)"
+  });
+
+  return true;
+}
+
+/**
  * Fetches the latest student dataset from Firebase Cloud Firestore, updating local cache.
  */
 export async function loadStudentDatasetFromFirestore(): Promise<StudentRecord[]> {
