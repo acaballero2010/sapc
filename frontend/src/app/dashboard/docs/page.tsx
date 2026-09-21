@@ -757,6 +757,93 @@ export default function DocumentationPage() {
               </p>
             </div>
           </div>
+
+          {/* Subject-Level Academic Failure Risk Prediction Model */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-[#8B0014] dark:text-rose-400">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                  Subject-Level Academic Failure Risk Prediction Model
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Early Academic Warning Engine forecasting subject-specific failure probability (P_fail &ge; 70%) before quarterly finals.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              While general AHP computes an overarching holistic composite score, the <strong>Subject-Level Failure Risk Predictor</strong> operates on granular formative classroom velocity. It evaluates Written Work (WW), Performance Tasks (PT), and Quarterly Exam standing (QE) alongside subject period cuts and cross-domain cognitive multipliers to calculate a calibrated sigmoid failure probability:
+            </p>
+
+            {/* Formula Callout */}
+            <div className="p-5 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs space-y-3 border border-slate-800">
+              <div className="text-amber-400 font-bold uppercase tracking-wider text-[11px]">
+                Failure Probability &amp; Grade Forecast Formulations
+              </div>
+              <div className="text-emerald-400">
+                P_fail(s) = 1.0 / (1.0 + exp(-k &times; (Passing_Threshold - G_projected)))
+              </div>
+              <div className="text-rose-300">
+                G_projected = (w_WW &times; S_WW + w_PT &times; S_PT + w_QA &times; S_QA) - &Delta;_Tasks - &Delta;_Attendance - &Delta;_CrossDomain
+              </div>
+              <div className="text-slate-400 text-[11px] pt-1">
+                Where: Passing_Threshold = 75.0, k = 0.18, &Delta;_Tasks = 8.0 pts per missing task, &Delta;_Attendance = 2.5 pts per cut past 2.
+              </div>
+            </div>
+
+            {/* DepEd DO 8 s. 2015 Subject Weightings Table */}
+            <div className="space-y-3">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                DepEd Senior High School Subject Grading Weight Standards
+              </h3>
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+                <table className="min-w-full text-left text-xs">
+                  <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 font-black text-slate-600 dark:text-slate-300 uppercase">
+                    <tr>
+                      <th className="py-3 px-4">Subject Track / Category</th>
+                      <th className="py-3 px-3 text-center">Written Work (WW)</th>
+                      <th className="py-3 px-3 text-center">Performance Tasks (PT)</th>
+                      <th className="py-3 px-3 text-center">Quarterly Exam (QA)</th>
+                      <th className="py-3 px-4">Sample Core &amp; Specialized Subjects</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">STEM Specialized</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">25%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">45%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">30%</td>
+                      <td className="py-3 px-4 text-xs">Pre-Calculus, General Chemistry, General Physics</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">ABM Specialized</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">25%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">45%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">30%</td>
+                      <td className="py-3 px-4 text-xs">FABM 1 &amp; 2, Business Finance, Applied Economics</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">HUMSS Specialized</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">25%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">50%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">25%</td>
+                      <td className="py-3 px-4 text-xs">DISS, Creative Writing, Philippine Politics &amp; Governance</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">Core Academic Subjects</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">30%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">50%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">20%</td>
+                      <td className="py-3 px-4 text-xs">General Mathematics, 21st Century Literature, Oral Comm</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

@@ -86,3 +86,58 @@ def get_student_academic_records(
     ).order_by(AcademicRecord.id.desc()).all()
 
     return records
+
+
+@router.get("/predict-subject-failure")
+def predict_subject_failure(
+    written_work_avg: float = 72.0,
+    performance_task_avg: float = 70.0,
+    quarterly_assessment_score: float = 68.0,
+    missing_tasks_count: int = 2,
+    subject_absences_count: int = 3,
+    strand: str = "STEM",
+    subject_code: str = "STEM-CALC",
+    mental_health_risk: float = 45.0,
+    physical_fatigue_risk: float = 30.0,
+    financial_strain_risk: float = 40.0,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Computes subject failure prediction, projected final grade, and confidence interval.
+    """
+    from app.services.subject_prediction_engine import SubjectFailurePredictorService
+    return SubjectFailurePredictorService.predict_subject_failure(
+        written_work_avg=written_work_avg,
+        performance_task_avg=performance_task_avg,
+        quarterly_assessment_score=quarterly_assessment_score,
+        missing_tasks_count=missing_tasks_count,
+        subject_absences_count=subject_absences_count,
+        strand=strand,
+        subject_code=subject_code,
+        mental_health_risk=mental_health_risk,
+        physical_fatigue_risk=physical_fatigue_risk,
+        financial_strain_risk=financial_strain_risk
+    )
+
+
+@router.post("/simulate-remediation")
+def simulate_remediation(
+    payload: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Simulates grade improvement and failure probability reduction after completing tasks or tutoring.
+    """
+    from app.services.subject_prediction_engine import SubjectFailurePredictorService
+    current_state = payload.get("current_state", {})
+    tasks_to_submit = payload.get("tasks_to_submit", 0)
+    tutoring_hours = payload.get("tutoring_hours", 0.0)
+    exam_improvement = payload.get("exam_improvement", 0.0)
+
+    return SubjectFailurePredictorService.simulate_remediation(
+        current_state=current_state,
+        tasks_to_submit=tasks_to_submit,
+        remedial_tutoring_hours=tutoring_hours,
+        exam_target_improvement=exam_improvement
+    )
+

@@ -43,10 +43,12 @@ import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
 import { StudentDetailModal } from "./StudentDetailModal";
 import { TeacherReferralModal } from "./TeacherReferralModal";
+import { SubjectFailurePredictor } from "./SubjectFailurePredictor";
 
 export type TeacherTabType = 
   | "dashboard"
   | "students"
+  | "subject_predictor"
   | "student_profile"
   | "student_progress"
   | "at_risk"
@@ -558,7 +560,7 @@ export const TeacherDashboard: React.FC = () => {
       const hash = window.location.hash.replace("#", "");
 
       const validTabs: TeacherTabType[] = [
-        "dashboard", "students", "student_profile", "student_progress", "at_risk",
+        "dashboard", "students", "subject_predictor", "student_profile", "student_progress", "at_risk",
         "import_wizard", "import_students", "import_grades", "import_attendance",
         "import_history", "revert_import", "csv_editor", "interventions",
         "suggestions", "log_progress", "complete_intervention", "class_record",
@@ -570,6 +572,7 @@ export const TeacherDashboard: React.FC = () => {
       } else if (hash) {
         if (hash === "advisory-overview") setActiveTab("dashboard");
         else if (hash === "roster") setActiveTab("students");
+        else if (hash === "subject-predictor-view" || hash === "predictor") setActiveTab("subject_predictor");
         else if (hash === "at-risk-view") setActiveTab("at_risk");
         else if (hash === "uploader" || hash === "import-wizard-view") setActiveTab("import_wizard");
         else if (hash === "interventions-view") setActiveTab("interventions");
@@ -800,8 +803,8 @@ export const TeacherDashboard: React.FC = () => {
 
   // Navigation Categories
   const CATEGORIES = useMemo(() => [
-    { id: "all", label: "All Modules (21)" },
-    { id: "overview", label: "Advisory & Roster (5)", tabIds: ["dashboard", "students", "at_risk", "student_profile", "student_progress"] },
+    { id: "all", label: "All Modules (22)" },
+    { id: "overview", label: "Advisory & Prediction (6)", tabIds: ["dashboard", "students", "subject_predictor", "at_risk", "student_profile", "student_progress"] },
     { id: "import", label: "CSV Ingestion Hub (7)", tabIds: ["import_wizard", "import_students", "import_grades", "import_attendance", "import_history", "revert_import", "csv_editor"] },
     { id: "care", label: "Interventions & Care (4)", tabIds: ["interventions", "suggestions", "log_progress", "complete_intervention"] },
     { id: "records", label: "DepEd Records & Messages (5)", tabIds: ["class_record", "attendance_record", "notifications", "export_credentials", "messages"] }
@@ -811,6 +814,7 @@ export const TeacherDashboard: React.FC = () => {
   const TAB_ITEMS: Array<{ id: TeacherTabType; label: string; icon: any; badge?: string; category: string }> = [
     { id: "dashboard", label: "Class Overview", icon: BarChart3, badge: "Health", category: "overview" },
     { id: "students", label: "Advisory Roster", icon: Users, badge: `${students.length}`, category: "overview" },
+    { id: "subject_predictor", label: "Subject Failure Predictor", icon: BookOpen, badge: "Early Warning", category: "overview" },
     { id: "at_risk", label: "At-Risk Priority Focus", icon: AlertTriangle, badge: `${atRiskCount}`, category: "overview" },
     { id: "student_profile", label: "Student Profile", icon: Eye, category: "overview" },
     { id: "student_progress", label: "Longitudinal Progress", icon: TrendingUp, category: "overview" },
@@ -1195,13 +1199,23 @@ export const TeacherDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => handleTabChange("at_risk")}
-                className="w-full min-h-[44px] py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition"
-              >
-                <span>View At-Risk Priority List ({atRiskCount})</span>
-              </button>
+              <div className="space-y-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleTabChange("subject_predictor")}
+                  className="w-full min-h-[44px] py-2.5 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Subject Failure Risk Predictor</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabChange("at_risk")}
+                  className="w-full min-h-[44px] py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition"
+                >
+                  <span>View At-Risk Priority List ({atRiskCount})</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1893,6 +1907,15 @@ export const TeacherDashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUBJECT-LEVEL FAILURE RISK PREDICTOR */}
+      {/* ========================================================================= */}
+      {activeTab === "subject_predictor" && (
+        <div id="subject-predictor-view" className="animate-in fade-in duration-200 scroll-mt-24">
+          <SubjectFailurePredictor />
         </div>
       )}
 

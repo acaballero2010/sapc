@@ -162,9 +162,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ],
     teacher: [
       {
-        category: "Advisory & Roster",
+        category: "Advisory & Prediction",
         items: [
           { name: "Class Overview", href: "/dashboard/teacher?tab=dashboard#advisory-overview", icon: BarChart3, badge: "HEALTH" },
+          { name: "Subject Failure Predictor", href: "/dashboard/teacher?tab=subject_predictor#subject-predictor-view", icon: BookOpen, badge: "PREDICTIVE" },
           { name: "Advisory Class Roster", href: "/dashboard/teacher?tab=students#roster", icon: Users, badge: "40" },
           { name: "At-Risk Priority Focus", href: "/dashboard/teacher?tab=at_risk#at-risk-view", icon: AlertTriangle, badge: "PRIORITY" },
           { name: "Student Profile", href: "/dashboard/teacher?tab=student_profile#profile-view", icon: Eye },
