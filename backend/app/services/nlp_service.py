@@ -297,12 +297,13 @@ class NLPService:
         message: str, 
         analysis: Dict[str, Any],
         conversation_history: Optional[List[Dict[str, str]]] = None,
-        student_context: Optional[Dict[str, Any]] = None
+        student_context: Optional[Dict[str, Any]] = None,
+        knowledge_context: Optional[List[Dict[str, Any]]] = None
     ) -> Tuple[Optional[str], Optional[str]]:
         """
         Calls Google Gemini Generative API (e.g. gemini-2.5-flash, gemini-1.5-flash, gemini-2.0-flash)
         for personalized, highly empathetic, culturally-grounded counseling dialogue.
-        Supports multi-turn conversational history and student profile awareness.
+        Supports multi-turn conversational history, student profile awareness, and dynamic institutional knowledge injection.
         Falls back gracefully if GEMINI_API_KEY is not configured or on network timeout.
         Returns: (response_text, model_name_used)
         """
@@ -327,6 +328,19 @@ class NLPService:
         student_strand = student_context.get("strand", "") if student_context else ""
         student_desc = f"Student Name: {student_name}" + (f", Level: {student_year}" if student_year else "") + (f", Strand/Course: {student_strand}" if student_strand else "")
 
+        # Format Institutional Knowledge Base context if matched
+        kb_prompt_section = ""
+        if knowledge_context and len(knowledge_context) > 0:
+            kb_prompt_section = "\n\n--- INSTITUTIONAL COUNSELOR KNOWLEDGE BASE (TRAINED GUIDELINES & POLICIES) ---\n"
+            kb_prompt_section += "The registered guidance counselors of SAPC have explicitly trained the following official guidelines, steps, and campus resources for this scenario. Ground your factual advice (room numbers, schedules, steps) on these institutional guidelines:\n"
+            for item in knowledge_context:
+                title = item.get("title", "Guidance Policy")
+                content = item.get("content", "")
+                res_list = item.get("resources", [])
+                res_str = f" | Campus Resources: {', '.join(res_list)}" if res_list else ""
+                kb_prompt_section += f"• [{title}]: {content}{res_str}\n"
+            kb_prompt_section += "--------------------------------------------------------------------------------\n"
+
         system_prompt = (
             "You are the official AI Guidance Counselor Companion for San Antonio de Padua College (SAPC), "
             "a caring educational institution in the Philippines.\n"
@@ -341,6 +355,7 @@ class NLPService:
             "Format Rule: Keep replies breathable, conversational, and digestible (2-3 concise paragraphs or clear bullet points max). Do not overwhelm the student with long lectures.\n\n"
             f"Student Profile: {student_desc}\n"
             f"Affective Analysis: Detected Emotion={emotion} ({int(confidence*100)}% confidence), Domain={domain}, Intent={intent}, Subject Focus={subject or 'General'}."
+            f"{kb_prompt_section}"
         )
 
         # Build contents array with multi-turn history if present
@@ -419,7 +434,8 @@ class NLPService:
         analysis: Dict[str, Any], 
         message: str,
         conversation_history: Optional[List[Dict[str, str]]] = None,
-        student_context: Optional[Dict[str, Any]] = None
+        student_context: Optional[Dict[str, Any]] = None,
+        knowledge_context: Optional[List[Dict[str, Any]]] = None
     ) -> Tuple[str, List[str], bool, Optional[str]]:
         """
         Scaffolded Bilingual Conversational Response Generator (Vygotsky ZPD & WHO Protocols).
@@ -454,10 +470,16 @@ class NLPService:
             message=message, 
             analysis=analysis, 
             conversation_history=conversation_history,
-            student_context=student_context
+            student_context=student_context,
+            knowledge_context=knowledge_context
         )
         if gemini_text:
             resources = self.get_contextual_resources(domain, emotion, detected_subject)
+            if knowledge_context:
+                for kb_item in knowledge_context:
+                    for r in kb_item.get("resources", []):
+                        if r not in resources:
+                            resources.append(r)
             return gemini_text, resources, True, model_used
 
         # 3. ACADEMIC SPECIFIC CONCERNS (e.g. failing grades, subject difficulties, study strategies)

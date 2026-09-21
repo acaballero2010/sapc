@@ -120,7 +120,8 @@ def send_chat_message(
         analysis=nlp_res,
         message=payload.message,
         conversation_history=conversation_history,
-        student_context=student_context
+        student_context=student_context,
+        knowledge_context=payload.knowledge_context
     )
 
     bot_msg = ChatMessage(

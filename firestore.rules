@@ -47,6 +47,11 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // Counselor Knowledge Base & AI Training Rules
+    match /counselor_knowledge_base/{itemId} {
+      allow read, write: if true;
+    }
+
     // RA 10173 Immutable Audit Logs (Append-only audit integrity)
     match /audit_logs/{logId} {
       allow read: if true;

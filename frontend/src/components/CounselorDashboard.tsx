@@ -44,6 +44,7 @@ import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { ParentAlertModal } from "./ParentAlertModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
+import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
 import { AHPDataVisualizer } from "./AHPDataVisualizer";
 import { SAPC_500_STUDENTS, SAPC_COHORT_SUMMARY } from "@/data/students500";
 import type { StudentRecord } from "@/data/students500";
@@ -313,6 +314,7 @@ export const CounselorDashboard: React.FC = () => {
   const [isInterventionOpen, setIsInterventionOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [showIngestionHub, setShowIngestionHub] = useState(false);
+  const [isKnowledgeHubOpen, setIsKnowledgeHubOpen] = useState(false);
   const [parentAlertStudent, setParentAlertStudent] = useState<StudentRecord | null>(null);
   const [isParentAlertOpen, setIsParentAlertOpen] = useState(false);
   const catDrag = useDragScroll();
@@ -745,6 +747,16 @@ export const CounselorDashboard: React.FC = () => {
             >
               <Download className="h-3.5 w-3.5 text-amber-300" />
               <span>Export CSV</span>
+            </button>
+
+            <button
+              onClick={() => setIsKnowledgeHubOpen(true)}
+              className="h-9 px-3.5 rounded-xl bg-purple-600/85 hover:bg-purple-600 text-white border border-purple-400/40 font-bold text-xs shadow transition flex items-center gap-1.5"
+              title="Train and personalize the AI Counselor Knowledge Base"
+            >
+              <Brain className="h-3.5 w-3.5 text-purple-200" />
+              <span className="hidden sm:inline">AI Training Hub</span>
+              <span className="sm:hidden">AI KB</span>
             </button>
 
             <button
@@ -2606,6 +2618,13 @@ export const CounselorDashboard: React.FC = () => {
         isOpen={isParentAlertOpen}
         onClose={() => setIsParentAlertOpen(false)}
         onSuccess={loadData}
+      />
+
+      <CounselorKnowledgeHubModal
+        isOpen={isKnowledgeHubOpen}
+        onClose={() => setIsKnowledgeHubOpen(false)}
+        currentUserRole="counselor"
+        currentUserName="Ms. Maria Theresa Cruz, RGC"
       />
     </div>
   );

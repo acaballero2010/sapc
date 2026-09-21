@@ -29,12 +29,14 @@ import {
   ShieldAlert,
   Key,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  BrainCircuit
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
+import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
 import { RiskBadge } from "./RiskBadge";
 import { 
   getActiveStudentDataset, 
@@ -122,8 +124,11 @@ export const AdminDashboard: React.FC = () => {
 
   // Modals & Sub-views
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [showIngestionHub, setShowIngestionHub] = useState(false);
+  const [isKnowledgeHubOpen, setIsKnowledgeHubOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
   const catDrag = useDragScroll();
   const tabsDrag = useDragScroll();
 
@@ -410,6 +415,15 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setIsKnowledgeHubOpen(true)}
+              className="px-4 py-2.5 rounded-2xl bg-purple-600/85 hover:bg-purple-600 text-white border border-purple-400/40 font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-2"
+              title="Train and personalize the AI Counselor Knowledge Base"
+            >
+              <BrainCircuit className="h-4 w-4 text-purple-200" />
+              <span>AI Training Hub</span>
+            </button>
+
             <button
               onClick={() => handleTabChange("risk_config")}
               className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-2"
@@ -1589,6 +1603,13 @@ export const AdminDashboard: React.FC = () => {
       <InstitutionalReportModal
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
+      />
+
+      <CounselorKnowledgeHubModal
+        isOpen={isKnowledgeHubOpen}
+        onClose={() => setIsKnowledgeHubOpen(false)}
+        currentUserRole="admin"
+        currentUserName="System Administrator"
       />
     </div>
   );

@@ -14,6 +14,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
+import { searchKnowledgeBase } from "@/lib/counselor-kb-store";
 
 interface ChatbotModalProps {
   isOpen: boolean;
@@ -104,13 +105,22 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
     setMessages((prev) => [...prev, newMsg]);
     setIsLoading(true);
 
+    // Retrieve matched institutional knowledge items via RAG
+    const matchedKB = searchKnowledgeBase(textToSend, 3);
+
     try {
       const res = await fetchWithAuth("/chatbot/message", {
         method: "POST",
         timeoutMs: 20000,
         body: JSON.stringify({
           message: textToSend,
-          session_token: sessionToken
+          session_token: sessionToken,
+          knowledge_context: matchedKB.map(k => ({
+            title: k.title,
+            category: k.category,
+            content: k.content,
+            resources: k.suggested_resources
+          }))
         })
       });
 
@@ -148,13 +158,27 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         localStorage.setItem("sapc_last_chat_topic", textToSend.slice(0, 40) + "...");
       }
     } catch {
-      // Fallback dynamic offline response
-      const cleanLower = textToSend.toLowerCase();
+      // Fallback dynamic offline response using matched institutional knowledge
       let fallbackText = "Naririnig kita at nandito ako para sa iyo. Ligtas ang espasyong ito para sa iyong nararamdaman. Huwag mag-atubiling lumapit sa Guidance Office sa Room 204.";
-      if (cleanLower.includes("kausap") || cleanLower.includes("lonely") || cleanLower.includes("mag-isa")) {
-        fallbackText = "Nandito ako at handang makinig sa iyo nang buong puso. Ano ang mga naiisip o nararamdaman mo ngayon? Pwede mong ikwento sa akin nang malaya.";
-      } else if (cleanLower.includes("bagsak") || cleanLower.includes("nahihirapan") || cleanLower.includes("subject")) {
-        fallbackText = "Normal na magkaroon ng hamon sa academic journey. May libreng peer tutoring ang SAPC sa Room 104 Learning Commons. Gusto mo bang pag-usapan ang review plan?";
+      let fallbackResources = [
+        "SAPC Guidance & Counseling Office (Room 204, Bldg A • Mon-Fri 8AM-5PM)",
+        "National Center for Mental Health (NCMH) Hotline: 1553 (24/7 Toll-Free)",
+        "Hopeline Philippines: 0917-558-4673"
+      ];
+
+      if (matchedKB.length > 0) {
+        const top = matchedKB[0];
+        fallbackText = `Naririnig kita at naiintindihan ko ang iyong sitwasyon. Ayon sa ating institutional guidelines para sa ${top.title}:\n\n${top.content}\n\nNandito ang ating Guidance Office para gabayan ka hakbang-hakbang.`;
+        if (top.suggested_resources && top.suggested_resources.length > 0) {
+          fallbackResources = top.suggested_resources;
+        }
+      } else {
+        const cleanLower = textToSend.toLowerCase();
+        if (cleanLower.includes("kausap") || cleanLower.includes("lonely") || cleanLower.includes("mag-isa")) {
+          fallbackText = "Nandito ako at handang makinig sa iyo nang buong puso. Ano ang mga naiisip o nararamdaman mo ngayon? Pwede mong ikwento sa akin nang malaya.";
+        } else if (cleanLower.includes("bagsak") || cleanLower.includes("nahihirapan") || cleanLower.includes("subject")) {
+          fallbackText = "Normal na magkaroon ng hamon sa academic journey. May libreng peer tutoring ang SAPC sa Room 104 Learning Commons. Gusto mo bang pag-usapan ang review plan?";
+        }
       }
 
       const botMsg: Message = {
@@ -162,11 +186,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         text: fallbackText,
         time: "Just now",
         isGeminiPowered: false,
-        resources: [
-          "SAPC Guidance & Counseling Office (Room 204, Bldg A)",
-          "National Center for Mental Health (NCMH) Hotline: 1553 (24/7 Toll-Free)",
-          "Hopeline Philippines: 0917-558-4673"
-        ]
+        resources: fallbackResources
       };
       setMessages((prev) => [...prev, botMsg]);
     } finally {

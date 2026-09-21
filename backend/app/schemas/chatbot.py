@@ -7,6 +7,7 @@ class ChatMessageInput(BaseModel):
     message: str
     session_token: Optional[str] = None
     conversation_history: Optional[List[Dict[str, str]]] = None
+    knowledge_context: Optional[List[Dict[str, Any]]] = None
 
 class ChatMessageOut(BaseModel):
     id: int
