@@ -40,7 +40,7 @@ import { useAuth } from "@/lib/auth-context";
 
 export default function DocumentationPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"risk" | "system" | "tech" | "users" | "privacy">("risk");
+  const [activeTab, setActiveTab] = useState<"risk" | "system" | "tech" | "users" | "howtos" | "releases" | "privacy">("risk");
 
   // Mini live AHP calculator state for interactive demonstration
   const [calcGpa, setCalcGpa] = useState<number>(78);
@@ -117,7 +117,7 @@ export default function DocumentationPage() {
           }`}
         >
           <Layers className="h-4 w-4" />
-          <span>AHP Risk Assessment Spec</span>
+          <span>AHP Risk Engine</span>
         </button>
 
         <button
@@ -129,7 +129,7 @@ export default function DocumentationPage() {
           }`}
         >
           <Brain className="h-4 w-4" />
-          <span>System Design Architecture</span>
+          <span>System Design</span>
         </button>
 
         <button
@@ -141,7 +141,7 @@ export default function DocumentationPage() {
           }`}
         >
           <Code2 className="h-4 w-4" />
-          <span>Tech Stack & APIs</span>
+          <span>Tech Stack</span>
         </button>
 
         <button
@@ -153,7 +153,31 @@ export default function DocumentationPage() {
           }`}
         >
           <Users className="h-4 w-4" />
-          <span>User Operations Manual</span>
+          <span>User Guides</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("howtos")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
+            activeTab === "howtos"
+              ? "bg-[#8B0014] text-white shadow-md"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <HelpCircle className="h-4 w-4" />
+          <span>How-Tos &amp; FAQs</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("releases")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
+            activeTab === "releases"
+              ? "bg-[#8B0014] text-white shadow-md"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <Award className="h-4 w-4" />
+          <span>Release Notes</span>
         </button>
 
         <button
@@ -165,7 +189,7 @@ export default function DocumentationPage() {
           }`}
         >
           <Lock className="h-4 w-4" />
-          <span>Privacy & RA 10173</span>
+          <span>Privacy &amp; RA 10173</span>
         </button>
       </div>
 
@@ -1081,7 +1105,238 @@ export default function DocumentationPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 5: PRIVACY & COMPLIANCE (RA 10173) */}
+      {/* TAB 5: HOW-TOS & FAQS */}
+      {/* ========================================================================= */}
+      {activeTab === "howtos" && (
+        <div className="space-y-6">
+          {/* FAQs Section */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900 text-[#D97706] dark:text-amber-400">
+                <HelpCircle className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                  Frequently Asked Questions (FAQs)
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Quick answers to common questions on AHP scoring, AI companionship, and data confidentiality.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2">
+                <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <span className="h-6 w-6 rounded-lg bg-[#8B0014] text-white flex items-center justify-center text-xs font-black">Q1</span>
+                  <span>What is the core purpose of SAPC IntellySys?</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-8">
+                  It is an early warning Decision Support System (DSS) designed to identify students at risk of dropout or severe distress by evaluating academic, familial, health, psychological, and financial factors before academic failure occurs.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2">
+                <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <span className="h-6 w-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-black">Q2</span>
+                  <span>Why is a student with an 88 GPA flagged as Medium Risk?</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-8">
+                  Academic metrics comprise 30% of the AHP score. If severe distress is logged in other domains (e.g., family crisis or acute anxiety), the composite risk score can exceed 40.0, proactively alerting the counselor.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2">
+                <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <span className="h-6 w-6 rounded-lg bg-purple-600 text-white flex items-center justify-center text-xs font-black">Q3</span>
+                  <span>Is the AI Counselor replacing human counselors?</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-8">
+                  <strong>No.</strong> The AI companion provides 24/7 empathetic listening and coping tips. All formal clinical assessments, psychiatric referrals, and academic decisions are made exclusively by registered human professionals.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2">
+                <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <span className="h-6 w-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-black">Q4</span>
+                  <span>How is data protected under Philippine law?</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-8">
+                  The platform strictly adheres to RA 10173 (Data Privacy Act of 2012) and DepEd Order No. 40, s. 2012. Data is encrypted, consent is opt-in, and screening responses are restricted under counselor privilege.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Step-by-Step How-To Guides */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-[#8B0014] dark:text-rose-400">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                  Step-by-Step How-To Guides
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Practical workflows for teachers, counselors, administrators, and parents.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* How to Ingest SASS CSV */}
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-[#8B0014] dark:text-rose-400" />
+                  <span>How to Ingest DepEd CSV</span>
+                </div>
+                <ol className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 list-decimal list-inside">
+                  <li>Go to <strong>DepEd SASS Hub</strong> &rarr; <strong>3-Step Import Wizard</strong>.</li>
+                  <li>Drop your quarterly CSV spreadsheet.</li>
+                  <li>Verify column headers (GPA, absences, failed counts).</li>
+                  <li>Click <strong>Confirm &amp; Process</strong> to update AHP scores.</li>
+                </ol>
+              </div>
+
+              {/* How to Rollback a Batch */}
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <RotateCcw className="h-4 w-4 text-amber-500" />
+                  <span>How to Roll Back an Import</span>
+                </div>
+                <ol className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 list-decimal list-inside">
+                  <li>Navigate to <strong>CSV Hub</strong> &rarr; <strong>Revert Rollback</strong>.</li>
+                  <li>Locate the target batch ID in the audit log table.</li>
+                  <li>Click <strong>Rollback Batch</strong>.</li>
+                  <li>The system restores the previous snapshot instantly.</li>
+                </ol>
+              </div>
+
+              {/* How to Triage Crisis Flags */}
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-rose-500" />
+                  <span>How to Triage a Crisis Flag</span>
+                </div>
+                <ol className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 list-decimal list-inside">
+                  <li>Open <strong>Crisis Response</strong> &rarr; <strong>Crisis Alerts Queue</strong>.</li>
+                  <li>Click <strong>Case Deep-Dive</strong> for flagged students.</li>
+                  <li>Review longitudinal timeline &amp; screener history.</li>
+                  <li>Initiate intake interview or parent emergency outreach.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 6: RELEASE NOTES & CHANGELOG */}
+      {/* ========================================================================= */}
+      {activeTab === "releases" && (
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-900 text-purple-600 dark:text-purple-400">
+                <Award className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                  Release Notes &amp; Platform Changelog
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Detailed timeline of system updates, AI enhancements, and psychometric calibrations.
+                </p>
+              </div>
+            </div>
+
+            {/* Version 2.5.0 */}
+            <div className="p-6 rounded-3xl bg-rose-50/40 dark:bg-rose-950/20 border-2 border-rose-200 dark:border-rose-900/60 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-xl bg-[#8B0014] text-white text-xs font-black">
+                    v2.5.0 (Latest Production)
+                  </span>
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">September 2026</span>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-black uppercase">
+                  Active Release
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-xs">
+                <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-1">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                    <span>Gemini 2.5 Guidance AI</span>
+                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                    Multi-turn conversational AI companion with Taglish fluency and automated crisis triage.
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-1">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <BookOpen className="h-3.5 w-3.5 text-[#8B0014]" />
+                    <span>In-App Documentation Hub</span>
+                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                    Interactive system architecture specs, live AHP math sandbox, and role-based guides.
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-1">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Bot className="h-3.5 w-3.5 text-blue-500" />
+                    <span>Clean Student Chat UI</span>
+                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                    Removed intimidating raw sentiment telemetry strips in favor of friendly guidance badge.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Version 2.4.0 */}
+            <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-xl bg-slate-800 text-white text-xs font-black">
+                    v2.4.0
+                  </span>
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">August 2026</span>
+                </div>
+              </div>
+              <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1 list-disc list-inside">
+                <li>3-Step DepEd SASS CSV Ingestion Wizard with live header mapping.</li>
+                <li>In-Browser CSV Table Editor and cryptographic rollback engine.</li>
+                <li>Sensitivity Simulator with live 5-domain sliders on the dashboard.</li>
+              </ul>
+            </div>
+
+            {/* Version 2.0.0 */}
+            <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-xl bg-slate-800 text-white text-xs font-black">
+                    v2.0.0
+                  </span>
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">June 2026</span>
+                </div>
+              </div>
+              <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1 list-disc list-inside">
+                <li>Full migration to Next.js 14 App Router, TypeScript, and FastAPI.</li>
+                <li>Implementation of 5 dedicated role portals (Admin, Counselor, Teacher, Student, Parent).</li>
+                <li>Standardized PHQ-9 and GAD-7 clinical screener integration.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 7: PRIVACY & COMPLIANCE (RA 10173) */}
       {/* ========================================================================= */}
       {activeTab === "privacy" && (
         <div className="space-y-6">
