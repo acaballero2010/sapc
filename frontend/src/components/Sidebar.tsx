@@ -565,6 +565,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 </button>
               )}
+
+              <button
+                onClick={() => {
+                  router.push("/dashboard/docs");
+                  setIsOpen(false);
+                }}
+                title="System Design, Tech Stack & Risk Specs Documentation"
+                className={`w-full flex items-center rounded-xl transition shadow-2xs ${
+                  isCollapsed
+                    ? pathname === "/dashboard/docs"
+                      ? "justify-center h-11 w-11 mx-auto bg-rose-50 dark:bg-rose-950/70 border-2 border-[#8B0014] dark:border-rose-500 text-[#8B0014] dark:text-rose-300"
+                      : "justify-center h-11 w-11 mx-auto bg-slate-50 dark:bg-slate-800/80 hover:bg-rose-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
+                    : pathname === "/dashboard/docs"
+                    ? "px-3 py-2.5 text-xs sm:text-sm font-bold bg-rose-50 dark:bg-rose-950/60 text-[#8B0014] dark:text-rose-300 border border-rose-200 dark:border-rose-900/60"
+                    : "px-3 py-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700"
+                }`}
+              >
+                <div className={`flex items-center min-w-0 ${isCollapsed ? "justify-center" : "gap-3"}`}>
+                  <BookOpen className={`${isCollapsed ? "h-5 w-5" : "h-4 w-4"} text-[#8B0014] dark:text-rose-400 shrink-0`} />
+                  {!isCollapsed && <span className="truncate font-bold">System &amp; Risk Docs</span>}
+                </div>
+              </button>
             </div>
           </div>
         </div>
