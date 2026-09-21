@@ -832,6 +832,58 @@ export default function DocumentationPage() {
               </div>
             </div>
 
+            {/* Plain English Layman's Explanation Card */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/80 to-blue-50/50 dark:from-indigo-950/40 dark:to-blue-950/30 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-indigo-600 text-white text-xs font-black">
+                  💡 Plain English Guide
+                </div>
+                <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">
+                  How Failure Prediction Works in 4 Simple Steps (Non-Technical Explanation)
+                </h4>
+              </div>
+
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                Think of the Predictive Model like a <strong>School Weather Forecast</strong>. Instead of waiting for a student to fail at the end of the quarter, the computer looks at early warning clues to calculate the percentage chance (0% to 100%) that they will fall below the passing grade of 75:
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-1">
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-indigo-100 dark:border-indigo-900/50 space-y-1">
+                  <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 block">Step 1: Base Grade</span>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Current Standing</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Takes scores on completed quizzes (Written Work), projects (Performance Tasks), and exams using DepEd weights.
+                  </p>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-rose-100 dark:border-rose-900/50 space-y-1">
+                  <span className="text-[10px] font-black uppercase text-rose-600 dark:text-rose-400 block">Step 2: Red Flag Deductions</span>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Subtract Roadblocks</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Deducts 8 pts for every missing project, 2.5 pts for excessive absences, and extra points for severe outside distress.
+                  </p>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-amber-100 dark:border-amber-900/50 space-y-1">
+                  <span className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-400 block">Step 3: Forecasted Final</span>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Where They Will Land</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Subtracts the penalties from their base grade to forecast their final grade if no help is given.
+                  </p>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-emerald-100 dark:border-emerald-900/50 space-y-1">
+                  <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 block">Step 4: Traffic Light Alert</span>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Failure Probability %</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    🔴 Critical (≥70% chance)<br />
+                    🟡 Moderate (40% - 69%)<br />
+                    🟢 On Track (&lt;40%)
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* What-If Remediation Simulation sandbox reference */}
             <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
               <div className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
