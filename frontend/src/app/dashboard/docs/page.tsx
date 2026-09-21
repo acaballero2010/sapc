@@ -789,54 +789,58 @@ export default function DocumentationPage() {
               </div>
             </div>
 
-            {/* DepEd DO 8 s. 2015 Subject Weightings Table */}
+            {/* DepEd DO 8 s. 2015 Junior High School Subject Weightings Table */}
             <div className="space-y-3">
               <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-                DepEd Senior High School Subject Grading Weight Standards
+                DepEd Junior High School (Grades 7–10) Subject Grading Weight Standards (DO 8, s. 2015)
               </h3>
               <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
                 <table className="min-w-full text-left text-xs">
                   <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 font-black text-slate-600 dark:text-slate-300 uppercase">
                     <tr>
-                      <th className="py-3 px-4">Subject Track / Category</th>
+                      <th className="py-3 px-4">Subject Group / Learning Area</th>
                       <th className="py-3 px-3 text-center">Written Work (WW)</th>
                       <th className="py-3 px-3 text-center">Performance Tasks (PT)</th>
-                      <th className="py-3 px-3 text-center">Quarterly Exam (QA)</th>
-                      <th className="py-3 px-4">Sample Core &amp; Specialized Subjects</th>
+                      <th className="py-3 px-3 text-center">Quarterly Assessment (QA)</th>
+                      <th className="py-3 px-4">DepEd Junior High Subjects</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">STEM Specialized</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">25%</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">45%</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">30%</td>
-                      <td className="py-3 px-4 text-xs">Pre-Calculus, General Chemistry, General Physics</td>
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">Science &amp; Mathematics</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">40%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">40%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">20%</td>
+                      <td className="py-3 px-4 text-xs">General Science, Biology, Chemistry, Physics, Algebra, Geometry, Statistics</td>
                     </tr>
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">ABM Specialized</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">25%</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">45%</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">30%</td>
-                      <td className="py-3 px-4 text-xs">FABM 1 &amp; 2, Business Finance, Applied Economics</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">HUMSS Specialized</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">25%</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">50%</td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">25%</td>
-                      <td className="py-3 px-4 text-xs">DISS, Creative Writing, Philippine Politics &amp; Governance</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">Core Academic Subjects</td>
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">Languages, AP, &amp; EsP</td>
                       <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">30%</td>
                       <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">50%</td>
                       <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">20%</td>
-                      <td className="py-3 px-4 text-xs">General Mathematics, 21st Century Literature, Oral Comm</td>
+                      <td className="py-3 px-4 text-xs">English, Filipino, Araling Panlipunan (AP), Edukasyon sa Pagpapakatao (EsP)</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">TLE &amp; MAPEH</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">20%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">60%</td>
+                      <td className="py-3 px-3 text-center font-mono font-bold text-purple-600">20%</td>
+                      <td className="py-3 px-4 text-xs">Technology &amp; Livelihood Education (TLE), Music, Arts, Physical Education, Health</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            {/* What-If Remediation Simulation sandbox reference */}
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
+              <div className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                <span>Interactive What-If Remediation Sandbox &amp; Target Recovery Engine</span>
+              </div>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                Faculty and counselors can dynamically simulate interventions (e.g. submitting 2 missing performance tasks, reducing absences, or attending clinic counseling). The engine recalculates projected grade <code className="text-amber-600 font-bold">&Delta;G</code> and post-intervention failure probability <code className="text-emerald-600 font-bold">P_fail_simulated</code> in real time to prescribe concrete, achievable goals for students.
+              </p>
             </div>
           </div>
         </div>
