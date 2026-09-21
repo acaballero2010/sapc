@@ -197,7 +197,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
 
     handleUrlSync();
 
-    const handleCustomNav = (e: CustomEvent<{ tab?: TabType; hash?: string }>) => {
+    const handleCustomNav = (e: CustomEvent<{ tab?: TabType; hash?: string; source?: string }>) => {
+      if (e.detail?.source === "tab_click") return;
       if (e.detail?.tab) {
         setActiveTab(e.detail.tab);
       }
@@ -230,6 +231,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
       const url = new URL(window.location.href);
       url.searchParams.set("tab", tab);
       window.history.replaceState({}, "", url.toString());
+      window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab, source: "tab_click" } }));
     }
   };
 

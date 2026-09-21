@@ -591,7 +591,8 @@ export const TeacherDashboard: React.FC = () => {
 
     handleUrlSync();
 
-    const handleCustomNav = (e: CustomEvent<{ tab?: TeacherTabType; hash?: string }>) => {
+    const handleCustomNav = (e: CustomEvent<{ tab?: TeacherTabType; hash?: string; source?: string }>) => {
+      if (e.detail?.source === "tab_click") return;
       if (e.detail?.tab) setActiveTab(e.detail.tab);
       if (e.detail?.hash) {
         setTimeout(() => {
@@ -629,6 +630,7 @@ export const TeacherDashboard: React.FC = () => {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", tab);
       window.history.replaceState({}, "", url.toString());
+      window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab, source: "tab_click" } }));
     }
   };
 

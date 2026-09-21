@@ -260,7 +260,8 @@ export const ParentDashboard: React.FC = () => {
       const urlTab = params.get("tab") as ParentTabType;
       if (urlTab) setActiveTab(urlTab);
 
-      const handleCustomNav = (e: CustomEvent<{ tab?: ParentTabType }>) => {
+      const handleCustomNav = (e: CustomEvent<{ tab?: ParentTabType; source?: string }>) => {
+        if (e.detail?.source === "tab_click") return;
         if (e.detail?.tab) setActiveTab(e.detail.tab);
       };
       window.addEventListener("sapc:navigate-tab", handleCustomNav as EventListener);
@@ -314,6 +315,7 @@ export const ParentDashboard: React.FC = () => {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", tab);
       window.history.replaceState({}, "", url.toString());
+      window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab, source: "tab_click" } }));
     }
   }, []);
 

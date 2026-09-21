@@ -336,6 +336,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     if (currentNorm === targetNorm) {
       if (requestedTab) {
+        setCurrentTab(requestedTab);
         window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab: requestedTab, hash } }));
         const newUrl = `${targetPath}?tab=${requestedTab}${hash ? `#${hash}` : ""}`;
         window.history.pushState({}, "", newUrl);
