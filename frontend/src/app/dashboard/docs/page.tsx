@@ -769,9 +769,53 @@ export default function DocumentationPage() {
               </div>
             </div>
 
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              While general AHP computes an overarching holistic composite score, the <strong>Subject-Level Failure Risk Predictor</strong> operates on granular formative classroom velocity. It evaluates Written Work (WW), Performance Tasks (PT), and Quarterly Exam standing (QE) alongside subject period cuts and cross-domain cognitive multipliers to calculate a calibrated sigmoid failure probability:
-            </p>
+            <div className="space-y-4">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                <Brain className="h-5 w-5 text-[#8B0014] dark:text-rose-400" />
+                <span>What Prediction Model Is Used?</span>
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                The system employs a <strong>Hybrid Multi-Factor Predictive Architecture</strong> combining three complementary mathematical models:
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div className="font-black text-[#8B0014] dark:text-rose-400 text-sm">
+                    1. Supervised Calibrated Logistic / Sigmoid Classifier
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-900 text-amber-300 font-mono text-[11px]">
+                    &sigma;(z) = 1.0 / (1.0 + e^(-0.18 &times; (75.0 - G&#770;_s)))
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Anchored to the <strong>75.0</strong> DepEd passing threshold with a calibrated logistic slope parameter <code className="font-bold">k = 0.18</code>. Converts multi-domain projected standing into a non-linear probability of failure <code className="font-bold">P(Fail) &isin; [0%, 100%]</code>.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div className="font-black text-blue-600 dark:text-blue-400 text-sm">
+                    2. Penalized Multi-Factor Linear Feature Projection
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-900 text-blue-300 font-mono text-[11px]">
+                    G&#770;_s = G_raw - &Delta;_tasks - &Delta;_attend - &Delta;_cross
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Forecasts the subject final grade (<code className="font-bold">G&#770;_s</code>) by integrating DepEd DO 8, s. 2015 classroom weights with dynamic deductions across all non-academic domains.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <div className="font-black text-amber-600 dark:text-amber-400 text-sm">
+                    3. Saaty&apos;s Analytic Hierarchy Process (AHP MCDM)
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[11px]">
+                    CR = 0.0163 &le; 0.10 (Consistent)
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Uses eigenvector-derived weights validated by psychometricians to synthesize domain screenings into mathematically consistent sub-scores.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Formula Callout */}
             <div className="p-5 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs space-y-3 border border-slate-800">
@@ -779,7 +823,7 @@ export default function DocumentationPage() {
                 Failure Probability &amp; Grade Forecast Formulations
               </div>
               <div className="text-emerald-400">
-                P_fail(s) = 1.0 / (1.0 + exp(-k &times; (Passing_Threshold - G_projected)))
+                P_fail(s) = 1.0 / (1.0 + exp(-0.18 &times; (75.0 - G_projected)))
               </div>
               <div className="text-rose-300">
                 G_projected = (w_WW &times; S_WW + w_PT &times; S_PT + w_QA &times; S_QA) - &Delta;_Tasks - &Delta;_Attendance - &Delta;_CrossDomain
