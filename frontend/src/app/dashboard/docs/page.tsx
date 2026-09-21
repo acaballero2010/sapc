@@ -34,13 +34,15 @@ import {
   Eye,
   Key,
   Download,
-  RotateCcw
+  RotateCcw,
+  Search
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 export default function DocumentationPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"risk" | "system" | "tech" | "users" | "howtos" | "releases" | "privacy">("risk");
+  const [searchFilter, setSearchFilter] = useState("");
 
   // Mini live AHP calculator state for interactive demonstration
   const [calcGpa, setCalcGpa] = useState<number>(78);
@@ -103,6 +105,57 @@ export default function DocumentationPage() {
               <span className="text-sm font-extrabold text-amber-300">RA 10173 • DepEd</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Live Docs Quick Search & Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+        <div className="flex items-center gap-2.5 flex-1">
+          <Search className="h-4 w-4 text-slate-400 shrink-0 ml-1" />
+          <input
+            type="text"
+            placeholder="Quick search in documentation (e.g., 'GPA penalty', 'Gemini AI', 'CR ratio', 'SASS import')..."
+            value={searchFilter}
+            onChange={e => setSearchFilter(e.target.value)}
+            className="w-full bg-transparent border-none text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
+          />
+          {searchFilter && (
+            <button
+              onClick={() => setSearchFilter("")}
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-2 py-1 rounded-lg"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Quick Jump Badges */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
+          <span className="text-[11px] font-bold text-slate-400 shrink-0">Quick jump:</span>
+          <button
+            onClick={() => { setActiveTab("risk"); setSearchFilter(""); }}
+            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0"
+          >
+            AHP Math
+          </button>
+          <button
+            onClick={() => { setActiveTab("tech"); setSearchFilter(""); }}
+            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0"
+          >
+            Gemini AI
+          </button>
+          <button
+            onClick={() => { setActiveTab("howtos"); setSearchFilter(""); }}
+            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0"
+          >
+            How-Tos
+          </button>
+          <button
+            onClick={() => { setActiveTab("releases"); setSearchFilter(""); }}
+            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0"
+          >
+            v2.5 Notes
+          </button>
         </div>
       </div>
 
