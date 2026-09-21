@@ -66,15 +66,16 @@ class SubjectFailurePredictorService:
         quarterly_assessment_score: float, # 0 - 100 (or prelim score)
         missing_tasks_count: int = 0,
         subject_absences_count: int = 0,
-        strand: str = "STEM",
-        subject_code: str = "STEM-CALC",
+        strand: str = "JHS",
+        subject_code: str = "JHS-MATH",
+        family_stress_risk: float = 0.0, # 0 - 100 (from AHP Family domain)
         mental_health_risk: float = 0.0, # 0 - 100 (from AHP Mental Health domain)
         physical_fatigue_risk: float = 0.0, # 0 - 100 (from AHP Health domain)
         financial_strain_risk: float = 0.0 # 0 - 100 (from AHP Financial domain)
     ) -> Dict[str, Any]:
         """
         Calculates projected final grade, failure probability, risk tier, 
-        dominant drivers, and recommended remedial prescriptions.
+        dominant drivers, and recommended remedial prescriptions factoring all 5 domains.
         """
         # Find subject metadata
         subj_meta = None
@@ -91,9 +92,9 @@ class SubjectFailurePredictorService:
                 "code": subject_code,
                 "name": subject_code,
                 "category": "General",
-                "weight_ww": 0.25,
+                "weight_ww": 0.30,
                 "weight_pt": 0.50,
-                "weight_qa": 0.25,
+                "weight_qa": 0.20,
                 "baseline_difficulty": 1.0
             }
 
@@ -101,7 +102,7 @@ class SubjectFailurePredictorService:
         w_pt = subj_meta["weight_pt"]
         w_qa = subj_meta["weight_qa"]
 
-        # Base weighted raw academic component
+        # Base weighted raw academic component (DepEd DO 8, s. 2015)
         raw_weighted_grade = (
             (written_work_avg * w_ww) +
             (performance_task_avg * w_pt) +
@@ -115,12 +116,12 @@ class SubjectFailurePredictorService:
         excess_absences = max(0, subject_absences_count - 2)
         attendance_penalty = min(15.0, excess_absences * 2.5)
 
-        # Cross-Domain Cognitive Dampening Multipliers
-        # Heavy mental distress, physical fatigue, and financial work burdens drag subject performance
+        # Cross-Domain Multipliers (All 4 Non-Academic Domains Factored)
         cross_domain_penalty = (
-            (mental_health_risk * 0.04) +
-            (physical_fatigue_risk * 0.03) +
-            (financial_strain_risk * 0.03)
+            (family_stress_risk * 0.03) +
+            (mental_health_risk * 0.03) +
+            (physical_fatigue_risk * 0.02) +
+            (financial_strain_risk * 0.02)
         )
 
         # Projected Final Grade (Bounded between 50.0 and 100.0)
@@ -145,7 +146,7 @@ class SubjectFailurePredictorService:
             risk_tier = "ON_TRACK"
             risk_badge = "🟢 On Track / Passing"
 
-        # Identify Primary Risk Drivers
+        # Identify Primary Risk Drivers (All 5 Domains Evaluated)
         risk_drivers = []
         if missing_tasks_count > 0:
             risk_drivers.append(f"{missing_tasks_count} Missing Performance Task(s) (-{task_penalty:.1f} pts)")
@@ -155,10 +156,14 @@ class SubjectFailurePredictorService:
             risk_drivers.append(f"High Subject Period Absenteeism ({subject_absences_count} cuts/absences)")
         if quarterly_assessment_score < 75.0:
             risk_drivers.append(f"Sub-Passing Prelim / Exam Standing ({quarterly_assessment_score:.1f}%)")
+        if family_stress_risk >= 60.0:
+            risk_drivers.append(f"Household Instability / Domestic Stress Impact (Family Risk: {family_stress_risk:.1f})")
         if mental_health_risk >= 60.0:
             risk_drivers.append(f"Elevated Psychological Distress Impact (MH Risk: {mental_health_risk:.1f})")
+        if physical_fatigue_risk >= 60.0:
+            risk_drivers.append(f"Physical Health / Chronic Fatigue Impact (Health Risk: {physical_fatigue_risk:.1f})")
         if financial_strain_risk >= 60.0:
-            risk_drivers.append("External Working Student / Economic Fatigue")
+            risk_drivers.append("External Working Student / Socioeconomic Fatigue")
 
         if not risk_drivers:
             risk_drivers.append("Consistently Satisfactory Performance Tasks & Quizzes")

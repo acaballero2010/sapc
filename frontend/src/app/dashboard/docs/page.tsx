@@ -832,54 +832,104 @@ export default function DocumentationPage() {
               </div>
             </div>
 
-            {/* Plain English Layman's Explanation Card */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/80 to-blue-50/50 dark:from-indigo-950/40 dark:to-blue-950/30 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-indigo-600 text-white text-xs font-black">
-                  💡 Plain English Guide
+            {/* Multi-Domain Attribute Integration & Factorization Matrix */}
+            <div className="bg-slate-50 dark:bg-slate-850 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-[#8B0014]/10 text-[#8B0014] dark:text-rose-400 border border-rose-200 dark:border-rose-900/50">
+                  <Layers className="h-5 w-5" />
                 </div>
-                <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">
-                  How Failure Prediction Works in 4 Simple Steps (Non-Technical Explanation)
-                </h4>
+                <div>
+                  <h4 className="font-extrabold text-slate-900 dark:text-white text-base">
+                    Multi-Factor Failure Prediction: 5-Domain Attribute Integration
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    How specific attributes from all five holistic domains are factored directly into the predictive failure model.
+                  </p>
+                </div>
               </div>
 
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Think of the Predictive Model like a <strong>School Weather Forecast</strong>. Instead of waiting for a student to fail at the end of the quarter, the computer looks at early warning clues to calculate the percentage chance (0% to 100%) that they will fall below the passing grade of 75:
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-1">
-                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-indigo-100 dark:border-indigo-900/50 space-y-1">
-                  <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 block">Step 1: Base Grade</span>
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Current Standing</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                {/* Academic Domain */}
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-[#8B0014] dark:text-rose-400 uppercase text-[11px]">1. Academic Domain (30%)</span>
+                    <span className="px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-[#8B0014] dark:text-rose-300 font-bold text-[10px]">SASS &amp; DO 8</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <strong>Factored Attributes:</strong> Subject quiz scores (WW), project completions (PT), exam standing (QA), missing deliverables count (<code className="text-rose-600 font-bold">M</code>), and subject-specific class cuts (<code className="text-rose-600 font-bold">A</code>).
+                  </p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Takes scores on completed quizzes (Written Work), projects (Performance Tasks), and exams using DepEd weights.
+                    <strong>Impact on Model:</strong> Dictates the primary baseline grade <code className="font-mono">G_raw</code> and immediate task/absence penalty deductions.
                   </p>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-rose-100 dark:border-rose-900/50 space-y-1">
-                  <span className="text-[10px] font-black uppercase text-rose-600 dark:text-rose-400 block">Step 2: Red Flag Deductions</span>
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Subtract Roadblocks</p>
+                {/* Family Domain */}
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-blue-600 dark:text-blue-400 uppercase text-[11px]">2. Family Domain (20%)</span>
+                    <span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-[10px]">17-Field Form</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <strong>Factored Attributes:</strong> Guardian living arrangement, household conflict level (0–10), domestic study support, OFW parent separation, and sibling caretaking burdens.
+                  </p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Deducts 8 pts for every missing project, 2.5 pts for excessive absences, and extra points for severe outside distress.
+                    <strong>Impact on Model:</strong> Generates Family Vulnerability Index (<code className="font-mono">S_FA</code>), adjusting student homework completion capacity.
                   </p>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-amber-100 dark:border-amber-900/50 space-y-1">
-                  <span className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-400 block">Step 3: Forecasted Final</span>
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Where They Will Land</p>
+                {/* Health Domain */}
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-emerald-600 dark:text-emerald-400 uppercase text-[11px]">3. Health Domain (20%)</span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-[10px]">Clinic Intake</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <strong>Factored Attributes:</strong> Chronic medical conditions, BMI nutritional status, clinic visit frequency, medical illness absences, sleep deficits (&lt;6 hrs/night), and sensory impairments.
+                  </p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Subtracts the penalties from their base grade to forecast their final grade if no help is given.
+                    <strong>Impact on Model:</strong> Calculates Physical Health Strain (<code className="font-mono">S_HE</code>), applying physical stamina penalty factors to exam focus.
                   </p>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-emerald-100 dark:border-emerald-900/50 space-y-1">
-                  <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 block">Step 4: Traffic Light Alert</span>
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Failure Probability %</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    🔴 Critical (≥70% chance)<br />
-                    🟡 Moderate (40% - 69%)<br />
-                    🟢 On Track (&lt;40%)
+                {/* Mental Health Domain */}
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-purple-600 dark:text-purple-400 uppercase text-[11px]">4. Mental Health Domain (15%)</span>
+                    <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold text-[10px]">PHQ-9 / GAD-7</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <strong>Factored Attributes:</strong> Standardized depression (PHQ-9) and anxiety (GAD-7) scores, psychological distress index, peer conflict/bullying incidents, and counseling intake notes.
                   </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <strong>Impact on Model:</strong> Determines Mental Health Deficit (<code className="font-mono">S_MH</code>), applying cognitive retention and anxiety multipliers.
+                  </p>
+                </div>
+
+                {/* Financial Domain */}
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-amber-600 dark:text-amber-400 uppercase text-[11px]">5. Financial Domain (15%)</span>
+                    <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 font-bold text-[10px]">Socioeconomic</span>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    <strong>Factored Attributes:</strong> 4Ps beneficiary status, household income bracket, transportation allowance distress, meal security, working student hours, and device/internet connectivity.
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <strong>Impact on Model:</strong> Produces Financial Strain Index (<code className="font-mono">S_FI</code>), accounting for resource barriers and after-school fatigue.
+                  </p>
+                </div>
+
+                {/* Predictive Synthesis */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-rose-900 to-[#5A000D] text-white space-y-2 flex flex-col justify-between">
+                  <div>
+                    <span className="font-black text-amber-300 uppercase text-[11px] block">Predictive Model Synthesis</span>
+                    <p className="text-rose-100 text-xs mt-1 leading-relaxed">
+                      All 5 domain sub-scores synthesize into the unified grade projection and calibrated sigmoid failure curve:
+                    </p>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-black/30 border border-white/10 font-mono text-[11px] text-amber-200">
+                    P(Fail) = 1.0 / (1.0 + e^(-0.18 &times; (75.0 - G&#770;_s)))
+                  </div>
                 </div>
               </div>
             </div>

@@ -146,10 +146,12 @@ export function calculateSubjectFailurePrediction(
   // Penalties
   const taskPenalty = Math.min(25.0, missingTasks * 8.0);
   const attendancePenalty = Math.min(15.0, Math.max(0, subjectAbsences - 2) * 2.5);
+  // Cross-Domain Multipliers (All 4 Non-Academic Domains Factored)
   const crossDomainPenalty = (
-    (student.domain_scores.mental_health * 0.04) +
-    (student.domain_scores.health * 0.03) +
-    (student.domain_scores.financial * 0.03)
+    (student.domain_scores.family * 0.03) +
+    (student.domain_scores.mental_health * 0.03) +
+    (student.domain_scores.health * 0.02) +
+    (student.domain_scores.financial * 0.02)
   );
 
   const projectedGrade = Math.max(50.0, Math.min(100.0, rawWeighted - taskPenalty - attendancePenalty - crossDomainPenalty));
@@ -171,13 +173,16 @@ export function calculateSubjectFailurePrediction(
     riskBadge = "🟡 Moderate Risk";
   }
 
-  // Top Risk Drivers
+  // Top Risk Drivers (Factoring All 5 Domains)
   const riskDrivers: string[] = [];
   if (missingTasks > 0) riskDrivers.push(`${missingTasks} Missing Performance Task(s) (-${taskPenalty.toFixed(1)} pts)`);
   if (baseWW < 75.0) riskDrivers.push(`Low Quiz Average (${baseWW.toFixed(1)}%)`);
   if (subjectAbsences >= 3) riskDrivers.push(`${subjectAbsences} Subject Period Cuts/Absences`);
   if (baseQA < 75.0) riskDrivers.push(`Sub-Passing Exam Standing (${baseQA.toFixed(1)}%)`);
+  if (student.domain_scores.family >= 60.0) riskDrivers.push(`Household Instability / Domestic Stress (Family: ${student.domain_scores.family.toFixed(0)})`);
   if (student.domain_scores.mental_health >= 60.0) riskDrivers.push(`Psychological Distress Impact (MH: ${student.domain_scores.mental_health.toFixed(0)})`);
+  if (student.domain_scores.health >= 60.0) riskDrivers.push(`Physical Fatigue / Health Strain (Health: ${student.domain_scores.health.toFixed(0)})`);
+  if (student.domain_scores.financial >= 60.0) riskDrivers.push(`Working Student / Socioeconomic Fatigue (Financial: ${student.domain_scores.financial.toFixed(0)})`);
   if (student.domain_scores.financial >= 60.0) riskDrivers.push(`Working Student Fatigue / Economic Strain`);
   if (riskDrivers.length === 0) riskDrivers.push("Satisfactory Task Submissions & Quiz Averages");
 
