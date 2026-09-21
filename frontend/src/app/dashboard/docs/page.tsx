@@ -892,9 +892,10 @@ export default function DocumentationPage() {
                   { id: "all", label: "All Attributes" },
                   { id: "academic", label: "Academic (SASS)" },
                   { id: "mental_health", label: "Mental Health" },
+                  { id: "physical_health", label: "Physical Health" },
                   { id: "financial", label: "Financial" },
-                  { id: "family", label: "Family" },
-                  { id: "health", label: "Physical Health" }
+                  { id: "family", label: "Family & Social" },
+                  { id: "master", label: "Demographics" }
                 ].map((f) => (
                   <button
                     key={f.id}
@@ -926,45 +927,60 @@ export default function DocumentationPage() {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
                   {[
                     // Master Demographics
-                    { key: "lrn", type: "String(12)", domain: "Master Key", values: "12 Digits (e.g. 109238475001)", desc: "Unique DepEd Learner Reference Number. Master entity relational key across all tables." },
-                    { key: "full_name", type: "String", domain: "Demographics", values: "Legal Name Text", desc: "Full student name for official records, report cards, and guidance files." },
-                    { key: "grade_level", type: "Integer", domain: "Demographics", values: "7, 8, 9, 10, 11, 12", desc: "Current enrolled grade level in Junior High or Senior High School." },
-                    { key: "strand", type: "String", domain: "Demographics", values: "STEM, HUMSS, ABM, GAS, TVL", desc: "Senior High School academic track determining curriculum specialization." },
-                    { key: "section_name", type: "String", domain: "Demographics", values: "Section Name Text", desc: "Assigned class section name (e.g. Grade 11 - St. Augustine)." },
-                    { key: "adviser_name", type: "String", domain: "Demographics", values: "Faculty Name Text", desc: "Licensed teacher overseeing homeroom guidance and advisory monitoring." },
+                    { domainId: "master", key: "lrn", type: "String(12)", domain: "Master Key", values: "12 Digits (e.g. 109238475001)", desc: "Unique DepEd Learner Reference Number. Master entity relational key across all tables." },
+                    { domainId: "master", key: "full_name", type: "String", domain: "Demographics", values: "Legal Name Text", desc: "Full student name for official records, report cards, and guidance files." },
+                    { domainId: "master", key: "grade_level", type: "Integer", domain: "Demographics", values: "7, 8, 9, 10, 11, 12", desc: "Current enrolled grade level in Junior High or Senior High School." },
+                    { domainId: "master", key: "strand", type: "String", domain: "Demographics", values: "STEM, HUMSS, ABM, GAS, TVL", desc: "Senior High School academic track determining curriculum specialization." },
+                    { domainId: "master", key: "section_name", type: "String", domain: "Demographics", values: "Section Name Text", desc: "Assigned class section name (e.g. Grade 11 - St. Augustine)." },
+                    { domainId: "master", key: "adviser_name", type: "String", domain: "Demographics", values: "Faculty Name Text", desc: "Licensed teacher overseeing homeroom guidance and advisory monitoring." },
                     
                     // Academic
-                    { key: "quarter_gpa", type: "Float", domain: "Academic (30%)", values: "60.00 – 100.00", desc: "Quarterly General Weighted Average across learning areas. Passing threshold is 75.0." },
-                    { key: "failing_subjects_count", type: "Integer", domain: "Academic (30%)", values: "0 – 10", desc: "Count of learning areas below 75.0. Primary driver of non-promotion risk." },
-                    { key: "days_absent", type: "Integer", domain: "Academic (30%)", values: "0 – 60 days", desc: "Total school days missed during the active grading period." },
-                    { key: "attendance_rate_pct", type: "Float", domain: "Academic (30%)", values: "0.0% – 100.0%", desc: "Ratio of days present to total school days: (Present / Total) × 100." },
-                    { key: "incomplete_requirements_count", type: "Integer", domain: "Academic (30%)", values: "0 – 20", desc: "Pending Written Works (WW) or Performance Tasks (PT) causing grade withholding." },
+                    { domainId: "academic", key: "quarter_gpa", type: "Float", domain: "Academic (30%)", values: "60.00 – 100.00", desc: "Quarterly General Weighted Average across learning areas. Passing threshold is 75.0." },
+                    { domainId: "academic", key: "failing_subjects_count", type: "Integer", domain: "Academic (30%)", values: "0 – 10", desc: "Count of learning areas below 75.0. Primary driver of non-promotion risk." },
+                    { domainId: "academic", key: "days_absent", type: "Integer", domain: "Academic (30%)", values: "0 – 60 days", desc: "Total school days missed during the active grading period." },
+                    { domainId: "academic", key: "attendance_rate_pct", type: "Float", domain: "Academic (30%)", values: "0.0% – 100.0%", desc: "Ratio of days present to total school days: (Present / Total) × 100." },
+                    { domainId: "academic", key: "incomplete_requirements_count", type: "Integer", domain: "Academic (30%)", values: "0 – 20", desc: "Pending Written Works (WW) or Performance Tasks (PT) causing grade withholding." },
+                    { domainId: "academic", key: "extracurricular_club", type: "String", domain: "Academic (30%)", values: "Club Name / Non-Member", desc: "Student organization or club membership supporting school engagement." },
+                    { domainId: "academic", key: "club_participation_level", type: "String", domain: "Academic (30%)", values: "High, Moderate, Low, None", desc: "Level of active involvement and attendance in school club meetings." },
                     
                     // Mental Health
-                    { key: "gad7_anxiety_score", type: "Integer", domain: "Mental Health (15%)", values: "0 – 21", desc: "Standardized GAD-7 Anxiety screener: Minimal (0-4), Mild (5-9), Moderate (10-14), Severe (15-21)." },
-                    { key: "phq9_depression_score", type: "Integer", domain: "Mental Health (15%)", values: "0 – 27", desc: "Standardized PHQ-9 Depression screener: Minimal (0-4), Mild (5-9), Moderate (10-14), Mod Severe (15-19), Severe (20-27)." },
-                    { key: "stress_level_1_to_5", type: "Integer", domain: "Mental Health (15%)", values: "1 to 5 Likert", desc: "Self-reported chronic academic and environmental stress index." },
-                    { key: "coping_adaptiveness", type: "String", domain: "Mental Health (15%)", values: "Adaptive, Neutral, Maladaptive", desc: "Quality of emotional regulation and task engagement under pressure." },
-                    { key: "counselor_case_flag", type: "Boolean", domain: "Mental Health (15%)", values: "true / false", desc: "Priority clinical flag set by RGC triggering immediate 1-on-1 counselor intake." },
+                    { domainId: "mental_health", key: "gad7_anxiety_score", type: "Integer", domain: "Mental Health (15%)", values: "0 – 21", desc: "Standardized GAD-7 Anxiety screener: Minimal (0-4), Mild (5-9), Moderate (10-14), Severe (15-21)." },
+                    { domainId: "mental_health", key: "phq9_depression_score", type: "Integer", domain: "Mental Health (15%)", values: "0 – 27", desc: "Standardized PHQ-9 Depression screener: Minimal (0-4), Mild (5-9), Moderate (10-14), Mod Severe (15-19), Severe (20-27)." },
+                    { domainId: "mental_health", key: "stress_level_1_to_5", type: "Integer", domain: "Mental Health (15%)", values: "1 to 5 Likert", desc: "Self-reported chronic academic and environmental stress index." },
+                    { domainId: "mental_health", key: "burnout_somatic_symptoms", type: "String", domain: "Mental Health (15%)", values: "Somatic Distress Text", desc: "Physical manifestations of psychological strain (e.g. tension headaches, panic, nausea)." },
+                    { domainId: "mental_health", key: "anhedonia_and_withdrawal_flag", type: "Boolean", domain: "Mental Health (15%)", values: "true / false", desc: "Loss of pleasure in regular activities and behavioral social withdrawal." },
+                    { domainId: "mental_health", key: "coping_adaptiveness", type: "String", domain: "Mental Health (15%)", values: "Adaptive, Neutral, Maladaptive", desc: "Quality of emotional regulation and task engagement under pressure." },
+                    { domainId: "mental_health", key: "resilience_score_1_to_5", type: "Integer", domain: "Mental Health (15%)", values: "1 to 5 Likert", desc: "Psychological resilience and emotional bounce-back capacity." },
+                    { domainId: "mental_health", key: "counselor_case_flag", type: "Boolean", domain: "Mental Health (15%)", values: "true / false", desc: "Priority clinical flag set by RGC triggering immediate 1-on-1 counselor intake." },
+
+                    // Physical Health
+                    { domainId: "physical_health", key: "general_physical_health_status", type: "String", domain: "Physical Health (20%)", values: "Excellent, Good, Fair, Poor", desc: "Physician/nurse overall clinical assessment of student physical wellness." },
+                    { domainId: "physical_health", key: "chronic_condition", type: "String", domain: "Physical Health (20%)", values: "Asthma, Migraine, Epilepsy, None", desc: "Persistent medical diagnoses requiring clinic management and PE modifications." },
+                    { domainId: "physical_health", key: "avg_sleep_hours_per_night", type: "Float", domain: "Physical Health (20%)", values: "2.0 – 12.0 hours", desc: "Nightly sleep duration. Chronic deprivation (<5h) causes severe cognitive fatigue." },
+                    { domainId: "physical_health", key: "sleep_quality_rating", type: "String", domain: "Physical Health (20%)", values: "Good, Moderate, Severely Deprived", desc: "Qualitative sleep hygiene rating impacting classroom focus and energy." },
+                    { domainId: "physical_health", key: "quarterly_clinic_visits", type: "Integer", domain: "Physical Health (20%)", values: "0 – 20 visits", desc: "Frequency of class disruptions for acute medical treatments at the school clinic." },
+                    { domainId: "physical_health", key: "medical_absences_count", type: "Integer", domain: "Physical Health (20%)", values: "0 – 30 days", desc: "Total validated medical absences supported by clinic or physician excuse notes." },
+                    { domainId: "physical_health", key: "daily_meal_frequency", type: "String", domain: "Physical Health (20%)", values: "3 Meals + Snacks, 2 Meals, 1 Meal / Skips", desc: "Nutritional intake regularity directly affecting cognitive stamina and glucose levels." },
+                    { domainId: "physical_health", key: "bmi_category", type: "String", domain: "Physical Health (20%)", values: "Underweight, Normal, Overweight, Obese", desc: "Standard DepEd BMI nutritional status screening category." },
+                    { domainId: "physical_health", key: "daytime_fatigue_or_somnolence", type: "String", domain: "Physical Health (20%)", values: "None, Occasional, Frequent", desc: "Classroom drowsiness and alertness flags logged by teachers." },
 
                     // Financial
-                    { key: "monthly_household_income_php", type: "Float", domain: "Financial (15%)", values: "PHP (≥ 0.0)", desc: "Gross monthly household income determining socio-economic quintile." },
-                    { key: "income_bracket", type: "String", domain: "Financial (15%)", values: "Low (<₱10k), Lower Mid (₱10k-25k), Mid, Upper Mid", desc: "DepEd / PSA socio-economic classification." },
-                    { key: "is_4ps_beneficiary", type: "Boolean", domain: "Financial (15%)", values: "true / false", desc: "DSWD Pantawid Pamilyang Pilipino Program indigent beneficiary status." },
-                    { key: "unpaid_balance_php", type: "Float", domain: "Financial (15%)", values: "PHP (≥ 0.0)", desc: "Current outstanding tuition and fee balance in accounting records." },
-                    { key: "student_part_time_work_status", type: "String", domain: "Financial (15%)", values: "None, Light, Working Student (>20h/wk)", desc: "External employment fatigue burden affecting homework completion and alertness." },
+                    { domainId: "financial", key: "monthly_household_income_php", type: "Float", domain: "Financial (15%)", values: "PHP (≥ 0.0)", desc: "Gross monthly household income determining socio-economic quintile." },
+                    { domainId: "financial", key: "income_bracket", type: "String", domain: "Financial (15%)", values: "Low (<₱10k), Lower Mid (₱10k-25k), Mid, Upper Mid", desc: "DepEd / PSA socio-economic classification." },
+                    { domainId: "financial", key: "is_4ps_beneficiary", type: "Boolean", domain: "Financial (15%)", values: "true / false", desc: "DSWD Pantawid Pamilyang Pilipino Program indigent beneficiary status." },
+                    { domainId: "financial", key: "daily_allowance_adequacy", type: "String", domain: "Financial (15%)", values: "Adequate (₱100+), Tight (₱50-80), Inadequate (<₱50)", desc: "Daily allowance for food, transportation, and learning material costs." },
+                    { domainId: "financial", key: "unpaid_balance_php", type: "Float", domain: "Financial (15%)", values: "PHP (≥ 0.0)", desc: "Current outstanding tuition and fee balance in accounting records." },
+                    { domainId: "financial", key: "overdue_installments", type: "Integer", domain: "Financial (15%)", values: "0 – 5", desc: "Number of overdue installment billing deadlines missed." },
+                    { domainId: "financial", key: "student_part_time_work_status", type: "String", domain: "Financial (15%)", values: "None, Light, Working Student (>20h/wk)", desc: "External employment fatigue burden affecting homework completion and alertness." },
 
                     // Family
-                    { key: "ofw_parent_status", type: "String", domain: "Family (20%)", values: "None, One Parent, Both Parents", desc: "Parental overseas employment separation status." },
-                    { key: "is_eldest_child", type: "Boolean", domain: "Family (20%)", values: "true / false", desc: "Eldest child indicator; correlates with domestic childcare and household burdens." },
-                    { key: "guardian_contact_rating", type: "String", domain: "Family (20%)", values: "High, Moderate, Low, Unresponsive", desc: "Parental communication responsiveness to school advisories and conferences." },
-                    { key: "domestic_distress_flag", type: "Boolean", domain: "Family (20%)", values: "true / false", desc: "Documented domestic conflict, guardian illness, or unstable study setting." },
-
-                    // Health
-                    { key: "chronic_condition", type: "String", domain: "Health (20%)", values: "Asthma, Migraine, Epilepsy, None", desc: "Persistent medical diagnoses requiring clinic management and PE modifications." },
-                    { key: "avg_sleep_hours_per_night", type: "Float", domain: "Health (20%)", values: "2.0 – 12.0 hours", desc: "Nightly sleep duration. Chronic deprivation (<5h) causes severe cognitive fatigue." },
-                    { key: "quarterly_clinic_visits", type: "Integer", domain: "Health (20%)", values: "0 – 20 visits", desc: "Frequency of class disruptions for acute medical treatments at the school clinic." },
-                    { key: "daytime_fatigue_or_somnolence", type: "String", domain: "Health (20%)", values: "None, Occasional, Frequent", desc: "Classroom drowsiness and alertness flags logged by teachers." }
+                    { domainId: "family", key: "ofw_parent_status", type: "String", domain: "Family & Social (20%)", values: "None, One Parent, Both Parents", desc: "Parental overseas employment separation status." },
+                    { domainId: "family", key: "is_eldest_child", type: "Boolean", domain: "Family & Social (20%)", values: "true / false", desc: "Eldest child indicator; correlates with domestic childcare and household burdens." },
+                    { domainId: "family", key: "siblings_count", type: "Integer", domain: "Family & Social (20%)", values: "0 – 10", desc: "Total number of dependent siblings in the household." },
+                    { domainId: "family", key: "parent_marital_status", type: "String", domain: "Family & Social (20%)", values: "Married / Intact, Separated, Single Parent", desc: "Guardian marital structure and domestic stability." },
+                    { domainId: "family", key: "living_arrangement", type: "String", domain: "Family & Social (20%)", values: "With Parents, Grandparents, Relatives, Dorm", desc: "Physical custody and household living arrangement." },
+                    { domainId: "family", key: "guardian_contact_rating", type: "String", domain: "Family & Social (20%)", values: "High, Moderate, Low, Unresponsive", desc: "Parental communication responsiveness to school advisories and conferences." },
+                    { domainId: "family", key: "domestic_distress_flag", type: "Boolean", domain: "Family & Social (20%)", values: "true / false", desc: "Documented domestic conflict, guardian illness, or unstable study setting." }
                   ]
                     .filter((item) => {
                       const matchQuery =
@@ -974,10 +990,10 @@ export default function DocumentationPage() {
                         item.domain.toLowerCase().includes(attributeSearch.toLowerCase());
                       const matchDomain =
                         datasetDomainFilter === "all" ||
-                        item.domain.toLowerCase().includes(datasetDomainFilter.toLowerCase());
+                        item.domainId === datasetDomainFilter;
                       return matchQuery && matchDomain;
                     })
-                    .map((item, idx) => (
+                    .map((item) => (
                       <tr 
                         key={item.key} 
                         className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
