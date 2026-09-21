@@ -2622,11 +2622,9 @@ export const TeacherDashboard: React.FC = () => {
                 className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#8B0014] cursor-pointer"
               >
                 <option value="all">All Sections</option>
-                <option value="STEM 12-A">STEM 12-A</option>
-                <option value="STEM 12-B">STEM 12-B</option>
-                <option value="ABM 12-A">ABM 12-A</option>
-                <option value="HUMSS 12-A">HUMSS 12-A</option>
-                <option value="ICT 12-A">ICT 12-A</option>
+                {Array.from(new Set(students.map(s => s.section_name))).filter(Boolean).sort().map(sec => (
+                  <option key={sec} value={sec}>{sec}</option>
+                ))}
               </select>
             </div>
 

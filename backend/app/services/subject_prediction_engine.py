@@ -1,34 +1,56 @@
 import math
 from typing import Dict, List, Any, Optional
 
-# DepEd Senior High School and Junior High School Subject Taxonomy
+# DepEd Junior High School (Grades 7 to 10) Subject Taxonomy (DO 8, s. 2015)
 SUBJECT_CATALOG = {
-    "STEM": [
-        {"code": "STEM-CALC", "name": "Pre-Calculus / Basic Calculus", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.45, "weight_qa": 0.30, "baseline_difficulty": 1.25},
-        {"code": "STEM-CHEM", "name": "General Chemistry 1 & 2", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.45, "weight_qa": 0.30, "baseline_difficulty": 1.20},
-        {"code": "STEM-PHYS", "name": "General Physics 1 & 2", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.45, "weight_qa": 0.30, "baseline_difficulty": 1.20},
-        {"code": "STEM-BIO", "name": "General Biology 1 & 2", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.45, "weight_qa": 0.30, "baseline_difficulty": 1.10},
-        {"code": "CORE-GMATH", "name": "General Mathematics", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.15},
-        {"code": "CORE-EAPP", "name": "English for Academic & Professional Purposes", "category": "Applied", "weight_ww": 0.25, "weight_pt": 0.50, "weight_qa": 0.25, "baseline_difficulty": 1.00},
+    "Grade 7": [
+        {"code": "JHS-MATH7", "name": "Mathematics 7 (Elementary Algebra & Geometry)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-SCI7", "name": "Science 7 (Integrated General Science)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-ENG7", "name": "English 7 (Philippine Literature & Grammar)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-FIL7", "name": "Filipino 7 (Ibong Adarna at Panitikang Luzon)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-AP7", "name": "Araling Panlipunan 7 (Araling Asyano)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-TLE7", "name": "TLE 7 (Exploratory ICT & Home Economics)", "category": "Core", "weight_ww": 0.20, "weight_pt": 0.60, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-MAPEH7", "name": "MAPEH 7 (Music, Arts, PE & Health)", "category": "Core", "weight_ww": 0.20, "weight_pt": 0.60, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-ESP7", "name": "Edukasyon sa Pagpapakatao 7 (EsP)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 0.95},
     ],
-    "ABM": [
-        {"code": "ABM-FABM1", "name": "Fundamentals of Accountancy, Business & Management 1", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.45, "weight_qa": 0.30, "baseline_difficulty": 1.20},
-        {"code": "ABM-FABM2", "name": "Fundamentals of Accountancy, Business & Management 2", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.45, "weight_qa": 0.30, "baseline_difficulty": 1.25},
-        {"code": "ABM-BMATH", "name": "Business Mathematics", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.15},
-        {"code": "ABM-ORGMGT", "name": "Organization and Management", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.50, "weight_qa": 0.25, "baseline_difficulty": 1.00},
-        {"code": "ABM-APECON", "name": "Applied Economics", "category": "Applied", "weight_ww": 0.25, "weight_pt": 0.50, "weight_qa": 0.25, "baseline_difficulty": 1.10},
+    "Grade 8": [
+        {"code": "JHS-MATH8", "name": "Mathematics 8 (Linear Equations & Geometry)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-SCI8", "name": "Science 8 (Biology, Chemistry & Physics)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-ENG8", "name": "English 8 (Afro-Asian Literature)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-FIL8", "name": "Filipino 8 (Florante at Laura)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-AP8", "name": "Araling Panlipunan 8 (Kasaysayan ng Daigdig)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-TLE8", "name": "TLE 8 (Junior Computer Hardware & Programming)", "category": "Core", "weight_ww": 0.20, "weight_pt": 0.60, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-MAPEH8", "name": "MAPEH 8 (Music, Arts, PE & Health)", "category": "Core", "weight_ww": 0.20, "weight_pt": 0.60, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-ESP8", "name": "Edukasyon sa Pagpapakatao 8 (EsP)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 0.95},
     ],
-    "HUMSS": [
-        {"code": "HUMSS-DISS", "name": "Disciplines and Ideas in the Social Sciences", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.50, "weight_qa": 0.25, "baseline_difficulty": 1.10},
-        {"code": "HUMSS-CW", "name": "Creative Writing / Malikhaing Pagsulat", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.55, "weight_qa": 0.20, "baseline_difficulty": 1.05},
-        {"code": "HUMSS-PPG", "name": "Philippine Politics and Governance", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.50, "weight_qa": 0.25, "baseline_difficulty": 1.10},
-        {"code": "HUMSS-TNCT", "name": "Trends, Networks, and Critical Thinking in the 21st Century", "category": "Applied", "weight_ww": 0.25, "weight_pt": 0.50, "weight_qa": 0.25, "baseline_difficulty": 1.00},
+    "Grade 9": [
+        {"code": "JHS-MATH9", "name": "Mathematics 9 (Quadratic Functions & Trigonometry)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-SCI9", "name": "Science 9 (Living Things & Electricity)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-ENG9", "name": "English 9 (Anglo-American Literature)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-FIL9", "name": "Filipino 9 (Noli Me Tangere)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-AP9", "name": "Araling Panlipunan 9 (Ekonomiks)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-TLE9", "name": "TLE 9 (Technical Drafting & Web Design)", "category": "Core", "weight_ww": 0.20, "weight_pt": 0.60, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-MAPEH9", "name": "MAPEH 9 (Music, Arts, PE & Health)", "category": "Core", "weight_ww": 0.20, "weight_pt": 0.60, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-ESP9", "name": "Edukasyon sa Pagpapakatao 9 (EsP)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 0.95},
+    ],
+    "Grade 10": [
+        {"code": "JHS-MATH10", "name": "Mathematics 10 (Polynomials, Sequences & Probability)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-SCI10", "name": "Science 10 (Earth & Space, Heredity & Electromagnetism)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-ENG10", "name": "English 10 (World Literature & Persuasive Writing)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-FIL10", "name": "Filipino 10 (El Filibusterismo)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-AP10", "name": "Araling Panlipunan 10 (Mga Kontemporaryong Isyu)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-TLE10", "name": "TLE 10 (Computer Systems Servicing & Coding)", "category": "Core", "weight_ww": 0.20, "weight_pt": 0.60, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-MAPEH10", "name": "MAPEH 10 (Music, Arts, PE & Health)", "category": "Core", "weight_ww": 0.20, "weight_pt": 0.60, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-ESP10", "name": "Edukasyon sa Pagpapakatao 10 (EsP)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 0.95},
     ],
     "JHS": [
-        {"code": "JHS-MATH", "name": "Mathematics 10", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
-        {"code": "JHS-SCI", "name": "Science 10", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
-        {"code": "JHS-ENG", "name": "English 10", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
-        {"code": "JHS-AP", "name": "Araling Panlipunan 10", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-MATH", "name": "Mathematics (Grade 7-10)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-SCI", "name": "Science (Grade 7-10)", "category": "Core", "weight_ww": 0.40, "weight_pt": 0.40, "weight_qa": 0.20, "baseline_difficulty": 1.15},
+        {"code": "JHS-ENG", "name": "English (Grade 7-10)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+        {"code": "JHS-AP", "name": "Araling Panlipunan (Grade 7-10)", "category": "Core", "weight_ww": 0.30, "weight_pt": 0.50, "weight_qa": 0.20, "baseline_difficulty": 1.00},
+    ],
+    "STEM": [
+        {"code": "STEM-CALC", "name": "Pre-Calculus / Algebra Review", "category": "Specialized", "weight_ww": 0.25, "weight_pt": 0.45, "weight_qa": 0.30, "baseline_difficulty": 1.25},
     ]
 }
 

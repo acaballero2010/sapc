@@ -50,11 +50,11 @@ export const INGESTION_DOMAINS: Record<IngestionDomain, DomainMetadata> = {
       "hobbies_interests"
     ],
     sampleData: `lrn,student_name,grade_level,section,quarter_gpa,failing_subjects_count,days_absent,attendance_rate_pct,incomplete_requirements_count,extracurricular_club,club_participation_level,hobbies_interests
-109238475001,Jerome Santos,11,Grade 11 - St. Augustine (STEM),88.5,0,2,95.6,0,Robotics & Coding Society,High,Robotics & Web Development
-109238475002,Maria Clara Reyes,11,Grade 11 - St. Lorenzo (HUMSS),72.0,2,8,82.4,2,None / Non-Member,None,Passive Screen Time / Social Media
-109238475003,Joshua Dimaculangan,11,Grade 11 - St. Augustine (STEM),69.5,3,11,75.8,3,None / Non-Member,None,Unstructured Rest / Inactive
-109238475004,Samantha Nicole Reyes,11,Grade 11 - St. Lorenzo (HUMSS),74.0,1,9,80.2,1,Peer Facilitators Wellness Circle,Low,Reading Novels & Webtoons
-109238475005,Christian Bautista,12,Grade 12 - St. Thomas Aquinas (STEM),93.0,0,1,97.8,0,Supreme Secondary Learner Government (SSLG),High,Debate & Public Speaking`
+109238475001,Jerome Santos,7,Grade 7 - St. Anthony,88.5,0,2,95.6,0,Math & Science Wizards Guild,High,Robotics & Web Development
+109238475002,Maria Clara Reyes,8,Grade 8 - St. Benedict,72.0,2,8,82.4,2,None / Non-Member,None,Passive Screen Time / Social Media
+109238475003,Joshua Dimaculangan,9,Grade 9 - St. Pedro Calungsod,69.5,3,11,75.8,3,None / Non-Member,None,Unstructured Rest / Inactive
+109238475004,Samantha Nicole Reyes,10,Grade 10 - St. Thomas Aquinas,74.0,1,9,80.2,1,SAPC Junior Red Cross Youth (RCY),Low,Reading Novels & Webtoons
+109238475005,Christian Bautista,10,Grade 10 - St. Augustine,93.0,0,1,97.8,0,Supreme Junior Learner Government (SSG),High,Debate & Public Speaking`
   },
 
   mental_health: {

@@ -37,8 +37,8 @@ export function SubjectFailurePredictor() {
   }, []);
   
   // Selection states
-  const [selectedStrand, setSelectedStrand] = useState<string>("STEM");
-  const [selectedSubjectCode, setSelectedSubjectCode] = useState<string>("STEM-CALC");
+  const [selectedStrand, setSelectedStrand] = useState<string>("Grade 7");
+  const [selectedSubjectCode, setSelectedSubjectCode] = useState<string>("JHS-MATH7");
   const [selectedSection, setSelectedSection] = useState<string>("all");
   const [riskTierFilter, setRiskTierFilter] = useState<"ALL" | "CRITICAL_RISK" | "MODERATE_RISK" | "ON_TRACK">("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -50,9 +50,9 @@ export function SubjectFailurePredictor() {
   const [examImprovement, setExamImprovement] = useState<number>(5);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
 
-  // Available subjects for selected strand
+  // Available subjects for selected grade level
   const strandSubjects = useMemo(() => {
-    return SUBJECT_REGISTRY.filter(s => s.strand === selectedStrand || s.strand === "JHS");
+    return SUBJECT_REGISTRY.filter(s => s.strand === selectedStrand || (selectedStrand === "JHS" && s.category === "Core"));
   }, [selectedStrand]);
 
   // Current active subject metadata
@@ -262,24 +262,25 @@ export function SubjectFailurePredictor() {
       {/* Interactive Controls & Filters */}
       <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Strand Filter */}
+          {/* Grade Level / Curriculum Filter */}
           <div className="space-y-1">
             <label className="text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-              Academic Strand
+              Curriculum / Grade Level
             </label>
             <select
               value={selectedStrand}
               onChange={(e) => {
                 setSelectedStrand(e.target.value);
-                const nextSubjs = SUBJECT_REGISTRY.filter(s => s.strand === e.target.value || s.strand === "JHS");
+                const nextSubjs = SUBJECT_REGISTRY.filter(s => s.strand === e.target.value || (e.target.value === "JHS" && s.category === "Core"));
                 if (nextSubjs.length > 0) setSelectedSubjectCode(nextSubjs[0].code);
               }}
               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold rounded-xl p-2.5 focus:ring-2 focus:ring-[#8B0014] focus:outline-none"
             >
-              <option value="STEM">🔬 STEM (Science, Tech &amp; Math)</option>
-              <option value="ABM">📊 ABM (Accountancy &amp; Business)</option>
-              <option value="HUMSS">✍️ HUMSS (Humanities &amp; Social Sciences)</option>
-              <option value="JHS">🎒 Junior High School (Grade 10)</option>
+              <option value="Grade 7">🎒 Grade 7 (Junior High)</option>
+              <option value="Grade 8">📘 Grade 8 (Junior High)</option>
+              <option value="Grade 9">📗 Grade 9 (Junior High)</option>
+              <option value="Grade 10">🎓 Grade 10 (Junior High)</option>
+              <option value="JHS">📚 All Junior High School Subjects</option>
             </select>
           </div>
 

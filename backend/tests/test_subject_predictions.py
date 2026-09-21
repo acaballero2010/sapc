@@ -8,7 +8,7 @@ def test_subject_catalog_structure():
         for subj in subjects:
             total_weight = subj["weight_ww"] + subj["weight_pt"] + subj["weight_qa"]
             assert abs(total_weight - 1.0) < 0.001
-            assert subj["baseline_difficulty"] >= 1.0
+            assert subj["baseline_difficulty"] >= 0.8
 
 def test_critical_failure_prediction():
     """Test high risk student prediction in Pre-Calculus"""
