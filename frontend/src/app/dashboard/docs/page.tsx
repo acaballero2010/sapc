@@ -1231,41 +1231,55 @@ export default function DocumentationPage() {
               </div>
               <div>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">
-                  System Architecture &amp; Data Pipeline
+                  Enterprise System Architecture &amp; Data Pipeline
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  Client-server decoupled architecture, asynchronous AI pipelines, and event-driven data flows.
+                  Decoupled 3-tier enterprise architecture, real-time Cloud Firestore SSOT sync, and multi-factor decision pipelines.
                 </p>
               </div>
             </div>
 
             {/* Architecture Diagram Box */}
-            <div className="p-5 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800">
+            <div className="p-5 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800 shadow-inner">
               <pre className="text-emerald-400">
-{`+-----------------------------------------------------------------------------------+
-|                                 CLIENT TIER                                       |
-|  Next.js 14 App Router (React Server/Client Components) + Tailwind + Recharts     |
-+-----------------------------------------------------------------------------------+
-                                         │
-                   ┌─────────────────────┴─────────────────────┐
-                   ▼                                           ▼
-       (Firebase Auth / ID Token)                  (FastAPI REST Endpoints)
-                   │                                           │
-+───────────────────────────────────────+   +───────────────────────────────────────+
-|         SECURITY & ACCESS LAYER       |   |         FASTAPI CORE ENGINE           |
-|  - Firebase Authentication            |   |  - Pydantic v2 Request Validation     |
-|  - Role-Based Access Control (RBAC)   |   |  - Saaty AHP 5-Domain Engine (NumPy)  |
-|  - Data Privacy Act (RA 10173) Guard  |   |  - DepEd SASS CSV Ingestion Wizard    |
-+───────────────────────────────────────+   +───────────────────────────────────────+
-                                                               │
-                                       ┌───────────────────────┴───────────────────────┐
-                                       ▼                                               ▼
-+──────────────────────────────────────────────+   +───────────────────────────────────────────+
-|               DATA STORAGE                   |   |            AI & INTELLIGENCE              |
-|  - PostgreSQL Relational Database (SQLAlchemy)|   |  - Google Gemini 2.5 Flash API (LLM)      |
-|  - Google Cloud Firestore (Live Chat / Sync) |   |  - Multi-Turn Distress Triage Protocol    |
-|  - Audit Trail Engine (SHA-256 Checksums)    |   |  - VADER Sentiment Fallback Engine        |
-+──────────────────────────────────────────────+   +───────────────────────────────────────────+`}
+{`+----------------------------------------------------------------------------------------------------+
+|                                    PRESENTATION TIER (CLIENT APPS)                                 |
+|  Next.js 16.3.5 App Router (React 19 + TypeScript 5) + Tailwind CSS + Recharts + Lucide Icons       |
++----------------------------------------------------------------------------------------------------+
+                                           │                                           │
+             ┌─────────────────────────────┴─────────────────────────────┐             │
+             ▼                                                           ▼             ▼
+  (Firebase Auth / OAuth / OTP)                               (onSnapshot Realtime Subscriptions /
+             │                                                 Chunked Batch Writes <= 400 ops)
+             ▼                                                           │
++───────────────────────────────────────────────────────────+            │
+|                AUTHENTICATION & ACCESS LAYER              |            │
+|  - Firebase Authentication (Email/Pass + Google OAuth)    |            │
+|  - 6-Digit Multi-Factor OTP (Resend Transactional API)    |            │
+|  - Role-Based Access Control (5 Roles: Admin, Counselor,  |            │
+|    Teacher, Parent, Student)                              |            │
+|  - First-Time Role Onboarding & LRN/ID Verification       |            │
++───────────────────────────────────────────────────────────+            │
+                                                                         ▼
++────────────────────────────────────────────────────────────────────────────────────────────────----+
+|                                GOOGLE CLOUD FIRESTORE (PRODUCTION SSOT)                             |
+|  - /students/{lrn}           : Master 500-student cohort records, domain scores, & SASS metrics    |
+|  - /assessments/{id}         : DepEd DO 8 quarterly subject marks & component grades                |
+|  - /interventions/{planId}   : Guidance care plans, progress milestones, & counselor case files   |
+|  - /mood_checkins/{checkinId}: Daily student mood check-ins & distress triggers                    |
+|  - /notifications/{id}       : Parent SMS/Email alert queue                                        |
+|  - /audit_logs/{logId}       : Append-only compliance log enforcing Data Privacy Act (RA 10173)    |
++────────────────────────────────────────────────────────────────────────────────────────────────----+
+                                           │
+             ┌─────────────────────────────┴─────────────────────────────┐
+             ▼                                                           ▼
++───────────────────────────────────────────────────────────+   +────────────────────────────────────+
+|        PREDICTIVE & DECISION SUPPORT ENGINE               |   |        FAST READ CACHE LAYER       |
+|  - Saaty AHP 5-Domain Matrix Engine (CR = 0.016 <= 0.10)  |   |  - In-Memory & LocalStorage Cache  |
+|  - DepEd DO 8, s. 2015 Subject Failure Predictor          |   |  - Zero-Latency UI Re-renders      |
+|  - Calibrated Sigmoid Failure Classifier (k = 0.18)       |   |  - Offline Resilience Fallback     |
+|  - Intelligent CSV Schema Auto-Detection & Universal Parse|   |  - Background Async Cloud Sync     |
++───────────────────────────────────────────────────────────+   +────────────────────────────────────+`}
               </pre>
             </div>
 
@@ -1274,66 +1288,118 @@ export default function DocumentationPage() {
               <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
                 <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
                   <Database className="h-4 w-4 text-[#8B0014] dark:text-rose-400" />
-                  <span>1. Ingestion &amp; SASS Parser</span>
+                  <span>1. Firestore Cloud SSOT</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300">
-                  Processes quarterly CSV records from the DepEd School Assessment System, validating headers, sanitizing types, calculating academic penalties, and saving snapshots.
+                  Acts as the single source of truth across all campus devices. Ingested cohorts write in chunked sub-batches of &le;400 operations, propagating to connected dashboards in real time via <code>onSnapshot</code>.
                 </p>
               </div>
 
               <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
                 <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
                   <Activity className="h-4 w-4 text-amber-500" />
-                  <span>2. AHP Multi-Criteria Engine</span>
+                  <span>2. Dual Decision &amp; Failure Models</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300">
-                  Computes eigenvalue matrices, applies psychometrician weights (0.30/0.20/0.20/0.15/0.15), and assigns risk tiers (Low/Med/High) with dominant driver tags.
+                  Combines Saaty&apos;s Analytic Hierarchy Process (AHP) for holistic 5-domain risk stratification with DepEd DO 8, s. 2015 component weighting and calibrated sigmoid failure probabilities.
                 </p>
               </div>
 
               <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
                 <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-                  <Bot className="h-4 w-4 text-purple-500" />
-                  <span>3. Gemini 2.5 Guidance AI</span>
+                  <Lock className="h-4 w-4 text-purple-500" />
+                  <span>3. Multi-Factor Auth &amp; RBAC</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300">
-                  Conducts multi-turn empathetic counseling dialogue, analyzes sentiment in real time, and alerts counselors instantly when critical distress phrases are detected.
+                  Enforces strict role isolation (Admin, Counselor, Teacher, Parent, Student) paired with Firebase Auth, Google SSO, and 6-digit transactional OTP verification via Resend.
                 </p>
               </div>
             </div>
 
-            {/* Database Entities & Schema */}
-            <div className="space-y-3 pt-2">
-              <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-                Core Relational Entities &amp; Schemas
+            {/* Authentication Flow Sequence Diagram */}
+            <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                <span>End-to-End User Authentication &amp; Access Flow</span>
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 font-mono space-y-1.5">
-                  <div className="font-bold text-slate-900 dark:text-white font-sans">students (Table)</div>
-                  <div className="text-slate-500 dark:text-slate-400">id, lrn, student_name, grade_level, section</div>
-                  <div className="text-slate-500 dark:text-slate-400">quarter_gpa, failing_count, absences, incompletes</div>
-                  <div className="text-slate-500 dark:text-slate-400">composite_risk, risk_tier, dominant_domain</div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 text-xs">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1.5">
+                  <span className="font-bold text-[#8B0014] dark:text-rose-400 block uppercase tracking-wider text-[10px]">Step 1: Sign-In</span>
+                  <strong className="text-slate-900 dark:text-white block">Credential / OAuth Input</strong>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    User submits email/password or authenticates with Google Single Sign-On (OAuth 2.0).
+                  </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 font-mono space-y-1.5">
-                  <div className="font-bold text-slate-900 dark:text-white font-sans">interventions (Table)</div>
-                  <div className="text-slate-500 dark:text-slate-400">id, student_id, domain, title, status</div>
-                  <div className="text-slate-500 dark:text-slate-400">assigned_by, assigned_at, milestones, outcome</div>
-                  <div className="text-slate-500 dark:text-slate-400">parent_acknowledged, counselor_notes</div>
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1.5">
+                  <span className="font-bold text-amber-600 dark:text-amber-400 block uppercase tracking-wider text-[10px]">Step 2: Verification</span>
+                  <strong className="text-slate-900 dark:text-white block">Role &amp; LRN / ID Check</strong>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    First-time logins trigger the Role Onboarding Wizard to bind verified institutional credentials.
+                  </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 font-mono space-y-1.5">
-                  <div className="font-bold text-slate-900 dark:text-white font-sans">clinical_screeners (Table)</div>
-                  <div className="text-slate-500 dark:text-slate-400">id, student_id, screener_type (PHQ-9/GAD-7)</div>
-                  <div className="text-slate-500 dark:text-slate-400">raw_score, severity_category, date_administered</div>
-                  <div className="text-slate-500 dark:text-slate-400">encrypted_responses, counselor_override</div>
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1.5">
+                  <span className="font-bold text-blue-600 dark:text-blue-400 block uppercase tracking-wider text-[10px]">Step 3: MFA Challenge</span>
+                  <strong className="text-slate-900 dark:text-white block">6-Digit Email / SMS OTP</strong>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    Dispatches a time-based 6-digit OTP with 10-minute TTL and anti-spam rate limiting.
+                  </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 font-mono space-y-1.5">
-                  <div className="font-bold text-slate-900 dark:text-white font-sans">import_audit_batches (Table)</div>
-                  <div className="text-slate-500 dark:text-slate-400">batch_id, filename, uploaded_by, record_count</div>
-                  <div className="text-slate-500 dark:text-slate-400">sha256_checksum, is_reverted, created_at</div>
-                  <div className="text-slate-500 dark:text-slate-400">delta_snapshot_json, status</div>
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1.5">
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 block uppercase tracking-wider text-[10px]">Step 4: Routing</span>
+                  <strong className="text-slate-900 dark:text-white block">RBAC Portal Routing</strong>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    Logs an RA 10173 session audit event and routes directly to the authorized role dashboard.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Cloud Firestore Collections & Schemas */}
+            <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
+                Google Cloud Firestore Schema &amp; Storage Collections
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-1.5">
+                  <div className="font-bold text-slate-900 dark:text-white font-sans flex items-center justify-between">
+                    <span>/students/{'{lrn}'}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold">Cloud SSOT</span>
+                  </div>
+                  <div className="text-slate-500 dark:text-slate-400">id, lrn, full_name, grade_level, strand, section_name, adviser_name</div>
+                  <div className="text-slate-500 dark:text-slate-400">domain_scores: &#123; academic, family, health, mental_health, financial &#125;</div>
+                  <div className="text-slate-500 dark:text-slate-400">sass_metrics: &#123; gpa, failing_subjects_count, days_absent, attendance_rate_pct &#125;</div>
+                  <div className="text-slate-500 dark:text-slate-400">latest_risk_score, latest_risk_tier, primary_risk_driver, updatedAt</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-1.5">
+                  <div className="font-bold text-slate-900 dark:text-white font-sans flex items-center justify-between">
+                    <span>/audit_logs/{'{logId}'}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-[#8B0014] dark:text-rose-300 font-bold">Append-Only (RA 10173)</span>
+                  </div>
+                  <div className="text-slate-500 dark:text-slate-400">id, timestamp, actor_name, actor_role, action, target_resource</div>
+                  <div className="text-slate-500 dark:text-slate-400">details, ip_address, compliance_basis, createdAt</div>
+                  <div className="text-rose-600 dark:text-rose-400 text-[11px] font-sans font-bold">Security Rule: allow update, delete: if false;</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-1.5">
+                  <div className="font-bold text-slate-900 dark:text-white font-sans flex items-center justify-between">
+                    <span>/interventions/{'{planId}'}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold">Pastoral Care</span>
+                  </div>
+                  <div className="text-slate-500 dark:text-slate-400">student_id, student_name, target_domain, title, description, status</div>
+                  <div className="text-slate-500 dark:text-slate-400">action_items, assigned_counselor, scheduled_followup, outcome_rating</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-1.5">
+                  <div className="font-bold text-slate-900 dark:text-white font-sans flex items-center justify-between">
+                    <span>/users/{'{userId}'}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 font-bold">RBAC Profile</span>
+                  </div>
+                  <div className="text-slate-500 dark:text-slate-400">email, full_name, role, firebaseUid, student_id, lastLoginAt</div>
                 </div>
               </div>
             </div>
@@ -1353,10 +1419,10 @@ export default function DocumentationPage() {
               </div>
               <div>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">
-                  Technology Stack &amp; Infrastructure
+                  Technology Stack &amp; Infrastructure Specifications
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  Full production stack specifications, core dependencies, and API interfaces.
+                  Production technology stack specifications, core dependencies, and API interfaces.
                 </p>
               </div>
             </div>
@@ -1371,77 +1437,111 @@ export default function DocumentationPage() {
                     <span>Frontend Architecture</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-mono font-bold">
-                    Next.js 14 App Router
+                    Next.js 16 (Turbopack)
                   </span>
                 </div>
 
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
                     <span className="text-slate-500">Framework</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">Next.js 14.2.x (React 18)</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Next.js 16.3.5 (React 19.2)</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
                     <span className="text-slate-500">Language</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">TypeScript 5.x</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">TypeScript 5.x (Strict Type Safety)</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
                     <span className="text-slate-500">Styling &amp; Design</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">Tailwind CSS + Glassmorphism</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Tailwind CSS 4 + Glassmorphism</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
                     <span className="text-slate-500">Data Visualization</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">Recharts (Radar, Area, Bar)</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Recharts 3.10 (Radar, Area, Bar)</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
                     <span className="text-slate-500">Icons</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">Lucide React</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Lucide React 1.47</span>
                   </div>
                   <div className="flex justify-between py-1">
-                    <span className="text-slate-500">Authentication Client</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">Firebase Web SDK v10</span>
+                    <span className="text-slate-500">Cloud SDK</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Firebase Modular SDK v12.19.0</span>
                   </div>
                 </div>
               </div>
 
-              {/* Backend Card */}
+              {/* Cloud & Backend Card */}
               <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
                     <Cpu className="h-4 w-4 text-amber-500" />
-                    <span>Backend REST Services</span>
+                    <span>Cloud &amp; Microservices</span>
                   </div>
                   <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-mono font-bold">
-                    FastAPI (Python 3.11+)
+                    Firestore + Edge APIs
                   </span>
                 </div>
 
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
-                    <span className="text-slate-500">API Framework</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">FastAPI Async ASGI</span>
+                    <span className="text-slate-500">Primary Cloud Database</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Google Cloud Firestore (SSOT)</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
-                    <span className="text-slate-500">Validation &amp; Schemas</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">Pydantic v2.x</span>
+                    <span className="text-slate-500">Hosting &amp; Edge CDN</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Google Firebase App Hosting</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
+                    <span className="text-slate-500">Email &amp; MFA Gateway</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Resend API (v6.28.1)</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
                     <span className="text-slate-500">AHP Mathematical Core</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">NumPy (Eigenvector calculations)</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">NumPy &amp; Pure TS Matrix Algebra</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
-                    <span className="text-slate-500">Data Processing</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">Pandas (SASS CSV Ingestion)</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-700">
-                    <span className="text-slate-500">ORM &amp; Database Engine</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">SQLAlchemy 2.0 + PostgreSQL</span>
+                    <span className="text-slate-500">Ingestion Parser</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">Auto-Detect Multi-Domain Engine</span>
                   </div>
                   <div className="flex justify-between py-1">
-                    <span className="text-slate-500">Async HTTP Client</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">HTTPX (Non-blocking Gemini calls)</span>
+                    <span className="text-slate-500">Data Privacy Standard</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">RA 10173 Append-Only Audit Trail</span>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Programmatic CRUD API Guide for Admins */}
+            <div className="p-5 rounded-2xl bg-slate-900 text-slate-200 space-y-3 border border-slate-800">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-amber-400 text-xs uppercase tracking-wider">
+                  Programmatic CRUD Operations Guide (System Admins &amp; Developers)
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 text-slate-400">
+                  @/lib/dataset-store.ts
+                </span>
+              </div>
+              <pre className="text-xs text-slate-300 font-mono overflow-x-auto p-3 bg-slate-950 rounded-xl">
+{`// 1. CREATE: Insert student with automatic AHP calculation and Firestore sync
+const newStudent = await addStudentRecord({
+  first_name: "Juan",
+  last_name: "Dela Cruz",
+  lrn: "109238479999",
+  grade_level: 11,
+  strand: "STEM",
+  section_name: "Grade 11 - St. Augustine (STEM)"
+});
+
+// 2. READ: Fetch by LRN or Student ID
+const student = getStudentRecord("109238479999");
+
+// 3. UPDATE: Adjust grades or domain scores (recalculates AHP and syncs to Firestore)
+await updateStudentRecord("109238479999", {
+  sass_metrics: { gpa: 89.5, failing_subjects_count: 0, days_absent: 1 }
+});
+
+// 4. DELETE: Remove student from cohort and delete document in Firestore
+await deleteStudentRecord("109238479999");`}
+              </pre>
             </div>
 
             {/* AI & Infrastructure Section */}
