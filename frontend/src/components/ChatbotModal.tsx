@@ -353,9 +353,11 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {[
               "Gusto ko ng kausap",
-              "Nahihirapan po ako sa subjects ko",
-              "Saan ang Guidance Office?",
-              "Kinakabahan ako sa exams"
+              "Nahihirapan po ako sa Math / Science",
+              "Sobrang daming requirements, paano magsimula?",
+              "Kinakabahan ako sa periodic exams",
+              "Nahihiya akong magsabi sa magulang ko",
+              "Saan ang Guidance Office Room 204?"
             ].map((suggestion, sIdx) => (
               <button
                 key={sIdx}
