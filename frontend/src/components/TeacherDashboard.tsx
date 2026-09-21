@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
-import { getActiveStudentDataset } from "@/lib/dataset-store";
+import { getActiveStudentDataset, saveStudentDataset, recalculateAHPForDataset } from "@/lib/dataset-store";
 import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
 import { StudentDetailModal } from "./StudentDetailModal";
@@ -666,7 +666,36 @@ export const TeacherDashboard: React.FC = () => {
   // Action Handlers
   // ---------------------------------------------------------------------------
   const handleWizardCommit = () => {
-    showToast(`Successfully processed and imported ${wizardRawRows.length} student records from ${wizardFileName}.`);
+    // Merge wizardRawRows into active student dataset
+    const updated = students.map((st) => {
+      const match = wizardRawRows.find((r) => r[0] === st.lrn || r[1]?.toLowerCase() === st.full_name?.toLowerCase());
+      if (match) {
+        const computedGrade = parseFloat(match[5]) || st.sass_metrics.gpa;
+        const ww = parseFloat(match[2]) || 80;
+        const pt = parseFloat(match[3]) || 80;
+        const qe = parseFloat(match[4]) || 80;
+        const acadScore = Math.max(5, Math.min(100, Math.round((85 - computedGrade) * 3 + (computedGrade < 75 ? 25 : 0))));
+
+        return {
+          ...st,
+          sass_metrics: {
+            ...st.sass_metrics,
+            gpa: computedGrade
+          },
+          domain_scores: {
+            ...st.domain_scores,
+            academic: acadScore
+          }
+        };
+      }
+      return st;
+    });
+
+    const recalculated = recalculateAHPForDataset(updated);
+    saveStudentDataset(recalculated);
+    setStudents(recalculated);
+
+    showToast(`Successfully processed, stored, and recalculated ${wizardRawRows.length} student records from ${wizardFileName}.`);
     const newHistory: ImportHistoryItem = {
       id: `BATCH-2026-0920-${String(importHistory.length + 1).padStart(2, "0")}`,
       type: "DepEd SASS Import Wizard",
@@ -685,17 +714,107 @@ export const TeacherDashboard: React.FC = () => {
 
   const handleEnrollStudents = () => {
     const lines = newStudentEnrollText.split("\n").filter(l => l.trim().length > 0);
-    showToast(`Successfully enrolled ${lines.length} new student records into Grade 11 STEM.`);
+    if (lines.length === 0) return;
+
+    const newEnrolled: StudentRecord[] = lines.map((line, idx) => {
+      const parts = line.split(",").map(p => p.trim());
+      const lrn = parts[0] || `1092384750${String(students.length + idx + 1).padStart(2, "0")}`;
+      const lastName = parts[1] || "Student";
+      const firstName = parts[2] || "New";
+      const grade = parseInt(parts[3], 10) || 7;
+      const section = parts[4] || "Grade 7 - St. Francis";
+      const email = parts[6] || `student.${lrn.slice(-4)}@sapc.edu.ph`;
+
+      return {
+        id: students.length + idx + 1,
+        lrn,
+        full_name: `${firstName} ${lastName}`,
+        first_name: firstName,
+        last_name: lastName,
+        grade_level: grade,
+        strand: "JHS",
+        section_name: section,
+        adviser_name: user?.full_name || "Mr. Roberto Santos, LPT",
+        email,
+        latest_risk_score: 24.5,
+        latest_risk_tier: "low" as const,
+        primary_risk_driver: "Academic",
+        domain_scores: { academic: 20, family: 15, health: 15, mental_health: 15, financial: 15 },
+        sass_metrics: {
+          gpa: 86.5,
+          failing_subjects_count: 0,
+          days_absent: 1,
+          attendance_rate_pct: 98.0,
+          incomplete_requirements_count: 0,
+          extracurricular_club: "Science Club",
+          club_participation_level: "Moderate" as const,
+          hobbies_interests: "Reading, Coding"
+        }
+      };
+    });
+
+    const combined = recalculateAHPForDataset([...students, ...newEnrolled]);
+    saveStudentDataset(combined);
+    setStudents(combined);
+
+    showToast(`Successfully enrolled and stored ${lines.length} new student records into the database.`);
     setNewStudentEnrollText("");
     handleTabChange("students");
   };
 
   const handleSaveGradesBatch = () => {
-    showToast(`Saved quarterly grades for ${gradeImportRows.length} students in ${gradeImportSubject} (${gradeImportQuarter}).`);
+    const updated = students.map((st) => {
+      const match = gradeImportRows.find((r) => r.lrn === st.lrn || r.name?.toLowerCase() === st.full_name?.toLowerCase());
+      if (match) {
+        const computedGrade = parseFloat((match.ww * 0.25 + match.pt * 0.50 + match.qe * 0.25).toFixed(1));
+        const acadScore = Math.max(5, Math.min(100, Math.round((85 - computedGrade) * 3 + (computedGrade < 75 ? 25 : 0))));
+
+        return {
+          ...st,
+          sass_metrics: {
+            ...st.sass_metrics,
+            gpa: computedGrade
+          },
+          domain_scores: {
+            ...st.domain_scores,
+            academic: acadScore
+          }
+        };
+      }
+      return st;
+    });
+
+    const recalculated = recalculateAHPForDataset(updated);
+    saveStudentDataset(recalculated);
+    setStudents(recalculated);
+
+    showToast(`Saved and stored quarterly grades for ${gradeImportRows.length} students in ${gradeImportSubject} (${gradeImportQuarter}).`);
   };
 
   const handleSaveAttendanceBatch = () => {
-    showToast(`Saved ${attendanceImportQuarter} attendance records for ${attendanceImportRows.length} students.`);
+    const updated = students.map((st) => {
+      const match = attendanceImportRows.find((r) => r.lrn === st.lrn || r.name?.toLowerCase() === st.full_name?.toLowerCase());
+      if (match) {
+        const absent = Math.max(0, match.total - match.present);
+        const rate = parseFloat(((match.present / (match.total || 45)) * 100).toFixed(1));
+
+        return {
+          ...st,
+          sass_metrics: {
+            ...st.sass_metrics,
+            days_absent: absent,
+            attendance_rate_pct: rate
+          }
+        };
+      }
+      return st;
+    });
+
+    const recalculated = recalculateAHPForDataset(updated);
+    saveStudentDataset(recalculated);
+    setStudents(recalculated);
+
+    showToast(`Saved and stored ${attendanceImportQuarter} attendance records for ${attendanceImportRows.length} students.`);
   };
 
   const handleRevertBatch = (batchId: string) => {
@@ -705,7 +824,26 @@ export const TeacherDashboard: React.FC = () => {
   };
 
   const handleSaveCsvEditor = () => {
-    showToast(`Saved changes to ${csvEditorRows.length} CSV rows directly in workspace.`);
+    const updated = students.map((st) => {
+      const match = csvEditorRows.find((r) => r.lrn === st.lrn || r.name?.toLowerCase() === st.full_name?.toLowerCase());
+      if (match) {
+        return {
+          ...st,
+          sass_metrics: {
+            ...st.sass_metrics,
+            gpa: match.grade,
+            attendance_rate_pct: match.attendance
+          }
+        };
+      }
+      return st;
+    });
+
+    const recalculated = recalculateAHPForDataset(updated);
+    saveStudentDataset(recalculated);
+    setStudents(recalculated);
+
+    showToast(`Saved and stored changes to ${csvEditorRows.length} CSV records directly in student database.`);
   };
 
   const handleAddCsvRow = () => {
