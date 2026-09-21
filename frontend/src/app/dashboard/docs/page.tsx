@@ -38,15 +38,42 @@ import {
   Search,
   FileSpreadsheet
 } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth, RoleType } from "@/lib/auth-context";
 import { INGESTION_DOMAINS } from "@/data/sample_templates";
 
 export default function DocumentationPage() {
   const { user } = useAuth();
+  const currentRole: RoleType = user?.role || "guidance_counselor";
+
+  // Role perspective filter (defaults to logged-in user's role, with option to preview other views)
+  const [rolePerspective, setRolePerspective] = useState<RoleType | "all">(currentRole);
   const [activeTab, setActiveTab] = useState<"risk" | "datasets" | "system" | "tech" | "users" | "howtos" | "releases" | "privacy">("risk");
   const [searchFilter, setSearchFilter] = useState("");
   const [datasetDomainFilter, setDatasetDomainFilter] = useState("all");
   const [attributeSearch, setAttributeSearch] = useState("");
+
+  // Determine allowed tabs for the selected role perspective
+  const isStudentOrParent = rolePerspective === "student" || rolePerspective === "parent";
+  const isTeacher = rolePerspective === "teacher";
+  
+  // Available tabs tailored to current role perspective
+  const visibleTabs: Array<{ id: "risk" | "datasets" | "system" | "tech" | "users" | "howtos" | "releases" | "privacy"; label: string; icon: React.ReactNode; audience: string }> = [
+    { id: "risk", label: "AHP Risk Engine", icon: <Layers className="h-4 w-4" />, audience: "All Roles" },
+    ...(!isStudentOrParent ? [{ id: "datasets" as const, label: "Data Dictionary & Datasets", icon: <Database className="h-4 w-4" />, audience: "Faculty & Admin" }] : []),
+    ...(!isStudentOrParent && !isTeacher ? [{ id: "system" as const, label: "System Design", icon: <Brain className="h-4 w-4" />, audience: "Admin & Counselors" }] : []),
+    ...(!isStudentOrParent && !isTeacher ? [{ id: "tech" as const, label: "Tech Stack & APIs", icon: <Code2 className="h-4 w-4" />, audience: "Admin Only" }] : []),
+    { id: "users", label: isStudentOrParent ? "My Portal Guide" : "User Operations Manual", icon: <Users className="h-4 w-4" />, audience: "Role-Specific" },
+    { id: "howtos", label: "How-Tos & FAQs", icon: <HelpCircle className="h-4 w-4" />, audience: "All Roles" },
+    { id: "releases", label: "Release Notes", icon: <Award className="h-4 w-4" />, audience: "All Roles" },
+    { id: "privacy", label: "Privacy & RA 10173", icon: <Lock className="h-4 w-4" />, audience: "All Roles" },
+  ];
+
+  // If active tab is not in visible tabs (e.g. after switching perspective), fallback to "risk"
+  React.useEffect(() => {
+    if (!visibleTabs.some(t => t.id === activeTab)) {
+      setActiveTab("risk");
+    }
+  }, [rolePerspective]);
 
   // Mini live AHP calculator state for interactive demonstration
   const [calcGpa, setCalcGpa] = useState<number>(78);
@@ -85,28 +112,51 @@ export default function DocumentationPage() {
         <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/30 text-amber-300 text-xs font-black tracking-wider uppercase flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                SAPC IntellySys 2.5 Architecture & Specs
+                SAPC IntellySys 2.5 Architecture &amp; Specs
+              </span>
+              <span className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-xs font-bold flex items-center gap-1.5">
+                <Users className="h-3.5 w-3.5 text-rose-200" />
+                Role: <span className="text-amber-200 uppercase font-black">{rolePerspective.replace("_", " ")}</span>
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
-              System Design & Risk Assessment Documentation
+              System Design &amp; Risk Assessment Documentation
             </h1>
             <p className="text-rose-100/80 text-sm sm:text-base leading-relaxed">
               Comprehensive reference for Saaty&apos;s Analytic Hierarchy Process (AHP) mathematical risk engine, system architecture, technology stack, and role-based user manuals.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="px-4 py-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center">
-              <span className="text-[10px] text-rose-200 uppercase font-bold block">Engine Version</span>
-              <span className="text-sm font-extrabold text-white">AHP-v2.5 (CR = 0.016)</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            {/* Role Perspective Selector (Allows previewing other role scopes) */}
+            <div className="p-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-1">
+              <span className="text-[10px] text-rose-200 uppercase font-bold block px-1">Perspective View</span>
+              <select
+                value={rolePerspective}
+                onChange={(e) => setRolePerspective(e.target.value as any)}
+                className="bg-rose-950/80 border border-white/20 text-white text-xs rounded-xl px-2.5 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-amber-300 cursor-pointer"
+              >
+                <option value="guidance_counselor">🩺 Guidance Counselor (Full SOP)</option>
+                <option value="teacher">👩‍🏫 Teacher (SASS &amp; Attendance)</option>
+                <option value="admin">⚙️ Administrator (System Specs)</option>
+                <option value="student">👨‍🎓 Student (Algorithmic Transparency)</option>
+                <option value="parent">👪 Parent (Home-School Portal)</option>
+                <option value="all">🌐 All Specs (Unfiltered Master View)</option>
+              </select>
             </div>
-            <div className="px-4 py-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center">
-              <span className="text-[10px] text-rose-200 uppercase font-bold block">Compliance</span>
-              <span className="text-sm font-extrabold text-amber-300">RA 10173 • DepEd</span>
+
+            <div className="flex items-center gap-2">
+              <div className="px-3.5 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center">
+                <span className="text-[10px] text-rose-200 uppercase font-bold block">Engine Version</span>
+                <span className="text-xs font-extrabold text-white">AHP-v2.5 (CR = 0.016)</span>
+              </div>
+              <div className="px-3.5 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center">
+                <span className="text-[10px] text-rose-200 uppercase font-bold block">Compliance</span>
+                <span className="text-xs font-extrabold text-amber-300">RA 10173 • DepEd</span>
+              </div>
             </div>
           </div>
         </div>
@@ -142,12 +192,14 @@ export default function DocumentationPage() {
           >
             AHP Math
           </button>
-          <button
-            onClick={() => { setActiveTab("tech"); setSearchFilter(""); }}
-            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0"
-          >
-            Gemini AI
-          </button>
+          {visibleTabs.some(t => t.id === "tech") && (
+            <button
+              onClick={() => { setActiveTab("tech"); setSearchFilter(""); }}
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0"
+            >
+              Gemini AI
+            </button>
+          )}
           <button
             onClick={() => { setActiveTab("howtos"); setSearchFilter(""); }}
             className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-bold shrink-0"
@@ -160,116 +212,37 @@ export default function DocumentationPage() {
           >
             v2.5 Notes
           </button>
-          <button
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                window.dispatchEvent(new CustomEvent("sapc:open-dataset-archive"));
-              }
-            }}
-            className="px-2.5 py-1 rounded-lg bg-[#8B0014] hover:bg-[#700010] text-white text-[11px] font-bold shrink-0 shadow-2xs cursor-pointer flex items-center gap-1"
-          >
-            <span>📦 Archive Datasets</span>
-          </button>
+          {!isStudentOrParent && (
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("sapc:open-dataset-archive"));
+                }
+              }}
+              className="px-2.5 py-1 rounded-lg bg-[#8B0014] hover:bg-[#700010] text-white text-[11px] font-bold shrink-0 shadow-2xs cursor-pointer flex items-center gap-1"
+            >
+              <span>📦 Archive Datasets</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Navigation Tabs (Tailored dynamically to user role) */}
       <div className="flex items-center gap-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-x-auto shadow-xs scrollbar-none">
-        <button
-          onClick={() => setActiveTab("risk")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
-            activeTab === "risk"
-              ? "bg-[#8B0014] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <Layers className="h-4 w-4" />
-          <span>AHP Risk Engine</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("datasets")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
-            activeTab === "datasets"
-              ? "bg-[#8B0014] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <Database className="h-4 w-4" />
-          <span>Data Dictionary &amp; Datasets</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("system")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
-            activeTab === "system"
-              ? "bg-[#8B0014] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <Brain className="h-4 w-4" />
-          <span>System Design</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("tech")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
-            activeTab === "tech"
-              ? "bg-[#8B0014] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <Code2 className="h-4 w-4" />
-          <span>Tech Stack</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
-            activeTab === "users"
-              ? "bg-[#8B0014] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <Users className="h-4 w-4" />
-          <span>User Guides</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("howtos")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
-            activeTab === "howtos"
-              ? "bg-[#8B0014] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <HelpCircle className="h-4 w-4" />
-          <span>How-Tos &amp; FAQs</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("releases")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
-            activeTab === "releases"
-              ? "bg-[#8B0014] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <Award className="h-4 w-4" />
-          <span>Release Notes</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab("privacy")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
-            activeTab === "privacy"
-              ? "bg-[#8B0014] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
-          }`}
-        >
-          <Lock className="h-4 w-4" />
-          <span>Privacy &amp; RA 10173</span>
-        </button>
+        {visibleTabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition cursor-pointer ${
+              activeTab === tab.id
+                ? "bg-[#8B0014] text-white shadow-md"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            {tab.icon}
+            <span>{tab.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* ========================================================================= */}
@@ -1283,132 +1256,152 @@ export default function DocumentationPage() {
               </div>
             </div>
 
-            {/* Role Guides Accordion / Sections */}
+            {/* Role Guides Priority Showcase */}
             <div className="space-y-4">
-              {/* Guidance Counselor */}
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-[#8B0014] dark:text-rose-400" />
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                      1. Guidance Counselor Operations Guide
-                    </h3>
+              {/* Guidance Counselor Guide */}
+              {(rolePerspective === "guidance_counselor" || rolePerspective === "all" || (!isStudentOrParent && !isTeacher)) && (
+                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "guidance_counselor" ? "bg-rose-50/80 dark:bg-rose-950/40 border-2 border-[#8B0014] shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-3`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-[#8B0014] dark:text-rose-400" />
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                        1. Guidance Counselor Operations Guide
+                      </h3>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-[#8B0014] dark:text-rose-300 text-xs font-black">
+                      {rolePerspective === "guidance_counselor" ? "⭐ Active Role SOP" : "Primary Triage"}
+                    </span>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-[#8B0014] dark:text-rose-300 text-xs font-black">
-                    Primary Triage
-                  </span>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">Crisis Alerts Queue</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Monitor incoming distress flags from screeners or AI chat. Triage immediately by severity.
-                    </p>
-                  </div>
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">Intervention Plans</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Create tailored care plans (Counseling, Family Conference, Tutoring), assign milestones, and log progress.
-                    </p>
-                  </div>
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">Clinical Screeners</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Administer and review standardized PHQ-9 (Depression) and GAD-7 (Anxiety) screening protocols.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Teacher */}
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                      2. Teacher &amp; Class Adviser Operations Guide
-                    </h3>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-black">
-                    Advisory Hub
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">3-Step SASS Wizard</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Upload quarterly CSV files, verify column mappings, and compute updated academic risk scores instantly.
-                    </p>
-                  </div>
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">At-Risk Focus List</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Filter priority students with failing marks or &gt;3 absences to coordinate remedial tutoring.
-                    </p>
-                  </div>
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">In-Browser CSV Editor</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Correct grade or attendance entries directly in the web UI with automated validation.
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">Crisis Alerts Queue</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Monitor incoming distress flags from screeners or AI chat. Triage immediately by severity.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">Intervention Plans</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Create tailored care plans (Counseling, Family Conference, Tutoring), assign milestones, and log progress.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">Clinical Screeners</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Administer and review standardized PHQ-9 (Depression) and GAD-7 (Anxiety) screening protocols.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Administrator */}
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Key className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                      3. School Administrator Operations Guide
-                    </h3>
+              {/* Teacher Guide */}
+              {(rolePerspective === "teacher" || rolePerspective === "all" || rolePerspective === "guidance_counselor" || rolePerspective === "admin") && (
+                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "teacher" ? "bg-blue-50/80 dark:bg-blue-950/40 border-2 border-blue-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-3`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                        2. Teacher &amp; Class Adviser Operations Guide
+                      </h3>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-black">
+                      {rolePerspective === "teacher" ? "⭐ Active Role SOP" : "Advisory Hub"}
+                    </span>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-xs font-black">
-                    Master Config
-                  </span>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">3-Step SASS Wizard</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Upload quarterly CSV files, verify column mappings, and compute updated academic risk scores instantly.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">At-Risk Focus List</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Filter priority students with failing marks or &gt;3 absences to coordinate remedial tutoring.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">In-Browser CSV Editor</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Correct grade or attendance entries directly in the web UI with automated validation.
+                      </p>
+                    </div>
+                  </div>
                 </div>
+              )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">AHP Weights Config</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Audit domain weights and verify mathematical consistency (CR &le; 0.10).
-                    </p>
+              {/* Administrator Guide */}
+              {(rolePerspective === "admin" || rolePerspective === "all" || rolePerspective === "guidance_counselor") && (
+                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "admin" ? "bg-amber-50/80 dark:bg-amber-950/40 border-2 border-amber-500 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-3`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Key className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                        3. School Administrator Operations Guide
+                      </h3>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-xs font-black">
+                      {rolePerspective === "admin" ? "⭐ Active Role SOP" : "Master Config"}
+                    </span>
                   </div>
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">Audit &amp; Rollback</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Inspect cryptographic SHA-256 batch logs and revert any flawed CSV upload with one click.
-                    </p>
-                  </div>
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block">User Accounts</span>
-                    <p className="text-slate-500 dark:text-slate-400">
-                      Provision faculty, student, and parent accounts, export credentials, and manage quarter calendars.
-                    </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">AHP Weights Config</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Audit domain weights and verify mathematical consistency (CR &le; 0.10).
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">Audit &amp; Rollback</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Inspect cryptographic SHA-256 batch logs and revert any flawed CSV upload with one click.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">User Accounts</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Provision faculty, student, and parent accounts, export credentials, and manage quarter calendars.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Student & Parent */}
+              {/* Student & Parent Guides */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-                    <GraduationCap className="h-5 w-5 text-purple-600" />
-                    <span>4. Student Portal Guide</span>
+                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "student" ? "bg-purple-50/80 dark:bg-purple-950/40 border-2 border-purple-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-2`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+                      <GraduationCap className="h-5 w-5 text-purple-600" />
+                      <span>4. Student Portal Guide</span>
+                    </div>
+                    {rolePerspective === "student" && (
+                      <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-black uppercase">
+                        Active View
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     View your 5-Domain Wellness Polygon, interact with the confidential AI Guidance Companion, log daily mood check-ins, and run &quot;what-if&quot; grade simulations.
                   </p>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-                    <HeartHandshake className="h-5 w-5 text-rose-600" />
-                    <span>5. Parent &amp; Guardian Portal Guide</span>
+                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "parent" ? "bg-rose-50/80 dark:bg-rose-950/40 border-2 border-rose-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-2`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+                      <HeartHandshake className="h-5 w-5 text-rose-600" />
+                      <span>5. Parent &amp; Guardian Portal Guide</span>
+                    </div>
+                    {rolePerspective === "parent" && (
+                      <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-black uppercase">
+                        Active View
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     Review your child&apos;s holistic wellness progress, acknowledge joint home-school care plans, inspect official Form 138 report cards, and request Parent-Teacher-Counselor conferences.
