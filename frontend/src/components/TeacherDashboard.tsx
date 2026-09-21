@@ -297,16 +297,205 @@ export const TeacherDashboard: React.FC = () => {
   });
 
   // ---------------------------------------------------------------------------
-  // 8. MANUAL ATTENDANCE ENCODING CALENDAR
+  // 8. MANUAL ATTENDANCE ENCODING CALENDAR (DYNAMIC MULTI-MONTH)
   // ---------------------------------------------------------------------------
-  const [attendanceCalendarMonth, setAttendanceCalendarMonth] = useState("September 2026");
-  const [attendanceDailyGrid, setAttendanceDailyGrid] = useState<Record<number, Record<number, "P" | "A" | "E" | "L">>>({
-    1: { 1: "P", 2: "P", 3: "P", 4: "P", 5: "P", 8: "P", 9: "P", 10: "E", 11: "P", 12: "P" },
-    2: { 1: "P", 2: "P", 3: "A", 4: "P", 5: "P", 8: "A", 9: "P", 10: "P", 11: "P", 12: "P" },
-    3: { 1: "P", 2: "P", 3: "P", 4: "P", 5: "P", 8: "P", 9: "P", 10: "P", 11: "P", 12: "P" },
-    7: { 1: "P", 2: "P", 3: "P", 4: "L", 5: "P", 8: "P", 9: "P", 10: "P", 11: "P", 12: "P" },
-    8: { 1: "P", 2: "P", 3: "P", 4: "P", 5: "P", 8: "P", 9: "P", 10: "P", 11: "P", 12: "P" }
+  const ATTENDANCE_MONTHS = useMemo(() => [
+    { key: "2026-08", label: "August 2026", year: 2026, monthIndex: 7, shortName: "Aug" },
+    { key: "2026-09", label: "September 2026", year: 2026, monthIndex: 8, shortName: "Sept" },
+    { key: "2026-10", label: "October 2026", year: 2026, monthIndex: 9, shortName: "Oct" },
+    { key: "2026-11", label: "November 2026", year: 2026, monthIndex: 10, shortName: "Nov" },
+    { key: "2026-12", label: "December 2026", year: 2026, monthIndex: 11, shortName: "Dec" },
+    { key: "2027-01", label: "January 2027", year: 2027, monthIndex: 0, shortName: "Jan" },
+    { key: "2027-02", label: "February 2027", year: 2027, monthIndex: 1, shortName: "Feb" },
+    { key: "2027-03", label: "March 2027", year: 2027, monthIndex: 2, shortName: "Mar" },
+    { key: "2027-04", label: "April 2027", year: 2027, monthIndex: 3, shortName: "Apr" },
+    { key: "2027-05", label: "May 2027", year: 2027, monthIndex: 4, shortName: "May" }
+  ], []);
+
+  const [attendanceCalendarMonth, setAttendanceCalendarMonth] = useState("2026-09");
+  const [attendanceStudentSearch, setAttendanceStudentSearch] = useState("");
+  const [attendanceSectionFilter, setAttendanceSectionFilter] = useState("all");
+
+  const [monthlyAttendanceRecord, setMonthlyAttendanceRecord] = useState<
+    Record<string, Record<number, Record<number, "P" | "A" | "E" | "L">>>
+  >({
+    "2026-08": {
+      1: { 24: "P", 25: "P", 26: "P", 27: "P", 28: "P", 31: "P" },
+      2: { 24: "P", 25: "P", 26: "A", 27: "P", 28: "P", 31: "P" },
+      3: { 24: "P", 25: "P", 26: "P", 27: "P", 28: "P", 31: "P" },
+      4: { 24: "P", 25: "L", 26: "P", 27: "P", 28: "P", 31: "P" },
+      5: { 24: "P", 25: "P", 26: "P", 27: "P", 28: "P", 31: "P" },
+      6: { 24: "P", 25: "P", 26: "P", 27: "P", 28: "P", 31: "P" },
+      7: { 24: "P", 25: "P", 26: "P", 27: "P", 28: "P", 31: "P" },
+      8: { 24: "P", 25: "P", 26: "P", 27: "P", 28: "P", 31: "P" }
+    },
+    "2026-09": {
+      1: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "E", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P", 21: "P", 22: "P", 23: "P", 24: "P", 25: "P", 28: "P", 29: "P", 30: "P" },
+      2: { 1: "P", 2: "P", 3: "A", 4: "P", 7: "P", 8: "A", 9: "P", 10: "P", 11: "P", 14: "A", 15: "P", 16: "P", 17: "L", 18: "P", 21: "P", 22: "A", 23: "P", 24: "P", 25: "P", 28: "P", 29: "P", 30: "P" },
+      3: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P", 21: "P", 22: "P", 23: "P", 24: "P", 25: "P", 28: "P", 29: "P", 30: "P" },
+      4: { 1: "P", 2: "L", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P", 21: "L", 22: "P", 23: "P", 24: "P", 25: "P", 28: "P", 29: "P", 30: "P" },
+      5: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "E", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P", 21: "P", 22: "P", 23: "P", 24: "P", 25: "P", 28: "P", 29: "P", 30: "P" },
+      6: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "A", 8: "A", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P", 21: "P", 22: "P", 23: "P", 24: "P", 25: "P", 28: "P", 29: "P", 30: "P" },
+      7: { 1: "P", 2: "P", 3: "P", 4: "L", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "L", 16: "P", 17: "P", 18: "P", 21: "P", 22: "P", 23: "P", 24: "P", 25: "P", 28: "P", 29: "P", 30: "P" },
+      8: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P", 21: "P", 22: "P", 23: "P", 24: "P", 25: "P", 28: "P", 29: "P", 30: "P" }
+    },
+    "2026-10": {
+      1: { 1: "P", 2: "P", 5: "P", 6: "P", 7: "P", 8: "P", 9: "P", 12: "P", 13: "P", 14: "P", 15: "P", 16: "P", 19: "P", 20: "P", 21: "P", 22: "P", 23: "P", 26: "P", 27: "P", 28: "P", 29: "P", 30: "P" },
+      2: { 1: "A", 2: "P", 5: "P", 6: "P", 7: "A", 8: "P", 9: "P", 12: "A", 13: "P", 14: "P", 15: "P", 16: "L", 19: "P", 20: "P", 21: "A", 22: "P", 23: "P", 26: "A", 27: "P", 28: "P", 29: "P", 30: "P" },
+      3: { 1: "P", 2: "P", 5: "P", 6: "P", 7: "P", 8: "P", 9: "P", 12: "P", 13: "P", 14: "P", 15: "P", 16: "P", 19: "P", 20: "P", 21: "P", 22: "P", 23: "P", 26: "P", 27: "P", 28: "P", 29: "P", 30: "P" },
+      4: { 1: "P", 2: "P", 5: "L", 6: "P", 7: "P", 8: "P", 9: "P", 12: "P", 13: "P", 14: "P", 15: "P", 16: "P", 19: "P", 20: "P", 21: "P", 22: "P", 23: "P", 26: "P", 27: "P", 28: "P", 29: "P", 30: "P" },
+      5: { 1: "P", 2: "P", 5: "P", 6: "P", 7: "P", 8: "P", 9: "P", 12: "P", 13: "P", 14: "P", 15: "P", 16: "P", 19: "P", 20: "P", 21: "P", 22: "P", 23: "P", 26: "P", 27: "P", 28: "P", 29: "P", 30: "P" },
+      6: { 1: "P", 2: "P", 5: "P", 6: "P", 7: "P", 8: "P", 9: "P", 12: "P", 13: "P", 14: "P", 15: "P", 16: "P", 19: "P", 20: "P", 21: "P", 22: "P", 23: "P", 26: "P", 27: "P", 28: "P", 29: "P", 30: "P" },
+      7: { 1: "P", 2: "P", 5: "P", 6: "P", 7: "P", 8: "P", 9: "P", 12: "P", 13: "P", 14: "P", 15: "P", 16: "P", 19: "P", 20: "P", 21: "P", 22: "P", 23: "P", 26: "P", 27: "P", 28: "P", 29: "P", 30: "P" },
+      8: { 1: "P", 2: "P", 5: "P", 6: "P", 7: "P", 8: "P", 9: "P", 12: "P", 13: "P", 14: "P", 15: "P", 16: "P", 19: "P", 20: "P", 21: "P", 22: "P", 23: "P", 26: "P", 27: "P", 28: "P", 29: "P", 30: "P" }
+    },
+    "2026-11": {
+      1: { 2: "P", 3: "P", 4: "P", 5: "P", 6: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 16: "P", 17: "P", 18: "P", 19: "P", 20: "P", 23: "P", 24: "P", 25: "P", 26: "P", 27: "P", 30: "P" },
+      2: { 2: "P", 3: "A", 4: "P", 5: "P", 6: "P", 9: "A", 10: "P", 11: "P", 12: "A", 13: "P", 16: "P", 17: "P", 18: "P", 19: "P", 20: "P", 23: "A", 24: "P", 25: "P", 26: "P", 27: "P", 30: "P" },
+      3: { 2: "P", 3: "P", 4: "P", 5: "P", 6: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 16: "P", 17: "P", 18: "P", 19: "P", 20: "P", 23: "P", 24: "P", 25: "P", 26: "P", 27: "P", 30: "P" },
+      4: { 2: "P", 3: "P", 4: "P", 5: "P", 6: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 16: "P", 17: "P", 18: "P", 19: "P", 20: "P", 23: "P", 24: "P", 25: "P", 26: "P", 27: "P", 30: "P" },
+      5: { 2: "P", 3: "P", 4: "P", 5: "P", 6: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 16: "P", 17: "P", 18: "P", 19: "P", 20: "P", 23: "P", 24: "P", 25: "P", 26: "P", 27: "P", 30: "P" },
+      6: { 2: "P", 3: "P", 4: "P", 5: "P", 6: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 16: "P", 17: "P", 18: "P", 19: "P", 20: "P", 23: "P", 24: "P", 25: "P", 26: "P", 27: "P", 30: "P" },
+      7: { 2: "P", 3: "P", 4: "L", 5: "P", 6: "P", 9: "P", 10: "P", 11: "L", 12: "P", 13: "P", 16: "P", 17: "P", 18: "P", 19: "P", 20: "P", 23: "P", 24: "P", 25: "P", 26: "P", 27: "P", 30: "P" },
+      8: { 2: "P", 3: "P", 4: "P", 5: "P", 6: "P", 9: "P", 10: "P", 11: "P", 12: "P", 13: "P", 16: "P", 17: "P", 18: "P", 19: "P", 20: "P", 23: "P", 24: "P", 25: "P", 26: "P", 27: "P", 30: "P" }
+    },
+    "2026-12": {
+      1: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P" },
+      2: { 1: "P", 2: "P", 3: "A", 4: "P", 7: "P", 8: "A", 9: "P", 10: "P", 11: "P", 14: "A", 15: "P", 16: "P", 17: "P", 18: "P" },
+      3: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P" },
+      4: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P" },
+      5: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P" },
+      6: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P" },
+      7: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P" },
+      8: { 1: "P", 2: "P", 3: "P", 4: "P", 7: "P", 8: "P", 9: "P", 10: "P", 11: "P", 14: "P", 15: "P", 16: "P", 17: "P", 18: "P" }
+    }
   });
+
+  // Calculate active month's school days (Mon-Fri) dynamically
+  const activeAttendanceMonthObj = useMemo(() => {
+    return ATTENDANCE_MONTHS.find(m => m.key === attendanceCalendarMonth) || ATTENDANCE_MONTHS[1];
+  }, [ATTENDANCE_MONTHS, attendanceCalendarMonth]);
+
+  const activeSchoolDays = useMemo(() => {
+    const days: { day: number; weekday: string; label: string; dateKey: string }[] = [];
+    const daysInMonth = new Date(activeAttendanceMonthObj.year, activeAttendanceMonthObj.monthIndex + 1, 0).getDate();
+    const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dt = new Date(activeAttendanceMonthObj.year, activeAttendanceMonthObj.monthIndex, d);
+      const dayOfWeek = dt.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        days.push({
+          day: d,
+          weekday: weekdayNames[dayOfWeek],
+          label: `${activeAttendanceMonthObj.shortName} ${d}`,
+          dateKey: `${activeAttendanceMonthObj.year}-${String(activeAttendanceMonthObj.monthIndex + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`
+        });
+      }
+    }
+    return days;
+  }, [activeAttendanceMonthObj]);
+
+  const toggleAttendanceCell = (studentId: number, day: number) => {
+    const currentStatus = monthlyAttendanceRecord[attendanceCalendarMonth]?.[studentId]?.[day] || "P";
+    const nextStatus: "P" | "A" | "E" | "L" = 
+      currentStatus === "P" ? "A" :
+      currentStatus === "A" ? "E" :
+      currentStatus === "E" ? "L" : "P";
+
+    setMonthlyAttendanceRecord(prev => ({
+      ...prev,
+      [attendanceCalendarMonth]: {
+        ...(prev[attendanceCalendarMonth] || {}),
+        [studentId]: {
+          ...(prev[attendanceCalendarMonth]?.[studentId] || {}),
+          [day]: nextStatus
+        }
+      }
+    }));
+  };
+
+  const handleFillAllPresent = () => {
+    setMonthlyAttendanceRecord(prev => {
+      const currentMonthData = { ...(prev[attendanceCalendarMonth] || {}) };
+      students.forEach(s => {
+        const studentDays = { ...(currentMonthData[s.id] || {}) };
+        activeSchoolDays.forEach(d => {
+          if (!studentDays[d.day]) {
+            studentDays[d.day] = "P";
+          }
+        });
+        currentMonthData[s.id] = studentDays;
+      });
+      return {
+        ...prev,
+        [attendanceCalendarMonth]: currentMonthData
+      };
+    });
+    setToastMessage(`Filled all empty dates with Present (P) for ${activeAttendanceMonthObj.label}!`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleExportMonthAttendanceCsv = () => {
+    const headers = [
+      "LRN",
+      "Student Name",
+      "Section",
+      ...activeSchoolDays.map(d => `"${d.label} (${d.weekday})"`),
+      "Present Count",
+      "Absent Count",
+      "Excused Count",
+      "Late Count",
+      "Attendance Rate %"
+    ];
+
+    const rows = filteredAttendanceStudents.map(s => {
+      let p = 0, a = 0, e = 0, l = 0;
+      const dayCols = activeSchoolDays.map(d => {
+        const status = monthlyAttendanceRecord[attendanceCalendarMonth]?.[s.id]?.[d.day] || "P";
+        if (status === "P") p++;
+        else if (status === "A") a++;
+        else if (status === "E") e++;
+        else if (status === "L") l++;
+        return `"${status}"`;
+      });
+      const total = p + a + e + l;
+      const rate = total > 0 ? Math.round(((p + e) / total) * 100) : 100;
+      return [
+        `"${s.lrn}"`,
+        `"${s.full_name}"`,
+        `"${s.section_name}"`,
+        ...dayCols,
+        p,
+        a,
+        e,
+        l,
+        `"${rate}%"`
+      ].join(",");
+    });
+
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `SAPC_Attendance_${activeAttendanceMonthObj.label.replace(" ", "_")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setToastMessage(`Exported ${activeAttendanceMonthObj.label} Attendance Sheet to CSV!`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const filteredAttendanceStudents = useMemo(() => {
+    return students.filter(s => {
+      const matchQuery = attendanceStudentSearch === "" ||
+        s.full_name.toLowerCase().includes(attendanceStudentSearch.toLowerCase()) ||
+        s.lrn.includes(attendanceStudentSearch);
+      const matchSection = attendanceSectionFilter === "all" || s.section_name === attendanceSectionFilter;
+      return matchQuery && matchSection;
+    });
+  }, [students, attendanceStudentSearch, attendanceSectionFilter]);
 
   // ---------------------------------------------------------------------------
   // 9. MESSAGES & THREADS
@@ -2335,74 +2524,203 @@ export const TeacherDashboard: React.FC = () => {
       {/* ========================================================================= */}
       {activeTab === "attendance_record" && (
         <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 shadow-sm space-y-6 animate-in fade-in duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          {/* Header & Controls */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
             <div>
-              <h3 className="text-lg sm:text-xl font-black text-slate-900">Manual Attendance Encoding Calendar</h3>
-              <p className="text-xs text-slate-500">Fast day-by-day attendance roll call with Present (P), Absent (A), Excused (E), and Late (L)</p>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg sm:text-xl font-black text-slate-900">Manual Attendance Encoding Calendar</h3>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold uppercase">
+                  {activeAttendanceMonthObj.label}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Fast day-by-day attendance roll call with Present (P), Absent (A), Excused (E), and Late (L). Click any cell to cycle status.
+              </p>
             </div>
-            <select
-              value={attendanceCalendarMonth}
-              onChange={(e) => setAttendanceCalendarMonth(e.target.value)}
-              className="min-h-[40px] px-3.5 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs self-start sm:self-auto"
-            >
-              <option>September 2026</option>
-              <option>October 2026</option>
-              <option>November 2026</option>
-            </select>
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Month Selector Dropdown */}
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-slate-400" />
+                <select
+                  value={attendanceCalendarMonth}
+                  onChange={(e) => setAttendanceCalendarMonth(e.target.value)}
+                  className="min-h-[40px] px-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#8B0014]/20 cursor-pointer"
+                >
+                  {ATTENDANCE_MONTHS.map(m => (
+                    <option key={m.key} value={m.key}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Batch Actions */}
+              <button
+                type="button"
+                onClick={handleFillAllPresent}
+                className="min-h-[40px] px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                title="Fill all blank dates for this month with Present"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                <span>Fill Present</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExportMonthAttendanceCsv}
+                className="min-h-[40px] px-3.5 rounded-xl bg-[#8B0014] hover:bg-[#700010] text-white font-bold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Download this month's attendance sheet as CSV"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span>Export CSV</span>
+              </button>
+            </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-slate-200">
+          {/* Search and Section Filters */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/70 p-3 rounded-2xl border border-slate-200/80 text-xs">
+            <div className="relative w-full sm:w-72">
+              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by student name or LRN..."
+                value={attendanceStudentSearch}
+                onChange={e => setAttendanceStudentSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#8B0014]"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 text-slate-500 font-medium self-end sm:self-auto">
+              <span>Showing <strong>{filteredAttendanceStudents.length}</strong> students</span>
+              <span>•</span>
+              <span><strong>{activeSchoolDays.length}</strong> School Days in {activeAttendanceMonthObj.label}</span>
+            </div>
+          </div>
+
+          {/* Dynamic Interactive Attendance Table */}
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs">
             <table className="min-w-full text-center text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600">
                 <tr>
-                  <th className="py-3 px-3 text-left">Student Name</th>
-                  {[1, 2, 3, 4, 5, 8, 9, 10, 11, 12].map(day => (
-                    <th key={day} className="py-3 px-2">Sept {day}</th>
+                  <th className="py-3 px-3 text-left min-w-[180px] sticky left-0 bg-slate-50 z-10 border-r border-slate-200">
+                    Student Details
+                  </th>
+                  {activeSchoolDays.map(d => (
+                    <th key={d.dateKey} className="py-2.5 px-1.5 min-w-[48px] border-r border-slate-100 last:border-r-0">
+                      <div className="text-[10px] text-slate-400 font-mono leading-none">{d.weekday}</div>
+                      <div className="text-[11px] font-bold text-slate-700 mt-0.5">{d.day}</div>
+                    </th>
                   ))}
+                  <th className="py-3 px-2 min-w-[50px] bg-emerald-50/60 text-emerald-800 border-l border-slate-200" title="Total Present">
+                    P
+                  </th>
+                  <th className="py-3 px-2 min-w-[50px] bg-rose-50/60 text-rose-800" title="Total Absent">
+                    A
+                  </th>
+                  <th className="py-3 px-2 min-w-[50px] bg-amber-50/60 text-amber-800" title="Total Excused">
+                    E
+                  </th>
+                  <th className="py-3 px-2 min-w-[50px] bg-blue-50/60 text-blue-800" title="Total Late">
+                    L
+                  </th>
+                  <th className="py-3 px-3 min-w-[65px] bg-slate-100 text-slate-800 font-black" title="Monthly Attendance Rate">
+                    Rate
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {students.slice(0, 8).map(s => (
-                  <tr key={s.id} className="hover:bg-slate-50">
-                    <td className="py-3 px-3 text-left font-bold text-slate-900 whitespace-nowrap">{s.full_name}</td>
-                    {[1, 2, 3, 4, 5, 8, 9, 10, 11, 12].map(day => {
-                      const currentStatus = attendanceDailyGrid[s.id]?.[day] || "P";
-                      return (
-                        <td key={day} className="py-2 px-1">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const nextStatus = currentStatus === "P" ? "A" : currentStatus === "A" ? "E" : currentStatus === "E" ? "L" : "P";
-                              setAttendanceDailyGrid({
-                                ...attendanceDailyGrid,
-                                [s.id]: {
-                                  ...(attendanceDailyGrid[s.id] || {}),
-                                  [day]: nextStatus
-                                }
-                              });
-                            }}
-                            className={`h-8 w-8 rounded-lg font-black text-xs transition flex items-center justify-center mx-auto ${
-                              currentStatus === "P" ? "bg-emerald-100 text-emerald-800" :
-                              currentStatus === "A" ? "bg-rose-600 text-white" :
-                              currentStatus === "E" ? "bg-amber-200 text-amber-900" : "bg-blue-100 text-blue-800"
-                            }`}
-                            title={`Toggle Day ${day}`}
-                          >
-                            {currentStatus}
-                          </button>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                {filteredAttendanceStudents.slice(0, 15).map(s => {
+                  let pCount = 0;
+                  let aCount = 0;
+                  let eCount = 0;
+                  let lCount = 0;
+
+                  return (
+                    <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
+                      {/* Student Info Sticky Column */}
+                      <td className="py-2.5 px-3 text-left sticky left-0 bg-white hover:bg-slate-50 z-10 border-r border-slate-200">
+                        <div className="font-bold text-slate-900 truncate max-w-[170px]">{s.full_name}</div>
+                        <div className="text-[10px] text-slate-400 font-mono truncate">{s.lrn}</div>
+                      </td>
+
+                      {/* Day Cells */}
+                      {activeSchoolDays.map(d => {
+                        const currentStatus = monthlyAttendanceRecord[attendanceCalendarMonth]?.[s.id]?.[d.day] || "P";
+                        if (currentStatus === "P") pCount++;
+                        else if (currentStatus === "A") aCount++;
+                        else if (currentStatus === "E") eCount++;
+                        else if (currentStatus === "L") lCount++;
+
+                        return (
+                          <td key={d.dateKey} className="py-1.5 px-1 border-r border-slate-100/80">
+                            <button
+                              type="button"
+                              onClick={() => toggleAttendanceCell(s.id, d.day)}
+                              className={`h-7 w-7 rounded-lg font-black text-xs transition-all flex items-center justify-center mx-auto cursor-pointer select-none transform active:scale-95 shadow-2xs ${
+                                currentStatus === "P" ? "bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300/60" :
+                                currentStatus === "A" ? "bg-rose-600 hover:bg-rose-700 text-white shadow-xs animate-in zoom-in-90 duration-100" :
+                                currentStatus === "E" ? "bg-amber-200 hover:bg-amber-300 text-amber-900 border border-amber-300" :
+                                "bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300"
+                              }`}
+                              title={`${s.full_name}: ${d.label} (${d.weekday}) — ${
+                                currentStatus === "P" ? "Present" :
+                                currentStatus === "A" ? "Unexcused Absent" :
+                                currentStatus === "E" ? "Excused Absence" : "Late / Tardy"
+                              } (Click to toggle)`}
+                            >
+                              {currentStatus}
+                            </button>
+                          </td>
+                        );
+                      })}
+
+                      {/* Summary Columns */}
+                      <td className="py-2 px-1 bg-emerald-50/30 font-bold text-emerald-700 border-l border-slate-200">
+                        {pCount}
+                      </td>
+                      <td className="py-2 px-1 bg-rose-50/30 font-bold text-rose-700">
+                        {aCount}
+                      </td>
+                      <td className="py-2 px-1 bg-amber-50/30 font-bold text-amber-700">
+                        {eCount}
+                      </td>
+                      <td className="py-2 px-1 bg-blue-50/30 font-bold text-blue-700">
+                        {lCount}
+                      </td>
+                      <td className="py-2 px-2 bg-slate-50 font-black">
+                        {(() => {
+                          const total = pCount + aCount + eCount + lCount;
+                          const rate = total > 0 ? Math.round(((pCount + eCount) / total) * 100) : 100;
+                          return (
+                            <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                              rate >= 90 ? "bg-emerald-100 text-emerald-800" :
+                              rate >= 80 ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"
+                            }`}>
+                              {rate}%
+                            </span>
+                          );
+                        })()}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-600 pt-1">
-            <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-emerald-500" /> P = Present</span>
-            <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-rose-600" /> A = Unexcused Absent</span>
-            <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-amber-400" /> E = Excused Absence</span>
-            <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-blue-500" /> L = Tardy / Late</span>
+
+          {/* Footer Legend and Summary Stats */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-600">
+              <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-emerald-500" /> P = Present</span>
+              <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-rose-600" /> A = Unexcused Absent</span>
+              <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-amber-400" /> E = Excused Absence</span>
+              <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-blue-500" /> L = Tardy / Late</span>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs text-slate-400">
+              <span>💡 Click any status button to cycle between <strong>P &rarr; A &rarr; E &rarr; L</strong></span>
+            </div>
           </div>
         </div>
       )}
