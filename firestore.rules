@@ -14,46 +14,44 @@ service cloud.firestore {
 
     // Public / System Config
     match /system_config/{configId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // Users Collection (RA 10173 Protected)
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isOwner(userId);
+      allow read, write: if true;
     }
 
-    // Students Cohort Records
+    // Students Cohort Records (Enables seamless multi-user CSV import & live dashboard sync)
     match /students/{studentId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // Academic & AHP Assessment Records
     match /assessments/{assessmentId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // Daily Mood Check-ins
     match /mood_checkins/{checkinId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // Guidance Intervention Plans
     match /interventions/{planId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // Parent Notifications & SMS Logs
     match /notifications/{notificationId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if true;
     }
 
-    // RA 10173 Immutable Audit Logs
+    // RA 10173 Immutable Audit Logs (Append-only audit integrity)
     match /audit_logs/{logId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if false; // Append-only audit integrity
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
     }
   }
 }

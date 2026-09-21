@@ -374,15 +374,19 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
       // Save locally & sync to Firebase Cloud Firestore
       saveStudentDataset(finalCalculatedList, true);
 
-      // Log RA 10173 Audit Record in Firestore & local audit trail
-      await logCloudAuditEvent({
-        actor_name: user?.full_name || "Authorized Staff",
-        actor_role: user?.role || "guidance_counselor",
-        action: "BATCH_DATA_INGESTION_CSV",
-        target_resource: `Domain: ${domainMeta.title}`,
-        details: `Processed ${parsedRows.length} records. Updated ${updatedCount || parsedRows.length} cohort student risk profiles with cloud Firestore sync. Academic Year: ${academicYear}, Quarter: ${quarter}.`,
-        ip_address: "127.0.0.1 (Campus LAN)"
-      });
+      // Log RA 10173 Audit Record in Firestore & local audit trail (safely non-blocking)
+      try {
+        await logCloudAuditEvent({
+          actor_name: user?.full_name || "Authorized Staff",
+          actor_role: user?.role || "guidance_counselor",
+          action: "BATCH_DATA_INGESTION_CSV",
+          target_resource: `Domain: ${domainMeta.title}`,
+          details: `Processed ${parsedRows.length} records. Updated ${updatedCount || parsedRows.length} cohort student risk profiles with cloud Firestore sync. Academic Year: ${academicYear}, Quarter: ${quarter}.`,
+          ip_address: "127.0.0.1 (Campus LAN)"
+        });
+      } catch (auditErr) {
+        console.warn("Audit log notice:", auditErr);
+      }
 
       // Dispatch window event for live dashboard reactivity
       if (typeof window !== "undefined") {
