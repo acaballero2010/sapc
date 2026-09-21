@@ -4,15 +4,8 @@ import React, { useState } from "react";
 import { 
   BarChart3, 
   Search, 
-  ArrowUpDown, 
-  AlertTriangle, 
   CheckCircle2, 
-  HeartHandshake, 
-  Filter,
-  Eye,
-  GraduationCap,
-  Sparkles,
-  Users
+  HeartHandshake
 } from "lucide-react";
 
 interface HeatmapStudent {
@@ -42,7 +35,7 @@ const MOCK_HEATMAP_STUDENTS: HeatmapStudent[] = [
 ];
 
 export const SectionRiskHeatmap: React.FC = () => {
-  const [students, setStudents] = useState<HeatmapStudent[]>(MOCK_HEATMAP_STUDENTS);
+  const [students] = useState<HeatmapStudent[]>(MOCK_HEATMAP_STUDENTS);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"composite" | "gpa" | "absences" | "name">("composite");
   const [referredId, setReferredId] = useState<string | null>(null);
@@ -53,7 +46,7 @@ export const SectionRiskHeatmap: React.FC = () => {
     return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40";
   };
 
-  const handleRefer = (id: string, name: string) => {
+  const handleRefer = (id: string, _name: string) => {
     setReferredId(id);
     setTimeout(() => setReferredId(null), 3000);
   };

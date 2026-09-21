@@ -106,9 +106,9 @@ export function calculateSubjectFailurePrediction(
   const isHighRisk = student.sass_metrics.failing_subjects_count > 0 || gpa < 75.0;
 
   // Synthesize realistic current standings
-  let baseWW = isHighRisk ? Math.max(52, gpa - 6 + (hash % 10)) : Math.min(96, gpa + 2 - (hash % 8));
-  let basePT = isHighRisk ? Math.max(55, gpa - 4 + (hash % 8)) : Math.min(98, gpa + 4 - (hash % 6));
-  let baseQA = isHighRisk ? Math.max(50, gpa - 8 + (hash % 12)) : Math.min(95, gpa - (hash % 7));
+  const baseWW = isHighRisk ? Math.max(52, gpa - 6 + (hash % 10)) : Math.min(96, gpa + 2 - (hash % 8));
+  const basePT = isHighRisk ? Math.max(55, gpa - 4 + (hash % 8)) : Math.min(98, gpa + 4 - (hash % 6));
+  const baseQA = isHighRisk ? Math.max(50, gpa - 8 + (hash % 12)) : Math.min(95, gpa - (hash % 7));
 
   // Determine missing tasks and subject-specific absences
   const missingTasks = student.sass_metrics.incomplete_requirements_count > 0

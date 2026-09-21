@@ -8,27 +8,16 @@ import {
   CheckCircle2, 
   BookOpen, 
   Sliders, 
-  Brain, 
   Search, 
-  Filter, 
   Download, 
   Sparkles, 
-  Users, 
-  Calendar, 
-  Clock, 
-  FileText, 
-  HelpCircle,
-  ChevronRight,
-  ArrowRight,
-  RefreshCcw,
-  Check,
-  X
+  Check, 
+  X 
 } from "lucide-react";
 import { getActiveStudentDataset } from "@/lib/dataset-store";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { 
   SUBJECT_REGISTRY, 
-  SubjectMetadata, 
   StudentSubjectPrediction, 
   calculateSubjectFailurePrediction, 
   simulateRemediationOutcome 

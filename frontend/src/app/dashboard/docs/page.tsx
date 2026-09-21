@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { 
   BookOpen, 
   Brain, 
@@ -14,26 +14,18 @@ import {
   Activity, 
   Sparkles, 
   Lock, 
-  FileText, 
   CheckCircle2, 
   AlertTriangle, 
   Server, 
   Code2, 
   Cpu, 
   Database, 
-  Terminal, 
   HelpCircle,
   Calculator,
   Sliders,
   Award,
-  ChevronRight,
-  ExternalLink,
   Bot,
-  Percent,
-  Calendar,
-  Eye,
   Key,
-  Download,
   RotateCcw,
   Search,
   FileSpreadsheet
@@ -57,23 +49,26 @@ export default function DocumentationPage() {
   const isTeacher = rolePerspective === "teacher";
   
   // Available tabs tailored to current role perspective
-  const visibleTabs: Array<{ id: "risk" | "datasets" | "system" | "tech" | "users" | "howtos" | "releases" | "privacy"; label: string; icon: React.ReactNode; audience: string }> = [
-    { id: "risk", label: "AHP Risk Engine", icon: <Layers className="h-4 w-4" />, audience: "All Roles" },
-    ...(!isStudentOrParent ? [{ id: "datasets" as const, label: "Data Dictionary & Datasets", icon: <Database className="h-4 w-4" />, audience: "Faculty & Admin" }] : []),
-    ...(!isStudentOrParent && !isTeacher ? [{ id: "system" as const, label: "System Design", icon: <Brain className="h-4 w-4" />, audience: "Admin & Counselors" }] : []),
-    ...(!isStudentOrParent && !isTeacher ? [{ id: "tech" as const, label: "Tech Stack & APIs", icon: <Code2 className="h-4 w-4" />, audience: "Admin Only" }] : []),
-    { id: "users", label: isStudentOrParent ? "My Portal Guide" : "User Operations Manual", icon: <Users className="h-4 w-4" />, audience: "Role-Specific" },
-    { id: "howtos", label: "How-Tos & FAQs", icon: <HelpCircle className="h-4 w-4" />, audience: "All Roles" },
-    { id: "releases", label: "Release Notes", icon: <Award className="h-4 w-4" />, audience: "All Roles" },
-    { id: "privacy", label: "Privacy & RA 10173", icon: <Lock className="h-4 w-4" />, audience: "All Roles" },
-  ];
+  const visibleTabs = useMemo(() => {
+    const tabs: Array<{ id: "risk" | "datasets" | "system" | "tech" | "users" | "howtos" | "releases" | "privacy"; label: string; icon: React.ReactNode; audience: string }> = [
+      { id: "risk", label: "AHP Risk Engine", icon: <Layers className="h-4 w-4" />, audience: "All Roles" },
+      ...(!isStudentOrParent ? [{ id: "datasets" as const, label: "Data Dictionary & Datasets", icon: <Database className="h-4 w-4" />, audience: "Faculty & Admin" }] : []),
+      ...(!isStudentOrParent && !isTeacher ? [{ id: "system" as const, label: "System Design", icon: <Brain className="h-4 w-4" />, audience: "Admin & Counselors" }] : []),
+      ...(!isStudentOrParent && !isTeacher ? [{ id: "tech" as const, label: "Tech Stack & APIs", icon: <Code2 className="h-4 w-4" />, audience: "Admin Only" }] : []),
+      { id: "users", label: isStudentOrParent ? "My Portal Guide" : "User Operations Manual", icon: <Users className="h-4 w-4" />, audience: "Role-Specific" },
+      { id: "howtos", label: "How-Tos & FAQs", icon: <HelpCircle className="h-4 w-4" />, audience: "All Roles" },
+      { id: "releases", label: "Release Notes", icon: <Award className="h-4 w-4" />, audience: "All Roles" },
+      { id: "privacy", label: "Privacy & RA 10173", icon: <Lock className="h-4 w-4" />, audience: "All Roles" },
+    ];
+    return tabs;
+  }, [isStudentOrParent, isTeacher]);
 
   // If active tab is not in visible tabs (e.g. after switching perspective), fallback to "risk"
-  React.useEffect(() => {
+  useEffect(() => {
     if (!visibleTabs.some(t => t.id === activeTab)) {
       setActiveTab("risk");
     }
-  }, [rolePerspective]);
+  }, [activeTab, visibleTabs]);
 
   // Mini live AHP calculator state for interactive demonstration
   const [calcGpa, setCalcGpa] = useState<number>(78);

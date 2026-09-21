@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { 
   Search, 
   X, 
@@ -9,8 +9,6 @@ import {
   Brain, 
   Users, 
   Bot, 
-  FileText, 
-  Sparkles, 
   AlertTriangle, 
   ShieldCheck, 
   Activity, 
@@ -18,10 +16,6 @@ import {
   HelpCircle,
   Lock,
   ArrowRight,
-  Sliders,
-  RotateCcw,
-  Calendar,
-  Command,
   Archive
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -52,7 +46,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onOpenArchive
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);

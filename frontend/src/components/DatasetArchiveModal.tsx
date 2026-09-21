@@ -5,17 +5,12 @@ import {
   Archive, 
   Download, 
   RotateCcw, 
-  Trash2, 
   CheckCircle2, 
-  FileText, 
   ShieldCheck, 
   FileSpreadsheet, 
-  Layers, 
   X, 
   Sparkles,
-  Calendar,
   Database,
-  RefreshCw,
   HardDrive,
   FileCode
 } from "lucide-react";

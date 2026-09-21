@@ -438,6 +438,16 @@ export const TeacherDashboard: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const filteredAttendanceStudents = useMemo(() => {
+    return students.filter(s => {
+      const matchQuery = attendanceStudentSearch === "" ||
+        s.full_name.toLowerCase().includes(attendanceStudentSearch.toLowerCase()) ||
+        s.lrn.includes(attendanceStudentSearch);
+      const matchSection = attendanceSectionFilter === "all" || s.section_name === attendanceSectionFilter;
+      return matchQuery && matchSection;
+    });
+  }, [students, attendanceStudentSearch, attendanceSectionFilter]);
+
   const handleExportMonthAttendanceCsv = () => {
     const headers = [
       "LRN",
@@ -488,16 +498,6 @@ export const TeacherDashboard: React.FC = () => {
     setToastMessage(`Exported ${activeAttendanceMonthObj.label} Attendance Sheet to CSV!`);
     setTimeout(() => setToastMessage(null), 3000);
   };
-
-  const filteredAttendanceStudents = useMemo(() => {
-    return students.filter(s => {
-      const matchQuery = attendanceStudentSearch === "" ||
-        s.full_name.toLowerCase().includes(attendanceStudentSearch.toLowerCase()) ||
-        s.lrn.includes(attendanceStudentSearch);
-      const matchSection = attendanceSectionFilter === "all" || s.section_name === attendanceSectionFilter;
-      return matchQuery && matchSection;
-    });
-  }, [students, attendanceStudentSearch, attendanceSectionFilter]);
 
   // ---------------------------------------------------------------------------
   // 9. MESSAGES & THREADS
@@ -2605,15 +2605,29 @@ export const TeacherDashboard: React.FC = () => {
 
           {/* Search and Section Filters */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/70 p-3 rounded-2xl border border-slate-200/80 text-xs">
-            <div className="relative w-full sm:w-72">
-              <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search by student name or LRN..."
-                value={attendanceStudentSearch}
-                onChange={e => setAttendanceStudentSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#8B0014]"
-              />
+            <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+              <div className="relative w-full sm:w-72">
+                <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by student name or LRN..."
+                  value={attendanceStudentSearch}
+                  onChange={e => setAttendanceStudentSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#8B0014]"
+                />
+              </div>
+              <select
+                value={attendanceSectionFilter}
+                onChange={e => setAttendanceSectionFilter(e.target.value)}
+                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#8B0014] cursor-pointer"
+              >
+                <option value="all">All Sections</option>
+                <option value="STEM 12-A">STEM 12-A</option>
+                <option value="STEM 12-B">STEM 12-B</option>
+                <option value="ABM 12-A">ABM 12-A</option>
+                <option value="HUMSS 12-A">HUMSS 12-A</option>
+                <option value="ICT 12-A">ICT 12-A</option>
+              </select>
             </div>
 
             <div className="flex items-center gap-2 text-slate-500 font-medium self-end sm:self-auto">

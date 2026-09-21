@@ -2,17 +2,9 @@
 
 import React, { useState } from "react";
 import { 
-  ShieldAlert, 
-  ShieldCheck, 
-  Calendar, 
   CheckCircle2, 
-  Clock, 
-  User, 
   ArrowRight, 
-  Sparkles, 
-  Plus, 
   Filter,
-  MoreVertical,
   Layers,
   HeartPulse,
   Brain,
