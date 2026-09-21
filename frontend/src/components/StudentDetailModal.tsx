@@ -36,6 +36,7 @@ import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
 import { SAPC_500_STUDENTS } from "@/data/students500";
+import { getActiveStudentDataset } from "@/lib/dataset-store";
 import { analyzeMoodTelemetry } from "@/lib/mood-telemetry";
 import { SUBJECT_REGISTRY, calculateSubjectFailurePrediction } from "@/lib/subject-prediction";
 
@@ -196,13 +197,9 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           return;
         }
 
-        // If backend is offline, use comprehensive mock data
-        throw new Error("Backend offline; using fallback profile");
-      } catch (err) {
-        console.warn("Using fallback mock data for student modal:", err);
-        
-        // Find student in 500-student dataset
-        const found = SAPC_500_STUDENTS.find(s => s.id === studentId) || SAPC_500_STUDENTS[0];
+        // When running in standalone / frontend-first mode, load seamlessly from active dataset
+        const activeDataset = getActiveStudentDataset();
+        const found = activeDataset.find(s => s.id === studentId) || SAPC_500_STUDENTS.find(s => s.id === studentId) || SAPC_500_STUDENTS[0];
         
         // Check if there are local plans for this student
         let localPlans: any[] = [];
