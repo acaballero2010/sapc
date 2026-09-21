@@ -184,10 +184,13 @@ export default function RegisterPage() {
             role: roleToUse,
             roleConfirmed: true,
             createdAt: serverTimestamp(),
-            verified: true,
+            verified: roleToUse !== "parent",
+            verification_status: roleToUse === "parent" ? "pending_school_approval" : "active",
+            linkageStatus: roleToUse === "parent" ? "pending_adviser_validation" : "verified",
             metadata: {
               lrn: activeTab === "student" ? lrn : null,
               childLrn: activeTab === "parent" ? childLrn : null,
+              relationship: activeTab === "parent" ? parentRelation : null,
               prcLicense: activeTab === "guidance_counselor" ? counselorPrc : null,
               department: activeTab === "teacher" ? teacherDept : null
             }
@@ -830,14 +833,16 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-emerald-100 text-emerald-900 border border-emerald-300">
-                  Verification Successful
+                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase border ${activeTab === "parent" ? "bg-amber-100 text-amber-900 border-amber-300" : "bg-emerald-100 text-emerald-900 border-emerald-300"}`}>
+                  {activeTab === "parent" ? "Awaiting School Approval" : "Verification Successful"}
                 </span>
                 <h2 className="text-2xl font-black text-slate-900 mt-2">
-                  Account Initialized & Linked
+                  {activeTab === "parent" ? "Parent Account Registered" : "Account Initialized & Linked"}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-md mx-auto">
-                  Your San Antonio de Padua College institutional profile has been verified and registered in the Decision Support System.
+                  {activeTab === "parent"
+                    ? "In compliance with DepEd DO 40, s. 2012 and RA 10173, your child's class adviser and school registrar will verify your parental linkage before granting full access to grades and psychological evaluations."
+                    : "Your San Antonio de Padua College institutional profile has been verified and registered in the Decision Support System."}
                 </p>
               </div>
 

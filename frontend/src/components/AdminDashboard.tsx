@@ -30,7 +30,12 @@ import {
   Key,
   ChevronLeft,
   ChevronRight,
-  BrainCircuit
+  BrainCircuit,
+  Copy,
+  KeyRound,
+  Check,
+  Lock,
+  Info
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
@@ -230,19 +235,67 @@ export const AdminDashboard: React.FC = () => {
     { id: "Q4", label: "4th Quarter (Final Clearance & Retention)", start: "2027-03-22", end: "2027-05-30", status: "Upcoming", isCurrent: false }
   ]);
 
-  // Campus Users
-  const [campusUsers] = useState([
-    { id: 1, name: "Maria Theresa Cruz, RGC", email: "counselor@sapc.edu.ph", role: "guidance_counselor", section: "Guidance Central", status: "Active" },
-    { id: 2, name: "Mr. Roberto Santos, LPT", email: "teacher.santos@sapc.edu.ph", role: "teacher", section: "Grade 11 - St. Augustine (STEM)", status: "Active" },
-    { id: 3, name: "Mrs. Clara Buenaflor, LPT", email: "teacher.buenaflor@sapc.edu.ph", role: "teacher", section: "Grade 11 - St. Thomas (HUMSS)", status: "Active" },
-    { id: 4, name: "Dr. Remedios Santos, Ed.D.", email: "admin@sapc.edu.ph", role: "admin", section: "Academic Affairs", status: "Active" }
+  // Campus Users & Faculty Directory
+  const [campusUsers, setCampusUsers] = useState([
+    { id: 1, name: "Maria Theresa Cruz, RGC", email: "counselor@sapc.edu.ph", role: "guidance_counselor", section: "Guidance Central (Lead RGC)", initialPassword: "counselor123", status: "Active" },
+    { id: 2, name: "Mr. Roberto Santos, LPT", email: "teacher.santos@sapc.edu.ph", role: "teacher", section: "Grade 11 - St. Augustine (STEM)", initialPassword: "teacher123", status: "Active" },
+    { id: 3, name: "Mrs. Clara Buenaflor, LPT", email: "teacher.buenaflor@sapc.edu.ph", role: "teacher", section: "Grade 11 - St. Thomas (HUMSS)", initialPassword: "teacher123", status: "Active" },
+    { id: 4, name: "Mr. Arnold Dizon, LPT", email: "teacher.dizon@sapc.edu.ph", role: "teacher", section: "Grade 11 - St. Clare (ABM)", initialPassword: "teacher123", status: "Active" },
+    { id: 5, name: "Prof. Annalyn Cruz, LPT", email: "teacher.cruz@sapc.edu.ph", role: "teacher", section: "Grade 12 - St. Jude (ABM)", initialPassword: "teacher123", status: "Active" },
+    { id: 6, name: "Dr. Remedios Santos, Ed.D.", email: "admin@sapc.edu.ph", role: "admin", section: "Academic Affairs & Decision Governance", initialPassword: "admin123", status: "Active" }
   ]);
 
-  // 11. Pending Registrations
+  // 11. Pending Registrations & Parent Linkage Verification Queue
   const [pendingRegistrations, setPendingRegistrations] = useState([
-    { id: "REG-201", name: "Gabriel Hernandez", email: "gabriel.h@gmail.com", role: "parent", linkedStudent: "Joshua Dimaculangan (LRN: 109238475001)", date: "2026-09-19" },
-    { id: "REG-202", name: "Prof. Annalyn Cruz, LPT", email: "annalyn.cruz@sapc.edu.ph", role: "teacher", linkedStudent: "Grade 12 - St. Jude (ABM)", date: "2026-09-18" }
+    { 
+      id: "REG-201", 
+      name: "Mrs. Elena Dimaculangan", 
+      email: "parent.dimaculangan@gmail.com", 
+      phone: "+63 917 555 0192", 
+      role: "parent", 
+      relationship: "Mother / Primary Guardian", 
+      linkedStudent: "Joshua Dimaculangan", 
+      linkedLRN: "109238475001",
+      section: "Grade 11 - St. Augustine (STEM)",
+      verificationDoc: "PSA Birth Certificate Attached (Verified)", 
+      date: "2026-09-19" 
+    },
+    { 
+      id: "REG-202", 
+      name: "Mr. Arthur Reyes", 
+      email: "arthur.reyes@yahoo.com", 
+      phone: "+63 918 332 9481", 
+      role: "parent", 
+      relationship: "Father", 
+      linkedStudent: "Samantha Nicole Reyes", 
+      linkedLRN: "109238475004",
+      section: "Grade 11 - St. Thomas (HUMSS)",
+      verificationDoc: "Guardian ID & Authorization Form", 
+      date: "2026-09-20" 
+    },
+    { 
+      id: "REG-203", 
+      name: "Prof. Annalyn Cruz, LPT", 
+      email: "annalyn.cruz@sapc.edu.ph", 
+      phone: "+63 920 119 2847", 
+      role: "teacher", 
+      relationship: "Faculty Adviser", 
+      linkedStudent: "Grade 12 - St. Jude (ABM)", 
+      linkedLRN: "N/A (Faculty)",
+      section: "Grade 12 - St. Jude (ABM)",
+      verificationDoc: "Faculty Appointment PRC License", 
+      date: "2026-09-18" 
+    }
   ]);
+
+  const copyFacultySlip = (teacher: typeof campusUsers[0]) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://sapc.edu.ph";
+    const slip = `=====================================\nSAN ANTONIO DE PADUA COLLEGE (SAPC)\nFaculty & Adviser Portal Credentials\n=====================================\nFaculty Name: ${teacher.name}\nAssigned Advisory: ${teacher.section}\nInstitutional Email: ${teacher.email}\nDefault Initial Password: ${teacher.initialPassword || "teacher123"}\nSign-in Portal: ${origin}/login\n\n* Security Notice: Please sign in and update your password under Profile > Security Settings.\n=====================================`;
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(slip);
+      showToast(`Copied onboarding credentials slip for ${teacher.name}!`);
+    }
+  };
 
   // 3. Import History Log
   const [importHistory] = useState([
@@ -1342,7 +1395,7 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 10. TEACHER ACCOUNTS (teachers) */}
+      {/* 10. TEACHER ACCOUNTS & CREDENTIALS DIRECTORY (teachers) */}
       {/* ========================================================= */}
       {activeTab === "teachers" && (
         <div className="space-y-6">
@@ -1351,34 +1404,91 @@ export const AdminDashboard: React.FC = () => {
               <div>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
                   <GraduationCap className="h-6 w-6 text-[#8B0014]" />
-                  Faculty &amp; Class Adviser Accounts
+                  Faculty &amp; Class Adviser Accounts Directory
                 </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Provisioned institutional accounts, advisory section assignments, and default temporary passwords
+                </p>
               </div>
               <button
                 onClick={() => handleTabChange("create_user")}
-                className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition self-start sm:self-auto"
+                className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition self-start sm:self-auto flex items-center gap-1.5 shadow-xs"
               >
-                + Create Campus User
+                <UserPlus className="h-4 w-4" />
+                <span>+ Provision Faculty User</span>
               </button>
             </div>
 
-            <div className="space-y-3">
-              {campusUsers.map((u) => (
-                <div key={u.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                  <div>
-                    <h4 className="font-extrabold text-sm text-slate-900">{u.name}</h4>
-                    <span className="text-slate-500">{u.email} • {u.section}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => showToast(`Password reset link dispatched to ${u.email}`)}
-                      className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs"
-                    >
-                      Reset Password
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
+              <Info className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <span className="font-extrabold block">Administrator Faculty Hand-Off Guide:</span>
+                <p className="leading-relaxed text-amber-800">
+                  Below are the pre-configured accounts for faculty and homeroom advisers. You can copy individual onboarding slips to give to teachers during faculty orientation. Teachers will use their default password on initial login and can update it under <strong>Profile &gt; Security Settings</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-slate-200">
+              <table className="min-w-full text-left text-xs sm:text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
+                  <tr>
+                    <th className="py-3.5 px-4">Faculty Name</th>
+                    <th className="py-3.5 px-4">Assigned Section / Track</th>
+                    <th className="py-3.5 px-4">Institutional Email</th>
+                    <th className="py-3.5 px-3">Initial Password</th>
+                    <th className="py-3.5 px-3 text-center">Status</th>
+                    <th className="py-3.5 px-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  {campusUsers.map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-50/80 transition">
+                      <td className="py-3.5 px-4">
+                        <strong className="text-slate-900 font-extrabold block">{u.name}</strong>
+                        <span className="text-xs text-slate-500 capitalize">{u.role.replace(/_/g, " ")}</span>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs font-semibold text-slate-700">
+                        {u.section}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-xs text-slate-700">
+                        {u.email}
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="px-2 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-800 font-mono text-xs font-bold">
+                          {u.initialPassword || "teacher123"}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {u.status}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => copyFacultySlip(u)}
+                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[#8B0014] hover:text-white text-slate-800 font-bold text-xs transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                            title="Copy Onboarding Credential Slip"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                            <span>Copy Slip</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => showToast(`Password reset link dispatched to ${u.email}`)}
+                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+                            title="Dispatch password reset token"
+                          >
+                            Reset
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -1401,7 +1511,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
                 <label className="font-bold text-slate-700">Full Name:</label>
-                <input type="text" placeholder="e.g. Maria Clara Santos" className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
+                <input type="text" placeholder="e.g. Maria Clara Santos, LPT" className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
               </div>
               <div className="space-y-1">
                 <label className="font-bold text-slate-700">Institutional Email:</label>
@@ -1416,6 +1526,10 @@ export const AdminDashboard: React.FC = () => {
                   <option value="student">Student</option>
                   <option value="admin">System Administrator</option>
                 </select>
+              </div>
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700">Assigned Section / Department:</label>
+                <input type="text" placeholder="e.g. Grade 11 - St. Augustine (STEM)" className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
               </div>
 
               <div className="sm:col-span-2 pt-2">
@@ -1433,48 +1547,184 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 12. PENDING REGISTRATIONS (pending_registrations) */}
+      {/* 12. PENDING REGISTRATIONS & PARENT LINKAGE QUEUE */}
       {/* ========================================================= */}
       {activeTab === "pending_registrations" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <UserCheck className="h-6 w-6 text-[#8B0014]" />
-                Security Registration Approval Queue
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500">Verify legitimacy before granting portal access to parent and teacher signups</p>
+            <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <UserCheck className="h-6 w-6 text-[#8B0014]" />
+                  Parent Linkage &amp; Security Verification Queue
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Verify parent-student legal guardianship before granting access to confidential academic &amp; wellness records (DepEd DO 40 / RA 10173)
+                </p>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 self-start sm:self-auto">
+                {pendingRegistrations.length} Pending Approvals
+              </span>
             </div>
 
             <div className="space-y-3">
-              {pendingRegistrations.map((p) => (
-                <div key={p.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                  <div>
-                    <h4 className="font-extrabold text-sm text-slate-900">{p.name} ({p.role.toUpperCase()})</h4>
-                    <p className="text-slate-500">{p.email} • {p.linkedStudent}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        setPendingRegistrations(prev => prev.filter(item => item.id !== p.id));
-                        showToast(`Approved registration for ${p.name}`);
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition"
-                    >
-                      ✓ Approve
-                    </button>
-                    <button
-                      onClick={() => {
-                        setPendingRegistrations(prev => prev.filter(item => item.id !== p.id));
-                        showToast(`Declined registration for ${p.name}`);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold text-xs transition"
-                    >
-                      Decline
-                    </button>
-                  </div>
+              {pendingRegistrations.length === 0 ? (
+                <div className="p-8 text-center text-xs text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  No pending parent or faculty registrations in queue.
                 </div>
-              ))}
+              ) : (
+                pendingRegistrations.map((p) => (
+                  <div key={p.id} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-extrabold text-sm text-slate-900">{p.name}</h4>
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
+                            p.role === "parent" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+                          }`}>
+                            {p.role}
+                          </span>
+                        </div>
+                        <p className="text-slate-600">
+                          <strong>Contact:</strong> {p.email} • {p.phone}
+                        </p>
+                        <p className="text-slate-700">
+                          <strong>Target Child / Student:</strong> <span className="font-bold text-[#8B0014]">{p.linkedStudent}</span> (LRN: {p.linkedLRN})
+                        </p>
+                        <p className="text-slate-600">
+                          <strong>Relationship / Track:</strong> {p.relationship} • {p.section}
+                        </p>
+                        <p className="text-slate-500 text-[11px] flex items-center gap-1 pt-1">
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                          <span>Document Status: <strong>{p.verificationDoc}</strong> (Requested {p.date})</span>
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-start sm:self-center shrink-0 pt-2 sm:pt-0">
+                        <button
+                          onClick={() => {
+                            setPendingRegistrations(prev => prev.filter(item => item.id !== p.id));
+                            showToast(`Approved & linked student records for ${p.name}`);
+                          }}
+                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition cursor-pointer flex items-center gap-1"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          <span>Approve &amp; Link</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPendingRegistrations(prev => prev.filter(item => item.id !== p.id));
+                            showToast(`Declined registration for ${p.name}`);
+                          }}
+                          className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs transition cursor-pointer"
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 13. PARENT DIRECTORY (parents) */}
+      {/* ========================================================= */}
+      {activeTab === "parents" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <Users className="h-6 w-6 text-[#8B0014]" />
+                  Verified Parent &amp; Guardian Directory
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Approved parent accounts linked to enrolled students with multi-channel SMS/Email notification bindings
+                </p>
+              </div>
+              <button
+                onClick={() => handleTabChange("pending_registrations")}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition flex items-center gap-1.5"
+              >
+                <UserCheck className="h-4 w-4" />
+                <span>View Approvals Queue ({pendingRegistrations.length})</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-slate-200">
+              <table className="min-w-full text-left text-xs sm:text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
+                  <tr>
+                    <th className="py-3.5 px-4">Parent / Guardian</th>
+                    <th className="py-3.5 px-4">Contact Details</th>
+                    <th className="py-3.5 px-4">Linked Student &amp; LRN</th>
+                    <th className="py-3.5 px-3">Relationship</th>
+                    <th className="py-3.5 px-3 text-center">Linkage Status</th>
+                    <th className="py-3.5 px-4 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  <tr className="hover:bg-slate-50/80 transition">
+                    <td className="py-3.5 px-4">
+                      <strong className="text-slate-900 font-extrabold block">Mrs. Elena Dimaculangan</strong>
+                      <span className="text-xs text-slate-500">PTCA Representative</span>
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-slate-700">
+                      parent@sapc.edu.ph • +63 917 555 0192
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <strong className="text-[#8B0014] font-bold block">Joshua Dimaculangan</strong>
+                      <span className="font-mono text-xs text-slate-500">LRN: 109238475001 • Grade 11 STEM</span>
+                    </td>
+                    <td className="py-3.5 px-3">Mother</td>
+                    <td className="py-3.5 px-3 text-center">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        ✓ Verified &amp; Linked
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <button
+                        onClick={() => showToast("Parent consultation details dispatched.")}
+                        className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold"
+                      >
+                        Contact
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-slate-50/80 transition">
+                    <td className="py-3.5 px-4">
+                      <strong className="text-slate-900 font-extrabold block">Mr. Arthur Reyes</strong>
+                      <span className="text-xs text-slate-500">Guardian</span>
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-slate-700">
+                      arthur.reyes@yahoo.com • +63 918 332 9481
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <strong className="text-[#8B0014] font-bold block">Samantha Nicole Reyes</strong>
+                      <span className="font-mono text-xs text-slate-500">LRN: 109238475004 • Grade 11 HUMSS</span>
+                    </td>
+                    <td className="py-3.5 px-3">Father</td>
+                    <td className="py-3.5 px-3 text-center">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        ✓ Verified &amp; Linked
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <button
+                        onClick={() => showToast("Parent consultation details dispatched.")}
+                        className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold"
+                      >
+                        Contact
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

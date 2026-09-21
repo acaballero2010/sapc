@@ -34,7 +34,10 @@ import {
   Send,
   UserCheck,
   Percent,
-  FileText
+  FileText,
+  Copy,
+  KeyRound,
+  Check
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
@@ -135,6 +138,7 @@ export const TeacherDashboard: React.FC = () => {
 
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState<string>("all");
+  const [rosterViewMode, setRosterViewMode] = useState<"risk" | "credentials">("risk");
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(1);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [referralStudent, setReferralStudent] = useState<any | null>(null);
@@ -142,6 +146,39 @@ export const TeacherDashboard: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const catDrag = useDragScroll();
   const tabsDrag = useDragScroll();
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const copyStudentSlip = (s: StudentRecord) => {
+    const email = `${s.lrn}@sapc.edu.ph`;
+    const defaultPass = "student123";
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://sapc.edu.ph";
+    const slipText = `=====================================\nSAN ANTONIO DE PADUA COLLEGE (SAPC)\nStudent Portal Login Credentials\n=====================================\nStudent Name: ${s.full_name}\nLRN / Username: ${s.lrn}\nAssigned Section: ${s.section_name || "Grade 11 - STEM"}\nInstitutional Email: ${email}\nDefault Initial Password: ${defaultPass}\nSign-in Portal: ${origin}/login\n\n* Security Notice: Please log in and change your initial password in Profile > Security Settings.\n=====================================`;
+    
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(slipText);
+      showToast(`Copied login credentials slip for ${s.full_name}!`);
+    }
+  };
+
+  const exportAdvisoryCredentialsCSV = () => {
+    let csv = "Student Name,LRN,Advisory Section,Institutional Email,Temporary Initial Password,Account Status\n";
+    filteredStudents.forEach(s => {
+      csv += `"${s.full_name}","${s.lrn}","${s.section_name || "Grade 11 - STEM"}","${s.lrn}@sapc.edu.ph","student123","Initial Credentials Active"\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `SAPC_Advisory_Credentials_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Exported Advisory Section Credentials Sheet!");
+  };
 
   // ---------------------------------------------------------------------------
   // 1. IMPORT WIZARD (3-Step Process)
@@ -655,11 +692,6 @@ export const TeacherDashboard: React.FC = () => {
       window.history.replaceState({}, "", url.toString());
       window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab, source: "tab_click" } }));
     }
-  };
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
   };
 
   // Summary Metrics calculations
@@ -2084,12 +2116,50 @@ export const TeacherDashboard: React.FC = () => {
         <div id="roster" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 shadow-sm space-y-6 animate-in fade-in duration-200 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
-              <h3 className="text-lg sm:text-xl font-black text-slate-900">Grade 11 - STEM (St. Augustine) Roster</h3>
-              <p className="text-xs text-slate-500">Color-coded risk monitoring with 1-click student profiling and guidance referral</p>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900">Grade 11 - STEM (St. Augustine) Advisory Hub</h3>
+              <p className="text-xs text-slate-500">Advisory class monitoring, student profiling, and student login credential distribution</p>
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800 self-start sm:self-auto">
-              {filteredStudents.length} of {students.length} Students
-            </span>
+            
+            <div className="flex items-center gap-2">
+              {/* Sub-view switcher: Risk vs Credentials */}
+              <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setRosterViewMode("risk")}
+                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                    rosterViewMode === "risk"
+                      ? "bg-white text-slate-900 shadow-2xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  📊 Risk Monitoring
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRosterViewMode("credentials")}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 cursor-pointer ${
+                    rosterViewMode === "credentials"
+                      ? "bg-white text-[#8B0014] shadow-2xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <KeyRound className="h-3.5 w-3.5 text-[#8B0014]" />
+                  <span>🔑 Student Login Slips</span>
+                </button>
+              </div>
+
+              {rosterViewMode === "credentials" && (
+                <button
+                  type="button"
+                  onClick={exportAdvisoryCredentialsCSV}
+                  className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  title="Export all login slips to CSV"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Export Slips CSV</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Search & Filter Bar */}
@@ -2105,124 +2175,198 @@ export const TeacherDashboard: React.FC = () => {
               />
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <select
-                value={riskFilter}
-                onChange={(e) => setRiskFilter(e.target.value)}
-                className="min-h-[44px] px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800"
-              >
-                <option value="all">All Risk Levels</option>
-                <option value="high">High Risk (🔴)</option>
-                <option value="medium">Medium Risk (🟡)</option>
-                <option value="low">Low Risk (🟢)</option>
-              </select>
-            </div>
+            {rosterViewMode === "risk" && (
+              <div className="flex items-center gap-2 shrink-0">
+                <select
+                  value={riskFilter}
+                  onChange={(e) => setRiskFilter(e.target.value)}
+                  className="min-h-[44px] px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800"
+                >
+                  <option value="all">All Risk Levels</option>
+                  <option value="high">High Risk (🔴)</option>
+                  <option value="medium">Medium Risk (🟡)</option>
+                  <option value="low">Low Risk (🟢)</option>
+                </select>
+              </div>
+            )}
           </div>
 
-          {/* Mobile Stacked Student Cards (<md) */}
-          <div className="grid grid-cols-1 md:hidden gap-3.5">
-            {filteredStudents.map((s) => (
-              <div key={s.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h4 className="font-black text-slate-900 text-sm">{s.full_name}</h4>
-                    <span className="text-xs text-slate-500 font-mono">LRN: {s.lrn}</span>
+          {/* VIEW 1: RISK MONITORING VIEW */}
+          {rosterViewMode === "risk" && (
+            <>
+              {/* Mobile Stacked Student Cards (<md) */}
+              <div className="grid grid-cols-1 md:hidden gap-3.5">
+                {filteredStudents.map((s) => (
+                  <div key={s.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="font-black text-slate-900 text-sm">{s.full_name}</h4>
+                        <span className="text-xs text-slate-500 font-mono">LRN: {s.lrn}</span>
+                      </div>
+                      <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" />
+                    </div>
+                    <div className="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200/80">
+                      <strong className="text-slate-800 font-bold block">Primary Bottleneck:</strong>
+                      <span>{s.primary_risk_driver}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedStudentId(s.id);
+                          setIsDetailOpen(true);
+                        }}
+                        className="min-h-[44px] py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Eye className="h-4 w-4" /> View Profile
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReferralStudent(s);
+                          setIsReferralOpen(true);
+                        }}
+                        className="min-h-[44px] py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <HeartHandshake className="h-4 w-4" /> Refer
+                      </button>
+                    </div>
                   </div>
-                  <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" />
-                </div>
-                <div className="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200/80">
-                  <strong className="text-slate-800 font-bold block">Primary Bottleneck:</strong>
-                  <span>{s.primary_risk_driver}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedStudentId(s.id);
-                      setIsDetailOpen(true);
-                    }}
-                    className="min-h-[44px] py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5"
-                  >
-                    <Eye className="h-4 w-4" /> View Profile
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setReferralStudent(s);
-                      setIsReferralOpen(true);
-                    }}
-                    className="min-h-[44px] py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 font-bold text-xs flex items-center justify-center gap-1.5"
-                  >
-                    <HeartHandshake className="h-4 w-4" /> Refer
-                  </button>
+                ))}
+              </div>
+
+              {/* Full Table on Tablet & Desktop (>=md) */}
+              <div className="hidden md:block overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="min-w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
+                    <tr>
+                      <th className="py-3.5 px-4">Student Name &amp; LRN</th>
+                      <th className="py-3.5 px-3 text-center">GPA</th>
+                      <th className="py-3.5 px-3 text-center">Attendance</th>
+                      <th className="py-3.5 px-3 text-center">AHP Composite Risk</th>
+                      <th className="py-3.5 px-4">Primary Driver</th>
+                      <th className="py-3.5 px-4 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {filteredStudents.map((s) => (
+                      <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                        <td className="py-3.5 px-4">
+                          <strong className="text-slate-900 font-extrabold block">{s.full_name}</strong>
+                          <span className="font-mono text-xs text-slate-500">{s.lrn}</span>
+                        </td>
+                        <td className="py-3.5 px-3 text-center font-bold text-[#8B0014]">
+                          {s.sass_metrics?.gpa ? s.sass_metrics.gpa.toFixed(1) : "88.5"}
+                        </td>
+                        <td className="py-3.5 px-3 text-center font-semibold text-emerald-600">
+                          {s.sass_metrics?.attendance_rate_pct ? `${s.sass_metrics.attendance_rate_pct}%` : "96.5%"}
+                        </td>
+                        <td className="py-3.5 px-3 text-center">
+                          <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" />
+                        </td>
+                        <td className="py-3.5 px-4 text-xs text-slate-600 max-w-xs">
+                          {s.primary_risk_driver}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedStudentId(s.id);
+                                setIsDetailOpen(true);
+                              }}
+                              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+                              title="View Comprehensive Profile"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReferralStudent(s);
+                                setIsReferralOpen(true);
+                              }}
+                              className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 cursor-pointer"
+                              title="Submit Guidance Referral"
+                            >
+                              <HeartHandshake className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {/* VIEW 2: STUDENT LOGIN ACCOUNTS & CREDENTIAL SLIPS */}
+          {rosterViewMode === "credentials" && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
+                <Info className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-extrabold block">Adviser Credential Distribution Notice:</span>
+                  <p className="leading-relaxed text-amber-800">
+                    Below are the pre-configured institutional logins for students in your advisory class. You can copy individual login slips to distribute to students during homeroom advisory, or export the full section roster. Students are advised to change their default password upon initial sign-in under <strong>Profile &gt; Security Settings</strong>.
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Full Table on Tablet & Desktop (>=md) */}
-          <div className="hidden md:block overflow-x-auto rounded-2xl border border-slate-200">
-            <table className="min-w-full text-left text-xs sm:text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
-                <tr>
-                  <th className="py-3.5 px-4">Student Name &amp; LRN</th>
-                  <th className="py-3.5 px-3 text-center">GPA</th>
-                  <th className="py-3.5 px-3 text-center">Attendance</th>
-                  <th className="py-3.5 px-3 text-center">AHP Composite Risk</th>
-                  <th className="py-3.5 px-4">Primary Driver</th>
-                  <th className="py-3.5 px-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
-                {filteredStudents.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-3.5 px-4">
-                      <strong className="text-slate-900 font-extrabold block">{s.full_name}</strong>
-                      <span className="font-mono text-xs text-slate-500">{s.lrn}</span>
-                    </td>
-                    <td className="py-3.5 px-3 text-center font-bold text-[#8B0014]">
-                      {s.sass_metrics?.gpa ? s.sass_metrics.gpa.toFixed(1) : "88.5"}
-                    </td>
-                    <td className="py-3.5 px-3 text-center font-semibold text-emerald-600">
-                      {s.sass_metrics?.attendance_rate_pct ? `${s.sass_metrics.attendance_rate_pct}%` : "96.5%"}
-                    </td>
-                    <td className="py-3.5 px-3 text-center">
-                      <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" />
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-600 max-w-xs">
-                      {s.primary_risk_driver}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedStudentId(s.id);
-                            setIsDetailOpen(true);
-                          }}
-                          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700"
-                          title="View Comprehensive Profile"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setReferralStudent(s);
-                            setIsReferralOpen(true);
-                          }}
-                          className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
-                          title="Submit Guidance Referral"
-                        >
-                          <HeartHandshake className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="min-w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
+                    <tr>
+                      <th className="py-3.5 px-4">Student Name &amp; LRN</th>
+                      <th className="py-3.5 px-4">Institutional Login Email</th>
+                      <th className="py-3.5 px-3">Initial Password</th>
+                      <th className="py-3.5 px-3 text-center">Account Status</th>
+                      <th className="py-3.5 px-4 text-center">Login Slip Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {filteredStudents.map((s) => {
+                      const studentEmail = `${s.lrn}@sapc.edu.ph`;
+                      const defaultPass = "student123";
+                      return (
+                        <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                          <td className="py-3.5 px-4">
+                            <strong className="text-slate-900 font-extrabold block">{s.full_name}</strong>
+                            <span className="font-mono text-xs text-slate-500">LRN: {s.lrn}</span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-xs text-slate-700">
+                            {studentEmail}
+                          </td>
+                          <td className="py-3.5 px-3">
+                            <span className="px-2 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-800 font-mono text-xs font-bold">
+                              {defaultPass}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3 text-center">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              ✓ Provisioned
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <button
+                              type="button"
+                              onClick={() => copyStudentSlip(s)}
+                              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#8B0014] hover:text-white text-slate-800 font-bold text-xs transition flex items-center justify-center gap-1.5 mx-auto cursor-pointer shadow-2xs"
+                              title="Copy Student Login Credential Slip"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                              <span>Copy Slip</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

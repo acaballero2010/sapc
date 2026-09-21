@@ -383,7 +383,13 @@ export const ParentDashboard: React.FC = () => {
               </select>
               <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-slate-500 pointer-events-none" />
             </div>
-            <span className="text-[11px] text-slate-300 block">LRN: {currentChildInfo.lrn}</span>
+            <div className="flex items-center justify-between text-[11px] pt-1 border-t border-white/10">
+              <span className="text-slate-300">LRN: {currentChildInfo.lrn}</span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/40">
+                <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                School Verified
+              </span>
+            </div>
           </div>
         </div>
       </div>

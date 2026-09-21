@@ -449,7 +449,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           roleConfirmed: true,
           authProvider: "password",
           createdAt: serverTimestamp(),
-          isVerified: true
+          isVerified: false,
+          verification_status: "pending_school_approval",
+          linkageStatus: "pending_adviser_validation"
         });
       }
       setStep("success");
@@ -1103,16 +1105,22 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
               </div>
 
               <div className="space-y-1.5 max-w-sm mx-auto">
-                <h4 className="text-xl font-black text-slate-900">Verification Successful!</h4>
+                <h4 className="text-xl font-black text-slate-900">
+                  {activeTab === "parent" ? "Parent Account Registered!" : "Verification Successful!"}
+                </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Your account has been authenticated and provisioned under RA 10173 data privacy rules for San Antonio de Padua College.
+                  {activeTab === "parent" 
+                    ? "In compliance with DepEd DO 40, s. 2012 and RA 10173 (Data Privacy Act), access to student grades and psychological evaluations requires school adviser & registrar verification before full disclosure." 
+                    : "Your account has been authenticated and provisioned under RA 10173 data privacy rules for San Antonio de Padua College."}
                 </p>
               </div>
 
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-left space-y-2">
                 <div className="flex justify-between">
                   <span className="text-slate-500 font-semibold">Institutional Status:</span>
-                  <span className="font-bold text-emerald-700">Active & Verified</span>
+                  <span className={`font-bold ${activeTab === "parent" ? "text-amber-700 bg-amber-100/70 px-2 py-0.5 rounded-md" : "text-emerald-700"}`}>
+                    {activeTab === "parent" ? "Pending School Linkage Approval" : "Active & Verified"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500 font-semibold">Authorized Role:</span>
@@ -1122,6 +1130,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                   <span className="text-slate-500 font-semibold">Academic Year:</span>
                   <span className="font-bold text-slate-900">AY 2025–2026 (Semester 2)</span>
                 </div>
+                {activeTab === "parent" && (
+                  <div className="pt-2 border-t border-slate-200 text-[11px] text-amber-800 font-medium">
+                    ⓘ Your child's class adviser and the school registrar have received your verification request.
+                  </div>
+                )}
               </div>
 
               <button
