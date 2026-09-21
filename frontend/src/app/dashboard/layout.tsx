@@ -8,8 +8,10 @@ import { SensitivitySimulator } from "@/components/SensitivitySimulator";
 import { RoleOnboardingWizard } from "@/components/RoleOnboardingWizard";
 import { UserMenuPopover } from "@/components/UserMenuPopover";
 import { GlobalNotificationDrawer } from "@/components/GlobalNotificationDrawer";
+import { CommandPalette } from "@/components/CommandPalette";
+import { DatasetArchiveModal } from "@/components/DatasetArchiveModal";
 import { useAuth } from "@/lib/auth-context";
-import { ShieldCheck, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ShieldCheck, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -22,6 +24,8 @@ export default function DashboardLayout({
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   useEffect(() => {
@@ -45,6 +49,16 @@ export default function DashboardLayout({
       } else if (window.innerWidth >= 1024 && window.innerWidth < 1280) {
         setIsCollapsed(true);
       }
+
+      const handleOpenCommand = () => setIsCommandOpen(true);
+      const handleOpenArchive = () => setIsArchiveOpen(true);
+
+      window.addEventListener("sapc:open-command-palette", handleOpenCommand);
+      window.addEventListener("sapc:open-dataset-archive", handleOpenArchive);
+      return () => {
+        window.removeEventListener("sapc:open-command-palette", handleOpenCommand);
+        window.removeEventListener("sapc:open-dataset-archive", handleOpenArchive);
+      };
     }
   }, []);
 
@@ -101,6 +115,20 @@ export default function DashboardLayout({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              {/* Quick Search Spotlight Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsCommandOpen(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-rose-50 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition shadow-2xs cursor-pointer"
+                title="Open Global Search (Ctrl + K)"
+              >
+                <Search className="h-3.5 w-3.5 text-slate-400" />
+                <span className="hidden sm:inline">Search...</span>
+                <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[9.5px] font-mono font-bold text-slate-400 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800">
+                  ⌘K
+                </kbd>
+              </button>
+
               {/* Rich user menu popover — includes notification bell + avatar dropdown */}
               <UserMenuPopover
                 onOpenAccount={() => router.push("/dashboard/profile")}
@@ -129,6 +157,19 @@ export default function DashboardLayout({
       </div>
 
       {/* Global Modals */}
+      <CommandPalette
+        isOpen={isCommandOpen}
+        onClose={() => setIsCommandOpen(false)}
+        onOpenChat={() => setIsChatOpen(true)}
+        onOpenSimulator={() => setIsSimulatorOpen(true)}
+        onOpenArchive={() => setIsArchiveOpen(true)}
+      />
+
+      <DatasetArchiveModal
+        isOpen={isArchiveOpen}
+        onClose={() => setIsArchiveOpen(false)}
+      />
+
       <ChatbotModal
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}

@@ -1,501 +1,501 @@
 lrn,student_name,grade_level,section,quarter_gpa,failing_subjects_count,days_absent,attendance_rate_pct,incomplete_requirements_count,extracurricular_club,club_participation_level,hobbies_interests
-109238475001,"Jerome Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",67.5,2,7,84.6,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475002,"Angelo Corpuz",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91.8,0,1,97.8,0,"Campus Journalism (The Padua Clarion)","Moderate","Acoustic Band & Guitar"
-109238475003,"Samantha Nicole Villanueva",Grade 11,"Grade 11 - St. Clare (ABM)",87.7,0,2,95.6,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
-109238475004,"Althea Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",87.6,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
-109238475005,"Erika Gonzales",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",70.7,0,1,97.8,1,"Peer Facilitators Wellness Circle","Low","Reading Novels & Webtoons"
-109238475006,"Lance Dizon",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",80,1,4,91.2,0,"TVL Skills & Hospitality Society","Low","Badminton & Cycling"
-109238475007,"Mariel Domingo",Grade 12,"Grade 12 - St. Jude (ABM)",89.7,0,0,100,0,"Red Cross Youth (RCY)","Moderate","Debate & Public Speaking"
-109238475008,"Sofia Manalo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.7,0,2,95.6,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
-109238475009,"Lance Mercado",Grade 10,"Grade 10 - St. Francis",77.5,0,1,97.8,0,"Teatro San Antonio (Drama Guild)","Moderate","Reading Novels & Webtoons"
-109238475010,"Miguel Mendoza",Grade 9,"Grade 9 - St. Benedict",93.5,0,0,100,0,"Young Entrepreneurs & ABM Club","High","Competitive Basketball"
-109238475011,"Justin Pascual",Grade 8,"Grade 8 - St. Dominic",90.1,0,5,89,0,"Campus Journalism (The Padua Clarion)","High","Robotics & Web Development"
-109238475012,"Vincent Alcantara",Grade 7,"Grade 7 - St. Ignatius",90.4,0,2,95.6,0,"Boy Scouts / Girl Scouts","High","Community Outreach Volunteering"
-109238475013,"Rafael De Leon",Grade 11,"Grade 11 - St. Augustine (STEM)",95.3,0,5,89,0,"Boy Scouts / Girl Scouts","High","Community Outreach Volunteering"
-109238475014,"Althea Bautista",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",92.9,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Reading Novels & Webtoons"
-109238475015,"Nicole Padilla",Grade 11,"Grade 11 - St. Clare (ABM)",89.6,0,5,89,0,"Campus Journalism (The Padua Clarion)","Moderate","Community Outreach Volunteering"
-109238475016,"Justin Torres",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93.3,0,5,89,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Mobile App Experimentation"
-109238475017,"John Carlo Corpuz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",73.7,0,0,100,2,"None / Non-Member","None","None / Disengaged"
-109238475018,"Rochelle Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",80.5,0,1,97.8,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475019,"Angelica Reyes",Grade 12,"Grade 12 - St. Jude (ABM)",70.4,1,11,75.8,2,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475020,"Nicole Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.3,0,4,91.2,0,"Robotics & Coding Society","Moderate","Community Outreach Volunteering"
-109238475021,"Kathleen Ocampo",Grade 10,"Grade 10 - St. Francis",78.3,0,1,97.8,0,"Boy Scouts / Girl Scouts","Low","Reading Novels & Webtoons"
-109238475022,"Daniel Santos",Grade 9,"Grade 9 - St. Benedict",95.3,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Campus Journalism & Creative Writing"
-109238475023,"Princess Mae Soriano",Grade 8,"Grade 8 - St. Dominic",84.5,0,3,93.4,0,"TVL Skills & Hospitality Society","Low","Reading Novels & Webtoons"
-109238475024,"Lance Soriano",Grade 7,"Grade 7 - St. Ignatius",66.4,4,12,73.6,2,"None / Non-Member","None","Casual Mobile Gaming"
-109238475025,"Bianca Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",95,0,1,97.8,0,"Young Entrepreneurs & ABM Club","Moderate","Acoustic Band & Guitar"
-109238475026,"Gabriel Pascual",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Cooking & Baking"
-109238475027,"Rafael De Leon",Grade 11,"Grade 11 - St. Clare (ABM)",82.9,0,1,97.8,0,"Boy Scouts / Girl Scouts","Low","Mobile App Experimentation"
-109238475028,"Nathan Dela Cruz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",75,0,4,91.2,0,"Badminton & Table Tennis Club","Moderate","Photography & Video Editing"
-109238475029,"Daniel Pascual",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",76.9,0,4,91.2,0,"Young Entrepreneurs & ABM Club","Low","Badminton & Cycling"
-109238475030,"Dominic Alcantara",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",69.4,0,4,91.2,2,"None / Non-Member","None","None / Disengaged"
-109238475031,"Samantha Nicole Gonzales",Grade 12,"Grade 12 - St. Jude (ABM)",84.8,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Mobile App Experimentation"
-109238475032,"Rafael Santos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",71.8,0,2,95.6,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475033,"Jasmine San Jose",Grade 10,"Grade 10 - St. Francis",91.8,0,4,91.2,0,"Red Cross Youth (RCY)","High","Digital Art & Graphic Design"
-109238475034,"Angelo Torres",Grade 9,"Grade 9 - St. Benedict",91,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Debate & Public Speaking"
-109238475035,"Rafael Domingo",Grade 8,"Grade 8 - St. Dominic",83.8,0,0,100,0,"Badminton & Table Tennis Club","High","Competitive Basketball"
-109238475036,"Gabriel Ramos",Grade 7,"Grade 7 - St. Ignatius",88.5,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","High","Photography & Video Editing"
-109238475037,"Chloe Soriano",Grade 11,"Grade 11 - St. Augustine (STEM)",85.9,0,1,97.8,0,"Red Cross Youth (RCY)","Moderate","Digital Art & Graphic Design"
-109238475038,"Kathleen Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",78.7,0,5,89,0,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
-109238475039,"Adrian Lim",Grade 11,"Grade 11 - St. Clare (ABM)",88.6,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Robotics & Web Development"
-109238475040,"Lucas Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",89.4,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
-109238475041,"Denise Torres",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",95.3,0,2,95.6,0,"Math & Science Guild","Moderate","Debate & Public Speaking"
-109238475042,"Andrea Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.8,0,0,100,0,"Varsity Athletics (Basketball/Volleyball)","High","Campus Journalism & Creative Writing"
-109238475043,"Denise Reyes",Grade 12,"Grade 12 - St. Jude (ABM)",78.9,0,3,93.4,0,"Badminton & Table Tennis Club","Low","Badminton & Cycling"
-109238475044,"Samantha Nicole Valdez",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.2,0,4,91.2,0,"Robotics & Coding Society","High","Debate & Public Speaking"
-109238475045,"Vanessa Corpuz",Grade 10,"Grade 10 - St. Francis",84.7,0,4,91.2,0,"Math & Science Guild","High","Robotics & Web Development"
-109238475046,"Aaron Ocampo",Grade 9,"Grade 9 - St. Benedict",89.6,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Acoustic Band & Guitar"
-109238475047,"Karl De Leon",Grade 8,"Grade 8 - St. Dominic",92,0,0,100,0,"Math & Science Guild","High","Debate & Public Speaking"
-109238475048,"Angelica Salazar",Grade 7,"Grade 7 - St. Ignatius",91.9,0,2,95.6,0,"Red Cross Youth (RCY)","High","Digital Art & Graphic Design"
-109238475049,"Vanessa San Jose",Grade 11,"Grade 11 - St. Augustine (STEM)",71.6,0,2,95.6,0,"TVL Skills & Hospitality Society","Moderate","Reading Novels & Webtoons"
-109238475050,"Alyssa Reyes",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",86.1,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Community Outreach Volunteering"
-109238475051,"Trisha Alcantara",Grade 11,"Grade 11 - St. Clare (ABM)",96,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Campus Journalism & Creative Writing"
-109238475052,"Bianca Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",81.2,0,3,93.4,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475053,"Rafael Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",76.5,0,3,93.4,0,"Boy Scouts / Girl Scouts","Low","Badminton & Cycling"
-109238475054,"Vincent Ramos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.8,0,1,97.8,0,"Young Entrepreneurs & ABM Club","Moderate","Mobile App Experimentation"
-109238475055,"Denise Manalo",Grade 12,"Grade 12 - St. Jude (ABM)",81.1,0,1,97.8,0,"Boy Scouts / Girl Scouts","Low","Mobile App Experimentation"
-109238475056,"Karl San Jose",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",86.6,0,5,89,0,"Boy Scouts / Girl Scouts","High","Community Outreach Volunteering"
-109238475057,"Angelo Alcantara",Grade 10,"Grade 10 - St. Francis",72.2,0,3,93.4,2,"None / Non-Member","None","Casual Mobile Gaming"
-109238475058,"Patricia San Jose",Grade 9,"Grade 9 - St. Benedict",65.4,1,3,93.4,2,"None / Non-Member","None","None / Disengaged"
-109238475059,"Kathleen Padilla",Grade 8,"Grade 8 - St. Dominic",92.1,0,0,100,0,"Math & Science Guild","High","Badminton & Cycling"
-109238475060,"Alyssa Castro",Grade 7,"Grade 7 - St. Ignatius",86.8,0,4,91.2,0,"Robotics & Coding Society","High","Mobile App Experimentation"
-109238475061,"Lucas Lim",Grade 11,"Grade 11 - St. Augustine (STEM)",82.7,0,5,89,0,"Badminton & Table Tennis Club","Low","Cooking & Baking"
-109238475062,"Bianca Villanueva",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.5,0,2,95.6,0,"Varsity Athletics (Basketball/Volleyball)","High","Acoustic Band & Guitar"
-109238475063,"Rafael San Jose",Grade 11,"Grade 11 - St. Clare (ABM)",86.7,0,2,95.6,0,"Boy Scouts / Girl Scouts","High","Digital Art & Graphic Design"
-109238475064,"Lucas Pascual",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93.9,0,5,89,0,"Campus Journalism (The Padua Clarion)","High","Robotics & Web Development"
-109238475065,"Kyle Bautista",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Debate & Public Speaking"
-109238475066,"Trisha Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",75.9,0,3,93.4,0,"Badminton & Table Tennis Club","Low","Photography & Video Editing"
-109238475067,"Daniel Padilla",Grade 12,"Grade 12 - St. Jude (ABM)",85.1,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","High","Robotics & Web Development"
-109238475068,"Mariel Tolentino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.3,0,4,91.2,0,"Badminton & Table Tennis Club","High","Acoustic Band & Guitar"
-109238475069,"Jasmine San Jose",Grade 10,"Grade 10 - St. Francis",87.5,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
-109238475070,"Danielle Garcia",Grade 9,"Grade 9 - St. Benedict",89.1,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Badminton & Cycling"
-109238475071,"Andrea Mercado",Grade 8,"Grade 8 - St. Dominic",80.7,0,1,97.8,0,"Peer Facilitators Wellness Circle","Moderate","Photography & Video Editing"
-109238475072,"Kathleen Castro",Grade 7,"Grade 7 - St. Ignatius",82.1,0,3,93.4,0,"Young Entrepreneurs & ABM Club","Moderate","Mobile App Experimentation"
-109238475073,"Vincent Valdez",Grade 11,"Grade 11 - St. Augustine (STEM)",87.6,0,5,89,0,"Campus Journalism (The Padua Clarion)","Moderate","Competitive Basketball"
-109238475074,"Camille Alcantara",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",92.1,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Badminton & Cycling"
-109238475075,"Kathleen Lim",Grade 11,"Grade 11 - St. Clare (ABM)",85,0,1,97.8,0,"Boy Scouts / Girl Scouts","High","Competitive Basketball"
-109238475076,"Matthew Santiago",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",81.7,1,1,97.8,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475077,"Joshua Pascual",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",94.7,0,1,97.8,0,"Glee Club & Chorale","High","Mobile App Experimentation"
-109238475078,"Lance Garcia",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91,0,1,97.8,0,"Math & Science Guild","High","Campus Journalism & Creative Writing"
-109238475079,"Mark Kenneth Villanueva",Grade 12,"Grade 12 - St. Jude (ABM)",84.2,0,0,100,0,"Varsity Athletics (Basketball/Volleyball)","High","Photography & Video Editing"
-109238475080,"Rafael De Leon",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",87.5,0,3,93.4,0,"Red Cross Youth (RCY)","High","Robotics & Web Development"
-109238475081,"Vincent Villanueva",Grade 10,"Grade 10 - St. Francis",87.1,0,4,91.2,0,"Boy Scouts / Girl Scouts","High","Acoustic Band & Guitar"
-109238475082,"Denise Corpuz",Grade 9,"Grade 9 - St. Benedict",76.9,0,3,93.4,0,"Boy Scouts / Girl Scouts","Low","Reading Novels & Webtoons"
-109238475083,"Camille Corpuz",Grade 8,"Grade 8 - St. Dominic",76,0,3,93.4,0,"Teatro San Antonio (Drama Guild)","Low","Cooking & Baking"
-109238475084,"Althea Reyes",Grade 7,"Grade 7 - St. Ignatius",66.1,0,5,89,3,"None / Non-Member","None","None / Disengaged"
-109238475085,"Karl Corpuz",Grade 11,"Grade 11 - St. Augustine (STEM)",80.7,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Mobile App Experimentation"
-109238475086,"Samantha Nicole Soriano",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91.3,0,2,95.6,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
-109238475087,"Princess Mae Reyes",Grade 11,"Grade 11 - St. Clare (ABM)",92.3,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Photography & Video Editing"
-109238475088,"Alyssa Ramos",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",69.5,1,0,100,2,"Peer Facilitators Wellness Circle","Low","Reading Novels & Webtoons"
-109238475089,"Vanessa Pascual",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",80.5,0,3,93.4,0,"Teatro San Antonio (Drama Guild)","Moderate","Photography & Video Editing"
-109238475090,"Patricia San Jose",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.4,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Debate & Public Speaking"
-109238475091,"John Carlo Reyes",Grade 12,"Grade 12 - St. Jude (ABM)",73.7,0,2,95.6,2,"None / Non-Member","None","Casual Mobile Gaming"
-109238475092,"Ethan Manalo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75.4,0,3,93.4,0,"Peer Facilitators Wellness Circle","Moderate","Photography & Video Editing"
-109238475093,"Alyssa Tolentino",Grade 10,"Grade 10 - St. Francis",79.8,0,4,91.2,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475094,"Aaron Navarro",Grade 9,"Grade 9 - St. Benedict",74.6,1,2,95.6,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475095,"Lance Tan",Grade 8,"Grade 8 - St. Dominic",91.3,0,1,97.8,0,"Math & Science Guild","High","Competitive Basketball"
-109238475096,"Angelica Flores",Grade 7,"Grade 7 - St. Ignatius",94,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","High","Debate & Public Speaking"
-109238475097,"Bianca Castro",Grade 11,"Grade 11 - St. Augustine (STEM)",73.5,2,13,71.4,2,"Peer Facilitators Wellness Circle","Low","Cooking & Baking"
-109238475098,"Sofia Dizon",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.9,0,4,91.2,0,"Robotics & Coding Society","Moderate","Photography & Video Editing"
-109238475099,"Gabriel Soriano",Grade 11,"Grade 11 - St. Clare (ABM)",73.2,0,1,97.8,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475100,"Patricia Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",88.4,0,5,89,0,"Teatro San Antonio (Drama Guild)","Moderate","Campus Journalism & Creative Writing"
-109238475101,"Jerome Castillo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",96.4,0,3,93.4,0,"Teatro San Antonio (Drama Guild)","Moderate","Acoustic Band & Guitar"
-109238475102,"Ralph Villanueva",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.7,0,1,97.8,0,"Math & Science Guild","High","Digital Art & Graphic Design"
-109238475103,"Princess Mae Soriano",Grade 12,"Grade 12 - St. Jude (ABM)",80.3,0,2,95.6,0,"Badminton & Table Tennis Club","Low","Badminton & Cycling"
-109238475104,"Vincent Torres",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93.5,0,4,91.2,0,"Red Cross Youth (RCY)","Moderate","Cooking & Baking"
-109238475105,"Francis Castillo",Grade 10,"Grade 10 - St. Francis",73.3,0,0,100,0,"TVL Skills & Hospitality Society","Moderate","Badminton & Cycling"
-109238475106,"Chloe Corpuz",Grade 9,"Grade 9 - St. Benedict",84.4,0,5,89,0,"Young Entrepreneurs & ABM Club","Moderate","Reading Novels & Webtoons"
-109238475107,"Bianca Castillo",Grade 8,"Grade 8 - St. Dominic",91.5,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Campus Journalism & Creative Writing"
-109238475108,"Ethan Ramos",Grade 7,"Grade 7 - St. Ignatius",89.3,0,1,97.8,0,"Math & Science Guild","High","Badminton & Cycling"
-109238475109,"Paolo Domingo",Grade 11,"Grade 11 - St. Augustine (STEM)",95.1,0,5,89,0,"TVL Skills & Hospitality Society","Moderate","Competitive Basketball"
-109238475110,"Nathan Gonzales",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",69,3,11,75.8,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475111,"Samantha Nicole Lim",Grade 11,"Grade 11 - St. Clare (ABM)",81.4,0,3,93.4,0,"Robotics & Coding Society","High","Acoustic Band & Guitar"
-109238475112,"Jerome Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",80.1,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475113,"Nicole Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",77.2,0,4,91.2,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475114,"Bea Patricia Corpuz",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.8,0,4,91.2,0,"Supreme Secondary Learner Government (SSLG)","High","Competitive Basketball"
-109238475115,"Christian Dave Santiago",Grade 12,"Grade 12 - St. Jude (ABM)",93.6,0,2,95.6,0,"Glee Club & Chorale","High","Badminton & Cycling"
-109238475116,"Erika Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",86.3,0,1,97.8,0,"Math & Science Guild","High","Community Outreach Volunteering"
-109238475117,"Lance Mendoza",Grade 10,"Grade 10 - St. Francis",85.4,0,1,97.8,0,"Red Cross Youth (RCY)","High","Robotics & Web Development"
-109238475118,"Kathleen Mendoza",Grade 9,"Grade 9 - St. Benedict",93.3,0,1,97.8,0,"Math & Science Guild","High","Debate & Public Speaking"
-109238475119,"John Carlo Castillo",Grade 8,"Grade 8 - St. Dominic",92.2,0,4,91.2,0,"Glee Club & Chorale","High","Competitive Basketball"
-109238475120,"Hannah Tolentino",Grade 7,"Grade 7 - St. Ignatius",86.9,0,3,93.4,0,"Red Cross Youth (RCY)","High","Robotics & Web Development"
-109238475121,"Sofia Ocampo",Grade 11,"Grade 11 - St. Augustine (STEM)",90.5,0,1,97.8,0,"Red Cross Youth (RCY)","High","Acoustic Band & Guitar"
-109238475122,"Bianca Pascual",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",85.7,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Competitive Basketball"
-109238475123,"Nicole Santos",Grade 11,"Grade 11 - St. Clare (ABM)",91.6,0,0,100,0,"Supreme Secondary Learner Government (SSLG)","High","Photography & Video Editing"
-109238475124,"Jasmine Manalo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",86.3,0,3,93.4,0,"Badminton & Table Tennis Club","High","Robotics & Web Development"
-109238475125,"Cedric Villanueva",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",90.3,0,0,100,0,"Peer Facilitators Wellness Circle","High","Debate & Public Speaking"
-109238475126,"Jerome Corpuz",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",95.6,0,1,97.8,0,"TVL Skills & Hospitality Society","High","Digital Art & Graphic Design"
-109238475127,"Jerome Salazar",Grade 12,"Grade 12 - St. Jude (ABM)",81.3,0,3,93.4,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475128,"Erika Villanueva",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.2,0,2,95.6,0,"Math & Science Guild","High","Photography & Video Editing"
-109238475129,"Cedric Santos",Grade 10,"Grade 10 - St. Francis",88.2,0,1,97.8,0,"Robotics & Coding Society","Moderate","Competitive Basketball"
-109238475130,"Vincent Torres",Grade 9,"Grade 9 - St. Benedict",94.8,0,2,95.6,0,"Math & Science Guild","High","Acoustic Band & Guitar"
-109238475131,"Mark Kenneth Santiago",Grade 8,"Grade 8 - St. Dominic",86.9,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Acoustic Band & Guitar"
-109238475132,"Lucas Domingo",Grade 7,"Grade 7 - St. Ignatius",92.9,0,2,95.6,0,"Supreme Secondary Learner Government (SSLG)","High","Acoustic Band & Guitar"
-109238475133,"Samantha Nicole Alcantara",Grade 11,"Grade 11 - St. Augustine (STEM)",86.7,0,5,89,0,"Glee Club & Chorale","High","Competitive Basketball"
-109238475134,"Mark Kenneth Salazar",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",75.2,0,0,100,0,"Badminton & Table Tennis Club","Low","Mobile App Experimentation"
-109238475135,"Miguel Garcia",Grade 11,"Grade 11 - St. Clare (ABM)",72.7,0,5,89,1,"Teatro San Antonio (Drama Guild)","Moderate","Mobile App Experimentation"
-109238475136,"Cedric Santos",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",78.8,0,4,91.2,0,"None / Non-Member","None","None / Disengaged"
-109238475137,"Chloe Villanueva",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",78.5,0,2,95.6,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475138,"John Carlo Flores",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.6,0,0,100,0,"Robotics & Coding Society","High","Digital Art & Graphic Design"
-109238475139,"Shaina Corpuz",Grade 12,"Grade 12 - St. Jude (ABM)",79,0,5,89,0,"TVL Skills & Hospitality Society","Moderate","Mobile App Experimentation"
-109238475140,"Andrea Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88,0,4,91.2,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
-109238475141,"Jerome Castillo",Grade 10,"Grade 10 - St. Francis",96.1,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Robotics & Web Development"
-109238475142,"Denise Soriano",Grade 9,"Grade 9 - St. Benedict",73.3,2,11,75.8,2,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
-109238475143,"Aaron Tolentino",Grade 8,"Grade 8 - St. Dominic",79,0,3,93.4,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475144,"Althea Padilla",Grade 7,"Grade 7 - St. Ignatius",81.6,0,2,95.6,0,"TVL Skills & Hospitality Society","Low","Mobile App Experimentation"
-109238475145,"Chloe Mercado",Grade 11,"Grade 11 - St. Augustine (STEM)",89.2,0,4,91.2,0,"Glee Club & Chorale","High","Robotics & Web Development"
-109238475146,"Lucas Soriano",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",76.9,0,3,93.4,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475147,"Patricia Alcantara",Grade 11,"Grade 11 - St. Clare (ABM)",79.1,1,5,89,0,"TVL Skills & Hospitality Society","Moderate","Cooking & Baking"
-109238475148,"Mariel Reyes",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",91.8,0,4,91.2,0,"Boy Scouts / Girl Scouts","High","Competitive Basketball"
-109238475149,"Mariel Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.6,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","High","Competitive Basketball"
-109238475150,"Shaina Navarro",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",64.7,4,13,71.4,1,"None / Non-Member","None","Casual Mobile Gaming"
-109238475151,"Sofia Dizon",Grade 12,"Grade 12 - St. Jude (ABM)",67.3,3,7,84.6,1,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475152,"Adrian Flores",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",70.4,1,1,97.8,2,"None / Non-Member","None","None / Disengaged"
-109238475153,"Kristine Lim",Grade 10,"Grade 10 - St. Francis",67.8,1,4,91.2,2,"Peer Facilitators Wellness Circle","Low","Photography & Video Editing"
-109238475154,"Lance Alcantara",Grade 9,"Grade 9 - St. Benedict",90.7,0,3,93.4,0,"Glee Club & Chorale","High","Campus Journalism & Creative Writing"
-109238475155,"Rochelle Santiago",Grade 8,"Grade 8 - St. Dominic",72.6,2,10,78,2,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475156,"Vanessa Rivera",Grade 7,"Grade 7 - St. Ignatius",92.4,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","High","Competitive Basketball"
-109238475157,"Chloe Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",73.7,0,5,89,2,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475158,"Hannah Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",93,0,5,89,0,"Boy Scouts / Girl Scouts","High","Digital Art & Graphic Design"
-109238475159,"Rafael Corpuz",Grade 11,"Grade 11 - St. Clare (ABM)",78.6,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Community Outreach Volunteering"
-109238475160,"Angelo Santiago",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.3,0,4,91.2,0,"Red Cross Youth (RCY)","High","Competitive Basketball"
-109238475161,"Miguel San Jose",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",70.9,1,14,69.2,3,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
-109238475162,"Rafael Soriano",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.5,0,3,93.4,0,"Glee Club & Chorale","High","Debate & Public Speaking"
-109238475163,"Kyle Dela Cruz",Grade 12,"Grade 12 - St. Jude (ABM)",87.1,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Community Outreach Volunteering"
-109238475164,"Francis Ramos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",87.1,0,5,89,0,"Robotics & Coding Society","High","Digital Art & Graphic Design"
-109238475165,"Vanessa Santos",Grade 10,"Grade 10 - St. Francis",87,0,5,89,0,"Varsity Athletics (Basketball/Volleyball)","High","Digital Art & Graphic Design"
-109238475166,"John Carlo Tan",Grade 9,"Grade 9 - St. Benedict",86.8,0,3,93.4,0,"Red Cross Youth (RCY)","High","Acoustic Band & Guitar"
-109238475167,"Sofia Santos",Grade 8,"Grade 8 - St. Dominic",95.2,0,3,93.4,0,"Math & Science Guild","High","Robotics & Web Development"
-109238475168,"Francis Salazar",Grade 7,"Grade 7 - St. Ignatius",87.6,0,1,97.8,0,"Badminton & Table Tennis Club","High","Digital Art & Graphic Design"
-109238475169,"Ralph Garcia",Grade 11,"Grade 11 - St. Augustine (STEM)",87.6,0,5,89,0,"Robotics & Coding Society","Moderate","Digital Art & Graphic Design"
-109238475170,"Trisha Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",81.2,0,2,95.6,0,"Peer Facilitators Wellness Circle","Low","Badminton & Cycling"
-109238475171,"Camille Ramos",Grade 11,"Grade 11 - St. Clare (ABM)",94.7,0,4,91.2,0,"Supreme Secondary Learner Government (SSLG)","High","Robotics & Web Development"
-109238475172,"Cedric Corpuz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",85.7,0,2,95.6,0,"Robotics & Coding Society","High","Cooking & Baking"
-109238475173,"Shaina Dela Cruz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",71.5,3,14,69.2,1,"Peer Facilitators Wellness Circle","Low","Reading Novels & Webtoons"
-109238475174,"Dominic Soriano",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89,0,4,91.2,0,"Glee Club & Chorale","High","Debate & Public Speaking"
-109238475175,"Rochelle Gonzales",Grade 12,"Grade 12 - St. Jude (ABM)",78.1,0,2,95.6,0,"Teatro San Antonio (Drama Guild)","Low","Cooking & Baking"
-109238475176,"Danielle Santiago",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",95.2,0,1,97.8,0,"Robotics & Coding Society","High","Debate & Public Speaking"
-109238475177,"Justin Bautista",Grade 10,"Grade 10 - St. Francis",73.4,4,6,86.8,2,"None / Non-Member","None","None / Disengaged"
-109238475178,"Hannah Villanueva",Grade 9,"Grade 9 - St. Benedict",85,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Community Outreach Volunteering"
-109238475179,"Mark Kenneth Salazar",Grade 8,"Grade 8 - St. Dominic",78.1,1,1,97.8,0,"None / Non-Member","None","None / Disengaged"
-109238475180,"Angelo Bautista",Grade 7,"Grade 7 - St. Ignatius",85.5,0,0,100,0,"Glee Club & Chorale","Moderate","Acoustic Band & Guitar"
-109238475181,"Gabriel San Jose",Grade 11,"Grade 11 - St. Augustine (STEM)",88.1,0,4,91.2,0,"Supreme Secondary Learner Government (SSLG)","High","Community Outreach Volunteering"
-109238475182,"Danielle Torres",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",77.4,0,2,95.6,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475183,"Vanessa De Leon",Grade 11,"Grade 11 - St. Clare (ABM)",86.3,0,5,89,0,"Math & Science Guild","High","Acoustic Band & Guitar"
-109238475184,"Patricia Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",76.5,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Moderate","Reading Novels & Webtoons"
-109238475185,"Bianca Dizon",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",83,0,2,95.6,0,"Boy Scouts / Girl Scouts","Low","Reading Novels & Webtoons"
-109238475186,"Justin Dizon",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",83.2,0,2,95.6,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475187,"Adrian Bautista",Grade 12,"Grade 12 - St. Jude (ABM)",76.6,0,4,91.2,0,"None / Non-Member","None","None / Disengaged"
-109238475188,"Mariel Gonzales",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.8,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Robotics & Web Development"
-109238475189,"Ralph Mercado",Grade 10,"Grade 10 - St. Francis",89.8,0,1,97.8,0,"Young Entrepreneurs & ABM Club","Moderate","Competitive Basketball"
-109238475190,"Paolo Padilla",Grade 9,"Grade 9 - St. Benedict",94.9,0,4,91.2,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
-109238475191,"Samantha Nicole Valdez",Grade 8,"Grade 8 - St. Dominic",88.2,0,1,97.8,0,"Math & Science Guild","High","Acoustic Band & Guitar"
-109238475192,"John Carlo Ocampo",Grade 7,"Grade 7 - St. Ignatius",78,1,0,100,0,"Peer Facilitators Wellness Circle","Moderate","Photography & Video Editing"
-109238475193,"Rafael Padilla",Grade 11,"Grade 11 - St. Augustine (STEM)",92.3,0,2,95.6,0,"Young Entrepreneurs & ABM Club","High","Digital Art & Graphic Design"
-109238475194,"Lance Dizon",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.7,0,3,93.4,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475195,"Danielle Villanueva",Grade 11,"Grade 11 - St. Clare (ABM)",84.8,0,1,97.8,0,"Badminton & Table Tennis Club","Moderate","Photography & Video Editing"
-109238475196,"Patricia Castro",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.3,0,1,97.8,0,"Red Cross Youth (RCY)","High","Competitive Basketball"
-109238475197,"Vanessa Garcia",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",93.6,0,5,89,0,"Robotics & Coding Society","High","Campus Journalism & Creative Writing"
-109238475198,"Erika Pascual",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",93.2,0,0,100,0,"Supreme Secondary Learner Government (SSLG)","High","Community Outreach Volunteering"
-109238475199,"Chloe Mendoza",Grade 12,"Grade 12 - St. Jude (ABM)",78.5,0,0,100,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475200,"Kyle De Leon",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",84.2,0,4,91.2,0,"Young Entrepreneurs & ABM Club","Moderate","Mobile App Experimentation"
-109238475201,"Vincent Corpuz",Grade 10,"Grade 10 - St. Francis",87.1,0,3,93.4,0,"Math & Science Guild","High","Community Outreach Volunteering"
-109238475202,"Karl Pascual",Grade 9,"Grade 9 - St. Benedict",76.2,0,3,93.4,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475203,"Gabriel Castillo",Grade 8,"Grade 8 - St. Dominic",84.5,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
-109238475204,"Nicole De Leon",Grade 7,"Grade 7 - St. Ignatius",84.8,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","Moderate","Acoustic Band & Guitar"
-109238475205,"Danielle Dizon",Grade 11,"Grade 11 - St. Augustine (STEM)",75.8,1,4,91.2,0,"Peer Facilitators Wellness Circle","Low","Badminton & Cycling"
-109238475206,"Kristine Reyes",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.8,0,4,91.2,0,"Math & Science Guild","High","Digital Art & Graphic Design"
-109238475207,"Mark Kenneth Navarro",Grade 11,"Grade 11 - St. Clare (ABM)",80.2,0,4,91.2,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475208,"Joshua Corpuz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",87.6,0,3,93.4,0,"Robotics & Coding Society","High","Acoustic Band & Guitar"
-109238475209,"Nathan Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.3,0,2,95.6,0,"Teatro San Antonio (Drama Guild)","High","Reading Novels & Webtoons"
-109238475210,"Angelo Santiago",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",74,1,2,95.6,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475211,"Lucas Villanueva",Grade 12,"Grade 12 - St. Jude (ABM)",89.5,0,0,100,0,"Peer Facilitators Wellness Circle","High","Robotics & Web Development"
-109238475212,"Ethan Domingo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",94.9,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Digital Art & Graphic Design"
-109238475213,"Bea Patricia Dela Cruz",Grade 10,"Grade 10 - St. Francis",89.9,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Debate & Public Speaking"
-109238475214,"Kristine Castillo",Grade 9,"Grade 9 - St. Benedict",87.1,0,2,95.6,0,"Peer Facilitators Wellness Circle","High","Community Outreach Volunteering"
-109238475215,"Andrea Ramos",Grade 8,"Grade 8 - St. Dominic",75.5,0,4,91.2,0,"None / Non-Member","None","None / Disengaged"
-109238475216,"Lance Dela Cruz",Grade 7,"Grade 7 - St. Ignatius",87.8,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","Moderate","Robotics & Web Development"
-109238475217,"Angelica Dela Cruz",Grade 11,"Grade 11 - St. Augustine (STEM)",80.1,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Reading Novels & Webtoons"
-109238475218,"Paolo Reyes",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.9,0,1,97.8,0,"Boy Scouts / Girl Scouts","Low","Badminton & Cycling"
-109238475219,"Miguel Mendoza",Grade 11,"Grade 11 - St. Clare (ABM)",84.8,0,3,93.4,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
-109238475220,"Bianca Salazar",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93,0,4,91.2,0,"Supreme Secondary Learner Government (SSLG)","High","Campus Journalism & Creative Writing"
-109238475221,"Dominic Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",79.6,1,4,91.2,0,"Boy Scouts / Girl Scouts","Moderate","Mobile App Experimentation"
-109238475222,"Francis Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",66.9,2,13,71.4,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475223,"Althea Dizon",Grade 12,"Grade 12 - St. Jude (ABM)",95.9,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","High","Digital Art & Graphic Design"
-109238475224,"Mariel Aquino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",82,0,2,95.6,0,"Peer Facilitators Wellness Circle","Moderate","Reading Novels & Webtoons"
-109238475225,"Matthew Ocampo",Grade 10,"Grade 10 - St. Francis",80.7,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475226,"Jerome Domingo",Grade 9,"Grade 9 - St. Benedict",73.1,2,8,82.4,2,"None / Non-Member","None","None / Disengaged"
-109238475227,"Joshua Pascual",Grade 8,"Grade 8 - St. Dominic",73.5,4,6,86.8,2,"None / Non-Member","None","None / Disengaged"
-109238475228,"Sean Padilla",Grade 7,"Grade 7 - St. Ignatius",85.4,0,3,93.4,0,"Peer Facilitators Wellness Circle","High","Community Outreach Volunteering"
-109238475229,"Danielle Ocampo",Grade 11,"Grade 11 - St. Augustine (STEM)",94.9,0,2,95.6,0,"TVL Skills & Hospitality Society","High","Acoustic Band & Guitar"
-109238475230,"Kristine Mendoza",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.9,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Debate & Public Speaking"
-109238475231,"Matthew Ramos",Grade 11,"Grade 11 - St. Clare (ABM)",91.2,0,3,93.4,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
-109238475232,"Chloe Salazar",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",72.6,0,3,93.4,1,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475233,"Daniel Pascual",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91.5,0,3,93.4,0,"Robotics & Coding Society","Moderate","Community Outreach Volunteering"
-109238475234,"Christian Dave Castillo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",89.1,0,3,93.4,0,"Math & Science Guild","High","Community Outreach Volunteering"
-109238475235,"Ethan Castillo",Grade 12,"Grade 12 - St. Jude (ABM)",70.4,4,14,69.2,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475236,"Shaina Rivera",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93.9,0,1,97.8,0,"TVL Skills & Hospitality Society","High","Community Outreach Volunteering"
-109238475237,"Cedric Ocampo",Grade 10,"Grade 10 - St. Francis",73.2,0,3,93.4,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475238,"Alexander Pascual",Grade 9,"Grade 9 - St. Benedict",93.1,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Moderate","Debate & Public Speaking"
-109238475239,"Erika Padilla",Grade 8,"Grade 8 - St. Dominic",85,0,4,91.2,0,"Boy Scouts / Girl Scouts","Moderate","Photography & Video Editing"
-109238475240,"Erika Pascual",Grade 7,"Grade 7 - St. Ignatius",83.7,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Moderate","Badminton & Cycling"
-109238475241,"Nathan Manalo",Grade 11,"Grade 11 - St. Augustine (STEM)",85.2,0,3,93.4,0,"Glee Club & Chorale","Moderate","Acoustic Band & Guitar"
-109238475242,"Camille Torres",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",76.3,1,5,89,0,"Boy Scouts / Girl Scouts","Moderate","Photography & Video Editing"
-109238475243,"Rochelle Rivera",Grade 11,"Grade 11 - St. Clare (ABM)",78,0,3,93.4,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475244,"Joshua Villanueva",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",91.3,0,1,97.8,0,"TVL Skills & Hospitality Society","High","Acoustic Band & Guitar"
-109238475245,"Joshua Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",72.6,0,4,91.2,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475246,"Lucas Bautista",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",91.6,0,2,95.6,0,"Glee Club & Chorale","High","Debate & Public Speaking"
-109238475247,"Kyle Salazar",Grade 12,"Grade 12 - St. Jude (ABM)",96.1,0,1,97.8,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
-109238475248,"Alyssa Santos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",88.4,0,1,97.8,0,"Math & Science Guild","High","Reading Novels & Webtoons"
-109238475249,"Nathan Garcia",Grade 10,"Grade 10 - St. Francis",87.6,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Competitive Basketball"
-109238475250,"Ethan Ramos",Grade 9,"Grade 9 - St. Benedict",84.7,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Reading Novels & Webtoons"
-109238475251,"Sean Pascual",Grade 8,"Grade 8 - St. Dominic",94.5,0,1,97.8,0,"Campus Journalism (The Padua Clarion)","High","Badminton & Cycling"
-109238475252,"Daniel Bautista",Grade 7,"Grade 7 - St. Ignatius",70.2,1,1,97.8,1,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475253,"Lucas Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",90.4,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Competitive Basketball"
-109238475254,"Dominic Valdez",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",92.9,0,4,91.2,0,"Red Cross Youth (RCY)","High","Debate & Public Speaking"
-109238475255,"John Carlo Dizon",Grade 11,"Grade 11 - St. Clare (ABM)",74.4,0,2,95.6,0,"Badminton & Table Tennis Club","Moderate","Mobile App Experimentation"
-109238475256,"Danielle Corpuz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",88.2,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Digital Art & Graphic Design"
-109238475257,"Mark Kenneth Corpuz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",95.9,0,3,93.4,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
-109238475258,"Mark Kenneth Manalo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",88,0,5,89,0,"Robotics & Coding Society","Moderate","Campus Journalism & Creative Writing"
-109238475259,"Jasmine Garcia",Grade 12,"Grade 12 - St. Jude (ABM)",83.5,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","High","Community Outreach Volunteering"
-109238475260,"Erika Flores",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.7,0,4,91.2,0,"Peer Facilitators Wellness Circle","High","Debate & Public Speaking"
-109238475261,"Mark Kenneth Reyes",Grade 10,"Grade 10 - St. Francis",87.8,0,0,100,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
-109238475262,"Jasmine Santiago",Grade 9,"Grade 9 - St. Benedict",80.6,0,0,100,0,"None / Non-Member","None","None / Disengaged"
-109238475263,"Patricia Soriano",Grade 8,"Grade 8 - St. Dominic",76.1,0,1,97.8,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475264,"Cedric Mercado",Grade 7,"Grade 7 - St. Ignatius",92.6,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","Moderate","Robotics & Web Development"
-109238475265,"Sean Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",83.5,1,4,91.2,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475266,"Justin Mendoza",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",94.6,0,1,97.8,0,"Glee Club & Chorale","High","Community Outreach Volunteering"
-109238475267,"Adrian Dela Cruz",Grade 11,"Grade 11 - St. Clare (ABM)",83.4,0,4,91.2,0,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
-109238475268,"Paolo San Jose",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",81,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Moderate","Badminton & Cycling"
-109238475269,"Denise Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91.9,0,1,97.8,0,"Math & Science Guild","High","Acoustic Band & Guitar"
-109238475270,"Erika Bautista",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",87.5,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","High","Community Outreach Volunteering"
-109238475271,"Camille De Leon",Grade 12,"Grade 12 - St. Jude (ABM)",87.8,0,4,91.2,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
-109238475272,"Dominic San Jose",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.5,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Community Outreach Volunteering"
-109238475273,"Erika Valdez",Grade 10,"Grade 10 - St. Francis",93.6,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Debate & Public Speaking"
-109238475274,"Lucas Castillo",Grade 9,"Grade 9 - St. Benedict",89,0,1,97.8,0,"Peer Facilitators Wellness Circle","High","Community Outreach Volunteering"
-109238475275,"Chloe Dizon",Grade 8,"Grade 8 - St. Dominic",88.2,0,4,91.2,0,"Red Cross Youth (RCY)","High","Campus Journalism & Creative Writing"
-109238475276,"Althea Santiago",Grade 7,"Grade 7 - St. Ignatius",73.7,4,10,78,2,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
-109238475277,"John Carlo Castro",Grade 11,"Grade 11 - St. Augustine (STEM)",91.3,0,5,89,0,"Badminton & Table Tennis Club","High","Badminton & Cycling"
-109238475278,"John Carlo Ramos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.9,0,2,95.6,0,"Robotics & Coding Society","High","Robotics & Web Development"
-109238475279,"Mark Kenneth Lim",Grade 11,"Grade 11 - St. Clare (ABM)",72.3,0,2,95.6,0,"Teatro San Antonio (Drama Guild)","Moderate","Badminton & Cycling"
-109238475280,"Vanessa Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",79.3,0,3,93.4,0,"None / Non-Member","None","None / Disengaged"
-109238475281,"Daniel Dela Cruz",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",75.7,1,4,91.2,0,"Boy Scouts / Girl Scouts","Low","Reading Novels & Webtoons"
-109238475282,"Justin Manalo",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",92,0,4,91.2,0,"TVL Skills & Hospitality Society","High","Competitive Basketball"
-109238475283,"Kristine Santiago",Grade 12,"Grade 12 - St. Jude (ABM)",74.6,0,0,100,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475284,"Nathan Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",92.2,0,1,97.8,0,"Robotics & Coding Society","High","Digital Art & Graphic Design"
-109238475285,"Althea Manalo",Grade 10,"Grade 10 - St. Francis",88.3,0,1,97.8,0,"Math & Science Guild","High","Campus Journalism & Creative Writing"
-109238475286,"Erika Gonzales",Grade 9,"Grade 9 - St. Benedict",91.3,0,2,95.6,0,"Red Cross Youth (RCY)","Moderate","Campus Journalism & Creative Writing"
-109238475287,"Trisha Valdez",Grade 8,"Grade 8 - St. Dominic",73.7,1,3,93.4,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475288,"Adrian Navarro",Grade 7,"Grade 7 - St. Ignatius",93.3,0,1,97.8,0,"Red Cross Youth (RCY)","Moderate","Debate & Public Speaking"
-109238475289,"Bianca De Leon",Grade 11,"Grade 11 - St. Augustine (STEM)",72.5,0,4,91.2,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475290,"Samantha Nicole Tolentino",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",81.3,0,3,93.4,0,"Badminton & Table Tennis Club","Low","Photography & Video Editing"
-109238475291,"Jerome Corpuz",Grade 11,"Grade 11 - St. Clare (ABM)",88.4,0,1,97.8,0,"Campus Journalism (The Padua Clarion)","High","Acoustic Band & Guitar"
-109238475292,"Adrian Rivera",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",65.6,0,5,89,2,"None / Non-Member","None","None / Disengaged"
-109238475293,"Rochelle Castillo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",80.5,0,1,97.8,0,"Teatro San Antonio (Drama Guild)","Low","Photography & Video Editing"
-109238475294,"Patricia Flores",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",92.8,0,5,89,0,"Math & Science Guild","High","Debate & Public Speaking"
-109238475295,"Jasmine Torres",Grade 12,"Grade 12 - St. Jude (ABM)",89.6,0,0,100,0,"Young Entrepreneurs & ABM Club","High","Digital Art & Graphic Design"
-109238475296,"Alexander Bautista",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",69.4,0,4,91.2,3,"None / Non-Member","None","None / Disengaged"
-109238475297,"Hannah Villanueva",Grade 10,"Grade 10 - St. Francis",82,0,1,97.8,0,"Badminton & Table Tennis Club","High","Debate & Public Speaking"
-109238475298,"Justin De Leon",Grade 9,"Grade 9 - St. Benedict",74.4,2,12,73.6,3,"Peer Facilitators Wellness Circle","Low","Mobile App Experimentation"
-109238475299,"Daniel Lim",Grade 8,"Grade 8 - St. Dominic",89.6,0,3,93.4,0,"Badminton & Table Tennis Club","Moderate","Debate & Public Speaking"
-109238475300,"Nicole San Jose",Grade 7,"Grade 7 - St. Ignatius",94.2,0,3,93.4,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
-109238475301,"Sofia Lim",Grade 11,"Grade 11 - St. Augustine (STEM)",95.4,0,2,95.6,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Competitive Basketball"
-109238475302,"Francis Bautista",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",77.3,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Cooking & Baking"
-109238475303,"Kathleen Soriano",Grade 11,"Grade 11 - St. Clare (ABM)",69.5,1,5,89,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475304,"Erika Garcia",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",83.8,0,3,93.4,0,"Robotics & Coding Society","High","Reading Novels & Webtoons"
-109238475305,"Kyle Villanueva",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",95.9,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Badminton & Cycling"
-109238475306,"Dominic Tolentino",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",86.2,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","High","Community Outreach Volunteering"
-109238475307,"Karl Gonzales",Grade 12,"Grade 12 - St. Jude (ABM)",76.8,0,0,100,0,"Teatro San Antonio (Drama Guild)","Low","Reading Novels & Webtoons"
-109238475308,"Erika Padilla",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",89.3,0,3,93.4,0,"Math & Science Guild","High","Acoustic Band & Guitar"
-109238475309,"Lucas Mendoza",Grade 10,"Grade 10 - St. Francis",86.1,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Acoustic Band & Guitar"
-109238475310,"Rafael Domingo",Grade 9,"Grade 9 - St. Benedict",90.7,0,2,95.6,0,"Red Cross Youth (RCY)","High","Competitive Basketball"
-109238475311,"Rochelle Lim",Grade 8,"Grade 8 - St. Dominic",90.9,0,0,100,0,"Teatro San Antonio (Drama Guild)","High","Robotics & Web Development"
-109238475312,"Mariel Manalo",Grade 7,"Grade 7 - St. Ignatius",72.8,3,7,84.6,2,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475313,"Andrea Dizon",Grade 11,"Grade 11 - St. Augustine (STEM)",77.3,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475314,"Denise Tolentino",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",85.4,0,0,100,0,"Peer Facilitators Wellness Circle","Low","Badminton & Cycling"
-109238475315,"Andrea Ocampo",Grade 11,"Grade 11 - St. Clare (ABM)",81.1,1,1,97.8,0,"None / Non-Member","None","None / Disengaged"
-109238475316,"Chloe Garcia",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",74.6,1,2,95.6,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475317,"Rafael Torres",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",94.4,0,0,100,0,"Boy Scouts / Girl Scouts","Moderate","Debate & Public Speaking"
-109238475318,"Rafael Aquino",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",92.3,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Debate & Public Speaking"
-109238475319,"Camille Tan",Grade 12,"Grade 12 - St. Jude (ABM)",73.3,0,0,100,0,"Young Entrepreneurs & ABM Club","Moderate","Reading Novels & Webtoons"
-109238475320,"Nicole Santos",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",69.2,0,2,95.6,1,"Teatro San Antonio (Drama Guild)","Low","Cooking & Baking"
-109238475321,"Ethan Manalo",Grade 10,"Grade 10 - St. Francis",84.2,0,5,89,0,"Glee Club & Chorale","Moderate","Robotics & Web Development"
-109238475322,"Lance Alcantara",Grade 9,"Grade 9 - St. Benedict",75.9,0,0,100,0,"Boy Scouts / Girl Scouts","Low","Cooking & Baking"
-109238475323,"Ralph Castro",Grade 8,"Grade 8 - St. Dominic",90.3,0,5,89,0,"Red Cross Youth (RCY)","High","Photography & Video Editing"
-109238475324,"Erika Bautista",Grade 7,"Grade 7 - St. Ignatius",89.8,0,2,95.6,0,"Math & Science Guild","High","Cooking & Baking"
-109238475325,"Denise Santiago",Grade 11,"Grade 11 - St. Augustine (STEM)",90.5,0,1,97.8,0,"TVL Skills & Hospitality Society","High","Mobile App Experimentation"
-109238475326,"Althea Castillo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",79.4,0,5,89,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475327,"Patricia Mendoza",Grade 11,"Grade 11 - St. Clare (ABM)",67,3,11,75.8,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475328,"Althea San Jose",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",85.5,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Photography & Video Editing"
-109238475329,"Lucas Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",91.5,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Acoustic Band & Guitar"
-109238475330,"Justin Lim",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",87.5,0,3,93.4,0,"Robotics & Coding Society","High","Robotics & Web Development"
-109238475331,"Princess Mae Dizon",Grade 12,"Grade 12 - St. Jude (ABM)",87,0,1,97.8,0,"Badminton & Table Tennis Club","High","Competitive Basketball"
-109238475332,"Karl Navarro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",79.5,0,2,95.6,0,"None / Non-Member","None","None / Disengaged"
-109238475333,"Paolo Torres",Grade 10,"Grade 10 - St. Francis",87.3,0,2,95.6,0,"Badminton & Table Tennis Club","Moderate","Cooking & Baking"
-109238475334,"Francis Castro",Grade 9,"Grade 9 - St. Benedict",92.1,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","High","Community Outreach Volunteering"
-109238475335,"Ralph Santos",Grade 8,"Grade 8 - St. Dominic",74.9,1,3,93.4,0,"Peer Facilitators Wellness Circle","Moderate","Reading Novels & Webtoons"
-109238475336,"Kathleen Ramos",Grade 7,"Grade 7 - St. Ignatius",68.2,2,8,82.4,1,"Peer Facilitators Wellness Circle","Low","Photography & Video Editing"
-109238475337,"Miguel Garcia",Grade 11,"Grade 11 - St. Augustine (STEM)",91.1,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","High","Digital Art & Graphic Design"
-109238475338,"Gabriel Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",66.3,1,12,73.6,2,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475339,"Kathleen Villanueva",Grade 11,"Grade 11 - St. Clare (ABM)",65.1,4,9,80.2,3,"None / Non-Member","None","Casual Mobile Gaming"
-109238475340,"Miguel Gonzales",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",70.8,4,7,84.6,1,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475341,"Dominic Domingo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",67.2,3,13,71.4,2,"Peer Facilitators Wellness Circle","Low","Reading Novels & Webtoons"
-109238475342,"Sean Flores",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",86.6,0,4,91.2,0,"Red Cross Youth (RCY)","Moderate","Mobile App Experimentation"
-109238475343,"Ralph San Jose",Grade 12,"Grade 12 - St. Jude (ABM)",85.7,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Digital Art & Graphic Design"
-109238475344,"Ralph Soriano",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",86.9,0,2,95.6,0,"Peer Facilitators Wellness Circle","Moderate","Robotics & Web Development"
-109238475345,"Matthew Torres",Grade 10,"Grade 10 - St. Francis",78.9,0,3,93.4,0,"Boy Scouts / Girl Scouts","Low","Mobile App Experimentation"
-109238475346,"Aaron Gonzales",Grade 9,"Grade 9 - St. Benedict",94.7,0,3,93.4,0,"Robotics & Coding Society","Moderate","Competitive Basketball"
-109238475347,"Rochelle San Jose",Grade 8,"Grade 8 - St. Dominic",96.4,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Campus Journalism & Creative Writing"
-109238475348,"Ethan Salazar",Grade 7,"Grade 7 - St. Ignatius",88.8,0,1,97.8,0,"Badminton & Table Tennis Club","Moderate","Cooking & Baking"
-109238475349,"Dominic Reyes",Grade 11,"Grade 11 - St. Augustine (STEM)",80.9,0,5,89,0,"TVL Skills & Hospitality Society","Moderate","Cooking & Baking"
-109238475350,"Andrea Dela Cruz",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88,0,3,93.4,0,"TVL Skills & Hospitality Society","High","Reading Novels & Webtoons"
-109238475351,"Francis Flores",Grade 11,"Grade 11 - St. Clare (ABM)",79.8,0,0,100,0,"Young Entrepreneurs & ABM Club","Low","Badminton & Cycling"
-109238475352,"Vanessa Ramos",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",89.7,0,2,95.6,0,"Math & Science Guild","High","Debate & Public Speaking"
-109238475353,"Lucas Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",93.2,0,2,95.6,0,"Math & Science Guild","High","Campus Journalism & Creative Writing"
-109238475354,"Lance Valdez",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",72.2,1,1,97.8,2,"Peer Facilitators Wellness Circle","Moderate","Reading Novels & Webtoons"
-109238475355,"Chloe Valdez",Grade 12,"Grade 12 - St. Jude (ABM)",91.6,0,2,95.6,0,"Supreme Secondary Learner Government (SSLG)","High","Mobile App Experimentation"
-109238475356,"Rafael Mendoza",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",85.2,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
-109238475357,"Francis Torres",Grade 10,"Grade 10 - St. Francis",70,1,0,100,3,"None / Non-Member","None","None / Disengaged"
-109238475358,"Adrian Manalo",Grade 9,"Grade 9 - St. Benedict",90.8,0,5,89,0,"Young Entrepreneurs & ABM Club","High","Digital Art & Graphic Design"
-109238475359,"Patricia Tan",Grade 8,"Grade 8 - St. Dominic",93.6,0,3,93.4,0,"Teatro San Antonio (Drama Guild)","Moderate","Robotics & Web Development"
-109238475360,"Chloe Torres",Grade 7,"Grade 7 - St. Ignatius",83,0,0,100,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475361,"Vanessa Reyes",Grade 11,"Grade 11 - St. Augustine (STEM)",89.8,0,2,95.6,0,"Glee Club & Chorale","High","Campus Journalism & Creative Writing"
-109238475362,"Aaron Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",82.9,0,2,95.6,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475363,"Angelo Tan",Grade 11,"Grade 11 - St. Clare (ABM)",85.5,0,0,100,0,"Boy Scouts / Girl Scouts","High","Mobile App Experimentation"
-109238475364,"Jasmine Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",64.5,2,8,82.4,1,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475365,"Sean Rivera",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",84.6,0,3,93.4,0,"Badminton & Table Tennis Club","Low","Reading Novels & Webtoons"
-109238475366,"Aaron Ramos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",88.4,0,2,95.6,0,"Robotics & Coding Society","High","Community Outreach Volunteering"
-109238475367,"Jerome Aquino",Grade 12,"Grade 12 - St. Jude (ABM)",77.2,0,1,97.8,0,"Badminton & Table Tennis Club","Moderate","Mobile App Experimentation"
-109238475368,"Jasmine Castillo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.4,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Community Outreach Volunteering"
-109238475369,"Francis Flores",Grade 10,"Grade 10 - St. Francis",84.7,0,3,93.4,0,"Math & Science Guild","High","Cooking & Baking"
-109238475370,"Mark Kenneth Valdez",Grade 9,"Grade 9 - St. Benedict",66.2,1,1,97.8,3,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475371,"Kathleen Castro",Grade 8,"Grade 8 - St. Dominic",73.7,0,3,93.4,2,"None / Non-Member","None","Casual Mobile Gaming"
-109238475372,"Daniel Mercado",Grade 7,"Grade 7 - St. Ignatius",94.6,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Reading Novels & Webtoons"
-109238475373,"Joshua De Leon",Grade 11,"Grade 11 - St. Augustine (STEM)",94.1,0,3,93.4,0,"Robotics & Coding Society","High","Campus Journalism & Creative Writing"
-109238475374,"Miguel Dizon",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",88.7,0,0,100,0,"Peer Facilitators Wellness Circle","High","Competitive Basketball"
-109238475375,"Aaron Torres",Grade 11,"Grade 11 - St. Clare (ABM)",86,0,2,95.6,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Debate & Public Speaking"
-109238475376,"Vanessa Dela Cruz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.6,0,1,97.8,0,"Teatro San Antonio (Drama Guild)","High","Community Outreach Volunteering"
-109238475377,"Paolo Alcantara",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",96.2,0,3,93.4,0,"Young Entrepreneurs & ABM Club","High","Community Outreach Volunteering"
-109238475378,"Alyssa Tan",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",83.8,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Badminton & Cycling"
-109238475379,"Chloe De Leon",Grade 12,"Grade 12 - St. Jude (ABM)",94.1,0,1,97.8,0,"Red Cross Youth (RCY)","Moderate","Campus Journalism & Creative Writing"
-109238475380,"Jerome Castro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",92.9,0,4,91.2,0,"Teatro San Antonio (Drama Guild)","High","Competitive Basketball"
-109238475381,"Kristine Castillo",Grade 10,"Grade 10 - St. Francis",91.9,0,3,93.4,0,"Glee Club & Chorale","High","Community Outreach Volunteering"
-109238475382,"Vanessa Garcia",Grade 9,"Grade 9 - St. Benedict",78.6,0,4,91.2,0,"TVL Skills & Hospitality Society","Low","Badminton & Cycling"
-109238475383,"Rochelle Garcia",Grade 8,"Grade 8 - St. Dominic",91.2,0,2,95.6,0,"Teatro San Antonio (Drama Guild)","High","Community Outreach Volunteering"
-109238475384,"John Carlo Dizon",Grade 7,"Grade 7 - St. Ignatius",72.8,3,8,82.4,2,"Peer Facilitators Wellness Circle","Low","Badminton & Cycling"
-109238475385,"Rafael Alcantara",Grade 11,"Grade 11 - St. Augustine (STEM)",75.1,1,4,91.2,0,"Teatro San Antonio (Drama Guild)","Low","Mobile App Experimentation"
-109238475386,"Kyle Garcia",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",74.1,0,3,93.4,0,"Young Entrepreneurs & ABM Club","Moderate","Cooking & Baking"
-109238475387,"John Carlo Ramos",Grade 11,"Grade 11 - St. Clare (ABM)",90.1,0,3,93.4,0,"Red Cross Youth (RCY)","High","Digital Art & Graphic Design"
-109238475388,"Jerome Flores",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90.1,0,1,97.8,0,"Campus Journalism (The Padua Clarion)","Moderate","Digital Art & Graphic Design"
-109238475389,"Camille Navarro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.9,0,2,95.6,0,"Red Cross Youth (RCY)","High","Debate & Public Speaking"
-109238475390,"Joshua Mendoza",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",70.7,4,10,78,2,"None / Non-Member","None","Casual Mobile Gaming"
-109238475391,"Lance Mercado",Grade 12,"Grade 12 - St. Jude (ABM)",84.6,0,3,93.4,0,"Robotics & Coding Society","High","Photography & Video Editing"
-109238475392,"Princess Mae Mercado",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",86.7,0,3,93.4,0,"Robotics & Coding Society","Moderate","Community Outreach Volunteering"
-109238475393,"Erika Torres",Grade 10,"Grade 10 - St. Francis",86.5,0,3,93.4,0,"Varsity Athletics (Basketball/Volleyball)","High","Competitive Basketball"
-109238475394,"Nathan Garcia",Grade 9,"Grade 9 - St. Benedict",80.7,0,2,95.6,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475395,"Nathan Aquino",Grade 8,"Grade 8 - St. Dominic",93,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","Moderate","Competitive Basketball"
-109238475396,"Shaina Manalo",Grade 7,"Grade 7 - St. Ignatius",92.4,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Digital Art & Graphic Design"
-109238475397,"Paolo Dizon",Grade 11,"Grade 11 - St. Augustine (STEM)",86.7,0,2,95.6,0,"Boy Scouts / Girl Scouts","Moderate","Robotics & Web Development"
-109238475398,"Justin Castillo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.4,0,1,97.8,0,"Red Cross Youth (RCY)","High","Badminton & Cycling"
-109238475399,"Shaina Aquino",Grade 11,"Grade 11 - St. Clare (ABM)",90.3,0,3,93.4,0,"Math & Science Guild","Moderate","Debate & Public Speaking"
-109238475400,"Andrea Tan",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",77.1,0,3,93.4,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475401,"Aaron Tan",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",89.2,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
-109238475402,"Alexander Mercado",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",66.8,2,9,80.2,2,"None / Non-Member","None","None / Disengaged"
-109238475403,"Danielle Santos",Grade 12,"Grade 12 - St. Jude (ABM)",91,0,2,95.6,0,"Campus Journalism (The Padua Clarion)","Moderate","Badminton & Cycling"
-109238475404,"Christian Dave Navarro",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",83.7,0,1,97.8,0,"Boy Scouts / Girl Scouts","High","Debate & Public Speaking"
-109238475405,"Patricia Ocampo",Grade 10,"Grade 10 - St. Francis",90.7,0,3,93.4,0,"Young Entrepreneurs & ABM Club","High","Acoustic Band & Guitar"
-109238475406,"Hannah Gonzales",Grade 9,"Grade 9 - St. Benedict",95.8,0,4,91.2,0,"Robotics & Coding Society","High","Debate & Public Speaking"
-109238475407,"Chloe Domingo",Grade 8,"Grade 8 - St. Dominic",86.5,0,1,97.8,0,"Peer Facilitators Wellness Circle","High","Robotics & Web Development"
-109238475408,"Justin Salazar",Grade 7,"Grade 7 - St. Ignatius",80.4,0,2,95.6,0,"None / Non-Member","None","None / Disengaged"
-109238475409,"Joshua Santos",Grade 11,"Grade 11 - St. Augustine (STEM)",85,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Campus Journalism & Creative Writing"
-109238475410,"Chloe Valdez",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",68.4,3,15,67,3,"None / Non-Member","None","None / Disengaged"
-109238475411,"Althea Mercado",Grade 11,"Grade 11 - St. Clare (ABM)",80.4,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475412,"Miguel Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",84.8,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Debate & Public Speaking"
-109238475413,"Danielle Padilla",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",88.4,0,3,93.4,0,"Math & Science Guild","High","Robotics & Web Development"
-109238475414,"Nathan San Jose",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",79.7,0,4,91.2,0,"Peer Facilitators Wellness Circle","Moderate","Photography & Video Editing"
-109238475415,"Bianca Flores",Grade 12,"Grade 12 - St. Jude (ABM)",89.6,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Campus Journalism & Creative Writing"
-109238475416,"Camille Domingo",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",84.9,0,1,97.8,0,"Robotics & Coding Society","Moderate","Campus Journalism & Creative Writing"
-109238475417,"Andrea Reyes",Grade 10,"Grade 10 - St. Francis",92.6,0,5,89,0,"Robotics & Coding Society","High","Community Outreach Volunteering"
-109238475418,"Justin Ramos",Grade 9,"Grade 9 - St. Benedict",81.8,0,4,91.2,0,"TVL Skills & Hospitality Society","Moderate","Badminton & Cycling"
-109238475419,"Danielle Rivera",Grade 8,"Grade 8 - St. Dominic",80.9,0,4,91.2,0,"Boy Scouts / Girl Scouts","Low","Badminton & Cycling"
-109238475420,"Alyssa Navarro",Grade 7,"Grade 7 - St. Ignatius",92.6,0,3,93.4,0,"Glee Club & Chorale","High","Badminton & Cycling"
-109238475421,"Hannah Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",88.5,0,5,89,0,"Varsity Athletics (Basketball/Volleyball)","High","Robotics & Web Development"
-109238475422,"Bea Patricia Salazar",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.9,0,2,95.6,0,"TVL Skills & Hospitality Society","High","Community Outreach Volunteering"
-109238475423,"Jasmine Castillo",Grade 11,"Grade 11 - St. Clare (ABM)",68.7,2,13,71.4,1,"None / Non-Member","None","None / Disengaged"
-109238475424,"Danielle Lim",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",90,0,1,97.8,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
-109238475425,"Dominic Valdez",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.4,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Mobile App Experimentation"
-109238475426,"Rochelle Valdez",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",63.3,0,4,91.2,1,"None / Non-Member","None","Casual Mobile Gaming"
-109238475427,"Jasmine Santiago",Grade 12,"Grade 12 - St. Jude (ABM)",93.1,0,4,91.2,0,"Glee Club & Chorale","High","Photography & Video Editing"
-109238475428,"Adrian San Jose",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",94.1,0,1,97.8,0,"Peer Facilitators Wellness Circle","High","Competitive Basketball"
-109238475429,"Francis Mendoza",Grade 10,"Grade 10 - St. Francis",80.9,0,5,89,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475430,"Dominic Flores",Grade 9,"Grade 9 - St. Benedict",87.6,0,4,91.2,0,"Campus Journalism (The Padua Clarion)","Moderate","Acoustic Band & Guitar"
-109238475431,"Kristine Tan",Grade 8,"Grade 8 - St. Dominic",96.4,0,4,91.2,0,"TVL Skills & Hospitality Society","Moderate","Competitive Basketball"
-109238475432,"Chloe Castro",Grade 7,"Grade 7 - St. Ignatius",80,0,2,95.6,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475433,"Sean Padilla",Grade 11,"Grade 11 - St. Augustine (STEM)",86.2,0,0,100,0,"TVL Skills & Hospitality Society","High","Photography & Video Editing"
-109238475434,"Denise Garcia",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",90.7,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Reading Novels & Webtoons"
-109238475435,"Bianca Mercado",Grade 11,"Grade 11 - St. Clare (ABM)",86.4,0,4,91.2,0,"Varsity Athletics (Basketball/Volleyball)","High","Mobile App Experimentation"
-109238475436,"Rafael Salazar",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",75.8,0,3,93.4,0,"TVL Skills & Hospitality Society","Moderate","Mobile App Experimentation"
-109238475437,"Princess Mae Villanueva",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",70.6,0,2,95.6,2,"None / Non-Member","None","Casual Mobile Gaming"
-109238475438,"Karl Santiago",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",87.9,0,3,93.4,0,"Math & Science Guild","High","Debate & Public Speaking"
-109238475439,"Jasmine Santos",Grade 12,"Grade 12 - St. Jude (ABM)",80.4,0,0,100,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475440,"Karl Mercado",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",70.8,0,2,95.6,1,"None / Non-Member","None","None / Disengaged"
-109238475441,"Camille Manalo",Grade 10,"Grade 10 - St. Francis",76.7,0,1,97.8,0,"Badminton & Table Tennis Club","Low","Photography & Video Editing"
-109238475442,"Paolo Santiago",Grade 9,"Grade 9 - St. Benedict",76.8,0,5,89,0,"TVL Skills & Hospitality Society","Moderate","Badminton & Cycling"
-109238475443,"Vanessa Bautista",Grade 8,"Grade 8 - St. Dominic",76.8,1,0,100,0,"Badminton & Table Tennis Club","Low","Reading Novels & Webtoons"
-109238475444,"Lucas Tolentino",Grade 7,"Grade 7 - St. Ignatius",87.1,0,1,97.8,0,"Math & Science Guild","High","Competitive Basketball"
-109238475445,"Rochelle Gonzales",Grade 11,"Grade 11 - St. Augustine (STEM)",83.4,0,4,91.2,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475446,"Gabriel Pascual",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.4,0,5,89,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
-109238475447,"Hannah Tan",Grade 11,"Grade 11 - St. Clare (ABM)",71.2,1,3,93.4,2,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475448,"Sofia Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",93.5,0,2,95.6,0,"Badminton & Table Tennis Club","High","Acoustic Band & Guitar"
-109238475449,"Kristine Santos",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.7,0,5,89,0,"Young Entrepreneurs & ABM Club","High","Robotics & Web Development"
-109238475450,"Karl Reyes",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",90.7,0,2,95.6,0,"Peer Facilitators Wellness Circle","High","Acoustic Band & Guitar"
-109238475451,"Angelo Salazar",Grade 12,"Grade 12 - St. Jude (ABM)",63.8,4,11,75.8,1,"None / Non-Member","None","Casual Mobile Gaming"
-109238475452,"Angelica Bautista",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",77.6,0,2,95.6,0,"None / Non-Member","None","Casual Mobile Gaming"
-109238475453,"Kyle Valdez",Grade 10,"Grade 10 - St. Francis",85.3,0,3,93.4,0,"Peer Facilitators Wellness Circle","Moderate","Acoustic Band & Guitar"
-109238475454,"Christian Dave Ocampo",Grade 9,"Grade 9 - St. Benedict",92.5,0,0,100,0,"Red Cross Youth (RCY)","High","Community Outreach Volunteering"
-109238475455,"Cedric Tolentino",Grade 8,"Grade 8 - St. Dominic",91.6,0,3,93.4,0,"Supreme Secondary Learner Government (SSLG)","High","Competitive Basketball"
-109238475456,"Angelo Mercado",Grade 7,"Grade 7 - St. Ignatius",78.1,0,1,97.8,0,"Young Entrepreneurs & ABM Club","Moderate","Cooking & Baking"
-109238475457,"Camille Rivera",Grade 11,"Grade 11 - St. Augustine (STEM)",71.5,3,7,84.6,2,"None / Non-Member","None","Casual Mobile Gaming"
-109238475458,"Bea Patricia Alcantara",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",65.2,2,6,86.8,2,"None / Non-Member","None","None / Disengaged"
-109238475459,"Samantha Nicole Bautista",Grade 11,"Grade 11 - St. Clare (ABM)",86.7,0,3,93.4,0,"Campus Journalism (The Padua Clarion)","Moderate","Debate & Public Speaking"
-109238475460,"Cedric Manalo",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",94.3,0,5,89,0,"Glee Club & Chorale","High","Campus Journalism & Creative Writing"
-109238475461,"Daniel Bautista",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",81.5,0,1,97.8,0,"None / Non-Member","None","Unstructured Rest / Inactive"
-109238475462,"Erika Santos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",72.6,1,3,93.4,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475463,"Sean Santos",Grade 12,"Grade 12 - St. Jude (ABM)",73.9,2,15,67,3,"None / Non-Member","None","Casual Mobile Gaming"
-109238475464,"Alexander Tolentino",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",85.5,0,1,97.8,0,"Young Entrepreneurs & ABM Club","High","Debate & Public Speaking"
-109238475465,"Daniel San Jose",Grade 10,"Grade 10 - St. Francis",92.8,0,4,91.2,0,"Glee Club & Chorale","High","Digital Art & Graphic Design"
-109238475466,"Angelo Aquino",Grade 9,"Grade 9 - St. Benedict",75.6,0,3,93.4,0,"Boy Scouts / Girl Scouts","Low","Photography & Video Editing"
-109238475467,"Joshua Santos",Grade 8,"Grade 8 - St. Dominic",72.8,1,2,95.6,2,"None / Non-Member","None","Casual Mobile Gaming"
-109238475468,"Denise De Leon",Grade 7,"Grade 7 - St. Ignatius",93.7,0,2,95.6,0,"TVL Skills & Hospitality Society","High","Competitive Basketball"
-109238475469,"Daniel Pascual",Grade 11,"Grade 11 - St. Augustine (STEM)",75.8,0,2,95.6,0,"Badminton & Table Tennis Club","Low","Mobile App Experimentation"
-109238475470,"Paolo Ocampo",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",81.2,0,3,93.4,0,"Boy Scouts / Girl Scouts","Moderate","Photography & Video Editing"
-109238475471,"Kyle Ramos",Grade 11,"Grade 11 - St. Clare (ABM)",92.5,0,2,95.6,0,"Badminton & Table Tennis Club","Moderate","Debate & Public Speaking"
-109238475472,"Rochelle Tolentino",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",80.8,0,1,97.8,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475473,"Adrian Santiago",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",87.1,0,1,97.8,0,"Young Entrepreneurs & ABM Club","High","Competitive Basketball"
-109238475474,"Adrian Rivera",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",93.3,0,4,91.2,0,"Young Entrepreneurs & ABM Club","High","Acoustic Band & Guitar"
-109238475475,"Princess Mae Alcantara",Grade 12,"Grade 12 - St. Jude (ABM)",90.3,0,3,93.4,0,"Math & Science Guild","High","Badminton & Cycling"
-109238475476,"Rochelle Soriano",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",91.7,0,3,93.4,0,"Badminton & Table Tennis Club","High","Mobile App Experimentation"
-109238475477,"Sofia Salazar",Grade 10,"Grade 10 - St. Francis",77.2,0,1,97.8,0,"None / Non-Member","None","None / Disengaged"
-109238475478,"Alyssa San Jose",Grade 9,"Grade 9 - St. Benedict",95,0,1,97.8,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
-109238475479,"Denise Corpuz",Grade 8,"Grade 8 - St. Dominic",82.4,0,0,100,0,"TVL Skills & Hospitality Society","Low","Mobile App Experimentation"
-109238475480,"Dominic Pascual",Grade 7,"Grade 7 - St. Ignatius",88.2,0,3,93.4,0,"Badminton & Table Tennis Club","High","Acoustic Band & Guitar"
-109238475481,"Sofia Villanueva",Grade 11,"Grade 11 - St. Augustine (STEM)",93.6,0,1,97.8,0,"Teatro San Antonio (Drama Guild)","High","Debate & Public Speaking"
-109238475482,"John Carlo Valdez",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",91.6,0,2,95.6,0,"Badminton & Table Tennis Club","Moderate","Cooking & Baking"
-109238475483,"Nathan Ocampo",Grade 11,"Grade 11 - St. Clare (ABM)",87.8,0,2,95.6,0,"Robotics & Coding Society","Moderate","Robotics & Web Development"
-109238475484,"Mark Kenneth Torres",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",94.5,0,1,97.8,0,"Supreme Secondary Learner Government (SSLG)","High","Debate & Public Speaking"
-109238475485,"Daniel Domingo",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",85.7,0,5,89,0,"Supreme Secondary Learner Government (SSLG)","Moderate","Digital Art & Graphic Design"
-109238475486,"Denise Mendoza",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",78.2,0,3,93.4,0,"None / Non-Member","None","None / Disengaged"
-109238475487,"Ethan Navarro",Grade 12,"Grade 12 - St. Jude (ABM)",96.8,0,2,95.6,0,"Red Cross Youth (RCY)","High","Cooking & Baking"
-109238475488,"Cedric Rivera",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",93.4,0,5,89,0,"Glee Club & Chorale","High","Badminton & Cycling"
-109238475489,"Jasmine Domingo",Grade 10,"Grade 10 - St. Francis",80.2,0,1,97.8,0,"TVL Skills & Hospitality Society","Moderate","Badminton & Cycling"
-109238475490,"Camille Corpuz",Grade 9,"Grade 9 - St. Benedict",89,0,2,95.6,0,"Varsity Athletics (Basketball/Volleyball)","High","Robotics & Web Development"
-109238475491,"Mariel Tolentino",Grade 8,"Grade 8 - St. Dominic",95.2,0,2,95.6,0,"Badminton & Table Tennis Club","High","Campus Journalism & Creative Writing"
-109238475492,"Kathleen Lim",Grade 7,"Grade 7 - St. Ignatius",90.2,0,1,97.8,0,"Peer Facilitators Wellness Circle","High","Badminton & Cycling"
-109238475493,"Vincent Tolentino",Grade 11,"Grade 11 - St. Augustine (STEM)",75.5,1,3,93.4,0,"Teatro San Antonio (Drama Guild)","Low","Mobile App Experimentation"
-109238475494,"Princess Mae Santos",Grade 11,"Grade 11 - St. Lorenzo (HUMSS)",87.4,0,2,95.6,0,"Math & Science Guild","High","Campus Journalism & Creative Writing"
-109238475495,"Karl Lim",Grade 11,"Grade 11 - St. Clare (ABM)",91.8,0,3,93.4,0,"TVL Skills & Hospitality Society","Moderate","Robotics & Web Development"
-109238475496,"Lance Dela Cruz",Grade 11,"Grade 11 - St. Pedro Calungsod (TVL-ICT)",80.6,0,1,97.8,0,"Peer Facilitators Wellness Circle","Moderate","Reading Novels & Webtoons"
-109238475497,"Trisha Castro",Grade 12,"Grade 12 - St. Thomas Aquinas (STEM)",94.8,0,5,89,0,"Varsity Athletics (Basketball/Volleyball)","High","Debate & Public Speaking"
-109238475498,"Nicole Santos",Grade 12,"Grade 12 - St. Teresa of Avila (HUMSS)",79.8,0,1,97.8,0,"None / Non-Member","None","Passive Screen Time / Social Media"
-109238475499,"Christian Dave Santos",Grade 12,"Grade 12 - St. Jude (ABM)",67.5,3,11,75.8,1,"None / Non-Member","None","None / Disengaged"
-109238475500,"Alyssa Tan",Grade 12,"Grade 12 - St. Vincent (TVL-HE)",75.9,0,5,89,0,"None / Non-Member","None","Unstructured Rest / Inactive"
+109238470001,Erika Bautista,Grade 7,Grade 7 - St. Anthony,86.8,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Debate & Public Speaking
+109238470002,Althea Garcia,Grade 7,Grade 7 - St. Bernadette,88.3,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Competitive Basketball / Athletics
+109238470003,Angela Padilla,Grade 7,Grade 7 - St. Bernadette,85.7,0,0,100.0,0,Supreme Junior Learner Government (SSG),High,Community Outreach Volunteering
+109238470004,Angelica Salazar,Grade 7,Grade 7 - St. Anthony,87.2,0,0,100.0,0,Math & Science Wizards Guild,Moderate,Debate & Public Speaking
+109238470005,Chloe De Leon,Grade 7,Grade 7 - St. Anthony,78.3,1,5,89.0,1,SAPC Junior Red Cross Youth (RCY),Low,Digital Art & Graphic Design
+109238470006,Luis San Jose,Grade 7,Grade 7 - St. Francis,91.2,0,2,95.6,0,Young Communicators & English Guild,Moderate,Visual Arts & Illustration
+109238470007,Patricia Tolentino,Grade 7,Grade 7 - St. Bernadette,93.1,0,0,100.0,0,Young Innovators & Junior Coding Club,Moderate,Campus Journalism & Creative Writing
+109238470008,Mariel Mercado,Grade 7,Grade 7 - St. Anthony,93.4,0,2,95.6,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Debate & Public Speaking
+109238470009,Chloe Santos,Grade 7,Grade 7 - St. Bernadette,66.6,3,13,71.4,3,SAPC Junior Red Cross Youth (RCY),Moderate,None / Disengaged
+109238470010,Patricia Domingo,Grade 7,Grade 7 - St. Bernadette,90.8,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),High,Visual Arts & Illustration
+109238470011,Joshua Castillo,Grade 7,Grade 7 - St. Therese,86.4,0,0,100.0,0,Young Communicators & English Guild,Moderate,Visual Arts & Illustration
+109238470012,Faith De Leon,Grade 7,Grade 7 - St. Therese,76.3,1,2,95.6,2,SAPC Junior Red Cross Youth (RCY),Low,Badminton & Cycling
+109238470013,Patricia Corpuz,Grade 7,Grade 7 - St. Francis,78.4,0,5,89.0,0,Junior Scouting (Boy Scouts / Girl Scouts),Low,Digital Art & Graphic Design
+109238470014,Camille Castro,Grade 7,Grade 7 - St. Anthony,67.9,2,8,82.4,2,None / Non-Member,None,Passive Screen Time / Social Media
+109238470015,Kyle Flores,Grade 7,Grade 7 - St. Therese,89.7,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),Moderate,Debate & Public Speaking
+109238470016,Mariel Dela Cruz,Grade 7,Grade 7 - St. Therese,67.8,2,15,70.0,4,None / Non-Member,None,Home Isolation / Resting
+109238470017,Erika Navarro,Grade 7,Grade 7 - St. Francis,81.8,0,6,86.8,0,Young Communicators & English Guild,Moderate,Acoustic Band & Guitar
+109238470018,Joy Manalo,Grade 7,Grade 7 - St. Therese,76.4,1,6,86.8,0,Young Innovators & Junior Coding Club,Low,Reading Novels & Webtoons
+109238470019,Tristan Torres,Grade 7,Grade 7 - St. Anthony,96.1,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Visual Arts & Illustration
+109238470020,Francis Cruz,Grade 7,Grade 7 - St. Therese,68.2,3,13,71.4,3,Math & Science Wizards Guild,Moderate,Home Isolation / Resting
+109238470021,Therese Valdez,Grade 7,Grade 7 - St. Therese,91.0,0,1,97.8,0,Young Communicators & English Guild,High,Debate & Public Speaking
+109238470022,Lance Navarro,Grade 7,Grade 7 - St. Bernadette,90.0,0,1,97.8,0,Junior Padua Band & Choir,Moderate,Competitive Basketball / Athletics
+109238470023,Jasmine Reyes,Grade 7,Grade 7 - St. Bernadette,92.3,0,0,100.0,0,Math & Science Wizards Guild,Moderate,Campus Journalism & Creative Writing
+109238470024,John Carlo Morales,Grade 7,Grade 7 - St. Bernadette,91.3,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),Moderate,Visual Arts & Illustration
+109238470025,Angelica Aquino,Grade 7,Grade 7 - St. Therese,91.8,0,2,95.6,0,Young Innovators & Junior Coding Club,High,Community Outreach Volunteering
+109238470026,John Carlo Valdez,Grade 7,Grade 7 - St. Therese,77.0,0,3,93.4,1,Junior Scouting (Boy Scouts / Girl Scouts),Low,Reading Novels & Webtoons
+109238470027,Hannah Aquino,Grade 7,Grade 7 - St. Francis,85.8,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),High,Competitive Basketball / Athletics
+109238470028,Nicole Cruz,Grade 7,Grade 7 - St. Therese,93.5,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),High,Campus Journalism & Creative Writing
+109238470029,Bianca Flores,Grade 7,Grade 7 - St. Therese,69.9,2,15,70.0,5,None / Non-Member,None,Passive Screen Time / Social Media
+109238470030,Nathan Reyes,Grade 7,Grade 7 - St. Therese,82.7,1,2,95.6,1,None / Non-Member,None,Cooking & Baking
+109238470031,Francis Alcantara,Grade 7,Grade 7 - St. Therese,81.8,1,3,93.4,2,Teatro San Antonio (Junior Theater Guild),Low,Acoustic Band & Guitar
+109238470032,Lance Gonzales,Grade 7,Grade 7 - St. Therese,77.5,1,3,93.4,2,Campus Journalism (Padua Junior Chronicle),Low,Cooking & Baking
+109238470033,Gabriel Flores,Grade 7,Grade 7 - St. Francis,92.2,0,0,100.0,0,Supreme Junior Learner Government (SSG),High,Community Outreach Volunteering
+109238470034,Bernadette Dela Cruz,Grade 7,Grade 7 - St. Bernadette,83.0,1,6,86.8,2,Junior Varsity Athletics (Basketball/Volleyball),Low,Reading Novels & Webtoons
+109238470035,Chloe Navarro,Grade 7,Grade 7 - St. Therese,90.1,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Competitive Basketball / Athletics
+109238470036,Maria Clara Aquino,Grade 7,Grade 7 - St. Therese,91.4,0,0,100.0,0,Junior Padua Band & Choir,High,Debate & Public Speaking
+109238470037,Bernadette Pascual,Grade 7,Grade 7 - St. Anthony,72.9,3,9,80.2,4,None / Non-Member,None,Passive Screen Time / Social Media
+109238470038,Therese Alcantara,Grade 7,Grade 7 - St. Francis,78.5,0,6,86.8,2,Young Innovators & Junior Coding Club,Low,Mobile App Experimentation
+109238470039,Vanessa De Leon,Grade 7,Grade 7 - St. Bernadette,95.8,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),High,Community Outreach Volunteering
+109238470040,Hannah Mercado,Grade 7,Grade 7 - St. Bernadette,95.4,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),Moderate,Debate & Public Speaking
+109238470041,Angelo Cruz,Grade 7,Grade 7 - St. Bernadette,89.8,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),Moderate,Debate & Public Speaking
+109238470042,Joaquin Morales,Grade 7,Grade 7 - St. Anthony,79.8,0,4,91.2,0,Young Communicators & English Guild,Moderate,Digital Art & Graphic Design
+109238470043,Andrea Dela Cruz,Grade 7,Grade 7 - St. Anthony,80.1,1,6,86.8,1,Math & Science Wizards Guild,Moderate,Mobile App Experimentation
+109238470044,Patricia Mercado,Grade 7,Grade 7 - St. Bernadette,87.3,0,2,95.6,0,Campus Journalism (Padua Junior Chronicle),High,Robotics & Web Development
+109238470045,Gabriel Reyes,Grade 7,Grade 7 - St. Bernadette,66.9,3,12,73.6,4,None / Non-Member,None,None / Disengaged
+109238470046,Jasmine Padilla,Grade 7,Grade 7 - St. Bernadette,89.2,0,2,95.6,0,Young Innovators & Junior Coding Club,High,Robotics & Web Development
+109238470047,Mariel Pascual,Grade 7,Grade 7 - St. Anthony,88.5,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),High,Debate & Public Speaking
+109238470048,Jose Domingo,Grade 7,Grade 7 - St. Bernadette,87.5,0,1,97.8,0,Junior Padua Band & Choir,High,Community Outreach Volunteering
+109238470049,Chloe Dizon,Grade 7,Grade 7 - St. Francis,87.6,0,2,95.6,0,Young Innovators & Junior Coding Club,Moderate,Campus Journalism & Creative Writing
+109238470050,Kathryn Bautista,Grade 7,Grade 7 - St. Francis,91.4,0,1,97.8,0,Math & Science Wizards Guild,Moderate,Competitive Basketball / Athletics
+109238470051,Christian Manalo,Grade 7,Grade 7 - St. Bernadette,73.7,1,8,82.4,2,None / Non-Member,None,Passive Screen Time / Social Media
+109238470052,Jerome Villanueva,Grade 7,Grade 7 - St. Therese,93.3,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Debate & Public Speaking
+109238470053,Karl Valdez,Grade 7,Grade 7 - St. Bernadette,81.8,1,3,93.4,1,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Mobile App Experimentation
+109238470054,Ethan Dela Cruz,Grade 7,Grade 7 - St. Anthony,94.7,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Visual Arts & Illustration
+109238470055,Rochelle Tolentino,Grade 7,Grade 7 - St. Anthony,80.2,1,6,86.8,2,Young Innovators & Junior Coding Club,Low,Cooking & Baking
+109238470056,Chloe Mercado,Grade 7,Grade 7 - St. Anthony,69.7,3,11,75.8,2,None / Non-Member,None,Passive Screen Time / Social Media
+109238470057,Cecilia De Leon,Grade 7,Grade 7 - St. Anthony,94.4,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),High,Campus Journalism & Creative Writing
+109238470058,Simon Pascual,Grade 7,Grade 7 - St. Anthony,79.6,0,6,86.8,0,Campus Journalism (Padua Junior Chronicle),Moderate,Reading Novels & Webtoons
+109238470059,Mark Torres,Grade 7,Grade 7 - St. Francis,95.8,0,2,95.6,0,Campus Journalism (Padua Junior Chronicle),Moderate,Community Outreach Volunteering
+109238470060,Rochelle Domingo,Grade 7,Grade 7 - St. Francis,85.0,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),Moderate,Campus Journalism & Creative Writing
+109238470061,Mariel Tolentino,Grade 7,Grade 7 - St. Bernadette,71.6,2,8,82.4,5,None / Non-Member,None,Casual Mobile Gaming
+109238470062,Andrea Ocampo,Grade 7,Grade 7 - St. Anthony,74.8,3,14,70.0,4,Young Communicators & English Guild,Low,None / Disengaged
+109238470063,Justin Santiago,Grade 7,Grade 7 - St. Bernadette,94.0,0,2,95.6,0,Campus Journalism (Padua Junior Chronicle),Moderate,Visual Arts & Illustration
+109238470064,Paolo Villanueva,Grade 7,Grade 7 - St. Anthony,90.6,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),High,Robotics & Web Development
+109238470065,Diego Alcantara,Grade 7,Grade 7 - St. Bernadette,85.2,0,0,100.0,0,Junior Padua Band & Choir,High,Community Outreach Volunteering
+109238470066,Angelo Flores,Grade 7,Grade 7 - St. Anthony,77.8,1,2,95.6,0,Campus Journalism (Padua Junior Chronicle),Low,Badminton & Cycling
+109238470067,Joaquin Navarro,Grade 7,Grade 7 - St. Francis,89.8,0,2,95.6,0,Young Communicators & English Guild,High,Campus Journalism & Creative Writing
+109238470068,Benedict Villanueva,Grade 7,Grade 7 - St. Anthony,79.8,1,3,93.4,1,Junior Padua Band & Choir,Moderate,Cooking & Baking
+109238470069,Andrea San Jose,Grade 7,Grade 7 - St. Therese,90.0,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Debate & Public Speaking
+109238470070,Erika Ramos,Grade 7,Grade 7 - St. Anthony,95.8,0,1,97.8,0,Junior Padua Band & Choir,High,Campus Journalism & Creative Writing
+109238470071,Angelo Pascual,Grade 7,Grade 7 - St. Anthony,73.9,1,9,80.2,3,None / Non-Member,None,Home Isolation / Resting
+109238470072,Lance Garcia,Grade 7,Grade 7 - St. Bernadette,85.8,0,0,100.0,0,Math & Science Wizards Guild,High,Visual Arts & Illustration
+109238470073,Anthony Manalo,Grade 7,Grade 7 - St. Francis,86.9,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Robotics & Web Development
+109238470074,Matthew Bautista,Grade 7,Grade 7 - St. Francis,90.7,0,2,95.6,0,Campus Journalism (Padua Junior Chronicle),High,Community Outreach Volunteering
+109238470075,Erika Cruz,Grade 7,Grade 7 - St. Therese,70.8,1,7,84.6,5,Junior Scouting (Boy Scouts / Girl Scouts),Low,Watching Streaming Videos
+109238470076,Liza Soriano,Grade 7,Grade 7 - St. Anthony,95.5,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),High,Robotics & Web Development
+109238470077,Therese Castro,Grade 7,Grade 7 - St. Anthony,86.3,0,1,97.8,0,SAPC Junior Red Cross Youth (RCY),High,Robotics & Web Development
+109238470078,Anthony Gonzales,Grade 7,Grade 7 - St. Anthony,89.6,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Robotics & Web Development
+109238470079,Joy Corpuz,Grade 7,Grade 7 - St. Francis,95.3,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),Moderate,Visual Arts & Illustration
+109238470080,Daniel Salazar,Grade 7,Grade 7 - St. Anthony,78.5,1,6,86.8,0,Junior Scouting (Boy Scouts / Girl Scouts),Low,Cooking & Baking
+109238470081,Simon Castro,Grade 7,Grade 7 - St. Anthony,89.9,0,1,97.8,0,Supreme Junior Learner Government (SSG),High,Visual Arts & Illustration
+109238470082,Adrian Lim,Grade 7,Grade 7 - St. Anthony,87.9,0,1,97.8,0,Math & Science Wizards Guild,Moderate,Visual Arts & Illustration
+109238470083,Andrea Gonzales,Grade 7,Grade 7 - St. Therese,85.7,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),High,Campus Journalism & Creative Writing
+109238470084,Trisha San Jose,Grade 7,Grade 7 - St. Bernadette,71.6,3,12,73.6,5,None / Non-Member,None,Unstructured Rest / Inactive
+109238470085,Cecilia Ocampo,Grade 7,Grade 7 - St. Therese,96.0,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Visual Arts & Illustration
+109238470086,Sebastian Dimaculangan,Grade 7,Grade 7 - St. Francis,94.7,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),Moderate,Campus Journalism & Creative Writing
+109238470087,Mariel Ocampo,Grade 7,Grade 7 - St. Therese,79.2,0,5,89.0,0,Young Communicators & English Guild,Moderate,Cooking & Baking
+109238470088,Lorenzo Alcantara,Grade 7,Grade 7 - St. Bernadette,66.2,2,11,75.8,3,None / Non-Member,None,Home Isolation / Resting
+109238470089,Simon Ramos,Grade 7,Grade 7 - St. Anthony,86.2,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Visual Arts & Illustration
+109238470090,Rita Cruz,Grade 7,Grade 7 - St. Therese,95.6,0,1,97.8,0,Young Innovators & Junior Coding Club,Moderate,Debate & Public Speaking
+109238470091,Cedric Lim,Grade 7,Grade 7 - St. Bernadette,85.8,0,2,95.6,0,Supreme Junior Learner Government (SSG),High,Debate & Public Speaking
+109238470092,Gabriel De Leon,Grade 7,Grade 7 - St. Bernadette,85.4,0,2,95.6,0,Junior Padua Band & Choir,High,Visual Arts & Illustration
+109238470093,Liza Domingo,Grade 7,Grade 7 - St. Therese,86.3,0,0,100.0,0,Math & Science Wizards Guild,High,Campus Journalism & Creative Writing
+109238470094,Justin Mercado,Grade 7,Grade 7 - St. Anthony,94.2,0,0,100.0,0,Junior Padua Band & Choir,Moderate,Robotics & Web Development
+109238470095,Angelo Morales,Grade 7,Grade 7 - St. Francis,90.3,0,2,95.6,0,Supreme Junior Learner Government (SSG),High,Competitive Basketball / Athletics
+109238470096,Jerome Padilla,Grade 7,Grade 7 - St. Therese,91.3,0,2,95.6,0,Supreme Junior Learner Government (SSG),Moderate,Competitive Basketball / Athletics
+109238470097,Joshua Salazar,Grade 7,Grade 7 - St. Bernadette,82.9,0,6,86.8,0,Math & Science Wizards Guild,Moderate,Badminton & Cycling
+109238470098,Sofia Soriano,Grade 7,Grade 7 - St. Francis,76.4,1,6,86.8,0,Math & Science Wizards Guild,Low,Cooking & Baking
+109238470099,Liza Aquino,Grade 7,Grade 7 - St. Francis,74.6,3,9,80.2,2,None / Non-Member,None,Home Isolation / Resting
+109238470100,Justin Aquino,Grade 7,Grade 7 - St. Francis,86.5,0,1,97.8,0,Math & Science Wizards Guild,Moderate,Visual Arts & Illustration
+109238470101,Sebastian Aquino,Grade 7,Grade 7 - St. Anthony,90.8,0,0,100.0,0,Young Communicators & English Guild,Moderate,Robotics & Web Development
+109238470102,Lucas Soriano,Grade 7,Grade 7 - St. Francis,79.3,1,6,86.8,1,Young Communicators & English Guild,Low,Acoustic Band & Guitar
+109238470103,Luis Dimaculangan,Grade 7,Grade 7 - St. Francis,81.6,0,5,89.0,1,None / Non-Member,None,Mobile App Experimentation
+109238470104,Emman Reyes,Grade 7,Grade 7 - St. Francis,90.0,0,1,97.8,0,Young Innovators & Junior Coding Club,Moderate,Campus Journalism & Creative Writing
+109238470105,Kathleen Santos,Grade 7,Grade 7 - St. Anthony,92.8,0,1,97.8,0,Young Communicators & English Guild,High,Community Outreach Volunteering
+109238470106,Angela San Jose,Grade 7,Grade 7 - St. Francis,88.7,0,2,95.6,0,Young Innovators & Junior Coding Club,Moderate,Visual Arts & Illustration
+109238470107,Clare Castillo,Grade 7,Grade 7 - St. Francis,75.0,1,5,89.0,0,None / Non-Member,None,Mobile App Experimentation
+109238470108,Princess Mae Rivera,Grade 7,Grade 7 - St. Bernadette,92.9,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Debate & Public Speaking
+109238470109,Dominic Villanueva,Grade 7,Grade 7 - St. Anthony,94.7,0,0,100.0,0,Math & Science Wizards Guild,Moderate,Campus Journalism & Creative Writing
+109238470110,Angelo Alcantara,Grade 7,Grade 7 - St. Anthony,92.1,0,1,97.8,0,Young Innovators & Junior Coding Club,High,Campus Journalism & Creative Writing
+109238470111,John Carlo De Leon,Grade 7,Grade 7 - St. Bernadette,89.5,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Community Outreach Volunteering
+109238470112,Cedric Torres,Grade 7,Grade 7 - St. Bernadette,74.7,3,12,73.6,2,Junior Scouting (Boy Scouts / Girl Scouts),Low,Unstructured Rest / Inactive
+109238470113,Faith Santiago,Grade 7,Grade 7 - St. Francis,81.2,0,6,86.8,0,Junior Scouting (Boy Scouts / Girl Scouts),Low,Acoustic Band & Guitar
+109238470114,Martin Dela Cruz,Grade 7,Grade 7 - St. Anthony,69.3,1,7,84.6,4,None / Non-Member,None,Passive Screen Time / Social Media
+109238470115,Andrea Pascual,Grade 7,Grade 7 - St. Bernadette,75.1,0,4,91.2,0,Campus Journalism (Padua Junior Chronicle),Moderate,Mobile App Experimentation
+109238470116,Benedict Flores,Grade 7,Grade 7 - St. Francis,86.1,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),High,Community Outreach Volunteering
+109238470117,Carlos Soriano,Grade 7,Grade 7 - St. Therese,87.4,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Community Outreach Volunteering
+109238470118,Vanessa Dizon,Grade 7,Grade 7 - St. Bernadette,94.0,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Robotics & Web Development
+109238470119,Kathryn Villanueva,Grade 7,Grade 7 - St. Bernadette,70.0,1,12,73.6,3,Young Communicators & English Guild,Moderate,Passive Screen Time / Social Media
+109238470120,Karl Lim,Grade 7,Grade 7 - St. Anthony,89.8,0,1,97.8,0,Young Communicators & English Guild,High,Campus Journalism & Creative Writing
+109238470121,Adrian De Leon,Grade 7,Grade 7 - St. Bernadette,89.8,0,0,100.0,0,Math & Science Wizards Guild,Moderate,Debate & Public Speaking
+109238470122,Christian Gonzales,Grade 7,Grade 7 - St. Anthony,91.1,0,0,100.0,0,Young Innovators & Junior Coding Club,High,Debate & Public Speaking
+109238470123,Samantha Nicole Castillo,Grade 7,Grade 7 - St. Therese,80.7,1,3,93.4,1,Campus Journalism (Padua Junior Chronicle),Low,Mobile App Experimentation
+109238470124,Rochelle Mercado,Grade 7,Grade 7 - St. Francis,93.0,0,0,100.0,0,Supreme Junior Learner Government (SSG),High,Debate & Public Speaking
+109238470125,Lance Villanueva,Grade 7,Grade 7 - St. Francis,88.5,0,0,100.0,0,Math & Science Wizards Guild,High,Robotics & Web Development
+109238470126,Justin San Jose,Grade 8,Grade 8 - St. Dominic,75.4,1,6,86.8,1,Young Communicators & English Guild,Low,Cooking & Baking
+109238470127,Cedric Bautista,Grade 8,Grade 8 - St. Benedict,95.8,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),High,Campus Journalism & Creative Writing
+109238470128,Maria Clara Manalo,Grade 8,Grade 8 - St. Rita,96.2,0,2,95.6,0,Young Communicators & English Guild,High,Campus Journalism & Creative Writing
+109238470129,Vanessa Dizon,Grade 8,Grade 8 - St. Rita,88.9,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),High,Competitive Basketball / Athletics
+109238470130,Tristan Morales,Grade 8,Grade 8 - St. Clare,85.8,0,2,95.6,0,Young Communicators & English Guild,High,Community Outreach Volunteering
+109238470131,Daniel Dimaculangan,Grade 8,Grade 8 - St. Rita,80.4,1,5,89.0,1,Campus Journalism (Padua Junior Chronicle),Moderate,Acoustic Band & Guitar
+109238470132,Therese Santiago,Grade 8,Grade 8 - St. Dominic,94.0,0,2,95.6,0,Young Communicators & English Guild,Moderate,Community Outreach Volunteering
+109238470133,Anthony Rivera,Grade 8,Grade 8 - St. Rita,89.7,0,2,95.6,0,Junior Padua Band & Choir,High,Competitive Basketball / Athletics
+109238470134,Matthew Valdez,Grade 8,Grade 8 - St. Dominic,93.9,0,0,100.0,0,Math & Science Wizards Guild,High,Robotics & Web Development
+109238470135,Angela Mendoza,Grade 8,Grade 8 - St. Dominic,96.3,0,2,95.6,0,Young Communicators & English Guild,High,Robotics & Web Development
+109238470136,Anthony Cruz,Grade 8,Grade 8 - St. Rita,90.1,0,0,100.0,0,Young Innovators & Junior Coding Club,High,Community Outreach Volunteering
+109238470137,Camille Manalo,Grade 8,Grade 8 - St. Clare,87.3,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),High,Competitive Basketball / Athletics
+109238470138,Elijah Gonzales,Grade 8,Grade 8 - St. Clare,89.4,0,0,100.0,0,Math & Science Wizards Guild,Moderate,Robotics & Web Development
+109238470139,Bianca Dizon,Grade 8,Grade 8 - St. Benedict,85.3,0,2,95.6,0,Junior Padua Band & Choir,High,Competitive Basketball / Athletics
+109238470140,Therese Manalo,Grade 8,Grade 8 - St. Benedict,85.0,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Robotics & Web Development
+109238470141,Simon San Jose,Grade 8,Grade 8 - St. Dominic,94.6,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Campus Journalism & Creative Writing
+109238470142,Patricia Torres,Grade 8,Grade 8 - St. Clare,91.5,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Campus Journalism & Creative Writing
+109238470143,Anthony Aquino,Grade 8,Grade 8 - St. Dominic,71.3,3,7,84.6,4,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Unstructured Rest / Inactive
+109238470144,Clare Castro,Grade 8,Grade 8 - St. Benedict,93.5,0,0,100.0,0,Supreme Junior Learner Government (SSG),High,Campus Journalism & Creative Writing
+109238470145,Samantha Nicole Castillo,Grade 8,Grade 8 - St. Benedict,95.4,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Robotics & Web Development
+109238470146,Sebastian Torres,Grade 8,Grade 8 - St. Rita,88.9,0,2,95.6,0,Young Innovators & Junior Coding Club,High,Competitive Basketball / Athletics
+109238470147,Vincent Ocampo,Grade 8,Grade 8 - St. Benedict,70.1,3,8,82.4,3,None / Non-Member,None,Casual Mobile Gaming
+109238470148,Rochelle San Jose,Grade 8,Grade 8 - St. Clare,88.2,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Community Outreach Volunteering
+109238470149,Patricia De Leon,Grade 8,Grade 8 - St. Clare,80.4,1,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Low,Mobile App Experimentation
+109238470150,Joshua Flores,Grade 8,Grade 8 - St. Rita,80.0,0,2,95.6,2,None / Non-Member,None,Digital Art & Graphic Design
+109238470151,Sofia De Leon,Grade 8,Grade 8 - St. Rita,75.4,1,4,91.2,2,Math & Science Wizards Guild,Moderate,Digital Art & Graphic Design
+109238470152,Bea De Leon,Grade 8,Grade 8 - St. Benedict,80.9,1,3,93.4,0,Math & Science Wizards Guild,Moderate,Cooking & Baking
+109238470153,Justin Alcantara,Grade 8,Grade 8 - St. Dominic,71.2,1,8,82.4,2,None / Non-Member,None,Unstructured Rest / Inactive
+109238470154,Kathleen Soriano,Grade 8,Grade 8 - St. Dominic,86.5,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),High,Campus Journalism & Creative Writing
+109238470155,Cedric Gonzales,Grade 8,Grade 8 - St. Dominic,88.4,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Campus Journalism & Creative Writing
+109238470156,Sebastian Dimaculangan,Grade 8,Grade 8 - St. Dominic,89.4,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Competitive Basketball / Athletics
+109238470157,Lucas Domingo,Grade 8,Grade 8 - St. Clare,77.7,0,6,86.8,2,Junior Padua Band & Choir,Low,Reading Novels & Webtoons
+109238470158,Matthew Cruz,Grade 8,Grade 8 - St. Rita,92.8,0,1,97.8,0,Young Communicators & English Guild,High,Community Outreach Volunteering
+109238470159,Dominic Castro,Grade 8,Grade 8 - St. Clare,92.4,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),Moderate,Visual Arts & Illustration
+109238470160,Camille Lim,Grade 8,Grade 8 - St. Rita,91.8,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Competitive Basketball / Athletics
+109238470161,Diego Tolentino,Grade 8,Grade 8 - St. Dominic,67.1,3,13,71.4,4,Junior Scouting (Boy Scouts / Girl Scouts),Low,Home Isolation / Resting
+109238470162,Matthew Cruz,Grade 8,Grade 8 - St. Benedict,81.1,0,3,93.4,0,Math & Science Wizards Guild,Moderate,Mobile App Experimentation
+109238470163,Chloe Torres,Grade 8,Grade 8 - St. Clare,74.2,3,9,80.2,3,None / Non-Member,None,Casual Mobile Gaming
+109238470164,Daniel Manalo,Grade 8,Grade 8 - St. Dominic,93.2,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),High,Campus Journalism & Creative Writing
+109238470165,Matthew Tolentino,Grade 8,Grade 8 - St. Benedict,90.0,0,1,97.8,0,SAPC Junior Red Cross Youth (RCY),Moderate,Robotics & Web Development
+109238470166,Diego Lim,Grade 8,Grade 8 - St. Dominic,82.7,1,2,95.6,0,None / Non-Member,None,Acoustic Band & Guitar
+109238470167,Adrian Ramos,Grade 8,Grade 8 - St. Rita,73.0,1,11,75.8,3,Math & Science Wizards Guild,Moderate,None / Disengaged
+109238470168,Rochelle Corpuz,Grade 8,Grade 8 - St. Clare,93.4,0,1,97.8,0,Young Innovators & Junior Coding Club,Moderate,Campus Journalism & Creative Writing
+109238470169,Samantha Nicole Villanueva,Grade 8,Grade 8 - St. Clare,83.2,1,5,89.0,2,Junior Scouting (Boy Scouts / Girl Scouts),Low,Badminton & Cycling
+109238470170,Martin Dela Cruz,Grade 8,Grade 8 - St. Clare,73.3,2,9,80.2,5,Junior Scouting (Boy Scouts / Girl Scouts),Low,Casual Mobile Gaming
+109238470171,Trisha Padilla,Grade 8,Grade 8 - St. Clare,88.2,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Community Outreach Volunteering
+109238470172,Miguel Castillo,Grade 8,Grade 8 - St. Benedict,85.5,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),High,Community Outreach Volunteering
+109238470173,Jose Reyes,Grade 8,Grade 8 - St. Rita,71.4,3,15,70.0,4,SAPC Junior Red Cross Youth (RCY),Moderate,Watching Streaming Videos
+109238470174,Lorenzo Ramos,Grade 8,Grade 8 - St. Benedict,91.9,0,0,100.0,0,Supreme Junior Learner Government (SSG),High,Robotics & Web Development
+109238470175,Matthew Domingo,Grade 8,Grade 8 - St. Rita,91.7,0,1,97.8,0,Junior Padua Band & Choir,High,Debate & Public Speaking
+109238470176,Jasmine Cruz,Grade 8,Grade 8 - St. Clare,82.5,1,4,91.2,0,Young Innovators & Junior Coding Club,Moderate,Acoustic Band & Guitar
+109238470177,Angelica Ocampo,Grade 8,Grade 8 - St. Clare,94.3,0,2,95.6,0,Supreme Junior Learner Government (SSG),Moderate,Campus Journalism & Creative Writing
+109238470178,Janine Mendoza,Grade 8,Grade 8 - St. Rita,94.2,0,2,95.6,0,Junior Padua Band & Choir,Moderate,Debate & Public Speaking
+109238470179,Clarisse Reyes,Grade 8,Grade 8 - St. Dominic,92.6,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),High,Campus Journalism & Creative Writing
+109238470180,Adrian Garcia,Grade 8,Grade 8 - St. Clare,85.1,0,1,97.8,0,Young Innovators & Junior Coding Club,High,Robotics & Web Development
+109238470181,Patricia De Leon,Grade 8,Grade 8 - St. Clare,66.0,2,13,71.4,3,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Passive Screen Time / Social Media
+109238470182,Kathryn Castro,Grade 8,Grade 8 - St. Dominic,75.2,1,3,93.4,0,Junior Padua Band & Choir,Low,Digital Art & Graphic Design
+109238470183,Kathryn Tolentino,Grade 8,Grade 8 - St. Dominic,81.4,1,4,91.2,1,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Reading Novels & Webtoons
+109238470184,Justin Ramos,Grade 8,Grade 8 - St. Benedict,75.8,1,3,93.4,0,Young Communicators & English Guild,Low,Badminton & Cycling
+109238470185,Cecilia Mendoza,Grade 8,Grade 8 - St. Benedict,91.3,0,2,95.6,0,Math & Science Wizards Guild,High,Competitive Basketball / Athletics
+109238470186,Lorenzo Santos,Grade 8,Grade 8 - St. Rita,90.4,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),High,Debate & Public Speaking
+109238470187,Camille Dela Cruz,Grade 8,Grade 8 - St. Rita,76.5,1,4,91.2,0,SAPC Junior Red Cross Youth (RCY),Moderate,Reading Novels & Webtoons
+109238470188,Francis Lim,Grade 8,Grade 8 - St. Dominic,93.0,0,2,95.6,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Community Outreach Volunteering
+109238470189,Lance Garcia,Grade 8,Grade 8 - St. Dominic,81.1,1,4,91.2,1,Young Communicators & English Guild,Moderate,Reading Novels & Webtoons
+109238470190,Paolo Torres,Grade 8,Grade 8 - St. Dominic,70.0,2,8,82.4,4,None / Non-Member,None,None / Disengaged
+109238470191,Angela Navarro,Grade 8,Grade 8 - St. Rita,94.4,0,1,97.8,0,Math & Science Wizards Guild,Moderate,Community Outreach Volunteering
+109238470192,Andrea Mendoza,Grade 8,Grade 8 - St. Rita,82.7,1,4,91.2,2,Teatro San Antonio (Junior Theater Guild),Low,Reading Novels & Webtoons
+109238470193,Grace Manalo,Grade 8,Grade 8 - St. Clare,89.2,0,2,95.6,0,Supreme Junior Learner Government (SSG),High,Competitive Basketball / Athletics
+109238470194,Camille Santos,Grade 8,Grade 8 - St. Clare,77.0,0,3,93.4,1,Supreme Junior Learner Government (SSG),Low,Mobile App Experimentation
+109238470195,Rafael Corpuz,Grade 8,Grade 8 - St. Clare,86.3,0,1,97.8,0,Math & Science Wizards Guild,Moderate,Competitive Basketball / Athletics
+109238470196,Angelica Soriano,Grade 8,Grade 8 - St. Dominic,76.2,1,4,91.2,1,Supreme Junior Learner Government (SSG),Moderate,Cooking & Baking
+109238470197,Andrea Cruz,Grade 8,Grade 8 - St. Clare,95.0,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),High,Robotics & Web Development
+109238470198,Joy Padilla,Grade 8,Grade 8 - St. Dominic,88.7,0,2,95.6,0,Campus Journalism (Padua Junior Chronicle),High,Community Outreach Volunteering
+109238470199,Clarisse De Leon,Grade 8,Grade 8 - St. Benedict,95.8,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Debate & Public Speaking
+109238470200,Lorenzo Reyes,Grade 8,Grade 8 - St. Clare,90.4,0,0,100.0,0,Math & Science Wizards Guild,Moderate,Visual Arts & Illustration
+109238470201,Therese Soriano,Grade 8,Grade 8 - St. Dominic,93.6,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),High,Debate & Public Speaking
+109238470202,Jerome Padilla,Grade 8,Grade 8 - St. Benedict,95.9,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),Moderate,Robotics & Web Development
+109238470203,Carlos Santos,Grade 8,Grade 8 - St. Clare,81.6,0,2,95.6,2,Teatro San Antonio (Junior Theater Guild),Low,Cooking & Baking
+109238470204,Adrian Flores,Grade 8,Grade 8 - St. Benedict,90.7,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Competitive Basketball / Athletics
+109238470205,Lance Valdez,Grade 8,Grade 8 - St. Benedict,74.2,2,15,70.0,2,SAPC Junior Red Cross Youth (RCY),Low,Unstructured Rest / Inactive
+109238470206,Bianca Torres,Grade 8,Grade 8 - St. Clare,72.9,3,6,86.8,2,Junior Scouting (Boy Scouts / Girl Scouts),Low,Casual Mobile Gaming
+109238470207,Anthony Bautista,Grade 8,Grade 8 - St. Benedict,74.4,3,14,70.0,3,Math & Science Wizards Guild,Moderate,Unstructured Rest / Inactive
+109238470208,Anthony Aquino,Grade 8,Grade 8 - St. Dominic,75.3,1,6,86.8,2,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Cooking & Baking
+109238470209,Elijah Manalo,Grade 8,Grade 8 - St. Dominic,94.7,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),High,Competitive Basketball / Athletics
+109238470210,Therese Navarro,Grade 8,Grade 8 - St. Rita,96.2,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),Moderate,Community Outreach Volunteering
+109238470211,Tristan Villanueva,Grade 8,Grade 8 - St. Dominic,87.6,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),Moderate,Visual Arts & Illustration
+109238470212,Angelica Padilla,Grade 8,Grade 8 - St. Rita,94.8,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Visual Arts & Illustration
+109238470213,Angelo Bautista,Grade 8,Grade 8 - St. Dominic,83.1,1,4,91.2,0,Junior Scouting (Boy Scouts / Girl Scouts),Low,Acoustic Band & Guitar
+109238470214,Lorenzo Aquino,Grade 8,Grade 8 - St. Dominic,79.3,1,5,89.0,2,Math & Science Wizards Guild,Moderate,Mobile App Experimentation
+109238470215,Grace Pascual,Grade 8,Grade 8 - St. Benedict,86.9,0,2,95.6,0,Math & Science Wizards Guild,Moderate,Visual Arts & Illustration
+109238470216,Miguel Cruz,Grade 8,Grade 8 - St. Rita,88.8,0,0,100.0,0,Math & Science Wizards Guild,High,Competitive Basketball / Athletics
+109238470217,Karl Santiago,Grade 8,Grade 8 - St. Benedict,95.7,0,2,95.6,0,Supreme Junior Learner Government (SSG),High,Visual Arts & Illustration
+109238470218,Joshua Padilla,Grade 8,Grade 8 - St. Rita,90.3,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),High,Robotics & Web Development
+109238470219,Rafael Villanueva,Grade 8,Grade 8 - St. Dominic,81.2,0,3,93.4,0,None / Non-Member,None,Badminton & Cycling
+109238470220,Camille Domingo,Grade 8,Grade 8 - St. Rita,86.6,0,2,95.6,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Community Outreach Volunteering
+109238470221,Erika Dimaculangan,Grade 8,Grade 8 - St. Rita,71.6,3,14,70.0,2,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Passive Screen Time / Social Media
+109238470222,Matthew Ocampo,Grade 8,Grade 8 - St. Benedict,66.6,2,13,71.4,3,None / Non-Member,None,Unstructured Rest / Inactive
+109238470223,Alyssa Rivera,Grade 8,Grade 8 - St. Rita,72.3,3,7,84.6,5,SAPC Junior Red Cross Youth (RCY),Moderate,Home Isolation / Resting
+109238470224,Sebastian Villanueva,Grade 8,Grade 8 - St. Clare,78.3,0,3,93.4,1,Young Communicators & English Guild,Moderate,Reading Novels & Webtoons
+109238470225,Cecilia Mercado,Grade 8,Grade 8 - St. Rita,92.6,0,1,97.8,0,Supreme Junior Learner Government (SSG),High,Community Outreach Volunteering
+109238470226,Jerome Reyes,Grade 8,Grade 8 - St. Rita,96.0,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Robotics & Web Development
+109238470227,Francis Ocampo,Grade 8,Grade 8 - St. Benedict,92.3,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),High,Competitive Basketball / Athletics
+109238470228,Joshua Santiago,Grade 8,Grade 8 - St. Dominic,88.0,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Campus Journalism & Creative Writing
+109238470229,Mark Mendoza,Grade 8,Grade 8 - St. Dominic,95.7,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),Moderate,Campus Journalism & Creative Writing
+109238470230,Chloe Navarro,Grade 8,Grade 8 - St. Rita,86.4,0,1,97.8,0,Young Innovators & Junior Coding Club,High,Competitive Basketball / Athletics
+109238470231,Faith Navarro,Grade 8,Grade 8 - St. Benedict,93.2,0,2,95.6,0,Supreme Junior Learner Government (SSG),High,Visual Arts & Illustration
+109238470232,Nathan Torres,Grade 8,Grade 8 - St. Dominic,69.8,3,11,75.8,4,None / Non-Member,None,Casual Mobile Gaming
+109238470233,Andrea Ramos,Grade 8,Grade 8 - St. Benedict,93.1,0,2,95.6,0,Supreme Junior Learner Government (SSG),Moderate,Debate & Public Speaking
+109238470234,Elijah Lim,Grade 8,Grade 8 - St. Rita,86.4,0,0,100.0,0,Math & Science Wizards Guild,Moderate,Visual Arts & Illustration
+109238470235,Andrea Rivera,Grade 8,Grade 8 - St. Dominic,91.7,0,0,100.0,0,Young Innovators & Junior Coding Club,Moderate,Visual Arts & Illustration
+109238470236,Mariel Rivera,Grade 8,Grade 8 - St. Rita,93.6,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),High,Debate & Public Speaking
+109238470237,Vincent Santiago,Grade 8,Grade 8 - St. Benedict,92.6,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Campus Journalism & Creative Writing
+109238470238,Diego Pascual,Grade 8,Grade 8 - St. Clare,88.6,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),Moderate,Debate & Public Speaking
+109238470239,Benedict Rivera,Grade 8,Grade 8 - St. Benedict,90.7,0,0,100.0,0,Young Communicators & English Guild,Moderate,Robotics & Web Development
+109238470240,Janine Domingo,Grade 8,Grade 8 - St. Dominic,92.8,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),Moderate,Campus Journalism & Creative Writing
+109238470241,Benedict Padilla,Grade 8,Grade 8 - St. Clare,81.8,0,6,86.8,2,SAPC Junior Red Cross Youth (RCY),Low,Digital Art & Graphic Design
+109238470242,Joy Salazar,Grade 8,Grade 8 - St. Benedict,90.6,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Visual Arts & Illustration
+109238470243,Francis Bautista,Grade 8,Grade 8 - St. Benedict,75.8,0,6,86.8,2,Junior Padua Band & Choir,Moderate,Acoustic Band & Guitar
+109238470244,Emman Ramos,Grade 8,Grade 8 - St. Benedict,94.3,0,2,95.6,0,Supreme Junior Learner Government (SSG),Moderate,Visual Arts & Illustration
+109238470245,Cedric Corpuz,Grade 8,Grade 8 - St. Benedict,83.0,1,6,86.8,0,Campus Journalism (Padua Junior Chronicle),Low,Cooking & Baking
+109238470246,Simon Garcia,Grade 8,Grade 8 - St. Dominic,76.6,0,5,89.0,1,None / Non-Member,None,Badminton & Cycling
+109238470247,Justin Padilla,Grade 8,Grade 8 - St. Rita,83.1,1,3,93.4,0,Teatro San Antonio (Junior Theater Guild),Moderate,Reading Novels & Webtoons
+109238470248,John Carlo Dela Cruz,Grade 8,Grade 8 - St. Clare,67.9,3,8,82.4,4,None / Non-Member,None,Unstructured Rest / Inactive
+109238470249,Alyssa Santiago,Grade 8,Grade 8 - St. Rita,93.4,0,1,97.8,0,Young Communicators & English Guild,Moderate,Debate & Public Speaking
+109238470250,Chloe Soriano,Grade 8,Grade 8 - St. Rita,93.2,0,0,100.0,0,Junior Padua Band & Choir,High,Competitive Basketball / Athletics
+109238470251,Mariel Ramos,Grade 9,Grade 9 - St. Lorenzo Ruiz,91.1,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),High,Competitive Basketball / Athletics
+109238470252,Karl Castillo,Grade 9,Grade 9 - St. Martin de Porres,89.2,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),High,Competitive Basketball / Athletics
+109238470253,Justin Aquino,Grade 9,Grade 9 - St. Pedro Calungsod,88.5,0,0,100.0,0,Math & Science Wizards Guild,High,Community Outreach Volunteering
+109238470254,Alyssa Castillo,Grade 9,Grade 9 - St. Pedro Calungsod,85.6,0,0,100.0,0,Junior Padua Band & Choir,Moderate,Robotics & Web Development
+109238470255,Elijah Tolentino,Grade 9,Grade 9 - St. Pedro Calungsod,94.0,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Competitive Basketball / Athletics
+109238470256,Martin Santiago,Grade 9,Grade 9 - St. Cecilia,77.4,1,5,89.0,1,Junior Padua Band & Choir,Low,Cooking & Baking
+109238470257,Andrea De Leon,Grade 9,Grade 9 - St. Pedro Calungsod,82.4,1,5,89.0,2,Campus Journalism (Padua Junior Chronicle),Low,Reading Novels & Webtoons
+109238470258,Justin Dimaculangan,Grade 9,Grade 9 - St. Lorenzo Ruiz,96.0,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),High,Campus Journalism & Creative Writing
+109238470259,Christian Castro,Grade 9,Grade 9 - St. Martin de Porres,83.0,1,3,93.4,0,Campus Journalism (Padua Junior Chronicle),Moderate,Mobile App Experimentation
+109238470260,Alyssa Soriano,Grade 9,Grade 9 - St. Martin de Porres,87.8,0,2,95.6,0,Young Communicators & English Guild,Moderate,Community Outreach Volunteering
+109238470261,Princess Mae Villanueva,Grade 9,Grade 9 - St. Cecilia,75.0,1,2,95.6,0,Junior Scouting (Boy Scouts / Girl Scouts),Low,Cooking & Baking
+109238470262,Benedict Flores,Grade 9,Grade 9 - St. Cecilia,94.5,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),High,Visual Arts & Illustration
+109238470263,Jerome Flores,Grade 9,Grade 9 - St. Cecilia,90.5,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Robotics & Web Development
+109238470264,Jasmine Gonzales,Grade 9,Grade 9 - St. Lorenzo Ruiz,92.8,0,0,100.0,0,Young Innovators & Junior Coding Club,High,Debate & Public Speaking
+109238470265,Liza Garcia,Grade 9,Grade 9 - St. Martin de Porres,75.9,1,6,86.8,2,Math & Science Wizards Guild,Moderate,Acoustic Band & Guitar
+109238470266,Christian Navarro,Grade 9,Grade 9 - St. Cecilia,92.2,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),Moderate,Robotics & Web Development
+109238470267,Paolo Mendoza,Grade 9,Grade 9 - St. Cecilia,71.4,3,10,78.0,3,None / Non-Member,None,Unstructured Rest / Inactive
+109238470268,Joshua San Jose,Grade 9,Grade 9 - St. Martin de Porres,94.2,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Visual Arts & Illustration
+109238470269,Anthony Mendoza,Grade 9,Grade 9 - St. Pedro Calungsod,92.7,0,0,100.0,0,Young Innovators & Junior Coding Club,High,Community Outreach Volunteering
+109238470270,Vanessa Mendoza,Grade 9,Grade 9 - St. Cecilia,75.7,0,4,91.2,1,Junior Padua Band & Choir,Moderate,Badminton & Cycling
+109238470271,Bernadette De Leon,Grade 9,Grade 9 - St. Martin de Porres,95.3,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),High,Campus Journalism & Creative Writing
+109238470272,Cecilia Bautista,Grade 9,Grade 9 - St. Cecilia,77.1,0,6,86.8,1,Supreme Junior Learner Government (SSG),Low,Digital Art & Graphic Design
+109238470273,Nicole Rivera,Grade 9,Grade 9 - St. Martin de Porres,72.5,1,12,73.6,2,Junior Scouting (Boy Scouts / Girl Scouts),Low,Passive Screen Time / Social Media
+109238470274,Joaquin Domingo,Grade 9,Grade 9 - St. Martin de Porres,93.2,0,2,95.6,0,Supreme Junior Learner Government (SSG),High,Competitive Basketball / Athletics
+109238470275,Kathleen Corpuz,Grade 9,Grade 9 - St. Martin de Porres,79.0,0,3,93.4,1,Math & Science Wizards Guild,Low,Reading Novels & Webtoons
+109238470276,Benedict Flores,Grade 9,Grade 9 - St. Pedro Calungsod,87.8,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),High,Community Outreach Volunteering
+109238470277,Nicole Castro,Grade 9,Grade 9 - St. Cecilia,92.0,0,0,100.0,0,Junior Padua Band & Choir,High,Community Outreach Volunteering
+109238470278,Karl Garcia,Grade 9,Grade 9 - St. Martin de Porres,78.5,0,3,93.4,0,Junior Padua Band & Choir,Low,Acoustic Band & Guitar
+109238470279,Chloe Cruz,Grade 9,Grade 9 - St. Lorenzo Ruiz,95.2,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),Moderate,Competitive Basketball / Athletics
+109238470280,Timothy Corpuz,Grade 9,Grade 9 - St. Martin de Porres,89.1,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Competitive Basketball / Athletics
+109238470281,Grace San Jose,Grade 9,Grade 9 - St. Cecilia,93.6,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Robotics & Web Development
+109238470282,Patricia Tolentino,Grade 9,Grade 9 - St. Martin de Porres,76.5,0,3,93.4,0,Math & Science Wizards Guild,Low,Acoustic Band & Guitar
+109238470283,Jasmine Lim,Grade 9,Grade 9 - St. Lorenzo Ruiz,90.9,0,2,95.6,0,Math & Science Wizards Guild,High,Competitive Basketball / Athletics
+109238470284,Grace Tolentino,Grade 9,Grade 9 - St. Martin de Porres,77.3,1,2,95.6,0,Junior Scouting (Boy Scouts / Girl Scouts),Low,Digital Art & Graphic Design
+109238470285,Alyssa Salazar,Grade 9,Grade 9 - St. Cecilia,92.6,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),High,Campus Journalism & Creative Writing
+109238470286,Maria Clara Aquino,Grade 9,Grade 9 - St. Cecilia,93.2,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Community Outreach Volunteering
+109238470287,Carlos Castillo,Grade 9,Grade 9 - St. Pedro Calungsod,71.5,3,6,86.8,2,SAPC Junior Red Cross Youth (RCY),Low,Passive Screen Time / Social Media
+109238470288,Maria Clara Manalo,Grade 9,Grade 9 - St. Cecilia,96.1,0,2,95.6,0,Math & Science Wizards Guild,High,Visual Arts & Illustration
+109238470289,Jasmine Bautista,Grade 9,Grade 9 - St. Martin de Porres,80.0,0,5,89.0,1,Young Communicators & English Guild,Low,Mobile App Experimentation
+109238470290,Nicole Alcantara,Grade 9,Grade 9 - St. Pedro Calungsod,94.0,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Visual Arts & Illustration
+109238470291,Mark Santiago,Grade 9,Grade 9 - St. Pedro Calungsod,76.2,1,5,89.0,2,Young Innovators & Junior Coding Club,Moderate,Reading Novels & Webtoons
+109238470292,Mark Lim,Grade 9,Grade 9 - St. Pedro Calungsod,89.2,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Visual Arts & Illustration
+109238470293,Clare Mendoza,Grade 9,Grade 9 - St. Martin de Porres,67.4,3,9,80.2,5,Young Communicators & English Guild,Low,Watching Streaming Videos
+109238470294,Bea Flores,Grade 9,Grade 9 - St. Martin de Porres,81.3,1,6,86.8,0,Teatro San Antonio (Junior Theater Guild),Low,Badminton & Cycling
+109238470295,Cedric Torres,Grade 9,Grade 9 - St. Martin de Porres,80.2,0,5,89.0,0,Young Innovators & Junior Coding Club,Low,Mobile App Experimentation
+109238470296,Chloe Corpuz,Grade 9,Grade 9 - St. Lorenzo Ruiz,85.8,0,1,97.8,0,Junior Padua Band & Choir,High,Campus Journalism & Creative Writing
+109238470297,Sofia Morales,Grade 9,Grade 9 - St. Lorenzo Ruiz,93.7,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Community Outreach Volunteering
+109238470298,Vincent Tolentino,Grade 9,Grade 9 - St. Lorenzo Ruiz,89.2,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Competitive Basketball / Athletics
+109238470299,Jasmine Ocampo,Grade 9,Grade 9 - St. Lorenzo Ruiz,77.9,1,4,91.2,0,Math & Science Wizards Guild,Moderate,Cooking & Baking
+109238470300,Lorenzo Castro,Grade 9,Grade 9 - St. Cecilia,69.8,2,13,71.4,5,None / Non-Member,None,Home Isolation / Resting
+109238470301,Therese Flores,Grade 9,Grade 9 - St. Martin de Porres,79.1,0,5,89.0,1,Junior Padua Band & Choir,Low,Mobile App Experimentation
+109238470302,Samantha Nicole Santiago,Grade 9,Grade 9 - St. Cecilia,95.5,0,2,95.6,0,Young Innovators & Junior Coding Club,Moderate,Competitive Basketball / Athletics
+109238470303,Angelo Aquino,Grade 9,Grade 9 - St. Martin de Porres,66.3,2,10,78.0,5,None / Non-Member,None,Casual Mobile Gaming
+109238470304,Dominic Gonzales,Grade 9,Grade 9 - St. Cecilia,93.3,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),Moderate,Debate & Public Speaking
+109238470305,Trisha Santiago,Grade 9,Grade 9 - St. Lorenzo Ruiz,85.2,0,2,95.6,0,Campus Journalism (Padua Junior Chronicle),High,Robotics & Web Development
+109238470306,Bea Alcantara,Grade 9,Grade 9 - St. Pedro Calungsod,71.4,3,14,70.0,5,Young Communicators & English Guild,Moderate,Watching Streaming Videos
+109238470307,Joshua Padilla,Grade 9,Grade 9 - St. Lorenzo Ruiz,88.9,0,1,97.8,0,Young Innovators & Junior Coding Club,Moderate,Debate & Public Speaking
+109238470308,Patricia Pascual,Grade 9,Grade 9 - St. Lorenzo Ruiz,71.8,3,12,73.6,2,None / Non-Member,None,Casual Mobile Gaming
+109238470309,Princess Mae Mercado,Grade 9,Grade 9 - St. Cecilia,92.4,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),Moderate,Community Outreach Volunteering
+109238470310,Clarisse Rivera,Grade 9,Grade 9 - St. Martin de Porres,67.8,2,6,86.8,2,SAPC Junior Red Cross Youth (RCY),Moderate,Unstructured Rest / Inactive
+109238470311,Lorenzo Salazar,Grade 9,Grade 9 - St. Martin de Porres,88.3,0,0,100.0,0,Young Communicators & English Guild,High,Visual Arts & Illustration
+109238470312,Vincent Alcantara,Grade 9,Grade 9 - St. Martin de Porres,88.7,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Robotics & Web Development
+109238470313,Patricia Tolentino,Grade 9,Grade 9 - St. Pedro Calungsod,72.0,1,13,71.4,5,SAPC Junior Red Cross Youth (RCY),Moderate,None / Disengaged
+109238470314,Daniel Aquino,Grade 9,Grade 9 - St. Pedro Calungsod,66.3,3,15,70.0,2,None / Non-Member,None,Watching Streaming Videos
+109238470315,Faith Flores,Grade 9,Grade 9 - St. Martin de Porres,73.4,1,6,86.8,4,None / Non-Member,None,Unstructured Rest / Inactive
+109238470316,Dominic Dela Cruz,Grade 9,Grade 9 - St. Pedro Calungsod,87.6,0,1,97.8,0,Junior Padua Band & Choir,High,Community Outreach Volunteering
+109238470317,Kyle Bautista,Grade 9,Grade 9 - St. Lorenzo Ruiz,95.7,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),Moderate,Visual Arts & Illustration
+109238470318,Elijah Lim,Grade 9,Grade 9 - St. Pedro Calungsod,92.9,0,2,95.6,0,Junior Padua Band & Choir,Moderate,Debate & Public Speaking
+109238470319,Clare Aquino,Grade 9,Grade 9 - St. Martin de Porres,78.3,1,3,93.4,0,Campus Journalism (Padua Junior Chronicle),Moderate,Acoustic Band & Guitar
+109238470320,Althea Castillo,Grade 9,Grade 9 - St. Lorenzo Ruiz,71.3,3,12,73.6,5,Math & Science Wizards Guild,Moderate,Watching Streaming Videos
+109238470321,Cedric Castillo,Grade 9,Grade 9 - St. Martin de Porres,80.9,1,6,86.8,1,Junior Scouting (Boy Scouts / Girl Scouts),Low,Mobile App Experimentation
+109238470322,Faith Santos,Grade 9,Grade 9 - St. Martin de Porres,92.7,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),Moderate,Campus Journalism & Creative Writing
+109238470323,Matthew Dela Cruz,Grade 9,Grade 9 - St. Lorenzo Ruiz,85.7,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Campus Journalism & Creative Writing
+109238470324,Ethan Torres,Grade 9,Grade 9 - St. Lorenzo Ruiz,80.7,0,4,91.2,0,Young Innovators & Junior Coding Club,Low,Cooking & Baking
+109238470325,Lance Soriano,Grade 9,Grade 9 - St. Cecilia,85.7,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),Moderate,Debate & Public Speaking
+109238470326,Benedict Corpuz,Grade 9,Grade 9 - St. Lorenzo Ruiz,86.3,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),High,Community Outreach Volunteering
+109238470327,Bea Mercado,Grade 9,Grade 9 - St. Martin de Porres,81.4,1,6,86.8,1,Junior Scouting (Boy Scouts / Girl Scouts),Low,Acoustic Band & Guitar
+109238470328,Andrea Garcia,Grade 9,Grade 9 - St. Martin de Porres,77.4,1,2,95.6,1,Campus Journalism (Padua Junior Chronicle),Low,Digital Art & Graphic Design
+109238470329,Janine Villanueva,Grade 9,Grade 9 - St. Martin de Porres,92.0,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Competitive Basketball / Athletics
+109238470330,Therese Castillo,Grade 9,Grade 9 - St. Martin de Porres,80.2,1,6,86.8,2,Junior Varsity Athletics (Basketball/Volleyball),Low,Mobile App Experimentation
+109238470331,Ethan Torres,Grade 9,Grade 9 - St. Pedro Calungsod,87.7,0,2,95.6,0,Junior Padua Band & Choir,High,Community Outreach Volunteering
+109238470332,Trisha Garcia,Grade 9,Grade 9 - St. Lorenzo Ruiz,88.8,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),Moderate,Debate & Public Speaking
+109238470333,Adrian Reyes,Grade 9,Grade 9 - St. Lorenzo Ruiz,85.0,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),Moderate,Community Outreach Volunteering
+109238470334,Joy Navarro,Grade 9,Grade 9 - St. Pedro Calungsod,95.5,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),High,Campus Journalism & Creative Writing
+109238470335,Angelo Mendoza,Grade 9,Grade 9 - St. Lorenzo Ruiz,91.8,0,2,95.6,0,Junior Padua Band & Choir,High,Competitive Basketball / Athletics
+109238470336,Angelo Alcantara,Grade 9,Grade 9 - St. Martin de Porres,90.1,0,2,95.6,0,Math & Science Wizards Guild,High,Campus Journalism & Creative Writing
+109238470337,Clarisse Mercado,Grade 9,Grade 9 - St. Pedro Calungsod,96.3,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),Moderate,Competitive Basketball / Athletics
+109238470338,Andrea Soriano,Grade 9,Grade 9 - St. Martin de Porres,89.2,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Visual Arts & Illustration
+109238470339,Camille Reyes,Grade 9,Grade 9 - St. Lorenzo Ruiz,88.2,0,2,95.6,0,Supreme Junior Learner Government (SSG),Moderate,Competitive Basketball / Athletics
+109238470340,Bernadette Alcantara,Grade 9,Grade 9 - St. Cecilia,95.4,0,2,95.6,0,Young Communicators & English Guild,High,Debate & Public Speaking
+109238470341,John Carlo Dimaculangan,Grade 9,Grade 9 - St. Cecilia,96.2,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Debate & Public Speaking
+109238470342,Joy Mendoza,Grade 9,Grade 9 - St. Pedro Calungsod,68.5,3,11,75.8,4,None / Non-Member,None,Unstructured Rest / Inactive
+109238470343,Matthew Ramos,Grade 9,Grade 9 - St. Martin de Porres,94.4,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Robotics & Web Development
+109238470344,Alyssa Santiago,Grade 9,Grade 9 - St. Lorenzo Ruiz,79.6,0,5,89.0,0,Supreme Junior Learner Government (SSG),Low,Cooking & Baking
+109238470345,Nathan Manalo,Grade 9,Grade 9 - St. Martin de Porres,90.5,0,1,97.8,0,Junior Padua Band & Choir,Moderate,Debate & Public Speaking
+109238470346,Jose Alcantara,Grade 9,Grade 9 - St. Pedro Calungsod,73.5,2,10,78.0,4,Young Communicators & English Guild,Low,Casual Mobile Gaming
+109238470347,Martin Santos,Grade 9,Grade 9 - St. Cecilia,90.5,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Debate & Public Speaking
+109238470348,Lorenzo Mercado,Grade 9,Grade 9 - St. Cecilia,83.4,1,3,93.4,0,Young Innovators & Junior Coding Club,Low,Digital Art & Graphic Design
+109238470349,Gabriel Dimaculangan,Grade 9,Grade 9 - St. Lorenzo Ruiz,73.8,1,11,75.8,3,SAPC Junior Red Cross Youth (RCY),Moderate,Casual Mobile Gaming
+109238470350,Simon Pascual,Grade 9,Grade 9 - St. Martin de Porres,86.4,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),High,Campus Journalism & Creative Writing
+109238470351,Clarisse Gonzales,Grade 9,Grade 9 - St. Cecilia,88.8,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Campus Journalism & Creative Writing
+109238470352,Rochelle Garcia,Grade 9,Grade 9 - St. Lorenzo Ruiz,69.0,1,10,78.0,4,None / Non-Member,None,None / Disengaged
+109238470353,Emman Tolentino,Grade 9,Grade 9 - St. Martin de Porres,89.4,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Campus Journalism & Creative Writing
+109238470354,Camille Gonzales,Grade 9,Grade 9 - St. Pedro Calungsod,90.8,0,0,100.0,0,Supreme Junior Learner Government (SSG),Moderate,Community Outreach Volunteering
+109238470355,Bernadette Tolentino,Grade 9,Grade 9 - St. Martin de Porres,91.6,0,0,100.0,0,Math & Science Wizards Guild,High,Community Outreach Volunteering
+109238470356,Jasmine Dela Cruz,Grade 9,Grade 9 - St. Martin de Porres,78.9,0,6,86.8,2,SAPC Junior Red Cross Youth (RCY),Moderate,Cooking & Baking
+109238470357,Jose Dela Cruz,Grade 9,Grade 9 - St. Lorenzo Ruiz,81.9,0,3,93.4,1,Young Innovators & Junior Coding Club,Moderate,Mobile App Experimentation
+109238470358,Kathleen Morales,Grade 9,Grade 9 - St. Pedro Calungsod,94.4,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Competitive Basketball / Athletics
+109238470359,Kathleen Ramos,Grade 9,Grade 9 - St. Cecilia,80.4,1,6,86.8,0,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Badminton & Cycling
+109238470360,Timothy Dela Cruz,Grade 9,Grade 9 - St. Pedro Calungsod,95.2,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),High,Community Outreach Volunteering
+109238470361,Simon Manalo,Grade 9,Grade 9 - St. Cecilia,80.6,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),Low,Badminton & Cycling
+109238470362,Adrian Santos,Grade 9,Grade 9 - St. Martin de Porres,88.8,0,1,97.8,0,Junior Padua Band & Choir,High,Campus Journalism & Creative Writing
+109238470363,Francis Lim,Grade 9,Grade 9 - St. Cecilia,91.3,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Visual Arts & Illustration
+109238470364,Chloe Soriano,Grade 9,Grade 9 - St. Pedro Calungsod,87.4,0,1,97.8,0,Supreme Junior Learner Government (SSG),High,Campus Journalism & Creative Writing
+109238470365,Kyle Villanueva,Grade 9,Grade 9 - St. Pedro Calungsod,68.9,2,14,70.0,3,None / Non-Member,None,Unstructured Rest / Inactive
+109238470366,Francis Salazar,Grade 9,Grade 9 - St. Cecilia,87.2,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),High,Visual Arts & Illustration
+109238470367,Daniel Mendoza,Grade 9,Grade 9 - St. Lorenzo Ruiz,95.2,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),Moderate,Competitive Basketball / Athletics
+109238470368,Justin Lim,Grade 9,Grade 9 - St. Pedro Calungsod,89.7,0,1,97.8,0,Math & Science Wizards Guild,Moderate,Visual Arts & Illustration
+109238470369,Martin Alcantara,Grade 9,Grade 9 - St. Lorenzo Ruiz,90.5,0,0,100.0,0,Junior Padua Band & Choir,High,Competitive Basketball / Athletics
+109238470370,Ethan Mendoza,Grade 9,Grade 9 - St. Pedro Calungsod,91.9,0,0,100.0,0,Math & Science Wizards Guild,High,Campus Journalism & Creative Writing
+109238470371,Trisha Mercado,Grade 9,Grade 9 - St. Pedro Calungsod,93.0,0,2,95.6,0,Campus Journalism (Padua Junior Chronicle),High,Community Outreach Volunteering
+109238470372,Bernadette Santiago,Grade 9,Grade 9 - St. Lorenzo Ruiz,88.1,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),High,Robotics & Web Development
+109238470373,Simon Dela Cruz,Grade 9,Grade 9 - St. Cecilia,78.5,0,5,89.0,0,Junior Padua Band & Choir,Moderate,Digital Art & Graphic Design
+109238470374,Mark Pascual,Grade 9,Grade 9 - St. Pedro Calungsod,87.4,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),Moderate,Debate & Public Speaking
+109238470375,Nicole Mendoza,Grade 9,Grade 9 - St. Cecilia,79.6,1,5,89.0,1,Teatro San Antonio (Junior Theater Guild),Low,Mobile App Experimentation
+109238470376,Liza Castillo,Grade 10,Grade 10 - St. Vincent de Paul,76.2,0,6,86.8,1,Supreme Junior Learner Government (SSG),Moderate,Badminton & Cycling
+109238470377,Cecilia Lim,Grade 10,Grade 10 - St. Vincent de Paul,66.0,2,9,80.2,4,None / Non-Member,None,None / Disengaged
+109238470378,Cedric Gonzales,Grade 10,Grade 10 - St. Thomas Aquinas,91.4,0,0,100.0,0,Junior Varsity Athletics (Basketball/Volleyball),High,Competitive Basketball / Athletics
+109238470379,Bea Lim,Grade 10,Grade 10 - St. Augustine,78.2,0,3,93.4,2,Math & Science Wizards Guild,Low,Cooking & Baking
+109238470380,Christian Corpuz,Grade 10,Grade 10 - St. Augustine,74.4,1,12,73.6,5,None / Non-Member,None,Home Isolation / Resting
+109238470381,Angelo Castro,Grade 10,Grade 10 - St. Thomas Aquinas,85.5,0,1,97.8,0,Young Communicators & English Guild,Moderate,Campus Journalism & Creative Writing
+109238470382,Andrea Villanueva,Grade 10,Grade 10 - St. Ignatius,95.9,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),Moderate,Competitive Basketball / Athletics
+109238470383,Ethan Torres,Grade 10,Grade 10 - St. Vincent de Paul,67.6,2,15,70.0,5,Young Communicators & English Guild,Moderate,Casual Mobile Gaming
+109238470384,Erika Alcantara,Grade 10,Grade 10 - St. Thomas Aquinas,83.4,0,4,91.2,2,Teatro San Antonio (Junior Theater Guild),Moderate,Reading Novels & Webtoons
+109238470385,Lance Villanueva,Grade 10,Grade 10 - St. Vincent de Paul,95.3,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Robotics & Web Development
+109238470386,Angelo Valdez,Grade 10,Grade 10 - St. Thomas Aquinas,73.4,1,14,70.0,2,Young Communicators & English Guild,Low,None / Disengaged
+109238470387,Jerome Castro,Grade 10,Grade 10 - St. Vincent de Paul,87.2,0,2,95.6,0,Math & Science Wizards Guild,High,Visual Arts & Illustration
+109238470388,Simon Dela Cruz,Grade 10,Grade 10 - St. Augustine,75.1,1,5,89.0,0,Math & Science Wizards Guild,Low,Mobile App Experimentation
+109238470389,Benedict Lim,Grade 10,Grade 10 - St. Ignatius,82.2,1,5,89.0,1,Junior Padua Band & Choir,Moderate,Cooking & Baking
+109238470390,Martin Mendoza,Grade 10,Grade 10 - St. Augustine,78.0,1,5,89.0,1,SAPC Junior Red Cross Youth (RCY),Low,Acoustic Band & Guitar
+109238470391,Anthony Padilla,Grade 10,Grade 10 - St. Ignatius,94.4,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Visual Arts & Illustration
+109238470392,Elijah Cruz,Grade 10,Grade 10 - St. Augustine,74.5,1,13,71.4,3,None / Non-Member,None,Home Isolation / Resting
+109238470393,Bea Ramos,Grade 10,Grade 10 - St. Vincent de Paul,94.0,0,2,95.6,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Debate & Public Speaking
+109238470394,Princess Mae Santos,Grade 10,Grade 10 - St. Vincent de Paul,88.9,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),Moderate,Visual Arts & Illustration
+109238470395,Dominic Castro,Grade 10,Grade 10 - St. Augustine,95.4,0,1,97.8,0,Junior Padua Band & Choir,High,Visual Arts & Illustration
+109238470396,Clarisse Mercado,Grade 10,Grade 10 - St. Vincent de Paul,87.5,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),Moderate,Competitive Basketball / Athletics
+109238470397,Justin Bautista,Grade 10,Grade 10 - St. Vincent de Paul,95.1,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),High,Visual Arts & Illustration
+109238470398,Jose Santos,Grade 10,Grade 10 - St. Vincent de Paul,88.6,0,2,95.6,0,Junior Padua Band & Choir,High,Debate & Public Speaking
+109238470399,Gabriel Lim,Grade 10,Grade 10 - St. Thomas Aquinas,91.7,0,2,95.6,0,Young Communicators & English Guild,Moderate,Visual Arts & Illustration
+109238470400,Jose Ramos,Grade 10,Grade 10 - St. Ignatius,92.6,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Community Outreach Volunteering
+109238470401,Karl Bautista,Grade 10,Grade 10 - St. Thomas Aquinas,88.5,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),High,Robotics & Web Development
+109238470402,Timothy Padilla,Grade 10,Grade 10 - St. Augustine,96.2,0,1,97.8,0,Supreme Junior Learner Government (SSG),High,Visual Arts & Illustration
+109238470403,Ethan Bautista,Grade 10,Grade 10 - St. Augustine,69.0,2,9,80.2,3,None / Non-Member,None,Unstructured Rest / Inactive
+109238470404,Adrian Aquino,Grade 10,Grade 10 - St. Ignatius,86.9,0,2,95.6,0,Young Innovators & Junior Coding Club,High,Robotics & Web Development
+109238470405,Jerome Bautista,Grade 10,Grade 10 - St. Thomas Aquinas,91.7,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),Moderate,Robotics & Web Development
+109238470406,Jerome Torres,Grade 10,Grade 10 - St. Augustine,75.5,0,5,89.0,2,Young Communicators & English Guild,Moderate,Digital Art & Graphic Design
+109238470407,Cecilia De Leon,Grade 10,Grade 10 - St. Vincent de Paul,94.6,0,1,97.8,0,Supreme Junior Learner Government (SSG),High,Debate & Public Speaking
+109238470408,Clarisse Gonzales,Grade 10,Grade 10 - St. Thomas Aquinas,67.0,1,6,86.8,2,Junior Scouting (Boy Scouts / Girl Scouts),Moderate,Casual Mobile Gaming
+109238470409,John Carlo Domingo,Grade 10,Grade 10 - St. Vincent de Paul,91.2,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),High,Campus Journalism & Creative Writing
+109238470410,Ethan Navarro,Grade 10,Grade 10 - St. Vincent de Paul,68.8,1,14,70.0,4,None / Non-Member,None,Passive Screen Time / Social Media
+109238470411,Lance Torres,Grade 10,Grade 10 - St. Ignatius,82.9,1,2,95.6,2,Young Communicators & English Guild,Low,Badminton & Cycling
+109238470412,Matthew Domingo,Grade 10,Grade 10 - St. Ignatius,77.9,1,3,93.4,2,Teatro San Antonio (Junior Theater Guild),Moderate,Acoustic Band & Guitar
+109238470413,Emman Reyes,Grade 10,Grade 10 - St. Thomas Aquinas,91.5,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Robotics & Web Development
+109238470414,Nathan Cruz,Grade 10,Grade 10 - St. Thomas Aquinas,86.4,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),High,Competitive Basketball / Athletics
+109238470415,Kathryn Morales,Grade 10,Grade 10 - St. Augustine,86.7,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Community Outreach Volunteering
+109238470416,Alyssa Morales,Grade 10,Grade 10 - St. Thomas Aquinas,67.0,1,9,80.2,4,None / Non-Member,None,None / Disengaged
+109238470417,Nicole Santos,Grade 10,Grade 10 - St. Ignatius,66.1,1,10,78.0,2,SAPC Junior Red Cross Youth (RCY),Low,Watching Streaming Videos
+109238470418,Rita Ocampo,Grade 10,Grade 10 - St. Augustine,95.8,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),High,Debate & Public Speaking
+109238470419,Andrea Aquino,Grade 10,Grade 10 - St. Thomas Aquinas,88.9,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Debate & Public Speaking
+109238470420,Karl Rivera,Grade 10,Grade 10 - St. Thomas Aquinas,68.4,3,10,78.0,4,None / Non-Member,None,Watching Streaming Videos
+109238470421,Simon Rivera,Grade 10,Grade 10 - St. Augustine,93.6,0,0,100.0,0,Junior Padua Band & Choir,High,Community Outreach Volunteering
+109238470422,Princess Mae Lim,Grade 10,Grade 10 - St. Augustine,83.2,1,3,93.4,2,Teatro San Antonio (Junior Theater Guild),Moderate,Mobile App Experimentation
+109238470423,Joy San Jose,Grade 10,Grade 10 - St. Thomas Aquinas,90.7,0,2,95.6,0,Campus Journalism (Padua Junior Chronicle),Moderate,Community Outreach Volunteering
+109238470424,Patricia Castillo,Grade 10,Grade 10 - St. Augustine,95.2,0,1,97.8,0,Young Innovators & Junior Coding Club,High,Debate & Public Speaking
+109238470425,Bernadette Ramos,Grade 10,Grade 10 - St. Thomas Aquinas,89.5,0,2,95.6,0,Teatro San Antonio (Junior Theater Guild),Moderate,Debate & Public Speaking
+109238470426,Princess Mae Dela Cruz,Grade 10,Grade 10 - St. Thomas Aquinas,67.1,1,13,71.4,2,None / Non-Member,None,Unstructured Rest / Inactive
+109238470427,Kyle Ramos,Grade 10,Grade 10 - St. Ignatius,96.2,0,0,100.0,0,Supreme Junior Learner Government (SSG),Moderate,Competitive Basketball / Athletics
+109238470428,Patricia Cruz,Grade 10,Grade 10 - St. Ignatius,88.7,0,1,97.8,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Campus Journalism & Creative Writing
+109238470429,Christian Flores,Grade 10,Grade 10 - St. Vincent de Paul,86.9,0,0,100.0,0,Campus Journalism (Padua Junior Chronicle),Moderate,Competitive Basketball / Athletics
+109238470430,Rafael Garcia,Grade 10,Grade 10 - St. Augustine,85.7,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),Moderate,Competitive Basketball / Athletics
+109238470431,Carlos Aquino,Grade 10,Grade 10 - St. Thomas Aquinas,82.6,1,5,89.0,0,None / Non-Member,None,Cooking & Baking
+109238470432,Clare Castillo,Grade 10,Grade 10 - St. Thomas Aquinas,78.1,0,3,93.4,1,Campus Journalism (Padua Junior Chronicle),Moderate,Reading Novels & Webtoons
+109238470433,Maria Clara Gonzales,Grade 10,Grade 10 - St. Augustine,81.6,1,6,86.8,2,SAPC Junior Red Cross Youth (RCY),Low,Reading Novels & Webtoons
+109238470434,Bea Navarro,Grade 10,Grade 10 - St. Ignatius,69.4,2,6,86.8,5,SAPC Junior Red Cross Youth (RCY),Moderate,None / Disengaged
+109238470435,Dominic Villanueva,Grade 10,Grade 10 - St. Thomas Aquinas,75.9,0,6,86.8,2,None / Non-Member,None,Reading Novels & Webtoons
+109238470436,Mariel Garcia,Grade 10,Grade 10 - St. Vincent de Paul,88.4,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Competitive Basketball / Athletics
+109238470437,Gabriel San Jose,Grade 10,Grade 10 - St. Augustine,92.1,0,2,95.6,0,Junior Padua Band & Choir,Moderate,Campus Journalism & Creative Writing
+109238470438,Nicole San Jose,Grade 10,Grade 10 - St. Ignatius,77.5,0,4,91.2,1,Junior Scouting (Boy Scouts / Girl Scouts),Low,Reading Novels & Webtoons
+109238470439,Elijah Tolentino,Grade 10,Grade 10 - St. Vincent de Paul,96.2,0,2,95.6,0,Young Communicators & English Guild,High,Visual Arts & Illustration
+109238470440,Martin Bautista,Grade 10,Grade 10 - St. Thomas Aquinas,78.6,0,2,95.6,0,Math & Science Wizards Guild,Moderate,Mobile App Experimentation
+109238470441,Patricia Villanueva,Grade 10,Grade 10 - St. Thomas Aquinas,76.4,0,6,86.8,1,SAPC Junior Red Cross Youth (RCY),Moderate,Mobile App Experimentation
+109238470442,Rochelle Pascual,Grade 10,Grade 10 - St. Thomas Aquinas,77.4,1,5,89.0,1,SAPC Junior Red Cross Youth (RCY),Low,Acoustic Band & Guitar
+109238470443,Benedict Lim,Grade 10,Grade 10 - St. Ignatius,78.9,0,2,95.6,1,Young Innovators & Junior Coding Club,Moderate,Acoustic Band & Guitar
+109238470444,Martin Valdez,Grade 10,Grade 10 - St. Augustine,73.5,2,6,86.8,4,None / Non-Member,None,Passive Screen Time / Social Media
+109238470445,Timothy Dela Cruz,Grade 10,Grade 10 - St. Vincent de Paul,67.0,2,14,70.0,5,None / Non-Member,None,Casual Mobile Gaming
+109238470446,Dominic Aquino,Grade 10,Grade 10 - St. Augustine,75.2,0,3,93.4,2,SAPC Junior Red Cross Youth (RCY),Moderate,Reading Novels & Webtoons
+109238470447,Lorenzo Navarro,Grade 10,Grade 10 - St. Thomas Aquinas,85.7,0,2,95.6,0,SAPC Junior Red Cross Youth (RCY),Moderate,Visual Arts & Illustration
+109238470448,Bernadette Santiago,Grade 10,Grade 10 - St. Thomas Aquinas,89.1,0,2,95.6,0,Junior Padua Band & Choir,Moderate,Community Outreach Volunteering
+109238470449,John Carlo Dizon,Grade 10,Grade 10 - St. Augustine,75.1,0,3,93.4,1,Campus Journalism (Padua Junior Chronicle),Low,Mobile App Experimentation
+109238470450,Angela Navarro,Grade 10,Grade 10 - St. Augustine,93.5,0,0,100.0,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Robotics & Web Development
+109238470451,Alyssa Castillo,Grade 10,Grade 10 - St. Vincent de Paul,79.3,0,4,91.2,0,Teatro San Antonio (Junior Theater Guild),Low,Cooking & Baking
+109238470452,Rochelle Ramos,Grade 10,Grade 10 - St. Vincent de Paul,71.2,3,10,78.0,4,Young Communicators & English Guild,Low,Unstructured Rest / Inactive
+109238470453,Angela Morales,Grade 10,Grade 10 - St. Augustine,85.3,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Competitive Basketball / Athletics
+109238470454,Bernadette Santos,Grade 10,Grade 10 - St. Vincent de Paul,90.2,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Visual Arts & Illustration
+109238470455,Sebastian De Leon,Grade 10,Grade 10 - St. Augustine,67.5,2,15,70.0,2,Junior Scouting (Boy Scouts / Girl Scouts),Low,Passive Screen Time / Social Media
+109238470456,Camille Mercado,Grade 10,Grade 10 - St. Vincent de Paul,74.5,1,9,80.2,4,SAPC Junior Red Cross Youth (RCY),Moderate,Home Isolation / Resting
+109238470457,Bernadette Aquino,Grade 10,Grade 10 - St. Ignatius,86.5,0,1,97.8,0,Supreme Junior Learner Government (SSG),Moderate,Visual Arts & Illustration
+109238470458,Diego Navarro,Grade 10,Grade 10 - St. Augustine,96.2,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),Moderate,Community Outreach Volunteering
+109238470459,Kyle Castro,Grade 10,Grade 10 - St. Thomas Aquinas,86.8,0,2,95.6,0,Young Communicators & English Guild,Moderate,Campus Journalism & Creative Writing
+109238470460,Carlos Dizon,Grade 10,Grade 10 - St. Thomas Aquinas,91.9,0,0,100.0,0,Junior Padua Band & Choir,High,Visual Arts & Illustration
+109238470461,Gabriel Dimaculangan,Grade 10,Grade 10 - St. Thomas Aquinas,71.1,3,15,70.0,5,Math & Science Wizards Guild,Moderate,Watching Streaming Videos
+109238470462,Kyle Corpuz,Grade 10,Grade 10 - St. Augustine,87.5,0,2,95.6,0,Math & Science Wizards Guild,Moderate,Robotics & Web Development
+109238470463,Therese Manalo,Grade 10,Grade 10 - St. Augustine,85.1,0,0,100.0,0,Young Communicators & English Guild,Moderate,Community Outreach Volunteering
+109238470464,Jose Reyes,Grade 10,Grade 10 - St. Thomas Aquinas,80.6,0,6,86.8,0,Supreme Junior Learner Government (SSG),Low,Digital Art & Graphic Design
+109238470465,Jasmine Navarro,Grade 10,Grade 10 - St. Vincent de Paul,86.2,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Robotics & Web Development
+109238470466,Mark Garcia,Grade 10,Grade 10 - St. Ignatius,87.2,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Debate & Public Speaking
+109238470467,Kathryn Padilla,Grade 10,Grade 10 - St. Vincent de Paul,87.2,0,0,100.0,0,Supreme Junior Learner Government (SSG),Moderate,Robotics & Web Development
+109238470468,Miguel Salazar,Grade 10,Grade 10 - St. Vincent de Paul,87.5,0,1,97.8,0,Young Innovators & Junior Coding Club,High,Community Outreach Volunteering
+109238470469,Sebastian Valdez,Grade 10,Grade 10 - St. Ignatius,67.6,3,13,71.4,2,None / Non-Member,None,Watching Streaming Videos
+109238470470,Rita Ocampo,Grade 10,Grade 10 - St. Vincent de Paul,94.3,0,0,100.0,0,Supreme Junior Learner Government (SSG),High,Robotics & Web Development
+109238470471,Angela Castillo,Grade 10,Grade 10 - St. Augustine,76.0,0,5,89.0,1,SAPC Junior Red Cross Youth (RCY),Low,Badminton & Cycling
+109238470472,Paolo Mercado,Grade 10,Grade 10 - St. Vincent de Paul,85.5,0,1,97.8,0,SAPC Junior Red Cross Youth (RCY),High,Robotics & Web Development
+109238470473,Hannah Aquino,Grade 10,Grade 10 - St. Thomas Aquinas,75.8,0,6,86.8,0,Supreme Junior Learner Government (SSG),Low,Mobile App Experimentation
+109238470474,Francis San Jose,Grade 10,Grade 10 - St. Vincent de Paul,86.0,0,2,95.6,0,Junior Scouting (Boy Scouts / Girl Scouts),High,Robotics & Web Development
+109238470475,Clare Aquino,Grade 10,Grade 10 - St. Ignatius,92.8,0,2,95.6,0,Junior Varsity Athletics (Basketball/Volleyball),Moderate,Visual Arts & Illustration
+109238470476,Justin Pascual,Grade 10,Grade 10 - St. Thomas Aquinas,92.6,0,0,100.0,0,Supreme Junior Learner Government (SSG),High,Community Outreach Volunteering
+109238470477,Angelo Manalo,Grade 10,Grade 10 - St. Augustine,75.2,1,2,95.6,0,SAPC Junior Red Cross Youth (RCY),Moderate,Acoustic Band & Guitar
+109238470478,Nathan Morales,Grade 10,Grade 10 - St. Ignatius,90.5,0,1,97.8,0,Campus Journalism (Padua Junior Chronicle),Moderate,Visual Arts & Illustration
+109238470479,Rita Navarro,Grade 10,Grade 10 - St. Augustine,80.3,0,5,89.0,0,Young Innovators & Junior Coding Club,Moderate,Cooking & Baking
+109238470480,Cecilia Santos,Grade 10,Grade 10 - St. Thomas Aquinas,73.3,1,10,78.0,3,Math & Science Wizards Guild,Low,None / Disengaged
+109238470481,Clarisse Salazar,Grade 10,Grade 10 - St. Thomas Aquinas,80.9,1,4,91.2,1,Young Communicators & English Guild,Low,Digital Art & Graphic Design
+109238470482,Kathleen Dimaculangan,Grade 10,Grade 10 - St. Vincent de Paul,75.0,1,5,89.0,2,Supreme Junior Learner Government (SSG),Low,Reading Novels & Webtoons
+109238470483,Christian Ocampo,Grade 10,Grade 10 - St. Thomas Aquinas,86.2,0,0,100.0,0,SAPC Junior Red Cross Youth (RCY),Moderate,Competitive Basketball / Athletics
+109238470484,Janine Dimaculangan,Grade 10,Grade 10 - St. Thomas Aquinas,90.2,0,1,97.8,0,Math & Science Wizards Guild,Moderate,Robotics & Web Development
+109238470485,Ethan Navarro,Grade 10,Grade 10 - St. Augustine,93.8,0,2,95.6,0,Junior Padua Band & Choir,High,Debate & Public Speaking
+109238470486,Ethan Pascual,Grade 10,Grade 10 - St. Augustine,82.5,1,3,93.4,0,None / Non-Member,None,Reading Novels & Webtoons
+109238470487,Rafael Bautista,Grade 10,Grade 10 - St. Augustine,90.6,0,1,97.8,0,Teatro San Antonio (Junior Theater Guild),Moderate,Visual Arts & Illustration
+109238470488,Camille Padilla,Grade 10,Grade 10 - St. Ignatius,86.6,0,0,100.0,0,Teatro San Antonio (Junior Theater Guild),Moderate,Campus Journalism & Creative Writing
+109238470489,Maria Clara Lim,Grade 10,Grade 10 - St. Vincent de Paul,95.6,0,2,95.6,0,Math & Science Wizards Guild,High,Competitive Basketball / Athletics
+109238470490,Paolo Mercado,Grade 10,Grade 10 - St. Ignatius,92.2,0,2,95.6,0,Supreme Junior Learner Government (SSG),Moderate,Competitive Basketball / Athletics
+109238470491,Anthony Mendoza,Grade 10,Grade 10 - St. Augustine,87.8,0,1,97.8,0,Supreme Junior Learner Government (SSG),High,Robotics & Web Development
+109238470492,Hannah San Jose,Grade 10,Grade 10 - St. Thomas Aquinas,72.0,1,12,73.6,5,Young Communicators & English Guild,Moderate,Unstructured Rest / Inactive
+109238470493,Joshua Lim,Grade 10,Grade 10 - St. Thomas Aquinas,78.4,0,6,86.8,0,Supreme Junior Learner Government (SSG),Low,Reading Novels & Webtoons
+109238470494,Ethan Soriano,Grade 10,Grade 10 - St. Thomas Aquinas,87.4,0,0,100.0,0,Young Innovators & Junior Coding Club,Moderate,Debate & Public Speaking
+109238470495,Karl Ramos,Grade 10,Grade 10 - St. Ignatius,91.1,0,1,97.8,0,Junior Varsity Athletics (Basketball/Volleyball),High,Robotics & Web Development
+109238470496,Jerome Tolentino,Grade 10,Grade 10 - St. Ignatius,94.8,0,1,97.8,0,Junior Padua Band & Choir,High,Visual Arts & Illustration
+109238470497,Therese Rivera,Grade 10,Grade 10 - St. Augustine,79.1,1,5,89.0,1,Junior Scouting (Boy Scouts / Girl Scouts),Low,Cooking & Baking
+109238470498,Hannah Dimaculangan,Grade 10,Grade 10 - St. Thomas Aquinas,79.2,1,6,86.8,1,Teatro San Antonio (Junior Theater Guild),Moderate,Mobile App Experimentation
+109238470499,Benedict Dela Cruz,Grade 10,Grade 10 - St. Thomas Aquinas,93.2,0,0,100.0,0,Young Communicators & English Guild,High,Competitive Basketball / Athletics
+109238470500,Ethan Garcia,Grade 10,Grade 10 - St. Thomas Aquinas,67.6,3,12,73.6,4,Young Communicators & English Guild,Moderate,Casual Mobile Gaming

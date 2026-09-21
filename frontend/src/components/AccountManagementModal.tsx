@@ -23,7 +23,6 @@ import {
   ImageIcon
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
 import { SapcLogo } from "./SapcLogo";
 
 interface AccountManagementModalProps {
@@ -40,7 +39,6 @@ const AVATAR_PRESETS = [
 ];
 
 export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ isOpen, onClose }) => {
-  const router = useRouter();
   const { user, logout, updateUserProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<"profile" | "academic" | "privacy">("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);

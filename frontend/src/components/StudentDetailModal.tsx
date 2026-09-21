@@ -37,6 +37,7 @@ import { DomainRadarChart } from "./DomainRadarChart";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
 import { SAPC_500_STUDENTS } from "@/data/students500";
 import { analyzeMoodTelemetry } from "@/lib/mood-telemetry";
+import { SUBJECT_REGISTRY, calculateSubjectFailurePrediction } from "@/lib/subject-prediction";
 
 interface StudentDetailModalProps {
   studentId: number | null;
@@ -52,7 +53,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   onCreateIntervention
 }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"synthesis" | "wellness" | "simulator">("synthesis");
+  const [activeTab, setActiveTab] = useState<"synthesis" | "wellness" | "subject_risk" | "simulator">("synthesis");
   const [student, setStudent] = useState<any | null>(null);
   const [riskData, setRiskData] = useState<any | null>(null);
   const [riskBreakdown, setRiskBreakdown] = useState<any | null>(null);
@@ -542,6 +543,17 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             Wellness & Mood Log ({activeMoodList.length})
           </button>
           <button
+            onClick={() => setActiveTab("subject_risk")}
+            className={`px-3 sm:px-4 py-2.5 rounded-t-2xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 transition shrink-0 ${
+              activeTab === "subject_risk"
+                ? "bg-white text-[#8B0014] border-t border-x border-slate-200 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <BookOpen className="h-3.5 w-3.5 text-[#8B0014]" />
+            Subject Failure Risk
+          </button>
+          <button
             onClick={() => setActiveTab("simulator")}
             className={`px-3 sm:px-4 py-2.5 rounded-t-2xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 transition shrink-0 ${
               activeTab === "simulator"
@@ -560,6 +572,134 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-500">
               <RefreshCw className="h-8 w-8 animate-spin text-[#8B0014]" />
               <p className="text-base font-semibold">Synthesizing multi-criteria AHP profile...</p>
+            </div>
+          ) : activeTab === "subject_risk" ? (
+            <div className="space-y-6">
+              <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-3 text-xs text-amber-950 dark:text-amber-200">
+                <Sparkles className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block font-black text-slate-900 dark:text-white text-sm mb-0.5">
+                    Early Academic Warning Engine — Subject Breakdown
+                  </strong>
+                  <span>
+                    Forecasted subject performance calculated from formative assessments (Written Work &amp; Performance Tasks), period cuts, and cross-domain cognitive load multipliers.
+                  </span>
+                </div>
+              </div>
+
+              {/* Subject Breakdown Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {SUBJECT_REGISTRY.filter(s => s.strand === (student?.strand || "STEM") || s.strand === "JHS").map((subj) => {
+                  const studentFullObj = {
+                    id: student?.id || 1,
+                    full_name: `${student?.first_name} ${student?.last_name}`,
+                    lrn: student?.lrn || "109238475001",
+                    grade_level: student?.grade_level || 11,
+                    section_name: student?.section_name || "Grade 11 - STEM (St. Augustine)",
+                    strand: student?.strand || "STEM",
+                    sass_metrics: {
+                      gpa: student?.sass_metrics?.gpa || student?.academic_records?.[0]?.gpa || 78,
+                      failing_subjects_count: student?.sass_metrics?.failing_subjects_count || student?.academic_records?.[0]?.failed_subjects_count || 0,
+                      days_absent: student?.sass_metrics?.days_absent || student?.academic_records?.[0]?.absences_count || 2,
+                      incomplete_requirements_count: student?.sass_metrics?.incomplete_requirements_count || student?.academic_records?.[0]?.incomplete_subjects_count || 0
+                    },
+                    domain_scores: {
+                      academic: domainScores.academic || 20,
+                      mental_health: domainScores.mental_health || 20,
+                      financial: domainScores.financial || 20,
+                      family: domainScores.family || 20,
+                      health: domainScores.health || 20
+                    }
+                  };
+
+                  const pred = calculateSubjectFailurePrediction(studentFullObj, subj.code);
+                  const isCritical = pred.risk_tier === "CRITICAL_RISK";
+                  const isModerate = pred.risk_tier === "MODERATE_RISK";
+
+                  return (
+                    <div 
+                      key={subj.code} 
+                      className={`p-5 rounded-2xl border transition-all ${
+                        isCritical 
+                          ? "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-900" 
+                          : isModerate 
+                          ? "bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900" 
+                          : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                      } space-y-3 shadow-2xs`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-bold text-slate-600">
+                            {subj.code} • {subj.category}
+                          </span>
+                          <h4 className="font-extrabold text-slate-900 dark:text-white text-sm mt-1">
+                            {subj.name}
+                          </h4>
+                        </div>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-black shrink-0 ${
+                          isCritical 
+                            ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" 
+                            : isModerate 
+                            ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" 
+                            : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                        }`}>
+                          {pred.risk_badge}
+                        </span>
+                      </div>
+
+                      {/* Grades & Probabilities */}
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 text-center">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase block">Projected Grade</span>
+                          <strong className={`text-xl font-black ${
+                            isCritical ? "text-red-600" : isModerate ? "text-amber-600" : "text-emerald-600"
+                          }`}>
+                            {pred.projected_final_grade}
+                          </strong>
+                          <span className="text-[9px] font-mono text-slate-400 block">Passing &ge; 75.0</span>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 text-center">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase block">Failure Likelihood</span>
+                          <strong className={`text-xl font-black ${
+                            isCritical ? "text-red-600" : isModerate ? "text-amber-600" : "text-emerald-600"
+                          }`}>
+                            {pred.failure_probability_pct}%
+                          </strong>
+                          <span className="text-[9px] text-slate-400 block">Confidence: 95%</span>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            isCritical ? "bg-red-500" : isModerate ? "bg-amber-500" : "bg-emerald-500"
+                          }`}
+                          style={{ width: `${pred.failure_probability_pct}%` }}
+                        />
+                      </div>
+
+                      {/* Risk Drivers */}
+                      <div className="space-y-1 text-xs">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Risk Factors:</span>
+                        {pred.risk_drivers.slice(0, 2).map((driver, idx) => (
+                          <div key={idx} className="text-[11px] text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#8B0014] shrink-0" />
+                            <span>{driver}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Prescribed Action */}
+                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400">
+                        <strong className="font-bold text-slate-800 dark:text-slate-200">Prescription: </strong>
+                        <span>{pred.recommended_actions[0]}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ) : activeTab === "simulator" ? (
             <AcademicRecoverySimulator

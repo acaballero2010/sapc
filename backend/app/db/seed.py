@@ -71,10 +71,11 @@ def seed_database():
     db.flush()
 
     print("Seeding Sections...")
-    sec1 = Section(name="Grade 11 - St. Augustine (STEM)", grade_level="11", adviser_id=teacher_user.id)
-    sec2 = Section(name="Grade 12 - St. Thomas (ABM)", grade_level="12", adviser_id=teacher_user.id)
-    sec3 = Section(name="1st Year BS Information Technology", grade_level="College-1", adviser_id=admin_user.id)
-    db.add_all([sec1, sec2, sec3])
+    sec1 = Section(name="Grade 7 - St. Anthony", grade_level="7", adviser_id=teacher_user.id)
+    sec2 = Section(name="Grade 8 - St. Benedict", grade_level="8", adviser_id=teacher_user.id)
+    sec3 = Section(name="Grade 9 - St. Pedro Calungsod", grade_level="9", adviser_id=teacher_user.id)
+    sec4 = Section(name="Grade 10 - St. Thomas Aquinas", grade_level="10", adviser_id=teacher_user.id)
+    db.add_all([sec1, sec2, sec3, sec4])
     db.flush()
 
     print("Seeding Parents & Students...")

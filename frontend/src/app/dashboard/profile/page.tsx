@@ -714,7 +714,7 @@ function UserProfileContent() {
 
 export default function UserProfilePage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-500">Loading profile...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-slate-400 font-medium">Loading profile...</div>}>
       <UserProfileContent />
     </Suspense>
   );
