@@ -191,7 +191,7 @@ export default function DocumentationPage() {
             </div>
 
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              SAPC IntellySys employs <strong>Saaty&apos;s Analytic Hierarchy Process (AHP)</strong>, an internationally recognized multi-criteria decision-making framework, validated by registered psychometricians for the San Antonio de Padua College student body. Rather than relying solely on quarterly GPA, the system synthesizes five interrelated holistic dimensions into a unified risk index ($R_{\text{composite}} \in [0, 100]$).
+              SAPC IntellySys employs <strong>Saaty&apos;s Analytic Hierarchy Process (AHP)</strong>, an internationally recognized multi-criteria decision-making framework, validated by registered psychometricians for the San Antonio de Padua College student body. Rather than relying solely on quarterly GPA, the system synthesizes five interrelated holistic dimensions into a unified risk index (R_composite &isin; [0, 100]).
             </p>
 
             {/* 5 Domains Grid */}
@@ -270,7 +270,7 @@ export default function DocumentationPage() {
               <div className="flex items-center gap-2 text-[#8B0014] dark:text-rose-400">
                 <Calculator className="h-5 w-5" />
                 <h3 className="font-extrabold text-slate-900 dark:text-white text-base">
-                  1. Academic Risk Sub-Score ($S_{`AC`}$)
+                  1. Academic Risk Sub-Score (S_AC)
                 </h3>
               </div>
 
@@ -285,7 +285,7 @@ export default function DocumentationPage() {
               <div className="space-y-3 pt-1">
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                   <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
-                    <span>Failing Subjects Penalty ($P_{\text{failed}}$)</span>
+                    <span>Failing Subjects Penalty (P_failed)</span>
                     <span className="text-[#8B0014] dark:text-rose-400">+25 pts each (Max 50 pts)</span>
                   </div>
                   <p className="text-slate-500 dark:text-slate-400 text-[11px]">
@@ -295,7 +295,7 @@ export default function DocumentationPage() {
 
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                   <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
-                    <span>Quarter GPA Penalty ($P_{\text{gpa}}$)</span>
+                    <span>Quarter GPA Penalty (P_gpa)</span>
                     <span className="text-[#8B0014] dark:text-rose-400">Up to 30 pts</span>
                   </div>
                   <ul className="text-slate-500 dark:text-slate-400 text-[11px] list-disc list-inside space-y-0.5">
@@ -307,7 +307,7 @@ export default function DocumentationPage() {
 
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                   <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
-                    <span>Days Absent Penalty ($P_{\text{absent}}$)</span>
+                    <span>Days Absent Penalty (P_absent)</span>
                     <span className="text-[#8B0014] dark:text-rose-400">Up to 15 pts</span>
                   </div>
                   <ul className="text-slate-500 dark:text-slate-400 text-[11px] list-disc list-inside space-y-0.5">
@@ -319,7 +319,7 @@ export default function DocumentationPage() {
 
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                   <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
-                    <span>Incomplete Requirements ($P_{\text{incom}}$)</span>
+                    <span>Incomplete Requirements (P_incom)</span>
                     <span className="text-[#8B0014] dark:text-rose-400">+5 pts each (Max 10 pts)</span>
                   </div>
                   <p className="text-slate-500 dark:text-slate-400 text-[11px]">
@@ -671,10 +671,10 @@ export default function DocumentationPage() {
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
               <div className="font-bold text-slate-900 dark:text-white">AHP Eigenvalue Verification:</div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-600 dark:text-slate-300">
-                <div>Principal Eigenvalue ($\lambda_{\max}$): <strong className="text-slate-900 dark:text-white font-mono">5.073</strong></div>
-                <div>Consistency Index ($CI$): <strong className="text-slate-900 dark:text-white font-mono">0.01825</strong></div>
-                <div>Random Index ($RI_{`n=5`}$): <strong className="text-slate-900 dark:text-white font-mono">1.12</strong></div>
-                <div>Consistency Ratio ($CR$): <strong className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">0.0163 (1.63%)</strong></div>
+                <div>Principal Eigenvalue (&lambda;_max): <strong className="text-slate-900 dark:text-white font-mono">5.073</strong></div>
+                <div>Consistency Index (CI): <strong className="text-slate-900 dark:text-white font-mono">0.01825</strong></div>
+                <div>Random Index (RI n=5): <strong className="text-slate-900 dark:text-white font-mono">1.12</strong></div>
+                <div>Consistency Ratio (CR): <strong className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">0.0163 (1.63%)</strong></div>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">
                 A Consistency Ratio below 0.10 (10%) confirms that psychometric judgments are logically consistent and devoid of transitive contradictions.
@@ -1035,7 +1035,7 @@ export default function DocumentationPage() {
                   <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
                     <span className="font-bold text-slate-900 dark:text-white block">AHP Weights Config</span>
                     <p className="text-slate-500 dark:text-slate-400">
-                      Audit domain weights and verify mathematical consistency ($CR \le 0.10$).
+                      Audit domain weights and verify mathematical consistency (CR &le; 0.10).
                     </p>
                   </div>
                   <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
