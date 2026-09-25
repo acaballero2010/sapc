@@ -46,6 +46,12 @@ import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
 import { AHPDataVisualizer } from "./AHPDataVisualizer";
+import { DomainRadarChart } from "./DomainRadarChart";
+import { QuarterlyGradeSparkline } from "./QuarterlyGradeSparkline";
+import { AhpSensitivitySimulator } from "./AhpSensitivitySimulator";
+import { DepEdFormModal } from "./DepEdFormModal";
+import { BatchInterventionModal } from "./BatchInterventionModal";
+import { useToast } from "@/lib/toast-context";
 import { SAPC_500_STUDENTS, SAPC_COHORT_SUMMARY } from "@/data/students500";
 import type { StudentRecord } from "@/data/students500";
 import { 
@@ -53,7 +59,25 @@ import {
   computeCohortAggregates, 
   exportActiveDatasetToCSV,
   subscribeToStudentDataset,
-  loadStudentDatasetFromFirestore
+  loadStudentDatasetFromFirestore,
+  getActiveInterventions,
+  saveActiveInterventions,
+  saveOrUpdateIntervention,
+  deleteIntervention,
+  getActiveReferrals,
+  saveActiveReferrals,
+  updateReferralStatus,
+  getActiveCounselingSessions,
+  saveActiveCounselingSessions,
+  scheduleCounselingSession,
+  updateSessionStatus,
+  getActiveNotifications,
+  markNotificationRead,
+  DEFAULT_REFERRALS,
+  DEFAULT_SESSIONS,
+  DEFAULT_NOTIFICATIONS,
+  updateStudentRecord,
+  InterventionCarePlan
 } from "@/lib/dataset-store";
 
 // Tab types for all 20 Counselor modules
@@ -94,25 +118,6 @@ interface FlaggedAlert {
   family_phone: string;
   previous_flags_count: number;
   actions_taken: string[];
-}
-
-
-interface InterventionCarePlan {
-  id: number;
-  student_id: number;
-  student_name: string;
-  title: string;
-  description: string;
-  target_domain: string;
-  status: string;
-  action_items: string;
-  scheduled_followup?: string;
-  goals?: string;
-  session_notes?: string;
-  outcome_rating?: number;
-  assigned_counselor?: string;
-  proposed_by?: string;
-  risk_adjustment_proposed?: string;
 }
 
 interface TeacherReferralItem {
@@ -301,8 +306,10 @@ export const CounselorDashboard: React.FC = () => {
   }, []);
 
   const [_analytics, setAnalytics] = useState<any | null>(DEFAULT_ANALYTICS);
-  const [flaggedSessions] = useState<FlaggedAlert[]>(DEFAULT_FLAGGED_ALERTS);
-  const [interventions] = useState<InterventionCarePlan[]>(DEFAULT_INTERVENTIONS);
+  const [flaggedSessions, setFlaggedSessions] = useState<FlaggedAlert[]>(DEFAULT_FLAGGED_ALERTS);
+  const [interventions, setInterventions] = useState<InterventionCarePlan[]>(() => {
+    return typeof window !== "undefined" ? getActiveInterventions() : DEFAULT_INTERVENTIONS;
+  });
   const [selectedAlert, setSelectedAlert] = useState<FlaggedAlert>(DEFAULT_FLAGGED_ALERTS[0]);
 
   const cohortStats = useMemo(() => computeCohortAggregates(students), [students]);
@@ -317,6 +324,10 @@ export const CounselorDashboard: React.FC = () => {
   const [isKnowledgeHubOpen, setIsKnowledgeHubOpen] = useState(false);
   const [parentAlertStudent, setParentAlertStudent] = useState<StudentRecord | null>(null);
   const [isParentAlertOpen, setIsParentAlertOpen] = useState(false);
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+  const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
+  const [isBatchInterventionOpen, setIsBatchInterventionOpen] = useState(false);
+  const { success: toastSuccess, error: toastError, info: toastInfo } = useToast();
   const catDrag = useDragScroll();
   const tabsDrag = useDragScroll();
 
@@ -430,84 +441,22 @@ export const CounselorDashboard: React.FC = () => {
   ]);
 
   // 16. Teacher Referrals
-  const [teacherReferrals] = useState<TeacherReferralItem[]>([
-    {
-      id: "REF-001",
-      student_id: 1,
-      student_name: "Joshua Dimaculangan",
-      lrn: "109238475001",
-      section: "Grade 11 - STEM (St. Augustine)",
-      referring_teacher: "Mr. Roberto Santos, LPT",
-      concern_type: "Academic Deterioration & Multiple Failing Marks",
-      urgency: "crisis",
-      observations: "Student missed 11 classes this quarter and broke down in tears during Pre-Calculus midterm exam.",
-      attempted_interventions: ["1-on-1 Teacher-Student Conference", "Peer Tutoring Assigned"],
-      created_at: "2026-09-18 14:30",
-      status: "pending_review"
-    },
-    {
-      id: "REF-002",
-      student_id: 4,
-      student_name: "Samantha Nicole Reyes",
-      lrn: "109238475004",
-      section: "Grade 11 - HUMSS (St. Thomas)",
-      referring_teacher: "Mrs. Clara Buenaflor, LPT",
-      concern_type: "Prolonged Unexcused Absences & Family Distress",
-      urgency: "priority",
-      observations: "Student reports staying awake late due to family crisis at home. Incomplete requirements.",
-      attempted_interventions: ["Adviser Phone Call to Guardian"],
-      created_at: "2026-09-16 09:15",
-      status: "in_progress"
-    }
-  ]);
+  const [teacherReferrals, setTeacherReferrals] = useState<any[]>(() => {
+    return typeof window !== "undefined" ? getActiveReferrals() : DEFAULT_REFERRALS;
+  });
 
   // 17. Counseling Sessions Schedule
-  const [sessionsList, setSessionsList] = useState<CounselingSessionItem[]>([
-    {
-      id: "SESS-101",
-      student_id: 1,
-      student_name: "Joshua Dimaculangan",
-      date: "Today, 10:30 AM",
-      time: "10:30 AM - 11:15 AM",
-      type: "1-on-1 Crisis Check-in",
-      status: "Confirmed",
-      room: "Guidance Consultation Room A",
-      notes: "Follow-up on GAD-7 score and test anxiety coping strategies."
-    },
-    {
-      id: "SESS-102",
-      student_id: 4,
-      student_name: "Samantha Nicole Reyes",
-      date: "Today, 02:00 PM",
-      time: "02:00 PM - 03:00 PM",
-      type: "Parent-Student Case Conference",
-      status: "Confirmed",
-      room: "Guidance Conference Room",
-      notes: "Attendance contract signing with guardian and class adviser."
-    },
-    {
-      id: "SESS-103",
-      student_id: 7,
-      student_name: "Christian Dave Villanueva",
-      date: "Tomorrow, 09:00 AM",
-      time: "09:00 AM - 09:45 AM",
-      type: "Academic Anxiety Counseling",
-      status: "Pending Acknowledgment",
-      room: "Guidance Consultation Room B",
-      notes: "Working student schedule load re-balancing consultation."
-    }
-  ]);
+  const [sessionsList, setSessionsList] = useState<any[]>(() => {
+    return typeof window !== "undefined" ? getActiveCounselingSessions() : DEFAULT_SESSIONS;
+  });
   const [newSessionStudentId, setNewSessionStudentId] = useState<number>(1);
   const [newSessionType, setNewSessionType] = useState<string>("1-on-1 Crisis Check-in");
   const [newSessionTime, setNewSessionTime] = useState<string>("11:00 AM");
 
   // 20. Notifications Feed
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: "Urgent NLP Crisis Flag", desc: "Joshua Dimaculangan triggered crisis keyword detection via AI chatbot.", time: "2 hours ago", unread: true, type: "crisis" },
-    { id: 2, title: "Teacher Referral Submitted", desc: "Mr. Roberto Santos referred Christian Dave Villanueva for Chemistry failure.", time: "4 hours ago", unread: true, type: "referral" },
-    { id: 3, title: "Parent Acknowledgment Received", desc: "Mrs. Reyes confirmed attendance for 2:00 PM case conference.", time: "5 hours ago", unread: false, type: "parent" },
-    { id: 4, title: "Intervention Milestone Logged", desc: "Angelica Dela Cruz completed Alumni Foundation grant clearance.", time: "Yesterday", unread: false, type: "intervention" }
-  ]);
+  const [notifications, setNotifications] = useState<any[]>(() => {
+    return typeof window !== "undefined" ? getActiveNotifications("counselor") : DEFAULT_NOTIFICATIONS;
+  });
 
   // Navigation Syncing
   const handleTabChange = useCallback((tab: CounselorTabType) => {
@@ -524,6 +473,10 @@ export const CounselorDashboard: React.FC = () => {
     try {
       if (typeof window !== "undefined") {
         setStudents(getActiveStudentDataset());
+        setInterventions(getActiveInterventions());
+        setTeacherReferrals(getActiveReferrals());
+        setSessionsList(getActiveCounselingSessions());
+        setNotifications(getActiveNotifications("counselor"));
       }
       const [analyticsRes, studentsRes] = await Promise.all([
         fetchWithAuth("/analytics/summary").catch(() => null),
@@ -546,7 +499,24 @@ export const CounselorDashboard: React.FC = () => {
       const handleDatasetUpdated = () => {
         setStudents(getActiveStudentDataset());
       };
+      const handleInterventionsUpdated = () => {
+        setInterventions(getActiveInterventions());
+      };
+      const handleReferralsUpdated = () => {
+        setTeacherReferrals(getActiveReferrals());
+      };
+      const handleSessionsUpdated = () => {
+        setSessionsList(getActiveCounselingSessions());
+      };
+      const handleNotificationsUpdated = () => {
+        setNotifications(getActiveNotifications("counselor"));
+      };
+
       window.addEventListener("sapc:dataset-updated", handleDatasetUpdated);
+      window.addEventListener("sapc_interventions_updated", handleInterventionsUpdated);
+      window.addEventListener("sapc:referrals-updated", handleReferralsUpdated);
+      window.addEventListener("sapc:sessions-updated", handleSessionsUpdated);
+      window.addEventListener("sapc:notifications-updated", handleNotificationsUpdated);
 
       const params = new URLSearchParams(window.location.search);
       const urlTab = params.get("tab") as CounselorTabType;
@@ -559,6 +529,10 @@ export const CounselorDashboard: React.FC = () => {
       window.addEventListener("sapc:navigate-tab", handleCustomNav as EventListener);
       return () => {
         window.removeEventListener("sapc:dataset-updated", handleDatasetUpdated);
+        window.removeEventListener("sapc_interventions_updated", handleInterventionsUpdated);
+        window.removeEventListener("sapc:referrals-updated", handleReferralsUpdated);
+        window.removeEventListener("sapc:sessions-updated", handleSessionsUpdated);
+        window.removeEventListener("sapc:notifications-updated", handleNotificationsUpdated);
         window.removeEventListener("sapc:navigate-tab", handleCustomNav as EventListener);
       };
     }
@@ -728,8 +702,38 @@ export const CounselorDashboard: React.FC = () => {
           {/* Right: action buttons + risk score */}
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
+              onClick={() => setIsSimulatorOpen(true)}
+              className="h-9 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-bold text-xs transition flex items-center gap-1.5 shadow"
+              title="Interactive AHP Sensitivity Simulation Sandbox"
+            >
+              <Sliders className="h-3.5 w-3.5 text-amber-300" />
+              <span className="hidden sm:inline">AHP Simulator</span>
+              <span className="sm:hidden">AHP</span>
+            </button>
+
+            <button
+              onClick={() => setIsBatchInterventionOpen(true)}
+              className="h-9 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-bold text-xs transition flex items-center gap-1.5 shadow"
+              title="Batch Intervention & Broadcast Hub"
+            >
+              <Users className="h-3.5 w-3.5 text-emerald-300" />
+              <span className="hidden sm:inline">Batch Action</span>
+              <span className="sm:hidden">Batch</span>
+            </button>
+
+            <button
+              onClick={() => setIsDepEdFormOpen(true)}
+              className="h-9 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-bold text-xs transition flex items-center gap-1.5 shadow"
+              title="Official DepEd SF9 / SF10 Progress Card Generator"
+            >
+              <FileText className="h-3.5 w-3.5 text-blue-300" />
+              <span className="hidden sm:inline">DepEd SF9/10</span>
+              <span className="sm:hidden">SF9</span>
+            </button>
+
+            <button
               onClick={() => setShowIngestionHub((prev) => !prev)}
-              className={`h-9 px-3.5 rounded-xl font-bold text-xs shadow transition flex items-center gap-1.5 ${
+              className={`h-9 px-3 rounded-xl font-bold text-xs shadow transition flex items-center gap-1.5 ${
                 showIngestionHub
                   ? "bg-amber-400 text-amber-950 ring-2 ring-white"
                   : "bg-white/15 hover:bg-white/25 text-white border border-white/20"
@@ -742,7 +746,7 @@ export const CounselorDashboard: React.FC = () => {
 
             <button
               onClick={() => exportActiveDatasetToCSV(students, "Guidance_Active_Cohort_Dataset.csv")}
-              className="h-9 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-bold text-xs transition flex items-center gap-1.5"
+              className="h-9 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-bold text-xs transition flex items-center gap-1.5"
               title="Export complete 5-domain cohort dataset to CSV"
             >
               <Download className="h-3.5 w-3.5 text-amber-300" />
@@ -751,11 +755,11 @@ export const CounselorDashboard: React.FC = () => {
 
             <button
               onClick={() => setIsKnowledgeHubOpen(true)}
-              className="h-9 px-3.5 rounded-xl bg-purple-600/85 hover:bg-purple-600 text-white border border-purple-400/40 font-bold text-xs shadow transition flex items-center gap-1.5"
+              className="h-9 px-3 rounded-xl bg-purple-600/85 hover:bg-purple-600 text-white border border-purple-400/40 font-bold text-xs shadow transition flex items-center gap-1.5"
               title="Train and personalize the AI Counselor Knowledge Base"
             >
               <Brain className="h-3.5 w-3.5 text-purple-200" />
-              <span className="hidden sm:inline">AI Training Hub</span>
+              <span className="hidden sm:inline">AI Training</span>
               <span className="sm:hidden">AI KB</span>
             </button>
 
@@ -764,7 +768,7 @@ export const CounselorDashboard: React.FC = () => {
               className="h-9 px-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs shadow transition flex items-center gap-1.5"
             >
               <Award className="h-3.5 w-3.5 text-[#8B0014]" />
-              <span className="hidden sm:inline">DepEd / CHED Report</span>
+              <span className="hidden sm:inline">DepEd Report</span>
               <span className="sm:hidden">Report</span>
             </button>
 
@@ -2353,18 +2357,17 @@ export const CounselorDashboard: React.FC = () => {
                 <button
                   onClick={() => {
                     const student = students.find(s => s.id === newSessionStudentId) || students[0];
-                    const newSess: CounselingSessionItem = {
-                      id: `SESS-${Date.now()}`,
+                    scheduleCounselingSession({
                       student_id: newSessionStudentId,
-                      student_name: `${student.first_name} ${student.last_name}`,
+                      student_name: student.full_name || `${student.first_name} ${student.last_name}`,
                       date: "Today",
                       time: newSessionTime || "11:00 AM",
                       type: newSessionType as any,
                       status: "Confirmed",
                       room: "Guidance Consultation Room A",
                       notes: "Scheduled via Counselor Portal"
-                    };
-                    setSessionsList(prev => [newSess, ...prev]);
+                    });
+                    setSessionsList(getActiveCounselingSessions());
                     showToast("Session successfully booked and calendar invitation sent!");
                   }}
                   className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-extrabold text-xs sm:text-sm hover:bg-[#6D0010] transition flex items-center gap-2 shrink-0"
@@ -2391,7 +2394,11 @@ export const CounselorDashboard: React.FC = () => {
 
                   <div className="pt-2 border-t border-slate-200 flex items-center justify-end">
                     <button
-                      onClick={() => showToast(`Marked session ${sess.id} as completed`)}
+                      onClick={() => {
+                        updateSessionStatus(sess.id, "Completed");
+                        setSessionsList(getActiveCounselingSessions());
+                        showToast(`Marked session ${sess.id} as completed`);
+                      }}
                       className="text-xs font-bold text-emerald-700 hover:underline"
                     >
                       ✓ Mark Completed
@@ -2625,6 +2632,24 @@ export const CounselorDashboard: React.FC = () => {
         onClose={() => setIsKnowledgeHubOpen(false)}
         currentUserRole="counselor"
         currentUserName="Ms. Maria Theresa Cruz, RGC"
+      />
+
+      <AhpSensitivitySimulator
+        isOpen={isSimulatorOpen}
+        onClose={() => setIsSimulatorOpen(false)}
+        onApplied={loadData}
+      />
+
+      <DepEdFormModal
+        isOpen={isDepEdFormOpen}
+        onClose={() => setIsDepEdFormOpen(false)}
+        selectedStudent={selectedStudentObj}
+      />
+
+      <BatchInterventionModal
+        isOpen={isBatchInterventionOpen}
+        onClose={() => setIsBatchInterventionOpen(false)}
+        onDispatched={loadData}
       />
     </div>
   );

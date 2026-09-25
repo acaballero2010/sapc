@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { 
   BookOpen, 
   Brain, 
@@ -207,6 +208,12 @@ export default function DocumentationPage() {
           >
             v2.5 Notes
           </button>
+          <Link
+            href="/dashboard/docs/chatbot"
+            className="px-2.5 py-1 rounded-lg bg-rose-100 dark:bg-rose-950/80 hover:bg-rose-200 dark:hover:bg-rose-900 text-[#8B0014] dark:text-rose-300 text-[11px] font-bold shrink-0 border border-rose-300 dark:border-rose-800 flex items-center gap-1"
+          >
+            <span>🤖 AI Chatbot & Training Guide</span>
+          </Link>
           {!isStudentOrParent && (
             <button
               onClick={() => {

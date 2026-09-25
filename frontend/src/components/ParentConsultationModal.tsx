@@ -10,7 +10,11 @@ import {
   PhoneCall,
   Send
 } from "lucide-react";
-import { SAPC_500_STUDENTS } from "@/data/students500";
+import { 
+  getActiveStudentDataset, 
+  scheduleCounselingSession, 
+  addAppNotification 
+} from "@/lib/dataset-store";
 import type { StudentRecord } from "@/data/students500";
 
 interface ParentConsultationModalProps {
@@ -37,14 +41,22 @@ export const ParentConsultationModal: React.FC<ParentConsultationModalProps> = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationSuccess, setConfirmationSuccess] = useState(false);
 
-  const selectedStudent = defaultStudent || SAPC_500_STUDENTS.find(s => s.id === studentId) || SAPC_500_STUDENTS[0];
+  const allStudents = typeof window !== "undefined" ? getActiveStudentDataset() : [];
+  const selectedStudent = defaultStudent || allStudents.find(s => s.id === studentId) || allStudents[0] || {
+    id: 1,
+    first_name: "Joshua",
+    last_name: "Dimaculangan",
+    full_name: "Joshua Dimaculangan",
+    lrn: "109238475001",
+    section_name: "Grade 11 - St. Augustine (STEM)"
+  };
 
   const handleBookConsultation = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Dispatch email confirmation via Next.js API route with Resend
+      // 1. Dispatch email confirmation via Next.js API route with Resend
       await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,6 +68,29 @@ export const ParentConsultationModal: React.FC<ParentConsultationModalProps> = (
           type: meetingType,
           venue: modality === "in_person" ? "Guidance Consultation Room 204" : modality === "video_zoom" ? "Google Meet / Zoom (Link: meet.google.com/sapc-guidance)" : "Direct Phone Call"
         })
+      }).catch(() => null);
+
+      // 2. Persist to active counseling sessions queue
+      scheduleCounselingSession({
+        student_id: selectedStudent.id,
+        student_name: selectedStudent.full_name || `${selectedStudent.first_name} ${selectedStudent.last_name}`,
+        date: meetingDate,
+        time: meetingTime,
+        type: meetingType,
+        status: "Confirmed",
+        room: modality === "in_person" ? "Guidance Consultation Room 204" : modality === "video_zoom" ? "Google Meet (meet.google.com/sapc-guidance)" : `Phone Call (${parentPhone})`,
+        notes: `Parent consultation booked for ${selectedStudent.first_name}. Agenda: ${agendaNotes}`
+      });
+
+      // 3. Add to notifications
+      addAppNotification({
+        type: "session",
+        title: `Parent Booked Consultation: ${selectedStudent.full_name || selectedStudent.first_name}`,
+        body: `${meetingType} on ${meetingDate} at ${meetingTime}. Contact: ${parentPhone}`,
+        targetRole: "counselor",
+        studentId: selectedStudent.id,
+        studentName: selectedStudent.full_name,
+        href: "/dashboard/guidance?tab=sessions"
       });
 
       setConfirmationSuccess(true);
@@ -136,7 +171,7 @@ export const ParentConsultationModal: React.FC<ParentConsultationModalProps> = (
                   onChange={(e) => setStudentId(Number(e.target.value))}
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium"
                 >
-                  {SAPC_500_STUDENTS.slice(0, 25).map((s) => (
+                  {allStudents.slice(0, 50).map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.full_name} ({s.section_name} • LRN: {s.lrn})
                     </option>

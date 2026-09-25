@@ -23,6 +23,7 @@ import {
 import { SAPC_500_STUDENTS } from "@/data/students500";
 import type { StudentRecord } from "@/data/students500";
 import { useAuth } from "@/lib/auth-context";
+import { getActiveStudentDataset } from "@/lib/dataset-store";
 
 interface GlobalCommandPaletteProps {
   isOpen: boolean;
@@ -138,10 +139,11 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
   // Search Filtering (Derived State strictly scoped by RBAC role)
   const currentRole = user?.role || "guidance_counselor";
   const q = query.trim().toLowerCase();
+  const studentDataset = getActiveStudentDataset();
   
   const filteredStudents = !q 
-    ? SAPC_500_STUDENTS.slice(0, 6) 
-    : SAPC_500_STUDENTS.filter(s => 
+    ? studentDataset.slice(0, 6) 
+    : studentDataset.filter(s => 
         s.first_name.toLowerCase().includes(q) ||
         s.last_name.toLowerCase().includes(q) ||
         s.lrn.includes(query.trim()) ||

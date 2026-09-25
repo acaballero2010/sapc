@@ -76,7 +76,7 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
     const referralPayload = {
       id: `ref-${Date.now()}`,
       student_id: activeStudent.id,
-      student_name: `${activeStudent.first_name} ${activeStudent.last_name}`,
+      student_name: activeStudent.full_name || `${activeStudent.first_name} ${activeStudent.last_name}`,
       lrn: activeStudent.lrn,
       section: activeStudent.section_name || "Senior High STEM",
       referring_teacher: user?.full_name || "Prof. Ernesto Bautista (Class Adviser)",
@@ -85,13 +85,18 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
       observations: observations || "Classroom observation: Student exhibiting multiple failing marks and lack of class engagement.",
       attempted_interventions: attemptedInterventions,
       created_at: new Date().toISOString(),
-      status: "pending_review"
+      status: "pending_review" as const
     };
 
-    // Save to local storage for persistence across views
-    if (typeof window !== "undefined") {
-      const existing = JSON.parse(localStorage.getItem("sapc_teacher_referrals") || "[]");
-      localStorage.setItem("sapc_teacher_referrals", JSON.stringify([referralPayload, ...existing]));
+    // Save to unified referrals store
+    try {
+      const { addTeacherReferral } = require("@/lib/dataset-store");
+      addTeacherReferral(referralPayload);
+    } catch {
+      if (typeof window !== "undefined") {
+        const existing = JSON.parse(localStorage.getItem("sapc_teacher_referrals") || "[]");
+        localStorage.setItem("sapc_teacher_referrals", JSON.stringify([referralPayload, ...existing]));
+      }
     }
 
     timer1Ref.current = setTimeout(() => {

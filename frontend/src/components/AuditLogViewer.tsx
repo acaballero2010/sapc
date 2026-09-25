@@ -163,7 +163,7 @@ export const AuditLogViewer: React.FC = () => {
     setAccessError(null);
     setReferenceTime(Date.now());
     try {
-      let combined: AuditLogEntry[] = [];
+      const combined: AuditLogEntry[] = [];
 
       // 1. Try Firestore /audit_logs collection
       try {

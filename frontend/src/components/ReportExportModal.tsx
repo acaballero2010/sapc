@@ -12,8 +12,9 @@ import {
   RotateCcw,
   Stamp
 } from "lucide-react";
-import { SAPC_500_STUDENTS } from "@/data/students500";
+import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { exportToCSV, exportToJSON } from "@/lib/export-utils";
+import { getActiveStudentDataset } from "@/lib/dataset-store";
 
 interface ReportExportModalProps {
   isOpen: boolean;
@@ -107,7 +108,8 @@ export const ReportExportModal: React.FC<ReportExportModalProps> = ({
 
   if (!isOpen) return null;
 
-  const student = SAPC_500_STUDENTS.find(s => s.id === selectedStudentId) || SAPC_500_STUDENTS[0];
+  const dataset = getActiveStudentDataset();
+  const student = dataset.find(s => s.id === selectedStudentId) || dataset[0] || SAPC_500_STUDENTS[0];
 
   const handlePrint = () => {
     window.print();
@@ -115,7 +117,7 @@ export const ReportExportModal: React.FC<ReportExportModalProps> = ({
 
   const handleExportCSV = () => {
     setIsExporting(true);
-    const rows = SAPC_500_STUDENTS.map(s => ({
+    const rows = dataset.map(s => ({
       ID: s.id,
       FullName: s.full_name,
       LRN: s.lrn,
@@ -155,8 +157,8 @@ export const ReportExportModal: React.FC<ReportExportModalProps> = ({
         financial: 0.15
       },
       consistencyRatio: 0.042,
-      totalStudents: SAPC_500_STUDENTS.length,
-      students: SAPC_500_STUDENTS
+      totalStudents: dataset.length,
+      students: dataset
     };
 
     exportToJSON(`SAPC_AHP_Decision_Model_${new Date().toISOString().slice(0,10)}`, exportData);
@@ -261,7 +263,7 @@ export const ReportExportModal: React.FC<ReportExportModalProps> = ({
                 onChange={(e) => setSelectedStudentId(Number(e.target.value))}
                 className="w-full sm:w-80 px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white"
               >
-                {SAPC_500_STUDENTS.slice(0, 30).map((s) => (
+                {dataset.slice(0, 50).map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.full_name} ({s.section_name} • LRN: {s.lrn})
                   </option>

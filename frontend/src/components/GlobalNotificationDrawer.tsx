@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   X,
   Bell,
@@ -70,13 +70,24 @@ const DEMO_NOTIFICATIONS: Notification[] = [
   },
 ];
 
-const TYPE_META: Record<Notification["type"], { icon: any; color: string; bg: string; label: string }> = {
+const TYPE_META: Record<string, { icon: any; color: string; bg: string; label: string }> = {
   crisis:   { icon: AlertTriangle,  color: "text-rose-600",    bg: "bg-rose-50",    label: "Crisis" },
   referral: { icon: HeartHandshake, color: "text-amber-600",   bg: "bg-amber-50",   label: "Referral" },
   session:  { icon: GraduationCap,  color: "text-blue-600",    bg: "bg-blue-50",    label: "Session" },
   system:   { icon: CheckCircle2,   color: "text-emerald-600", bg: "bg-emerald-50", label: "System" },
   info:     { icon: Info,           color: "text-slate-500",   bg: "bg-slate-50",   label: "Info" },
+  parent:   { icon: CheckCircle2,   color: "text-indigo-600",  bg: "bg-indigo-50",  label: "Parent" },
+  alert:    { icon: AlertTriangle,  color: "text-rose-600",    bg: "bg-rose-50",    label: "Alert" },
+  deadline: { icon: Clock,          color: "text-amber-600",   bg: "bg-amber-50",   label: "Deadline" }
 };
+
+import { 
+  getActiveNotifications, 
+  markNotificationRead, 
+  markAllNotificationsRead, 
+  deleteAppNotification,
+  AppNotification 
+} from "@/lib/dataset-store";
 
 const FILTER_TABS = ["All", "Unread", "Crisis", "Referral", "Session"] as const;
 type FilterTab = typeof FILTER_TABS[number];
@@ -91,8 +102,20 @@ export const GlobalNotificationDrawer: React.FC<GlobalNotificationDrawerProps> =
   isOpen,
   onClose,
 }) => {
-  const [notifications, setNotifications] = useState<Notification[]>(DEMO_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
+    return typeof window !== "undefined" ? getActiveNotifications() : [];
+  });
   const [filter, setFilter] = useState<FilterTab>("All");
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setNotifications(getActiveNotifications());
+    };
+    window.addEventListener("sapc:notifications-updated", handleUpdate);
+    // Initial fetch
+    setNotifications(getActiveNotifications());
+    return () => window.removeEventListener("sapc:notifications-updated", handleUpdate);
+  }, [isOpen]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -102,11 +125,20 @@ export const GlobalNotificationDrawer: React.FC<GlobalNotificationDrawerProps> =
     return n.type === filter.toLowerCase();
   });
 
-  const markAllRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  const markRead = (id: string) =>
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-  const remove = (id: string) =>
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const handleMarkAllRead = () => {
+    markAllNotificationsRead();
+    setNotifications(getActiveNotifications());
+  };
+
+  const handleMarkRead = (id: string) => {
+    markNotificationRead(id);
+    setNotifications(getActiveNotifications());
+  };
+
+  const handleRemove = (id: string) => {
+    deleteAppNotification(id);
+    setNotifications(getActiveNotifications());
+  };
 
   if (!isOpen) return null;
 
@@ -142,7 +174,7 @@ export const GlobalNotificationDrawer: React.FC<GlobalNotificationDrawerProps> =
             {unreadCount > 0 && (
               <button
                 type="button"
-                onClick={markAllRead}
+                onClick={handleMarkAllRead}
                 className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-[#8B0014] dark:hover:text-rose-400 transition px-2 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 Mark all read
@@ -190,7 +222,7 @@ export const GlobalNotificationDrawer: React.FC<GlobalNotificationDrawerProps> =
             </div>
           ) : (
             filtered.map((notif) => {
-              const meta = TYPE_META[notif.type];
+              const meta = TYPE_META[notif.type] || TYPE_META.system;
               const Icon = meta.icon;
               return (
                 <div
@@ -214,7 +246,7 @@ export const GlobalNotificationDrawer: React.FC<GlobalNotificationDrawerProps> =
                         {!notif.read && (
                           <button
                             type="button"
-                            onClick={() => markRead(notif.id)}
+                            onClick={() => handleMarkRead(notif.id)}
                             title="Mark as read"
                             className="h-5 w-5 rounded-md flex items-center justify-center hover:bg-emerald-100 dark:hover:bg-emerald-950/50 text-emerald-600"
                           >
@@ -223,7 +255,7 @@ export const GlobalNotificationDrawer: React.FC<GlobalNotificationDrawerProps> =
                         )}
                         <button
                           type="button"
-                          onClick={() => remove(notif.id)}
+                          onClick={() => handleRemove(notif.id)}
                           title="Dismiss"
                           className="h-5 w-5 rounded-md flex items-center justify-center hover:bg-rose-100 dark:hover:bg-rose-950/50 text-rose-500"
                         >

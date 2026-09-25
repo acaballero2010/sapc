@@ -46,13 +46,20 @@ import {
   saveStudentDataset, 
   recalculateAHPForDataset,
   subscribeToStudentDataset,
-  loadStudentDatasetFromFirestore
+  loadStudentDatasetFromFirestore,
+  getActiveNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  getActiveInterventions
 } from "@/lib/dataset-store";
 import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
 import { StudentDetailModal } from "./StudentDetailModal";
 import { TeacherReferralModal } from "./TeacherReferralModal";
 import { SubjectFailurePredictor } from "./SubjectFailurePredictor";
+import { DepEdFormModal } from "./DepEdFormModal";
+import { BatchInterventionModal } from "./BatchInterventionModal";
+import { useToast } from "@/lib/toast-context";
 
 export type TeacherTabType = 
   | "dashboard"
@@ -138,11 +145,27 @@ export const TeacherDashboard: React.FC = () => {
 
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState<string>("all");
+
+  // Filtered students
+  const filteredStudents = useMemo(() => {
+    return students.filter(s => {
+      const matchesSearch = 
+        s.full_name.toLowerCase().includes(search.toLowerCase()) ||
+        s.lrn.includes(search) ||
+        s.primary_risk_driver.toLowerCase().includes(search.toLowerCase());
+      const matchesRisk = riskFilter === "all" || s.latest_risk_tier === riskFilter;
+      return matchesSearch && matchesRisk;
+    });
+  }, [students, search, riskFilter]);
+
   const [rosterViewMode, setRosterViewMode] = useState<"risk" | "credentials">("risk");
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(1);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [referralStudent, setReferralStudent] = useState<any | null>(null);
   const [isReferralOpen, setIsReferralOpen] = useState(false);
+  const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const { success: toastSuccess, info: toastInfo } = useToast();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const catDrag = useDragScroll();
   const tabsDrag = useDragScroll();
@@ -595,12 +618,39 @@ export const TeacherDashboard: React.FC = () => {
   // ---------------------------------------------------------------------------
   // 10. NOTIFICATIONS
   // ---------------------------------------------------------------------------
-  const [notifications] = useState([
-    { id: 1, type: "alert", title: "Crisis Watch Protocol Alert", desc: "Student Angelica Dela Cruz logged high academic distress indicator.", time: "15m ago", read: false },
-    { id: 2, type: "counselor", title: "Guidance Referral Update", desc: "Counselor Maria Theresa Cruz approved peer tutoring referral for Jerome Santos.", time: "2h ago", read: false },
-    { id: 3, type: "deadline", title: "Quarter 2 Grade Submission", desc: "DepEd Form 137 electronic encoding closes on October 15, 2026.", time: "1d ago", read: true },
-    { id: 4, type: "parent", title: "Parent Acknowledgment Received", desc: "Parent of Mark Kenneth Bautista signed Q1 digital report card.", time: "2d ago", read: true }
-  ]);
+  const [notifications, setNotifications] = useState<any[]>(() => {
+    return typeof window !== "undefined" ? getActiveNotifications("teacher") : [];
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const handleNotifUpdate = () => {
+        setNotifications(getActiveNotifications("teacher"));
+      };
+      const handleInterventionsUpdate = () => {
+        const raw = getActiveInterventions();
+        setInterventionsList(raw.map((r: any) => ({
+          id: `INT-${r.id}`,
+          studentId: r.student_id,
+          studentName: r.student_name,
+          lrn: "109238475001",
+          type: r.title || r.target_domain,
+          assignedTo: r.assigned_counselor || "Class Adviser",
+          status: r.status === "Completed" ? "Completed" : "Active",
+          effectiveness: r.outcome_rating || 4,
+          startDate: "Recent",
+          latestMilestone: r.description || "Active care plan",
+          notes: r.session_notes || ""
+        })));
+      };
+      window.addEventListener("sapc:notifications-updated", handleNotifUpdate);
+      window.addEventListener("sapc_interventions_updated", handleInterventionsUpdate);
+      return () => {
+        window.removeEventListener("sapc:notifications-updated", handleNotifUpdate);
+        window.removeEventListener("sapc_interventions_updated", handleInterventionsUpdate);
+      };
+    }
+  }, []);
 
   // Selected student for deep dive views
   const selectedStudent = useMemo(() => {
@@ -702,18 +752,6 @@ export const TeacherDashboard: React.FC = () => {
   const highCount = students.filter(s => s.latest_risk_tier === "high").length;
   const atRiskCount = medCount + highCount;
 
-  // Filtered students
-  const filteredStudents = useMemo(() => {
-    return students.filter(s => {
-      const matchesSearch = 
-        s.full_name.toLowerCase().includes(search.toLowerCase()) ||
-        s.lrn.includes(search) ||
-        s.primary_risk_driver.toLowerCase().includes(search.toLowerCase());
-      const matchesRisk = riskFilter === "all" || s.latest_risk_tier === riskFilter;
-      return matchesSearch && matchesRisk;
-    });
-  }, [students, search, riskFilter]);
-
   // ---------------------------------------------------------------------------
   // Action Handlers
   // ---------------------------------------------------------------------------
@@ -723,9 +761,9 @@ export const TeacherDashboard: React.FC = () => {
       const match = wizardRawRows.find((r) => r[0] === st.lrn || r[1]?.toLowerCase() === st.full_name?.toLowerCase());
       if (match) {
         const computedGrade = parseFloat(match[5]) || st.sass_metrics.gpa;
-        const ww = parseFloat(match[2]) || 80;
-        const pt = parseFloat(match[3]) || 80;
-        const qe = parseFloat(match[4]) || 80;
+        const _ww = parseFloat(match[2]) || 80;
+        const _pt = parseFloat(match[3]) || 80;
+        const _qe = parseFloat(match[4]) || 80;
         const acadScore = Math.max(5, Math.min(100, Math.round((85 - computedGrade) * 3 + (computedGrade < 75 ? 25 : 0))));
 
         return {
@@ -1104,6 +1142,26 @@ export const TeacherDashboard: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0 pt-2 md:pt-0">
+          <button
+            type="button"
+            onClick={() => setIsDepEdFormOpen(true)}
+            className="min-h-[44px] px-3.5 sm:px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm border border-white/25 transition flex items-center justify-center gap-2 active:scale-95 shadow"
+            title="Official DepEd SF9 / SF10 Progress Card Generator"
+          >
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-300 shrink-0" />
+            <span>DepEd SF9</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsBatchModalOpen(true)}
+            className="min-h-[44px] px-3.5 sm:px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm border border-white/25 transition flex items-center justify-center gap-2 active:scale-95 shadow"
+            title="Batch Intervention & Broadcast Hub"
+          >
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-300 shrink-0" />
+            <span>Batch Action</span>
+          </button>
+
           <button
             type="button"
             onClick={() => handleTabChange("import_wizard")}
@@ -3227,6 +3285,20 @@ export const TeacherDashboard: React.FC = () => {
           onSuccess={() => showToast("Guidance referral submitted to Guidance Department.")}
         />
       )}
+
+      {/* DepEd SF9 / SF10 Official Form Modal */}
+      <DepEdFormModal
+        isOpen={isDepEdFormOpen}
+        onClose={() => setIsDepEdFormOpen(false)}
+        selectedStudent={students.find(s => s.id === selectedStudentId) || students[0]}
+      />
+
+      {/* Teacher Batch Intervention Modal */}
+      <BatchInterventionModal
+        isOpen={isBatchModalOpen}
+        onClose={() => setIsBatchModalOpen(false)}
+        onDispatched={() => showToast("Batch action dispatched successfully.")}
+      />
     </div>
   );
 };

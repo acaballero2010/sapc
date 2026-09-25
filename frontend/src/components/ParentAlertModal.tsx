@@ -142,6 +142,20 @@ export const ParentAlertModal: React.FC<ParentAlertModalProps> = ({
         localStorage.setItem("sapc_dispatched_notifications", JSON.stringify([notificationPayload, ...list]));
       }
     } finally {
+      // Also register into unified notification store
+      try {
+        const { addAppNotification } = await import("@/lib/dataset-store");
+        addAppNotification({
+          type: "parent",
+          title: subject || `Parent Meeting Dispatched: ${notificationPayload.student_name}`,
+          body: `${messageBody.substring(0, 120)}... (Channel: ${channel.toUpperCase()})`,
+          targetRole: "parent",
+          studentId: student.id,
+          studentName: notificationPayload.student_name,
+          href: "/dashboard/parent?tab=notifications"
+        });
+      } catch {}
+
       setIsSending(false);
       setIsSentSuccess(true);
       if (onSuccess) onSuccess();

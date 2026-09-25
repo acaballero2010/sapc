@@ -1132,7 +1132,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 </div>
                 {activeTab === "parent" && (
                   <div className="pt-2 border-t border-slate-200 text-[11px] text-amber-800 font-medium">
-                    ⓘ Your child's class adviser and the school registrar have received your verification request.
+                    ⓘ Your child&apos;s class adviser and the school registrar have received your verification request.
                   </div>
                 )}
               </div>

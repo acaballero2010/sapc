@@ -30,11 +30,21 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import { fetchWithAuth } from "@/lib/api";
+import { 
+  getActiveStudentDataset, 
+  updateStudentRecord, 
+  getActiveInterventions, 
+  getActiveNotifications, 
+  scheduleCounselingSession, 
+  addAppNotification 
+} from "@/lib/dataset-store";
 import { useAuth } from "@/lib/auth-context";
-import { SAPC_500_STUDENTS } from "@/data/students500";
+import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
+import { QuarterlyGradeSparkline } from "./QuarterlyGradeSparkline";
+import { DepEdFormModal } from "./DepEdFormModal";
+import { useToast } from "@/lib/toast-context";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
 import { AccountManagementModal } from "./AccountManagementModal";
 import { useDragScroll } from "@/lib/useDragScroll";
@@ -65,6 +75,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
   // Default first tab is Student Profile
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
+  const { success: toastSuccess, info: toastInfo } = useToast();
   const tabsDrag = useDragScroll<HTMLDivElement>();
   const [student, setStudent] = useState<any | null>(null);
   const [riskData, setRiskData] = useState<any | null>(null);
@@ -258,13 +270,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
     const loadProfile = async () => {
       setIsLoading(true);
       try {
-        const studentsList = (await fetchWithAuth("/students").catch(() => null)) || SAPC_500_STUDENTS;
+        const studentsList = (typeof window !== "undefined" ? getActiveStudentDataset() : []) || (await fetchWithAuth("/students").catch(() => null));
         if (studentsList && studentsList.length > 0) {
           const s = studentsList.find((st: any) => 
             (user?.student_id && st.id === user.student_id) ||
             (user?.email && st.email?.toLowerCase() === user.email.toLowerCase()) ||
             (user?.full_name && `${st.first_name} ${st.last_name}`.toLowerCase() === user.full_name.toLowerCase())
-          ) || {
+          ) || studentsList[0] || {
             id: user?.student_id || 1,
             first_name: user?.full_name ? user.full_name.split(" ")[0] : "Joshua",
             last_name: user?.full_name && user.full_name.split(" ").length > 1 ? user.full_name.split(" ").slice(1).join(" ") : "Dimaculangan",
@@ -314,6 +326,26 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
     };
 
     loadProfile();
+
+    const handleDatasetSync = () => {
+      const active = getActiveStudentDataset();
+      const current = active.find(st => st.id === (student?.id || user?.student_id || 1));
+      if (current) {
+        setStudent(current);
+        setRiskData({
+          composite_risk_score: current.latest_risk_score,
+          risk_tier: current.latest_risk_tier,
+          academic_score: current.domain_scores?.academic || 18.0,
+          family_score: current.domain_scores?.family || 14.0,
+          health_score: current.domain_scores?.health || 12.0,
+          mental_health_score: current.domain_scores?.mental_health || 15.0,
+          financial_score: current.domain_scores?.financial || 10.0
+        });
+      }
+    };
+
+    window.addEventListener("sapc:dataset-updated", handleDatasetSync);
+    return () => window.removeEventListener("sapc:dataset-updated", handleDatasetSync);
   }, [user?.student_id, user?.email, user?.full_name]);
 
   if (!isMounted) {
@@ -411,13 +443,106 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
     } catch {}
   };
 
-  const handleAssessmentSubmit = (type: string) => {
-    setAssessmentSuccessMsg(`Successfully saved and updated your ${type} screening profile.`);
+  const [activeInterventionsList, setActiveInterventionsList] = useState<any[]>(() => {
+    return typeof window !== "undefined" ? getActiveInterventions() : [];
+  });
+  const [studentNotificationsList, setStudentNotificationsList] = useState<any[]>(() => {
+    return typeof window !== "undefined" ? getActiveNotifications("student") : [];
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const handleInterventionsUpdate = () => {
+        setActiveInterventionsList(getActiveInterventions());
+      };
+      const handleNotifUpdate = () => {
+        setStudentNotificationsList(getActiveNotifications("student"));
+      };
+      window.addEventListener("sapc_interventions_updated", handleInterventionsUpdate);
+      window.addEventListener("sapc:notifications-updated", handleNotifUpdate);
+      return () => {
+        window.removeEventListener("sapc_interventions_updated", handleInterventionsUpdate);
+        window.removeEventListener("sapc:notifications-updated", handleNotifUpdate);
+      };
+    }
+  }, []);
+
+  const handleAssessmentSubmit = async (type: string) => {
+    if (!student) return;
+    let scoreToUpdate = 15;
+    let domainKey: "mental_health" | "health" | "family" | "financial" = "mental_health";
+
+    if (type.includes("Mental Health")) {
+      domainKey = "mental_health";
+      scoreToUpdate = Math.min(100, Math.round(((totalPhq9 / 27) * 55) + ((totalGad7 / 21) * 45)));
+      if (scoreToUpdate >= 65) {
+        addAppNotification({
+          type: "crisis",
+          title: `Severe Distress Flagged: ${student.full_name || student.first_name}`,
+          body: `Student recorded PHQ-9 (${totalPhq9}/27) & GAD-7 (${totalGad7}/21). Priority case review suggested.`,
+          targetRole: "counselor",
+          studentId: student.id,
+          studentName: student.full_name,
+          href: "/dashboard/guidance?tab=crisis_alerts"
+        });
+      }
+    } else if (type.includes("Physical Health")) {
+      domainKey = "health";
+      const sleepPenalty = healthForm.sleepHours < 6 ? 30 : healthForm.sleepHours < 7 ? 15 : 0;
+      const fatiguePenalty = healthForm.daytimeFatigue === "Frequent (Nearly every afternoon)" ? 35 : healthForm.daytimeFatigue.includes("Sometimes") ? 15 : 5;
+      const mealPenalty = healthForm.mealFrequency.includes("Irregular") ? 25 : healthForm.mealFrequency.includes("2 Meals") ? 15 : 5;
+      scoreToUpdate = Math.min(100, Math.max(10, sleepPenalty + fatiguePenalty + mealPenalty));
+    } else if (type.includes("Family")) {
+      domainKey = "family";
+      const burden = familyForm.isEldest ? 20 : 0;
+      const conflict = familyForm.familyConflictLevel * 10;
+      const ofw = familyForm.ofwStatus.includes("Abroad") ? 15 : 0;
+      scoreToUpdate = Math.min(100, Math.max(10, burden + conflict + ofw + 10));
+    } else if (type.includes("Financial")) {
+      domainKey = "financial";
+      const stress = financialForm.financialStressLevel * 15;
+      const work = financialForm.isWorkingStudent ? 25 : 0;
+      scoreToUpdate = Math.min(100, Math.max(10, stress + work));
+    }
+
+    const updated = await updateStudentRecord(student.id, {
+      domain_scores: {
+        ...(student.domain_scores || {}),
+        [domainKey]: scoreToUpdate
+      }
+    });
+
+    if (updated) {
+      setStudent(updated);
+      setRiskData({
+        composite_risk_score: updated.latest_risk_score,
+        risk_tier: updated.latest_risk_tier,
+        academic_score: updated.domain_scores?.academic || 18.0,
+        family_score: updated.domain_scores?.family || 14.0,
+        health_score: updated.domain_scores?.health || 12.0,
+        mental_health_score: updated.domain_scores?.mental_health || 15.0,
+        financial_score: updated.domain_scores?.financial || 10.0
+      });
+    }
+
+    setAssessmentSuccessMsg(`Successfully saved ${type} profile. Risk scores and radar visualizers updated!`);
     setTimeout(() => setAssessmentSuccessMsg(null), 3500);
   };
 
   const handleConsultationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (student) {
+      scheduleCounselingSession({
+        student_id: student.id,
+        student_name: student.full_name || `${student.first_name} ${student.last_name}`,
+        date: "Tomorrow",
+        time: "02:00 PM",
+        type: consultationReason,
+        status: "Pending Acknowledgment",
+        room: "Room 204 Guidance Center",
+        notes: `Student self-requested consultation: ${consultationNotes || "General check-in"}`
+      });
+    }
     setConsultationSubmitted(true);
     setTimeout(() => {
       setConsultationSubmitted(false);
@@ -468,6 +593,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0 pt-2 xl:pt-0">
+          <button
+            type="button"
+            onClick={() => setIsDepEdFormOpen(true)}
+            className="min-h-[44px] px-4 sm:px-5 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm border border-white/25 transition flex items-center justify-center gap-2 active:scale-95 shadow"
+          >
+            <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-300 shrink-0" />
+            <span>DepEd SF9 Card</span>
+          </button>
+
           <button
             type="button"
             onClick={onOpenChat}
@@ -1736,6 +1870,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
           onClose={() => setIsAccountModalOpen(false)}
         />
       )}
+
+      {/* DepEd SF9 / SF10 Official Form Modal */}
+      <DepEdFormModal
+        isOpen={isDepEdFormOpen}
+        onClose={() => setIsDepEdFormOpen(false)}
+        selectedStudent={student}
+      />
     </div>
   );
 };

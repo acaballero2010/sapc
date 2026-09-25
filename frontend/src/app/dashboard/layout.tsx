@@ -12,6 +12,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 import { DatasetArchiveModal } from "@/components/DatasetArchiveModal";
 import { useAuth } from "@/lib/auth-context";
 import { ShieldCheck, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
+import { CloudSyncIndicator } from "@/components/CloudSyncIndicator";
 
 export default function DashboardLayout({
   children,
@@ -115,6 +116,8 @@ export default function DashboardLayout({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              <CloudSyncIndicator />
+
               {/* Quick Search Spotlight Trigger */}
               <button
                 type="button"

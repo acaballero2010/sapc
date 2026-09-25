@@ -15,7 +15,8 @@ import {
   FileCode
 } from "lucide-react";
 import { INGESTION_DOMAINS, IngestionDomain } from "@/data/sample_templates";
-import { SAPC_500_STUDENTS } from "@/data/students500";
+import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+import { getActiveStudentDataset } from "@/lib/dataset-store";
 
 interface ArchiveSnapshot {
   id: string;
@@ -68,20 +69,22 @@ export const DatasetArchiveModal: React.FC<DatasetArchiveModalProps> = ({
 
   if (!isOpen) return null;
 
-  // 1. Download Master JSON Bundle (500 Students)
+  // 1. Download Master JSON Bundle
   const downloadMasterJson = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(SAPC_500_STUDENTS, null, 2));
+    const dataset = getActiveStudentDataset();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataset, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `SAPC_Master_500_Students_Archive_${new Date().toISOString().slice(0,10)}.json`);
+    downloadAnchor.setAttribute("download", `SAPC_Master_Students_Archive_${new Date().toISOString().slice(0,10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
-    showToast("Master 500-student database JSON archive downloaded successfully!");
+    showToast(`Master ${dataset.length}-student database JSON archive downloaded successfully!`);
   };
 
-  // 1b. Download Master CSV Bundle (500 Students)
+  // 1b. Download Master CSV Bundle
   const downloadMasterCsv = () => {
+    const dataset = getActiveStudentDataset();
     const headers = [
       "lrn",
       "full_name",
@@ -112,7 +115,7 @@ export const DatasetArchiveModal: React.FC<DatasetArchiveModalProps> = ({
 
     const csvRows = [
       headers.join(","),
-      ...SAPC_500_STUDENTS.map(s => [
+      ...dataset.map(s => [
         `"${s.lrn}"`,
         `"${s.full_name}"`,
         `"${s.first_name}"`,

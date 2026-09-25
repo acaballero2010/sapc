@@ -30,10 +30,24 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
-import { SAPC_500_STUDENTS } from "@/data/students500";
+import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
 import { AHPDataVisualizer } from "./AHPDataVisualizer";
+import { DomainRadarChart } from "./DomainRadarChart";
+import { QuarterlyGradeSparkline } from "./QuarterlyGradeSparkline";
+import { DepEdFormModal } from "./DepEdFormModal";
+import { useToast } from "@/lib/toast-context";
+import { 
+  getActiveStudentDataset, 
+  updateStudentRecord, 
+  getActiveInterventions, 
+  getActiveNotifications, 
+  scheduleCounselingSession, 
+  addAppNotification, 
+  AppNotification, 
+  InterventionCarePlan 
+} from "@/lib/dataset-store";
 
 export type ParentTabType = 
   | "dashboard"
@@ -59,6 +73,11 @@ export const ParentDashboard: React.FC = () => {
   const [selectedStudentId, setSelectedStudentId] = useState<number>(1);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [hasStudentConsent, setHasStudentConsent] = useState<boolean>(true);
+  const [studentDataset, setStudentDataset] = useState<StudentRecord[]>(() => getActiveStudentDataset());
+  const [interventionsList, setInterventionsList] = useState<InterventionCarePlan[]>(() => getActiveInterventions());
+  const [notificationsList, setNotificationsList] = useState<AppNotification[]>(() => getActiveNotifications());
+  const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
+  const { success: toastSuccess, info: toastInfo } = useToast();
   const catDrag = useDragScroll<HTMLDivElement>();
   const tabsDrag = useDragScroll<HTMLDivElement>();
 
@@ -99,12 +118,20 @@ export const ParentDashboard: React.FC = () => {
   ], []);
 
   const currentChild = useMemo(() => {
-    return SAPC_500_STUDENTS.find(s => s.id === selectedStudentId) || SAPC_500_STUDENTS[0];
-  }, [selectedStudentId]);
+    return studentDataset.find(s => s.id === selectedStudentId) || studentDataset[0] || SAPC_500_STUDENTS[0];
+  }, [studentDataset, selectedStudentId]);
 
   const currentChildInfo = useMemo(() => {
     return LINKED_CHILDREN.find(c => c.id === selectedStudentId) || LINKED_CHILDREN[0];
   }, [LINKED_CHILDREN, selectedStudentId]);
+
+  const childInterventions = useMemo(() => {
+    return interventionsList.filter(i => i.student_id === selectedStudentId);
+  }, [interventionsList, selectedStudentId]);
+
+  const childNotifications = useMemo(() => {
+    return notificationsList.filter(n => !n.student_id || n.student_id === selectedStudentId || n.audience === "all" || n.audience === "parent");
+  }, [notificationsList, selectedStudentId]);
 
   // Categories for 15 Tabs
   const CATEGORIES = useMemo(() => [
@@ -254,6 +281,32 @@ export const ParentDashboard: React.FC = () => {
   };
 
   useEffect(() => {
+    const handleDatasetUpdate = () => {
+      setStudentDataset(getActiveStudentDataset());
+    };
+    const handleInterventionsUpdate = () => {
+      setInterventionsList(getActiveInterventions());
+    };
+    const handleNotificationsUpdate = () => {
+      setNotificationsList(getActiveNotifications());
+    };
+
+    window.addEventListener("sapc_student_dataset_updated", handleDatasetUpdate);
+    window.addEventListener("sapc_interventions_updated", handleInterventionsUpdate);
+    window.addEventListener("sapc:notifications-updated", handleNotificationsUpdate);
+    window.addEventListener("sapc:referrals-updated", handleNotificationsUpdate);
+    window.addEventListener("sapc:sessions-updated", handleNotificationsUpdate);
+
+    return () => {
+      window.removeEventListener("sapc_student_dataset_updated", handleDatasetUpdate);
+      window.removeEventListener("sapc_interventions_updated", handleInterventionsUpdate);
+      window.removeEventListener("sapc:notifications-updated", handleNotificationsUpdate);
+      window.removeEventListener("sapc:referrals-updated", handleNotificationsUpdate);
+      window.removeEventListener("sapc:sessions-updated", handleNotificationsUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
     setIsMounted(true);
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -383,12 +436,15 @@ export const ParentDashboard: React.FC = () => {
               </select>
               <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-slate-500 pointer-events-none" />
             </div>
-            <div className="flex items-center justify-between text-[11px] pt-1 border-t border-white/10">
-              <span className="text-slate-300">LRN: {currentChildInfo.lrn}</span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/40">
-                <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                School Verified
-              </span>
+            <div className="flex items-center justify-between text-[11px] pt-1 border-t border-white/10 gap-2">
+              <span className="text-slate-300 truncate">LRN: {currentChildInfo.lrn}</span>
+              <button
+                onClick={() => setIsDepEdFormOpen(true)}
+                className="px-2.5 py-1 rounded-lg bg-amber-400/90 hover:bg-amber-300 text-amber-950 font-bold text-[10px] flex items-center gap-1 shadow-sm transition"
+              >
+                <Award className="w-3 h-3" />
+                <span>DepEd SF9</span>
+              </button>
             </div>
           </div>
         </div>
@@ -722,8 +778,14 @@ export const ParentDashboard: React.FC = () => {
 
                 {/* Interactive Multi-Modal Data Visualizer */}
                 <AHPDataVisualizer 
-                  studentName="Joshua Dimaculangan (Child's Wellness Matrix)"
-                  domainScores={{ academic: 28.5, family: 18.0, health: 16.5, mental: 14.0, financial: 12.0 }}
+                  studentName={`${currentChild.full_name} (Child's Wellness Matrix)`}
+                  domainScores={{ 
+                    academic: currentChild.domain_scores?.academic ?? 28.5, 
+                    family: currentChild.domain_scores?.family ?? 18.0, 
+                    health: currentChild.domain_scores?.health ?? 16.5, 
+                    mental: currentChild.domain_scores?.mental_health ?? 14.0, 
+                    financial: currentChild.domain_scores?.financial ?? 12.0 
+                  }}
                 />
 
                 {/* Plain-Language 5-Domain Summary */}
@@ -776,31 +838,72 @@ export const ParentDashboard: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <span className="px-2.5 py-0.5 rounded bg-[#8B0014] text-white font-black text-[10px]">Active Protocol</span>
-                  <h4 className="font-extrabold text-base text-slate-900 mt-1">Pre-Calculus Tutoring &amp; Exam Anxiety Coping</h4>
-                </div>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
-                  Status: In Progress
-                </span>
-              </div>
+            <div className="space-y-4">
+              {childInterventions.length > 0 ? (
+                childInterventions.map((plan) => (
+                  <div key={plan.id} className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <span className="px-2.5 py-0.5 rounded bg-[#8B0014] text-white font-black text-[10px]">Care Protocol</span>
+                        <h4 className="font-extrabold text-base text-slate-900 mt-1">{plan.title}</h4>
+                      </div>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-xl border ${
+                        plan.status === "completed" 
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                          : plan.status === "pending"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-blue-50 text-blue-700 border-blue-200"
+                      }`}>
+                        Status: {plan.status === "in-progress" ? "In Progress" : plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
+                      </span>
+                    </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-700">
-                <div className="p-3 bg-white rounded-xl border border-slate-200">
-                  <span className="text-slate-400 block text-[11px]">Assigned Handlers:</span>
-                  <strong>Mr. Santos (Adviser) &amp; Ma&apos;am Cruz (Counselor)</strong>
+                    <p className="text-xs text-slate-600 leading-relaxed">{plan.description}</p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-700">
+                      <div className="p-3 bg-white rounded-xl border border-slate-200">
+                        <span className="text-slate-400 block text-[11px]">Assigned Counselor / Adviser:</span>
+                        <strong>{plan.assigned_by || currentChildInfo.counselor}</strong>
+                      </div>
+                      <div className="p-3 bg-white rounded-xl border border-slate-200">
+                        <span className="text-slate-400 block text-[11px]">Target Domain:</span>
+                        <strong className="capitalize">{plan.domain || "Academic & Wellness"}</strong>
+                      </div>
+                      <div className="p-3 bg-white rounded-xl border border-slate-200">
+                        <span className="text-slate-400 block text-[11px]">Follow-Up / Due Date:</span>
+                        <strong>{plan.due_date || "Continuous Monitoring"}</strong>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <span className="px-2.5 py-0.5 rounded bg-[#8B0014] text-white font-black text-[10px]">Active Protocol</span>
+                      <h4 className="font-extrabold text-base text-slate-900 mt-1">Pre-Calculus Tutoring &amp; Exam Anxiety Coping</h4>
+                    </div>
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
+                      Status: In Progress
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-700">
+                    <div className="p-3 bg-white rounded-xl border border-slate-200">
+                      <span className="text-slate-400 block text-[11px]">Assigned Handlers:</span>
+                      <strong>Mr. Santos (Adviser) &amp; Ma&apos;am Cruz (Counselor)</strong>
+                    </div>
+                    <div className="p-3 bg-white rounded-xl border border-slate-200">
+                      <span className="text-slate-400 block text-[11px]">Peer Tutor:</span>
+                      <strong>Kyle Mercado (Grade 12 STEM)</strong>
+                    </div>
+                    <div className="p-3 bg-white rounded-xl border border-slate-200">
+                      <span className="text-slate-400 block text-[11px]">Expected Outcome:</span>
+                      <strong>Grade recovery above 78.0 &amp; lower GAD-7 anxiety</strong>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-3 bg-white rounded-xl border border-slate-200">
-                  <span className="text-slate-400 block text-[11px]">Peer Tutor:</span>
-                  <strong>Kyle Mercado (Grade 12 STEM)</strong>
-                </div>
-                <div className="p-3 bg-white rounded-xl border border-slate-200">
-                  <span className="text-slate-400 block text-[11px]">Expected Outcome:</span>
-                  <strong>Grade recovery above 78.0 &amp; lower GAD-7 anxiety</strong>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -849,7 +952,7 @@ export const ParentDashboard: React.FC = () => {
                           setAcknowledgments(prev => prev.map(a => a.id === ack.id ? { ...a, isAcknowledged: true, acknowledgedDate: new Date().toLocaleString() } : a));
                           showToast("You have formally acknowledged your home support commitment.");
                         }}
-                        className="px-4 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs transition"
+                        className="px-4 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs transition cursor-pointer"
                       >
                         ✓ I Acknowledge &amp; Confirm My Role
                       </button>
@@ -913,8 +1016,27 @@ export const ParentDashboard: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => showToast("Family assessment updated securely.")}
-                className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition"
+                onClick={() => {
+                  const isHigh = familyData.familySupportLevel.toLowerCase().includes("high") || familyData.parentingStyle.toLowerCase().includes("authoritative");
+                  const updatedSupportScore = isHigh ? 88.0 : 70.0;
+                  
+                  updateStudentRecord(currentChild.id, {
+                    family_support_score: updatedSupportScore
+                  });
+
+                  addAppNotification({
+                    studentId: currentChild.id,
+                    studentName: currentChild.full_name,
+                    title: "Family Environment Questionnaire Updated",
+                    body: `Parent submitted updated home context data for ${currentChild.full_name}.`,
+                    type: "parent",
+                    targetRole: "counselor",
+                    priority: "low"
+                  });
+
+                  showToast("Family assessment updated securely and synced with student file.");
+                }}
+                className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition cursor-pointer"
               >
                 Save Family Assessment
               </button>
@@ -972,8 +1094,27 @@ export const ParentDashboard: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => showToast("Financial data saved. Guidance office will assess for scholarship endorsement.")}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition"
+                onClick={() => {
+                  const isLow = financialData.is4PsBeneficiary.toLowerCase() === "yes" || financialData.monthlyIncomeBracket.includes("Below");
+                  const updatedRiskScore = isLow ? 75.0 : 35.0;
+
+                  updateStudentRecord(currentChild.id, {
+                    financial_risk_score: updatedRiskScore
+                  });
+
+                  addAppNotification({
+                    studentId: currentChild.id,
+                    studentName: currentChild.full_name,
+                    title: "Parent Financial Survey Submitted",
+                    body: `Financial survey submitted for ${currentChild.full_name} (4Ps: ${financialData.is4PsBeneficiary}).`,
+                    type: "parent",
+                    targetRole: "counselor",
+                    priority: "medium"
+                  });
+
+                  showToast("Financial data saved. Guidance office will assess for scholarship endorsement.");
+                }}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition cursor-pointer"
               >
                 Submit Financial Information
               </button>
@@ -1093,13 +1234,36 @@ export const ParentDashboard: React.FC = () => {
                       date: newMeetingDate,
                       time: newMeetingTime,
                       reason: newMeetingReason || "General progress check-in",
-                      status: "Pending Confirmation"
+                      status: "Confirmed by Guidance"
                     };
                     setRequestedMeetings(prev => [req, ...prev]);
+
+                    scheduleCounselingSession({
+                      student_id: currentChild.id,
+                      student_name: currentChild.full_name,
+                      date: newMeetingDate,
+                      time: newMeetingTime,
+                      counselor: "Maria Theresa Cruz, RGC",
+                      topic: `${newMeetingType}: ${newMeetingReason || "Parent consultation"}`,
+                      status: "Confirmed",
+                      notes: `Parent consultation requested for ${currentChild.full_name}.`,
+                      format: "in-person"
+                    });
+
+                    addAppNotification({
+                      studentId: currentChild.id,
+                      studentName: currentChild.full_name,
+                      title: `Parent Meeting Requested: ${newMeetingType}`,
+                      body: `Parent of ${currentChild.full_name} requested consultation on ${newMeetingDate} at ${newMeetingTime}.`,
+                      type: "session",
+                      targetRole: "counselor",
+                      priority: "medium"
+                    });
+
                     setNewMeetingReason("");
-                    showToast("Consultation request submitted.");
+                    showToast("Consultation request scheduled and dispatched to counselor triage queue.");
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition"
+                  className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition cursor-pointer"
                 >
                   Submit Meeting Request
                 </button>
@@ -1239,19 +1403,27 @@ export const ParentDashboard: React.FC = () => {
             </div>
 
             <div className="space-y-2 text-xs">
-              {[
-                { title: "Pre-Calculus Quiz Score Updated", time: "Yesterday, 3:15 PM", desc: "Grade 82.0 posted by Mr. Santos." },
-                { title: "Case Conference Reminder", time: "Today, 9:30 AM", desc: "Confirmation for Tuesday 2:00 PM check-in with Guidance." },
-                { title: "DepEd Card Distribution Notice", time: "Sep 15, 2026", desc: "Quarter 2 formal release schedule." }
-              ].map((n, i) => (
-                <div key={i} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5">
-                  <div className="flex justify-between items-center">
-                    <strong className="text-slate-900">{n.title}</strong>
-                    <span className="text-slate-400 text-[11px]">{n.time}</span>
+              {childNotifications.length > 0 ? (
+                childNotifications.map((n) => (
+                  <div key={n.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <strong className="text-slate-900">{n.title}</strong>
+                        {n.priority === "high" && (
+                          <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-[9px]">Urgent</span>
+                        )}
+                      </div>
+                      <span className="text-slate-400 text-[11px]">{n.created_at}</span>
+                    </div>
+                    <p className="text-slate-600">{n.message}</p>
                   </div>
-                  <p className="text-slate-600">{n.desc}</p>
+                ))
+              ) : (
+                <div className="py-8 text-center text-slate-400">
+                  <Bell className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                  <p>No new notifications at this time.</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -1381,6 +1553,13 @@ export const ParentDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* DepEd SF9 / SF10 Official Form Modal */}
+      <DepEdFormModal
+        isOpen={isDepEdFormOpen}
+        onClose={() => setIsDepEdFormOpen(false)}
+        selectedStudent={currentChild}
+      />
     </div>
   );
 };

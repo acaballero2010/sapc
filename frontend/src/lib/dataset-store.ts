@@ -1,4 +1,5 @@
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+export type { StudentRecord };
 import { db } from "@/lib/firebase";
 import { 
   collection, 
@@ -69,6 +70,14 @@ export const DEFAULT_RISK_WEIGHTS: RiskWeightsConfig = {
   health: 20.0,
   mental: 15.0,
   financial: 15.0
+};
+
+export const DEFAULT_AHP_WEIGHTS = {
+  academic: 0.30,
+  family: 0.20,
+  health: 0.20,
+  mental_health: 0.15,
+  financial: 0.15
 };
 
 const STORAGE_KEY = "sapc_custom_student_data";
@@ -304,7 +313,16 @@ export function getStudentRecord(idOrLrn: string | number): StudentRecord | unde
 /**
  * CRUD (Update): Updates an existing student record in local state and Firestore.
  */
-export async function updateStudentRecord(idOrLrn: string | number, updates: Partial<StudentRecord>): Promise<StudentRecord | null> {
+export async function updateStudentRecord(
+  idOrLrn: string | number,
+  updates: Partial<StudentRecord> & {
+    family_support_score?: number;
+    financial_risk_score?: number;
+    mental_health_score?: number;
+    health_physical_score?: number;
+    academic_gwa_score?: number;
+  }
+): Promise<StudentRecord | null> {
   const current = getActiveStudentDataset();
   const searchStr = String(idOrLrn).trim();
   const index = current.findIndex(s => String(s.id) === searchStr || String(s.lrn).trim() === searchStr);
@@ -312,13 +330,18 @@ export async function updateStudentRecord(idOrLrn: string | number, updates: Par
   if (index === -1) return null;
 
   const existing = current[index];
+  const domain_scores = {
+    academic: updates.academic_gwa_score ?? updates.domain_scores?.academic ?? existing.domain_scores.academic,
+    family: updates.family_support_score ?? updates.domain_scores?.family ?? existing.domain_scores.family,
+    health: updates.health_physical_score ?? updates.domain_scores?.health ?? existing.domain_scores.health,
+    mental_health: updates.mental_health_score ?? updates.domain_scores?.mental_health ?? existing.domain_scores.mental_health,
+    financial: updates.financial_risk_score ?? updates.domain_scores?.financial ?? existing.domain_scores.financial
+  };
+
   const updated: StudentRecord = {
     ...existing,
     ...updates,
-    domain_scores: {
-      ...existing.domain_scores,
-      ...(updates.domain_scores || {})
-    },
+    domain_scores,
     sass_metrics: {
       ...existing.sass_metrics,
       ...(updates.sass_metrics || {})
@@ -352,7 +375,7 @@ export async function updateStudentRecord(idOrLrn: string | number, updates: Par
     ip_address: "127.0.0.1 (Campus LAN)"
   });
 
-  return updated;
+  return recalculated[index] || updated;
 }
 
 /**
@@ -788,4 +811,625 @@ export async function importFullCohortCSV(csvText: string): Promise<{ success: b
   } catch (err: any) {
     return { success: false, count: 0, error: err.message || "Failed to parse CSV" };
   }
+}
+
+
+// ============================================================================
+// UNIFIED INTERVENTIONS & CARE PLANS STORE
+// ============================================================================
+export interface InterventionCarePlan {
+  id: number | string;
+  student_id: number;
+  student_name?: string;
+  title: string;
+  description?: string;
+  target_domain?: string;
+  domain?: string;
+  status: "Active" | "Completed" | "Pending Review" | "Under Review" | "in-progress" | "pending" | "completed" | string;
+  action_items?: string;
+  scheduled_followup?: string;
+  due_date?: string;
+  goals?: string;
+  session_notes?: string;
+  outcome_rating?: number;
+  assigned_counselor?: string;
+  assigned_by?: string;
+  proposed_by?: string;
+  risk_adjustment_proposed?: string;
+  created_at?: string;
+}
+
+const INTERVENTIONS_STORAGE_KEY = "sapc_interventions";
+
+export const DEFAULT_INTERVENTIONS: InterventionCarePlan[] = [
+  {
+    id: 201,
+    student_id: 1,
+    student_name: "Joshua Dimaculangan",
+    title: "Academic Remediation & Anxiety Management Protocol",
+    description: "Peer tutoring in Pre-Calculus with weekly guidance counseling check-ins for test anxiety.",
+    target_domain: "Mental Health & Academic",
+    status: "Active",
+    action_items: JSON.stringify([
+      { id: "task-101", text: "Pre-Calculus diagnostic test with Ms. Santos", assignee: "Subject Teacher", priority: "high", due_timeline: "Within 3 Days", completed: true },
+      { id: "task-102", text: "Bi-weekly 1-on-1 counseling session for test anxiety", assignee: "Guidance Counselor", priority: "high", due_timeline: "Ongoing (Weekly)", completed: false },
+      { id: "task-103", text: "Assigned peer tutor (Kyle Mercado - Grade 12 STEM)", assignee: "Class Adviser", priority: "medium", due_timeline: "Within 1 Week", completed: true },
+      { id: "task-104", text: "Parent consultation on quiet evening study space", assignee: "Parent / Guardian", priority: "routine", due_timeline: "Within 2 Weeks", completed: false }
+    ]),
+    scheduled_followup: new Date(Date.now() + 86400000 * 3).toISOString(),
+    goals: "Reduce GAD-7 anxiety score from 14 to <7, stabilize Pre-Calculus grade above 78.0",
+    session_notes: "Joshua was open about feeling overwhelmed by expectations as first in family to take STEM.",
+    outcome_rating: 4,
+    assigned_counselor: "Maria Theresa Cruz, RGC",
+    created_at: new Date(Date.now() - 86400000 * 4).toISOString()
+  },
+  {
+    id: 202,
+    student_id: 4,
+    student_name: "Samantha Nicole Reyes",
+    title: "Family Support & Attendance Recovery Plan",
+    description: "Coordination with guardian and flexible modular submission arrangement for missed HUMSS deadlines.",
+    target_domain: "Family & Attendance",
+    status: "Active",
+    action_items: JSON.stringify([
+      { id: "task-201", text: "Formal case conference with guardian at Guidance Center", assignee: "Guidance Counselor", priority: "high", due_timeline: "Within 3 Days", completed: true },
+      { id: "task-202", text: "Execute Attendance Recovery Commitment Contract", assignee: "Parent / Guardian", priority: "high", due_timeline: "Within 5 Days", completed: false },
+      { id: "task-203", text: "Daily morning attendance tracking by adviser", assignee: "Class Adviser", priority: "medium", due_timeline: "Ongoing", completed: false }
+    ]),
+    scheduled_followup: new Date(Date.now() + 86400000 * 5).toISOString(),
+    goals: "Restore 95% attendance standing and submit pending creative writing portfolios",
+    session_notes: "Guardian confirmed emotional stress at home. Flexible timeline granted.",
+    outcome_rating: 3,
+    assigned_counselor: "Maria Theresa Cruz, RGC",
+    created_at: new Date(Date.now() - 86400000 * 6).toISOString()
+  },
+  {
+    id: 203,
+    student_id: 3,
+    student_name: "Angelica Dela Cruz",
+    title: "Emergency Tuition Subsidy & Financial Aid Referral",
+    description: "Endorsement to SAPC Alumni Foundation assistance grant for delayed installment payments.",
+    target_domain: "Financial Assistance",
+    status: "Completed",
+    action_items: JSON.stringify([
+      { id: "task-301", text: "Endorse scholarship application to Alumni Foundation", assignee: "Guidance Counselor", priority: "high", due_timeline: "Completed", completed: true },
+      { id: "task-302", text: "Accounting promissory note approval", assignee: "Scholarship / Finance Office", priority: "high", due_timeline: "Completed", completed: true },
+      { id: "task-303", text: "Final voucher release & enrollment clearance", assignee: "Scholarship / Finance Office", priority: "medium", due_timeline: "Completed", completed: true }
+    ]),
+    scheduled_followup: new Date(Date.now() - 86400000 * 2).toISOString(),
+    goals: "Clear financial arrears to enable examination permits",
+    session_notes: "Grant approved. Student cleared for 2nd quarter examinations.",
+    outcome_rating: 5,
+    assigned_counselor: "Maria Theresa Cruz, RGC",
+    created_at: new Date(Date.now() - 86400000 * 10).toISOString()
+  }
+];
+
+export function getActiveInterventions(): InterventionCarePlan[] {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(INTERVENTIONS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return DEFAULT_INTERVENTIONS;
+}
+
+export function saveActiveInterventions(plans: InterventionCarePlan[]): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(INTERVENTIONS_STORAGE_KEY, JSON.stringify(plans));
+      window.dispatchEvent(new CustomEvent("sapc_interventions_updated", { detail: plans }));
+    } catch (e) {
+      console.error("Failed to save interventions locally:", e);
+    }
+  }
+}
+
+export function saveOrUpdateIntervention(plan: Partial<InterventionCarePlan> & { student_id: number; title: string }): InterventionCarePlan {
+  const current = getActiveInterventions();
+  const id = plan.id || Date.now();
+  const existingIndex = current.findIndex(p => String(p.id) === String(id));
+
+  const fullPlan: InterventionCarePlan = {
+    description: "",
+    target_domain: "Academic Remediation",
+    status: "Active",
+    action_items: "[]",
+    scheduled_followup: new Date(Date.now() + 86400000 * 7).toISOString(),
+    goals: "",
+    session_notes: "",
+    outcome_rating: 0,
+    assigned_counselor: "Maria Theresa Cruz, RGC",
+    created_at: new Date().toISOString(),
+    ...plan,
+    id,
+    student_id: plan.student_id,
+    student_name: plan.student_name || `Student #${plan.student_id}`,
+    title: plan.title,
+  };
+
+  let updatedList: InterventionCarePlan[];
+  if (existingIndex >= 0) {
+    updatedList = [...current];
+    updatedList[existingIndex] = fullPlan;
+  } else {
+    updatedList = [fullPlan, ...current];
+  }
+
+  saveActiveInterventions(updatedList);
+  return fullPlan;
+}
+
+export const createInterventionCarePlan = saveOrUpdateIntervention;
+
+export function deleteIntervention(id: number | string): boolean {
+  const current = getActiveInterventions();
+  const filtered = current.filter(p => String(p.id) !== String(id));
+  if (filtered.length !== current.length) {
+    saveActiveInterventions(filtered);
+    return true;
+  }
+  return false;
+}
+
+// ============================================================================
+// UNIFIED NOTIFICATIONS STORE (SMS, EMAIL, SYSTEM, CRISIS)
+// ============================================================================
+export interface AppNotification {
+  id: string;
+  type: "crisis" | "referral" | "session" | "system" | "info" | "parent" | "alert" | "deadline";
+  title: string;
+  body: string;
+  message?: string;
+  time: string;
+  timestamp: string;
+  created_at?: string;
+  read: boolean;
+  is_read?: boolean;
+  priority?: "urgent" | "high" | "medium" | "low" | string;
+  audience?: string;
+  targetRole?: "admin" | "counselor" | "teacher" | "student" | "parent" | "all";
+  studentId?: number;
+  student_id?: number;
+  studentName?: string;
+  student_name?: string;
+  href?: string;
+}
+
+const NOTIFICATIONS_STORAGE_KEY = "sapc_notifications";
+
+export const DEFAULT_NOTIFICATIONS: AppNotification[] = [
+  {
+    id: "notif-001",
+    type: "crisis",
+    title: "Crisis Alert — High Risk Student",
+    body: "Joshua Dimaculangan logged high distress in Pre-Calculus. Counselor case conference requested.",
+    message: "Joshua Dimaculangan logged high distress in Pre-Calculus. Counselor case conference requested.",
+    time: "5 min ago",
+    timestamp: new Date(Date.now() - 300000).toISOString(),
+    created_at: "5 min ago",
+    read: false,
+    is_read: false,
+    priority: "high",
+    targetRole: "all",
+    audience: "all",
+    studentId: 1,
+    student_id: 1,
+    studentName: "Joshua Dimaculangan",
+    student_name: "Joshua Dimaculangan",
+    href: "/dashboard/guidance?tab=crisis_alerts"
+  },
+  {
+    id: "notif-002",
+    type: "referral",
+    title: "Teacher Referral Submitted",
+    body: "Mr. Roberto Santos submitted a student support referral for Grade 11 - STEM St. Augustine.",
+    message: "Mr. Roberto Santos submitted a student support referral for Grade 11 - STEM St. Augustine.",
+    time: "25 min ago",
+    timestamp: new Date(Date.now() - 1500000).toISOString(),
+    created_at: "25 min ago",
+    read: false,
+    is_read: false,
+    priority: "medium",
+    targetRole: "counselor",
+    audience: "counselor",
+    studentId: 7,
+    student_id: 7,
+    studentName: "Christian Dave Villanueva",
+    student_name: "Christian Dave Villanueva",
+    href: "/dashboard/guidance?tab=referrals"
+  },
+  {
+    id: "notif-003",
+    type: "session",
+    title: "Counseling Session Scheduled",
+    body: "Parent consultation with Mrs. Teresa Santos confirmed for Room 204 Guidance Center.",
+    message: "Parent consultation with Mrs. Teresa Santos confirmed for Room 204 Guidance Center.",
+    time: "1 hr ago",
+    timestamp: new Date(Date.now() - 3600000).toISOString(),
+    created_at: "1 hr ago",
+    read: false,
+    is_read: false,
+    priority: "medium",
+    targetRole: "all",
+    audience: "all",
+    studentId: 1,
+    student_id: 1,
+    studentName: "Joshua Dimaculangan",
+    student_name: "Joshua Dimaculangan",
+    href: "/dashboard/guidance?tab=sessions"
+  },
+  {
+    id: "notif-004",
+    type: "system",
+    title: "Dataset Ingestion & AHP Recalculation Complete",
+    body: "500 student records synchronized with DepEd DO 8, s. 2015 weighted scoring metrics.",
+    message: "500 student records synchronized with DepEd DO 8, s. 2015 weighted scoring metrics.",
+    time: "2 hrs ago",
+    timestamp: new Date(Date.now() - 7200000).toISOString(),
+    created_at: "2 hrs ago",
+    read: true,
+    is_read: true,
+    priority: "low",
+    targetRole: "all",
+    audience: "all"
+  },
+  {
+    id: "notif-005",
+    type: "parent",
+    title: "Parent Digital Form 138 Acknowledged",
+    body: "Parent of Mark Kenneth Bautista signed Q1 digital report card.",
+    message: "Parent of Mark Kenneth Bautista signed Q1 digital report card.",
+    time: "Yesterday",
+    timestamp: new Date(Date.now() - 86400000).toISOString(),
+    created_at: "Yesterday",
+    read: true,
+    is_read: true,
+    priority: "low",
+    targetRole: "teacher",
+    audience: "teacher"
+  }
+];
+
+export function getActiveNotifications(role?: string): AppNotification[] {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (!role || role === "all") return parsed;
+          return parsed.filter(n => !n.targetRole || n.targetRole === "all" || n.targetRole === role || n.audience === "all" || n.audience === role);
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+  if (!role || role === "all") return DEFAULT_NOTIFICATIONS;
+  return DEFAULT_NOTIFICATIONS.filter(n => !n.targetRole || n.targetRole === "all" || n.targetRole === role || n.audience === "all" || n.audience === role);
+}
+
+export function saveActiveNotifications(notifications: AppNotification[]): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
+      window.dispatchEvent(new CustomEvent("sapc:notifications-updated", { detail: notifications }));
+    } catch (e) {
+      console.error("Failed to save notifications locally:", e);
+    }
+  }
+}
+
+export function addAppNotification(notif: Partial<AppNotification> & { title: string; body?: string; message?: string }): AppNotification {
+  const current = getActiveNotifications();
+  const id = notif.id || `notif-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const text = notif.body || notif.message || "";
+  const fullNotif: AppNotification = {
+    time: "Just now",
+    timestamp: new Date().toISOString(),
+    created_at: "Just now",
+    read: false,
+    is_read: false,
+    targetRole: "all",
+    audience: "all",
+    priority: "medium",
+    ...notif,
+    id,
+    type: notif.type || "system",
+    title: notif.title,
+    body: text,
+    message: text,
+    studentId: notif.studentId || notif.student_id,
+    student_id: notif.student_id || notif.studentId,
+    studentName: notif.studentName || notif.student_name,
+    student_name: notif.student_name || notif.studentName,
+  };
+
+  const updated = [fullNotif, ...current];
+  saveActiveNotifications(updated);
+  return fullNotif;
+}
+
+export function markNotificationRead(id: string): void {
+  const current = getActiveNotifications();
+  const updated = current.map(n => n.id === id ? { ...n, read: true, is_read: true } : n);
+  saveActiveNotifications(updated);
+}
+
+export function markAllNotificationsRead(role?: string): void {
+  const current = getActiveNotifications();
+  const updated = current.map(n => {
+    if (!role || role === "all" || !n.targetRole || n.targetRole === "all" || n.targetRole === role) {
+      return { ...n, read: true, is_read: true };
+    }
+    return n;
+  });
+  saveActiveNotifications(updated);
+}
+
+export function deleteAppNotification(id: string): void {
+  const current = getActiveNotifications();
+  const filtered = current.filter(n => n.id !== id);
+  saveActiveNotifications(filtered);
+}
+
+// ============================================================================
+// UNIFIED TEACHER REFERRALS STORE
+// ============================================================================
+export interface TeacherReferral {
+  id: string;
+  student_id: number;
+  student_name: string;
+  lrn: string;
+  section: string;
+  referring_teacher: string;
+  concern_type: string;
+  urgency: "crisis" | "priority" | "routine" | string;
+  observations: string;
+  attempted_interventions: string[];
+  created_at: string;
+  status: "pending_review" | "accepted" | "in_progress" | "declined";
+}
+
+const REFERRALS_STORAGE_KEY = "sapc_teacher_referrals";
+
+export const DEFAULT_REFERRALS: TeacherReferral[] = [
+  {
+    id: "REF-001",
+    student_id: 1,
+    student_name: "Joshua Dimaculangan",
+    lrn: "109238475001",
+    section: "Grade 11 - St. Augustine (STEM)",
+    referring_teacher: "Mr. Roberto Santos, LPT (Class Adviser)",
+    concern_type: "Academic Helplessness & Exam Panic",
+    urgency: "priority",
+    observations: "Student exhibits visible trembling before math quizzes and has missed 2 problem set submissions.",
+    attempted_interventions: ["1-on-1 recitation debrief", "Extended submission window for quiz #2"],
+    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+    status: "pending_review"
+  },
+  {
+    id: "REF-002",
+    student_id: 7,
+    student_name: "Christian Dave Villanueva",
+    lrn: "109238475007",
+    section: "Grade 11 - St. Augustine (STEM)",
+    referring_teacher: "Engr. Paul Valdez (Chemistry Teacher)",
+    concern_type: "Working Student Fatigue & Missed Lab Tasks",
+    urgency: "routine",
+    observations: "Falls asleep during morning lecture sessions due to evening BPO shifts. Needs schedule counseling.",
+    attempted_interventions: ["Modified lab group partner assignment"],
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+    status: "in_progress"
+  }
+];
+
+export function getActiveReferrals(): TeacherReferral[] {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(REFERRALS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return DEFAULT_REFERRALS;
+}
+
+export function saveActiveReferrals(referrals: TeacherReferral[]): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(REFERRALS_STORAGE_KEY, JSON.stringify(referrals));
+      window.dispatchEvent(new CustomEvent("sapc:referrals-updated", { detail: referrals }));
+    } catch (e) {
+      console.error("Failed to save referrals locally:", e);
+    }
+  }
+}
+
+export function addTeacherReferral(ref: Partial<TeacherReferral> & { student_id: number; student_name: string; observations: string }): TeacherReferral {
+  const current = getActiveReferrals();
+  const id = ref.id || `REF-${Date.now().toString().slice(-4)}`;
+  const fullRef: TeacherReferral = {
+    lrn: "109238475000",
+    section: "Grade 11 - STEM",
+    referring_teacher: "Subject Teacher",
+    concern_type: "Academic & Emotional Distress",
+    urgency: "priority",
+    attempted_interventions: [],
+    created_at: new Date().toISOString(),
+    status: "pending_review",
+    ...ref,
+    id,
+    student_id: ref.student_id,
+    student_name: ref.student_name,
+    observations: ref.observations,
+  };
+
+  const updated = [fullRef, ...current];
+  saveActiveReferrals(updated);
+
+  // Auto-post notification
+  addAppNotification({
+    type: "referral",
+    title: `Teacher Referral: ${fullRef.student_name}`,
+    body: `${fullRef.referring_teacher} submitted a ${fullRef.urgency.toUpperCase()} referral: ${fullRef.concern_type}.`,
+    message: `${fullRef.referring_teacher} submitted a ${fullRef.urgency.toUpperCase()} referral: ${fullRef.concern_type}.`,
+    targetRole: "counselor",
+    audience: "counselor",
+    studentId: fullRef.student_id,
+    student_id: fullRef.student_id,
+    studentName: fullRef.student_name,
+    student_name: fullRef.student_name,
+    href: "/dashboard/guidance?tab=referrals"
+  });
+
+  return fullRef;
+}
+
+export function updateReferralStatus(id: string, status: TeacherReferral["status"]): void {
+  const current = getActiveReferrals();
+  const updated = current.map(r => r.id === id ? { ...r, status } : r);
+  saveActiveReferrals(updated);
+}
+
+// ============================================================================
+// UNIFIED COUNSELING SESSIONS STORE
+// ============================================================================
+export interface CounselingSession {
+  id: string;
+  student_id: number;
+  student_name: string;
+  time: string;
+  date: string;
+  type: string;
+  topic?: string;
+  counselor?: string;
+  format?: string;
+  status: "Confirmed" | "Completed" | "Pending Acknowledgment" | "Rescheduled" | "Cancelled" | "scheduled" | string;
+  room?: string;
+  notes?: string;
+}
+
+const SESSIONS_STORAGE_KEY = "sapc_counseling_sessions";
+
+export const DEFAULT_SESSIONS: CounselingSession[] = [
+  {
+    id: "SES-101",
+    student_id: 1,
+    student_name: "Joshua Dimaculangan",
+    time: "02:00 PM - 02:45 PM",
+    date: "Today",
+    type: "Academic Anxiety Counseling",
+    status: "Confirmed",
+    room: "Room 204 Guidance Center",
+    notes: "Follow up on GAD-7 anxiety triggers and Pre-Calculus tutoring match."
+  },
+  {
+    id: "SES-102",
+    student_id: 4,
+    student_name: "Samantha Nicole Reyes",
+    time: "03:30 PM - 04:15 PM",
+    date: "Tomorrow",
+    type: "Parent-Student Case Conference",
+    status: "Pending Acknowledgment",
+    room: "Room 204 Guidance Center",
+    notes: "Joint session with guardian regarding flexible attendance agreement."
+  },
+  {
+    id: "SES-103",
+    student_id: 3,
+    student_name: "Angelica Dela Cruz",
+    time: "10:00 AM - 10:30 AM",
+    date: "Sep 22, 2026",
+    type: "Routine Follow-up",
+    status: "Completed",
+    room: "Online Google Meet",
+    notes: "Financial grant promissory note verified and cleared by Accounting."
+  }
+];
+
+export function getActiveCounselingSessions(): CounselingSession[] {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(SESSIONS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return DEFAULT_SESSIONS;
+}
+
+export function saveActiveCounselingSessions(sessions: CounselingSession[]): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
+      window.dispatchEvent(new CustomEvent("sapc:sessions-updated", { detail: sessions }));
+    } catch (e) {
+      console.error("Failed to save sessions locally:", e);
+    }
+  }
+}
+
+export function scheduleCounselingSession(session: Partial<CounselingSession> & { student_id: number; student_name: string; date: string; time: string }): CounselingSession {
+  const current = getActiveCounselingSessions();
+  const id = session.id || `SES-${Date.now().toString().slice(-4)}`;
+  const fullSession: CounselingSession = {
+    type: session.topic || "1-on-1 Counseling Check-in",
+    status: "Confirmed",
+    room: "Room 204 Guidance Center, SAPC",
+    notes: "",
+    ...session,
+    id,
+    student_id: session.student_id,
+    student_name: session.student_name,
+    time: session.time,
+    date: session.date,
+  };
+
+  const updated = [fullSession, ...current];
+  saveActiveCounselingSessions(updated);
+
+  // Auto-post notification
+  addAppNotification({
+    type: "session",
+    title: `Guidance Session: ${fullSession.student_name}`,
+    body: `${fullSession.type} scheduled for ${fullSession.date} at ${fullSession.time}.`,
+    message: `${fullSession.type} scheduled for ${fullSession.date} at ${fullSession.time}.`,
+    targetRole: "all",
+    audience: "all",
+    studentId: fullSession.student_id,
+    student_id: fullSession.student_id,
+    studentName: fullSession.student_name,
+    student_name: fullSession.student_name,
+    href: "/dashboard/guidance?tab=sessions"
+  });
+
+  return fullSession;
+}
+
+export function updateSessionStatus(id: string, status: CounselingSession["status"], notes?: string): void {
+  const current = getActiveCounselingSessions();
+  const updated = current.map(s => s.id === id ? { ...s, status, notes: notes || s.notes } : s);
+  saveActiveCounselingSessions(updated);
 }

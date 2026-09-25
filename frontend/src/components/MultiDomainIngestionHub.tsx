@@ -789,7 +789,7 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
             {/* Quick Filter Results */}
             {searchStudent.trim().length > 1 && (
               <div className="max-h-48 overflow-y-auto rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100 shadow-sm">
-                {SAPC_500_STUDENTS.filter(s => 
+                {getActiveStudentDataset().filter(s => 
                   s.full_name.toLowerCase().includes(searchStudent.toLowerCase()) || 
                   s.lrn.includes(searchStudent)
                 ).slice(0, 6).map(s => (
