@@ -45,11 +45,9 @@ import {
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
-import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
 import { FacultyImportModal } from "./FacultyImportModal";
-import { RiskBadge } from "./RiskBadge";
 import { 
   getActiveStudentDataset, 
   computeCohortAggregates, 
@@ -63,9 +61,6 @@ import {
   addStudentRecord,
   updateStudentRecord,
   deleteStudentRecord,
-  getActiveInterventions,
-  saveOrUpdateIntervention,
-  InterventionCarePlan,
   addAppNotification,
   getActiveNotifications,
   FacultyRecord,
@@ -798,18 +793,18 @@ Issued Date     : ${new Date().toLocaleDateString()}
     }
   };
 
-  // Categories for 21 Tabs
+  // Categories for 19 Tabs
   const CATEGORIES = useMemo(() => [
-    { id: "all", label: "All Master Controls (21)" },
+    { id: "all", label: "All Master Controls (19)" },
     { id: "governance", label: "System & Platform Config (5)", tabIds: ["dashboard", "platform_settings", "quarter_management", "knowledge_base", "notifications"] },
     { id: "ingestion", label: "Master Ingestion & Rollback (5)", tabIds: ["import_wizard", "import_history", "revert_import", "verify_assessments", "export_import_history"] },
     { id: "students", label: "Student Master Registry (3)", tabIds: ["students", "create_student", "student_profile"] },
     { id: "users", label: "Campus Accounts & Security (5)", tabIds: ["teachers", "create_user", "parents", "pending_registrations", "export_credentials"] },
-    { id: "compliance", label: "Interventions & Reports (3)", tabIds: ["interventions", "intervention_suggestions", "reports"] }
+    { id: "compliance", label: "Institutional Compliance (1)", tabIds: ["reports"] }
   ], []);
 
   const TAB_ITEMS: Array<{ id: AdminTabType; label: string; icon: any; badge?: string; category: string }> = [
-    { id: "dashboard", label: "System Command Center", icon: Users, badge: "Master", category: "governance" },
+    { id: "dashboard", label: "System Command Center", icon: Activity, badge: "Master", category: "governance" },
     { id: "platform_settings", label: "Platform & Campus Logo", icon: Building, badge: "Admin Only", category: "governance" },
     { id: "quarter_management", label: "Quarter Management", icon: Calendar, badge: "Q2 Active", category: "governance" },
     { id: "import_wizard", label: "Master Import Wizard", icon: Layers, badge: "DepEd SASS", category: "ingestion" },
@@ -822,8 +817,6 @@ Issued Date     : ${new Date().toLocaleDateString()}
     { id: "create_user", label: "Create Campus Account", icon: Key, category: "users" },
     { id: "parents", label: "Parent Accounts & Links", icon: Users, badge: `${parentRecords.length} Active`, category: "users" },
     { id: "pending_registrations", label: "Pending Registrations", icon: UserCheck, badge: `${pendingRegistrations.length} Due`, category: "users" },
-    { id: "interventions", label: "System-Wide Interventions", icon: ShieldAlert, category: "compliance" },
-    { id: "intervention_suggestions", label: "Bulk Recommendations", icon: Sparkles, category: "compliance" },
     { id: "reports", label: "DepEd / CHED Reports", icon: Award, category: "compliance" },
     { id: "notifications", label: "Broadcast Announcements", icon: Bell, category: "governance" },
     { id: "knowledge_base", label: "Knowledge Base & FAQs", icon: HelpCircle, category: "governance" },
@@ -842,7 +835,6 @@ Issued Date     : ${new Date().toLocaleDateString()}
   const [studentPage, setStudentPage] = useState<number>(1);
   const [studentPageSize, setStudentPageSize] = useState<number>(25);
   const [studentGradeFilter, setStudentGradeFilter] = useState<string>("all");
-  const [studentTierFilter, setStudentTierFilter] = useState<string>("all");
   const [studentSectionFilter, setStudentSectionFilter] = useState<string>("all");
 
   const selectedStudentObj = useMemo(() => {
@@ -869,14 +861,11 @@ Issued Date     : ${new Date().toLocaleDateString()}
     if (studentGradeFilter !== "all") {
       result = result.filter(s => String(s.grade_level) === studentGradeFilter);
     }
-    if (studentTierFilter !== "all") {
-      result = result.filter(s => s.latest_risk_tier === studentTierFilter);
-    }
     if (studentSectionFilter !== "all") {
       result = result.filter(s => s.section_name === studentSectionFilter);
     }
     return result;
-  }, [students, searchQuery, studentGradeFilter, studentTierFilter, studentSectionFilter]);
+  }, [students, searchQuery, studentGradeFilter, studentSectionFilter]);
 
   const totalStudentPages = useMemo(() => {
     if (studentPageSize >= 500) return 1;
@@ -892,7 +881,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
   // Reset page to 1 when filters change
   useEffect(() => {
     setStudentPage(1);
-  }, [searchQuery, studentGradeFilter, studentTierFilter, studentSectionFilter, studentPageSize]);
+  }, [searchQuery, studentGradeFilter, studentSectionFilter, studentPageSize]);
 
   // ==========================================
   // 2. CREATE STUDENT FORM STATE
@@ -1115,89 +1104,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
   };
 
   // ==========================================
-  // 5. SYSTEM-WIDE INTERVENTIONS STATE
-  // ==========================================
-  const [carePlans, setCarePlans] = useState<InterventionCarePlan[]>(() => getActiveInterventions());
-  const [newCarePlanStudentId, setNewCarePlanStudentId] = useState<number>(1);
-  const [newCarePlanTitle, setNewCarePlanTitle] = useState<string>("Academic Remediation / Peer Tutoring");
-  const [newCarePlanDomain, setNewCarePlanDomain] = useState<string>("Academic");
-  const [newCarePlanDescription, setNewCarePlanDescription] = useState<string>("Provide weekly subject coaching to elevate Pre-Calculus GWA above 80.");
-  const [newCarePlanCounselor, setNewCarePlanCounselor] = useState<string>("Maria Theresa Cruz, RGC");
-  const [newCarePlanGoals, _setNewCarePlanGoals] = useState<string>("Stabilize quarterly grades and attendance");
-
-  useEffect(() => {
-    const handleInterventionsUpdate = () => {
-      setCarePlans(getActiveInterventions());
-    };
-    window.addEventListener("sapc:interventions-updated", handleInterventionsUpdate);
-    window.addEventListener("sapc_interventions_updated", handleInterventionsUpdate);
-    return () => {
-      window.removeEventListener("sapc:interventions-updated", handleInterventionsUpdate);
-      window.removeEventListener("sapc_interventions_updated", handleInterventionsUpdate);
-    };
-  }, []);
-
-  const handleCreateCarePlan = (e: React.FormEvent) => {
-    e.preventDefault();
-    const targetStudent = students.find(s => s.id === Number(newCarePlanStudentId)) || students[0];
-    if (!targetStudent) {
-      showToast("Select a valid student record.");
-      return;
-    }
-    const plan = saveOrUpdateIntervention({
-      student_id: targetStudent.id,
-      student_name: `${targetStudent.first_name} ${targetStudent.last_name}`,
-      title: newCarePlanTitle,
-      description: newCarePlanDescription,
-      target_domain: newCarePlanDomain,
-      goals: newCarePlanGoals,
-      assigned_counselor: newCarePlanCounselor,
-      status: "Active"
-    });
-    setCarePlans(getActiveInterventions());
-    showToast(`Care plan activated for ${plan.student_name}!`);
-  };
-
-  const handleQuickDeployAIPan = (student: StudentRecord) => {
-    let recTitle = "Academic Remediation & Peer Tutoring";
-    let recDomain = "Academic";
-    let recDesc = "Establish weekly tutoring and diagnostic review with Subject Adviser.";
-
-    if (student.domain_scores?.mental_health >= 30) {
-      recTitle = "Psychological First Aid & Clinical Intake";
-      recDomain = "Mental Health";
-      recDesc = "Conduct 1-on-1 counseling session and provide emotional regulation coping strategies.";
-    } else if (student.domain_scores?.family >= 25) {
-      recTitle = "Parent-Teacher Case Conference";
-      recDomain = "Family Support";
-      recDesc = "Schedule guidance conference with guardian to establish structured home study habits.";
-    } else if (student.sass_metrics?.attendance_rate_pct < 88) {
-      recTitle = "Attendance Contract & Health Check";
-      recDomain = "Health & Attendance";
-      recDesc = "Formulate flexible attendance recovery agreement and coordinate with campus clinic.";
-    } else if (student.domain_scores?.financial >= 30) {
-      recTitle = "Tuition Voucher & Financial Grant Endorsement";
-      recDomain = "Financial Assistance";
-      recDesc = "Endorse student to SAPC Alumni Foundation and PEAC voucher emergency subsidy.";
-    }
-
-    saveOrUpdateIntervention({
-      student_id: student.id,
-      student_name: `${student.first_name} ${student.last_name}`,
-      title: recTitle,
-      target_domain: recDomain,
-      description: recDesc,
-      goals: "Target risk reduction below 40 AHP points within 4 weeks",
-      assigned_counselor: "Maria Theresa Cruz, RGC",
-      status: "Active"
-    });
-    setCarePlans(getActiveInterventions());
-    showToast(`AI Care Plan deployed for ${student.first_name} ${student.last_name}!`);
-    handleTabChange("interventions");
-  };
-
-  // ==========================================
-  // 6. BROADCAST ANNOUNCEMENTS STATE
+  // 5. BROADCAST ANNOUNCEMENTS STATE
   // ==========================================
   const [broadcastAudience, setBroadcastAudience] = useState<"all" | "teacher" | "parent" | "counselor">("all");
   const [broadcastPriority, setBroadcastPriority] = useState<"info" | "urgent" | "alert">("urgent");
@@ -1383,50 +1290,52 @@ Issued Date     : ${new Date().toLocaleDateString()}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Total Enrolled</span>
+            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Master Student Records</span>
             <Users className="h-4 w-4 text-[#8B0014]" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
             <span className="text-2xl sm:text-3xl font-black text-slate-900">{cohortStats.total}</span>
-            <span className="text-xs font-bold text-slate-400">Students</span>
+            <span className="text-xs font-bold text-slate-400">Enrolled</span>
           </div>
-          <span className="text-[11px] text-slate-500">Across {cohortStats.sectionBreakdown.length || 12} Sections (JHS &amp; SHS)</span>
+          <span className="text-[11px] text-slate-500">Across {cohortStats.sectionBreakdown.length || 16} Sections (JHS &amp; SHS)</span>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-black text-rose-700 uppercase tracking-wider">High Risk / Tier 1</span>
-            <ShieldAlert className="h-4 w-4 text-rose-600" />
+            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Faculty &amp; Staff</span>
+            <GraduationCap className="h-4 w-4 text-[#8B0014]" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-2xl sm:text-3xl font-black text-rose-600">{cohortStats.highRiskCount}</span>
-            <span className="text-xs font-bold text-slate-400">({cohortStats.highRiskPct}%)</span>
+            <span className="text-2xl sm:text-3xl font-black text-slate-900">{facultyList.length}</span>
+            <span className="text-xs font-bold text-slate-400">Accounts</span>
           </div>
-          <span className="text-[11px] font-bold text-rose-700">Priority Guidance Interventions</span>
+          <span className="text-[11px] font-bold text-slate-600">
+            {facultyList.filter(f => f.role === "teacher").length} Teachers • {facultyList.filter(f => f.role === "guidance_counselor" || f.role === "counselor").length} Counselors
+          </span>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">AHP Consistency</span>
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
+            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">SASS Ingestion Pipeline</span>
+            <Layers className="h-4 w-4 text-emerald-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-2xl sm:text-3xl font-black text-emerald-600">0.048</span>
-            <span className="text-xs font-bold text-slate-400">CR</span>
+            <span className="text-2xl sm:text-3xl font-black text-emerald-600">{importHistory.length}</span>
+            <span className="text-xs font-bold text-slate-400">Batches Synced</span>
           </div>
-          <span className="text-[11px] font-bold text-emerald-700">✓ Saaty Valid (CR &le; 0.10)</span>
+          <span className="text-[11px] font-bold text-emerald-700">✓ 100% DepEd Schema Integrity</span>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Cohort Risk Avg</span>
-            <Calendar className="h-4 w-4 text-amber-600" />
+            <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Access &amp; Security Queue</span>
+            <UserCheck className="h-4 w-4 text-amber-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-2xl sm:text-3xl font-black text-amber-800">{cohortStats.avgRiskScore}</span>
-            <span className="text-xs font-bold text-slate-400">/ 100</span>
+            <span className="text-2xl sm:text-3xl font-black text-amber-800">{pendingRegistrations.length}</span>
+            <span className="text-xs font-bold text-slate-400">Registrations Due</span>
           </div>
-          <span className="text-[11px] font-bold text-amber-800">Mean 5-Domain Vulnerability</span>
+          <span className="text-[11px] font-bold text-amber-800">RA 10173 Audit Logging Active</span>
         </div>
       </div>
 
@@ -1552,9 +1461,135 @@ Issued Date     : ${new Date().toLocaleDateString()}
       {activeTab === "dashboard" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* System Health & Operations Matrix */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Longitudinal Matrix */}
-              <CohortTrendAnalytics onSelectSection={() => handleTabChange("students")} />
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div>
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-10 w-10 rounded-2xl bg-[#8B0014]/10 text-[#8B0014] flex items-center justify-center font-bold">
+                        <Activity className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                          Platform Infrastructure &amp; Health Overview
+                        </h3>
+                        <p className="text-xs sm:text-sm text-slate-500">
+                          Real-time system telemetry, Cloud Firestore multi-client sync, and institutional data governance
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold shadow-2xs self-start sm:self-auto">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Cloud Firestore Live</span>
+                  </span>
+                </div>
+
+                {/* Telemetry Metrics */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span className="text-slate-500 block font-bold text-[11px]">System Status</span>
+                    <span className="text-lg font-black text-emerald-600 flex items-center gap-1">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      99.98% Online
+                    </span>
+                    <span className="text-[10px] text-slate-400 mt-0.5 block">Sub-listeners Active</span>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span className="text-slate-500 block font-bold text-[11px]">Active Academic Term</span>
+                    <span className="text-lg font-black text-slate-900">Quarter 2</span>
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">Midterm Remediation</span>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span className="text-slate-500 block font-bold text-[11px]">Ingestion Schema</span>
+                    <span className="text-lg font-black text-blue-700">DepEd SASS v2.4</span>
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">0 Parse Errors</span>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span className="text-slate-500 block font-bold text-[11px]">Data Privacy Act</span>
+                    <span className="text-lg font-black text-emerald-700">RA 10173</span>
+                    <span className="text-[10px] text-emerald-600 mt-0.5 block">✓ Immutable Logs</span>
+                  </div>
+                </div>
+
+                {/* Quick Administrative Operations Action Matrix */}
+                <div className="space-y-3">
+                  <h4 className="font-black text-slate-900 text-sm flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-[#8B0014]" />
+                    Core Platform Governance Modules
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange("import_wizard")}
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-rose-50/50 border border-slate-200 hover:border-rose-200 transition text-left space-y-1.5 cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className="font-extrabold text-slate-900 group-hover:text-[#8B0014] text-xs">
+                          Master DepEd SASS Ingestion Hub
+                        </strong>
+                        <Layers className="h-4 w-4 text-slate-400 group-hover:text-[#8B0014]" />
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        Upload multi-domain CSV datasets (Academic, Attendance, Screeners) with real-time validation.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange("teachers")}
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-rose-50/50 border border-slate-200 hover:border-rose-200 transition text-left space-y-1.5 cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className="font-extrabold text-slate-900 group-hover:text-[#8B0014] text-xs">
+                          Faculty &amp; Counselor User Accounts
+                        </strong>
+                        <GraduationCap className="h-4 w-4 text-slate-400 group-hover:text-[#8B0014]" />
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        Manage {facultyList.length} active teacher &amp; counselor accounts, advisory rosters, and login slips.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange("pending_registrations")}
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-amber-50/50 border border-slate-200 hover:border-amber-200 transition text-left space-y-1.5 cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className="font-extrabold text-slate-900 group-hover:text-amber-800 text-xs">
+                          Pending Registration Verification Queue
+                        </strong>
+                        <UserCheck className="h-4 w-4 text-slate-400 group-hover:text-amber-700" />
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        {pendingRegistrations.length} parent &amp; faculty verification requests awaiting PSA document review.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange("platform_settings")}
+                      className="p-4 rounded-2xl bg-slate-50 hover:bg-rose-50/50 border border-slate-200 hover:border-rose-200 transition text-left space-y-1.5 cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <strong className="font-extrabold text-slate-900 group-hover:text-[#8B0014] text-xs">
+                          Institutional Branding &amp; Campus Config
+                        </strong>
+                        <Building className="h-4 w-4 text-slate-400 group-hover:text-[#8B0014]" />
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        Configure official SAPC emblem, DepEd School ID ({depEdSchoolId}), and institutional identifiers.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Recent Audit Activities */}
@@ -1567,32 +1602,40 @@ Issued Date     : ${new Date().toLocaleDateString()}
               <div className="space-y-3 text-xs">
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                   <div className="flex justify-between">
-                    <strong className="text-slate-900">AHP Weights Verification</strong>
+                    <strong className="text-slate-900">DepEd SASS Ingestion</strong>
                     <span className="text-slate-400 text-[10px]">Just now</span>
                   </div>
-                  <p className="text-slate-600">CR = 0.048 verified for 30/20/20/15/15 vector.</p>
+                  <p className="text-slate-600">Mr. Santos uploaded 45 STEM Grade 11 grades (Schema v2.4 Validated).</p>
                 </div>
 
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                   <div className="flex justify-between">
-                    <strong className="text-slate-900">DepEd SASS Ingestion</strong>
+                    <strong className="text-slate-900">Faculty Roster Synchronized</strong>
                     <span className="text-slate-400 text-[10px]">2 hrs ago</span>
                   </div>
-                  <p className="text-slate-600">Mr. Santos uploaded 45 STEM Grade 11 grades.</p>
+                  <p className="text-slate-600">7 academic faculty &amp; counselor accounts synced with Cloud Firestore.</p>
                 </div>
 
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                   <div className="flex justify-between">
-                    <strong className="text-slate-900">De-escalation Approval</strong>
+                    <strong className="text-slate-900">PSA Document Verified</strong>
                     <span className="text-slate-400 text-[10px]">Yesterday</span>
                   </div>
-                  <p className="text-slate-600">Angelica Dela Cruz risk score lowered to 32.0.</p>
+                  <p className="text-slate-600">Parent account authorized for Form 138 digital access.</p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                  <div className="flex justify-between">
+                    <strong className="text-slate-900">Security Audit Log Check</strong>
+                    <span className="text-slate-400 text-[10px]">2 days ago</span>
+                  </div>
+                  <p className="text-slate-600">RA 10173 access logs verified with 256-bit cryptographic integrity.</p>
                 </div>
               </div>
 
               <button
                 onClick={() => handleTabChange("import_history")}
-                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition text-center"
+                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition text-center cursor-pointer"
               >
                 View Full Audit Logs →
               </button>
@@ -2063,7 +2106,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  Full administrative access across all {cohortStats.sectionBreakdown.length || 12} sections with dynamic AHP 5-domain risk scoring
+                  Master learner census, 12-digit LRN verification, section assignments, and DepEd SASS synchronization
                 </p>
               </div>
 
@@ -2114,7 +2157,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
               </div>
 
               {/* Grade Filter */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-3">
                 <select
                   value={studentGradeFilter}
                   onChange={(e) => setStudentGradeFilter(e.target.value)}
@@ -2130,28 +2173,14 @@ Issued Date     : ${new Date().toLocaleDateString()}
                 </select>
               </div>
 
-              {/* Tier Filter */}
-              <div className="lg:col-span-2">
-                <select
-                  value={studentTierFilter}
-                  onChange={(e) => setStudentTierFilter(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-[#8B0014]"
-                >
-                  <option value="all">All Risk Tiers</option>
-                  <option value="High Risk">Tier 1: High Risk</option>
-                  <option value="Moderate Risk">Tier 2: Moderate Risk</option>
-                  <option value="Low Risk">Tier 3: Low Risk</option>
-                </select>
-              </div>
-
               {/* Section Filter */}
-              <div className="lg:col-span-3">
+              <div className="lg:col-span-4">
                 <select
                   value={studentSectionFilter}
                   onChange={(e) => setStudentSectionFilter(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-[#8B0014]"
                 >
-                  <option value="all">All Sections ({uniqueSections.length})</option>
+                  <option value="all">All Advisory Sections ({uniqueSections.length})</option>
                   {uniqueSections.map((sec) => (
                     <option key={sec} value={sec}>{sec}</option>
                   ))}
@@ -2189,8 +2218,8 @@ Issued Date     : ${new Date().toLocaleDateString()}
                     <th className="py-3 px-4">#</th>
                     <th className="py-3 px-4">Student &amp; LRN</th>
                     <th className="py-3 px-4">Grade &amp; Section</th>
-                    <th className="py-3 px-4">5-Domain Profile</th>
-                    <th className="py-3 px-4">AHP Composite Risk</th>
+                    <th className="py-3 px-4">SASS Ingestion Data</th>
+                    <th className="py-3 px-4">Enrolment Status</th>
                     <th className="py-3 px-4 text-right">Admin Actions</th>
                   </tr>
                 </thead>
@@ -2227,26 +2256,22 @@ Issued Date     : ${new Date().toLocaleDateString()}
                           </td>
                           <td className="py-3.5 px-4">
                             <div className="flex flex-wrap gap-1 text-[10px]">
-                              <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-100" title="Academic GPA">
-                                GPA: {s.sass_metrics?.gpa || 85}
+                              <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-100" title="Academic GWA">
+                                GWA: {s.sass_metrics?.gpa || 85}
                               </span>
-                              <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-100" title="Attendance Rate">
+                              <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-100" title="Attendance Rate">
                                 Att: {s.sass_metrics?.attendance_rate_pct || 95}%
                               </span>
-                              {s.domain_scores?.mental_health !== undefined && s.domain_scores.mental_health > 15 && (
-                                <span className={`px-1.5 py-0.5 rounded font-bold border ${s.domain_scores.mental_health >= 30 ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-purple-50 text-purple-700 border-purple-100"}`} title="Mental Health Domain Risk">
-                                  Mental: {s.domain_scores.mental_health}
-                                </span>
-                              )}
-                              {s.domain_scores?.family !== undefined && s.domain_scores.family > 20 && (
-                                <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 font-bold border border-amber-200" title="Family Risk Indicator">
-                                  Family: {s.domain_scores.family}
-                                </span>
-                              )}
+                              <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200" title="DepEd SASS Synced">
+                                ✓ SASS Synced
+                              </span>
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
-                            <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" />
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              Active Enrolled
+                            </span>
                           </td>
                           <td className="py-3.5 px-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
@@ -2260,7 +2285,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
                                 title="Override / Edit Student Data"
                               >
                                 <Edit className="h-3 w-3" />
-                                <span>Override</span>
+                                <span>Edit Record</span>
                               </button>
 
                               <button
@@ -2583,7 +2608,9 @@ Issued Date     : ${new Date().toLocaleDateString()}
                   LRN: {selectedStudentObj.lrn} • {selectedStudentObj.section_name} • Grade {selectedStudentObj.grade_level}
                 </p>
               </div>
-              <RiskBadge score={selectedStudentObj.latest_risk_score} tier={selectedStudentObj.latest_risk_tier} size="md" />
+              <span className="px-3 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200 self-start sm:self-auto">
+                🟢 Enrolled &amp; Active
+              </span>
             </div>
 
             {/* Quick Student Selector */}
@@ -2596,7 +2623,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
               >
                 {students.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.first_name} {s.last_name} ({s.section_name} - {s.latest_risk_tier})
+                    {s.first_name} {s.last_name} ({s.section_name} - LRN: {s.lrn})
                   </option>
                 ))}
               </select>
@@ -4444,13 +4471,13 @@ Issued Date     : ${new Date().toLocaleDateString()}
                   </p>
                 </div>
                 <div className="pt-3 border-t border-purple-200/60 flex items-center justify-between">
-                  <span className="text-[10px] text-purple-700 font-bold">{carePlans.length} Care Plans</span>
+                  <span className="text-[10px] text-purple-700 font-bold">RGC Counseling Hub</span>
                   <button
                     type="button"
-                    onClick={() => handleTabChange("interventions")}
+                    onClick={() => setIsReportOpen(true)}
                     className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
                   >
-                    <span>View Care Plans</span>
+                    <span>View Summary</span>
                   </button>
                 </div>
               </div>
@@ -4479,226 +4506,6 @@ Issued Date     : ${new Date().toLocaleDateString()}
                     <span>Audit Logs</span>
                   </button>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* 14. SYSTEM-WIDE INTERVENTIONS (interventions) */}
-      {/* ========================================================= */}
-      {activeTab === "interventions" && (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <ShieldAlert className="h-6 w-6 text-[#8B0014]" />
-                  Active Guidance Care Plans &amp; Multi-Tier Interventions
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500">
-                  Track and manage targeted interventions deployed for vulnerable and high-risk learners across SAPC
-                </p>
-              </div>
-              <button
-                onClick={() => handleTabChange("intervention_suggestions")}
-                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
-              >
-                <Sparkles className="h-4 w-4" />
-                <span>AI Bulk Recommendations ({cohortStats.highRiskCount})</span>
-              </button>
-            </div>
-
-            {/* List of Active Care Plans */}
-            <div className="space-y-3">
-              <h4 className="font-black text-slate-900 text-sm">
-                Live Active Care Plans ({carePlans.length})
-              </h4>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {carePlans.map((plan) => (
-                  <div key={plan.id} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <strong className="text-slate-900 font-black text-sm block">{plan.student_name}</strong>
-                        <span className="text-slate-500 text-[11px]">Domain: {plan.target_domain}</span>
-                      </div>
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
-                        {plan.status}
-                      </span>
-                    </div>
-
-                    <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
-                      <span className="font-extrabold text-slate-900 block">{plan.title}</span>
-                      <p className="text-slate-600 text-[11px] leading-relaxed">{plan.description}</p>
-                      {plan.goals && (
-                        <p className="text-[#8B0014] font-medium text-[10px] pt-1">Target Goals: {plan.goals}</p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
-                      <span>Counselor: <strong>{plan.assigned_counselor}</strong></span>
-                      <span>Created: <strong className="font-mono">{plan.created_at ? new Date(plan.created_at).toLocaleDateString() : "Active"}</strong></span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Create New Care Plan Form */}
-            <div className="p-6 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-4 text-xs">
-              <h4 className="font-black text-amber-950 text-sm">Create New Intervention Care Plan</h4>
-              <form onSubmit={handleCreateCarePlan} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-1 sm:col-span-2">
-                  <label className="font-bold text-amber-900">Target Student *</label>
-                  <select
-                    value={newCarePlanStudentId}
-                    onChange={(e) => setNewCarePlanStudentId(Number(e.target.value))}
-                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
-                  >
-                    {students.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.first_name} {s.last_name} ({s.section_name} - {s.latest_risk_tier?.toUpperCase()})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-amber-900">Target Domain</label>
-                  <select
-                    value={newCarePlanDomain}
-                    onChange={(e) => setNewCarePlanDomain(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
-                  >
-                    <option value="Academic">Academic Remediation</option>
-                    <option value="Mental Health">Mental Health & Well-being</option>
-                    <option value="Family Support">Family & Home Support</option>
-                    <option value="Health & Attendance">Health & Attendance Recovery</option>
-                    <option value="Financial Assistance">Financial Aid & Subsidy</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1 sm:col-span-2">
-                  <label className="font-bold text-amber-900">Intervention Title / Protocol</label>
-                  <input
-                    type="text"
-                    required
-                    value={newCarePlanTitle}
-                    onChange={(e) => setNewCarePlanTitle(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
-                    placeholder="e.g. Intensive Pre-Calculus Coaching & Recitation Support"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-amber-900">Assigned Counselor</label>
-                  <input
-                    type="text"
-                    value={newCarePlanCounselor}
-                    onChange={(e) => setNewCarePlanCounselor(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
-                  />
-                </div>
-
-                <div className="space-y-1 sm:col-span-3">
-                  <label className="font-bold text-amber-900">Action Items &amp; Description</label>
-                  <textarea
-                    rows={2}
-                    value={newCarePlanDescription}
-                    onChange={(e) => setNewCarePlanDescription(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-medium"
-                    placeholder="Describe specific intervention action items..."
-                  />
-                </div>
-
-                <div className="sm:col-span-3 flex justify-end pt-1">
-                  <button
-                    type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-[#8B0014] text-white font-extrabold text-xs hover:bg-[#6D0010] transition shadow-md cursor-pointer"
-                  >
-                    Activate Care Plan
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* 15. AI BULK RECOMMENDATIONS (intervention_suggestions) */}
-      {/* ========================================================= */}
-      {activeTab === "intervention_suggestions" && (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <Sparkles className="h-6 w-6 text-amber-500" />
-                  AI Automated Intervention Recommendations
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500">
-                  Algorithmic triage mapping multi-domain risk indicators to evidence-based guidance interventions
-                </p>
-              </div>
-              <button
-                onClick={() => handleTabChange("interventions")}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition cursor-pointer"
-              >
-                View Active Plans ({carePlans.length})
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                  High-Risk Learners Requiring Priority Care Plans ({students.filter(s => s.latest_risk_tier === "high" || s.latest_risk_score >= 60).length})
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {students.filter(s => s.latest_risk_tier === "high" || s.latest_risk_score >= 60).map((student) => (
-                  <div key={student.id} className="p-5 rounded-2xl bg-rose-50/40 border border-rose-200 space-y-3 text-xs flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <strong className="text-slate-900 font-black text-sm block">{student.first_name} {student.last_name}</strong>
-                          <span className="text-slate-500 text-[11px]">{student.section_name} • LRN: {student.lrn}</span>
-                        </div>
-                        <RiskBadge score={student.latest_risk_score} tier={student.latest_risk_tier} size="sm" />
-                      </div>
-
-                      <div className="p-3 bg-white rounded-xl border border-rose-200/80 space-y-1">
-                        <span className="font-extrabold text-rose-900 block">
-                          AI Recommended Modality: {
-                            student.domain_scores?.mental_health >= 30 ? "Psychological First Aid & Clinical Intake" :
-                            student.sass_metrics?.attendance_rate_pct < 88 ? "Attendance Recovery Contract" :
-                            student.domain_scores?.family >= 25 ? "Parent-Teacher Case Conference" :
-                            student.domain_scores?.financial >= 30 ? "Tuition Voucher & Financial Grant" :
-                            "Academic Remediation & Peer Tutoring"
-                          }
-                        </span>
-                        <p className="text-slate-600 text-[11px]">
-                          Primary Risk Trigger: <strong>{student.primary_risk_driver || "Multi-Domain Vulnerability"}</strong> (Score: {student.latest_risk_score}/100)
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-rose-200/60 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-500">Auto-assigned: Maria Theresa Cruz, RGC</span>
-                      <button
-                        type="button"
-                        onClick={() => handleQuickDeployAIPan(student)}
-                        className="px-3.5 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs transition flex items-center gap-1 shadow-2xs cursor-pointer"
-                      >
-                        <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                        <span>Deploy Plan</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>

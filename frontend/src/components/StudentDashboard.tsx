@@ -273,14 +273,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
             (user?.full_name && `${st.first_name} ${st.last_name}`.toLowerCase() === user.full_name.toLowerCase())
           ) || studentsList[0] || {
             id: user?.student_id || 1,
-            first_name: user?.full_name ? user.full_name.split(" ")[0] : "Joshua",
-            last_name: user?.full_name && user.full_name.split(" ").length > 1 ? user.full_name.split(" ").slice(1).join(" ") : "Dimaculangan",
-            full_name: user?.full_name || "Joshua Dimaculangan",
-            lrn: "109238475999",
-            grade_level: 11,
-            strand: "STEM",
-            section_name: "Grade 11 - St. Augustine (STEM)",
-            adviser_name: "Mr. Roberto Santos, LPT",
+            first_name: user?.full_name ? user.full_name.split(" ")[0] : "Erika",
+            last_name: user?.full_name && user.full_name.split(" ").length > 1 ? user.full_name.split(" ").slice(1).join(" ") : "Bautista",
+            full_name: user?.full_name || "Erika Bautista",
+            lrn: "109238470001",
+            grade_level: 7,
+            strand: "JHS",
+            section_name: "Grade 7 - St. Anthony",
+            adviser_name: "Ms. Elena Bautista, LPT",
             email: user?.email || "student@sapc.edu.ph"
           };
           setStudent(s);

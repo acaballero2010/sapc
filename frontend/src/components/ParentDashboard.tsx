@@ -82,36 +82,23 @@ export const ParentDashboard: React.FC = () => {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // Pre-linked children for parent demo
-  const LINKED_CHILDREN = useMemo(() => [
-    {
-      id: 1,
-      name: "Joshua Dimaculangan",
-      lrn: "109238475001",
-      section: "Grade 11 - St. Augustine (STEM)",
-      adviser: "Mr. Roberto Santos, LPT",
-      counselor: "Maria Theresa Cruz, RGC",
-      avatar: "JD"
-    },
-    {
-      id: 4,
-      name: "Samantha Nicole Reyes",
-      lrn: "109238475004",
-      section: "Grade 11 - St. Thomas (HUMSS)",
-      adviser: "Mrs. Clara Buenaflor, LPT",
-      counselor: "Maria Theresa Cruz, RGC",
-      avatar: "SR"
-    },
-    {
-      id: 3,
-      name: "Angelica Dela Cruz",
-      lrn: "109238475003",
-      section: "Grade 11 - St. Clare (ABM)",
-      adviser: "Mr. Roberto Santos, LPT",
-      counselor: "Maria Theresa Cruz, RGC",
-      avatar: "AD"
-    }
-  ], []);
+  // Pre-linked children for parent demo dynamically derived from active student database
+  const LINKED_CHILDREN = useMemo(() => {
+    const defaultIds = [1, 2, 4];
+    return defaultIds.map(id => {
+      const s = studentDataset.find(st => st.id === id) || studentDataset[0];
+      const initials = s ? `${s.first_name[0] || ""}${s.last_name[0] || ""}` : "ST";
+      return {
+        id: s.id,
+        name: s.full_name,
+        lrn: s.lrn,
+        section: s.section_name,
+        adviser: s.adviser_name,
+        counselor: "Maria Theresa Cruz, RGC",
+        avatar: initials
+      };
+    });
+  }, [studentDataset]);
 
   const currentChild = useMemo(() => {
     return studentDataset.find(s => s.id === selectedStudentId) || studentDataset[0] || SAPC_500_STUDENTS[0];

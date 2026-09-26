@@ -58,13 +58,13 @@ const DEMO_PROFILES: Record<RoleType, { email: string; pass: string; name: strin
   student: { 
     email: "student@sapc.edu.ph", 
     pass: "student123", 
-    name: "Joshua Dimaculangan",
+    name: "Erika Bautista",
     student_id: 1 
   },
   parent: { 
     email: "parent@sapc.edu.ph", 
     pass: "parent123", 
-    name: "Mrs. Elena Dimaculangan",
+    name: "Mrs. Elena Bautista",
     student_id: 1 
   }
 };

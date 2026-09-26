@@ -1111,20 +1111,20 @@ export const DEFAULT_INTERVENTIONS: InterventionCarePlan[] = [
   {
     id: 201,
     student_id: 1,
-    student_name: "Joshua Dimaculangan",
+    student_name: "Erika Bautista",
     title: "Academic Remediation & Anxiety Management Protocol",
-    description: "Peer tutoring in Pre-Calculus with weekly guidance counseling check-ins for test anxiety.",
+    description: "Peer tutoring in Mathematics with weekly guidance counseling check-ins for test anxiety.",
     target_domain: "Mental Health & Academic",
     status: "Active",
     action_items: JSON.stringify([
-      { id: "task-101", text: "Pre-Calculus diagnostic test with Ms. Santos", assignee: "Subject Teacher", priority: "high", due_timeline: "Within 3 Days", completed: true },
+      { id: "task-101", text: "Math diagnostic test with Ms. Elena Bautista", assignee: "Subject Teacher", priority: "high", due_timeline: "Within 3 Days", completed: true },
       { id: "task-102", text: "Bi-weekly 1-on-1 counseling session for test anxiety", assignee: "Guidance Counselor", priority: "high", due_timeline: "Ongoing (Weekly)", completed: false },
-      { id: "task-103", text: "Assigned peer tutor (Kyle Mercado - Grade 12 STEM)", assignee: "Class Adviser", priority: "medium", due_timeline: "Within 1 Week", completed: true },
+      { id: "task-103", text: "Assigned peer tutor (Kyle Mercado - Grade 10)", assignee: "Class Adviser", priority: "medium", due_timeline: "Within 1 Week", completed: true },
       { id: "task-104", text: "Parent consultation on quiet evening study space", assignee: "Parent / Guardian", priority: "routine", due_timeline: "Within 2 Weeks", completed: false }
     ]),
     scheduled_followup: new Date(Date.now() + 86400000 * 3).toISOString(),
-    goals: "Reduce GAD-7 anxiety score from 14 to <7, stabilize Pre-Calculus grade above 78.0",
-    session_notes: "Joshua was open about feeling overwhelmed by expectations as first in family to take STEM.",
+    goals: "Reduce GAD-7 anxiety score from 14 to <7, stabilize Mathematics grade above 80.0",
+    session_notes: "Erika was open about feeling overwhelmed by study expectations and exam preparation.",
     outcome_rating: 4,
     assigned_counselor: "Maria Theresa Cruz, RGC",
     created_at: new Date(Date.now() - 86400000 * 4).toISOString()
@@ -1132,9 +1132,9 @@ export const DEFAULT_INTERVENTIONS: InterventionCarePlan[] = [
   {
     id: 202,
     student_id: 4,
-    student_name: "Samantha Nicole Reyes",
+    student_name: "John Paul Dimaculangan",
     title: "Family Support & Attendance Recovery Plan",
-    description: "Coordination with guardian and flexible modular submission arrangement for missed HUMSS deadlines.",
+    description: "Coordination with guardian and flexible modular submission arrangement for missed JHS deadlines.",
     target_domain: "Family & Attendance",
     status: "Active",
     action_items: JSON.stringify([
@@ -1152,7 +1152,7 @@ export const DEFAULT_INTERVENTIONS: InterventionCarePlan[] = [
   {
     id: 203,
     student_id: 3,
-    student_name: "Angelica Dela Cruz",
+    student_name: "Angelica Santos",
     title: "Emergency Tuition Subsidy & Financial Aid Referral",
     description: "Endorsement to SAPC Alumni Foundation assistance grant for delayed installment payments.",
     target_domain: "Financial Assistance",
@@ -1472,10 +1472,10 @@ export const DEFAULT_REFERRALS: TeacherReferral[] = [
   {
     id: "REF-001",
     student_id: 1,
-    student_name: "Joshua Dimaculangan",
-    lrn: "109238475001",
-    section: "Grade 11 - St. Augustine (STEM)",
-    referring_teacher: "Mr. Roberto Santos, LPT (Class Adviser)",
+    student_name: "Erika Bautista",
+    lrn: "109238470001",
+    section: "Grade 7 - St. Anthony",
+    referring_teacher: "Ms. Elena Bautista, LPT (Class Adviser)",
     concern_type: "Academic Helplessness & Exam Panic",
     urgency: "priority",
     observations: "Student exhibits visible trembling before math quizzes and has missed 2 problem set submissions.",
@@ -1485,15 +1485,15 @@ export const DEFAULT_REFERRALS: TeacherReferral[] = [
   },
   {
     id: "REF-002",
-    student_id: 7,
-    student_name: "Christian Dave Villanueva",
-    lrn: "109238475007",
-    section: "Grade 11 - St. Augustine (STEM)",
-    referring_teacher: "Engr. Paul Valdez (Chemistry Teacher)",
-    concern_type: "Working Student Fatigue & Missed Lab Tasks",
+    student_id: 2,
+    student_name: "Althea Garcia",
+    lrn: "109238470002",
+    section: "Grade 7 - St. Bernadette",
+    referring_teacher: "Mr. Carlos Dizon, LPT (Class Adviser)",
+    concern_type: "Working Student Fatigue & Missed Tasks",
     urgency: "routine",
-    observations: "Falls asleep during morning lecture sessions due to evening BPO shifts. Needs schedule counseling.",
-    attempted_interventions: ["Modified lab group partner assignment"],
+    observations: "Reports difficulty balancing family responsibilities with daytime academic schedule. Needs schedule counseling.",
+    attempted_interventions: ["Modified study group partner assignment"],
     created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
     status: "in_progress"
   }
@@ -1531,8 +1531,8 @@ export function addTeacherReferral(ref: Partial<TeacherReferral> & { student_id:
   const current = getActiveReferrals();
   const id = ref.id || `REF-${Date.now().toString().slice(-4)}`;
   const fullRef: TeacherReferral = {
-    lrn: "109238475000",
-    section: "Grade 11 - STEM",
+    lrn: "109238470000",
+    section: "Grade 7 - St. Anthony",
     referring_teacher: "Subject Teacher",
     concern_type: "Academic & Emotional Distress",
     urgency: "priority",
@@ -1597,18 +1597,18 @@ export const DEFAULT_SESSIONS: CounselingSession[] = [
   {
     id: "SES-101",
     student_id: 1,
-    student_name: "Joshua Dimaculangan",
+    student_name: "Erika Bautista",
     time: "02:00 PM - 02:45 PM",
     date: "Today",
     type: "Academic Anxiety Counseling",
     status: "Confirmed",
     room: "Room 204 Guidance Center",
-    notes: "Follow up on GAD-7 anxiety triggers and Pre-Calculus tutoring match."
+    notes: "Follow up on GAD-7 anxiety triggers and Mathematics tutoring match."
   },
   {
     id: "SES-102",
     student_id: 4,
-    student_name: "Samantha Nicole Reyes",
+    student_name: "John Paul Dimaculangan",
     time: "03:30 PM - 04:15 PM",
     date: "Tomorrow",
     type: "Parent-Student Case Conference",
@@ -1619,7 +1619,7 @@ export const DEFAULT_SESSIONS: CounselingSession[] = [
   {
     id: "SES-103",
     student_id: 3,
-    student_name: "Angelica Dela Cruz",
+    student_name: "Angelica Santos",
     time: "10:00 AM - 10:30 AM",
     date: "Sep 22, 2026",
     type: "Routine Follow-up",
