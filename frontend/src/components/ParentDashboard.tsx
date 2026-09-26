@@ -72,7 +72,7 @@ export const ParentDashboard: React.FC = () => {
   const [hasStudentConsent, setHasStudentConsent] = useState<boolean>(true);
   const [studentDataset, setStudentDataset] = useState<StudentRecord[]>(() => getActiveStudentDataset());
   const [interventionsList, setInterventionsList] = useState<InterventionCarePlan[]>(() => getActiveInterventions());
-  const [notificationsList, setNotificationsList] = useState<AppNotification[]>(() => getActiveNotifications());
+  const [notificationsList, setNotificationsList] = useState<AppNotification[]>(() => getActiveNotifications("parent"));
   const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
   const catDrag = useDragScroll<HTMLDivElement>();
   const tabsDrag = useDragScroll<HTMLDivElement>();
@@ -116,6 +116,10 @@ export const ParentDashboard: React.FC = () => {
     return notificationsList.filter(n => !n.student_id || n.student_id === selectedStudentId || n.audience === "all" || n.audience === "parent");
   }, [notificationsList, selectedStudentId]);
 
+  const unreadParentNotifsCount = useMemo(() => {
+    return notificationsList.filter(n => !n.read && !n.is_read).length;
+  }, [notificationsList]);
+
   // Categories for 15 Tabs
   const CATEGORIES = useMemo(() => [
     { id: "all", label: "All Parent Tools (15)" },
@@ -138,7 +142,7 @@ export const ParentDashboard: React.FC = () => {
     { id: "financial_assessment", label: "Financial & 4Ps Survey", icon: Wallet, badge: "Optional", category: "surveys" },
     { id: "schedule_meeting", label: "Schedule Consultation", icon: HeartHandshake, category: "connect" },
     { id: "messages", label: "Direct Teacher Chat", icon: MessageSquare, badge: "Threaded", category: "connect" },
-    { id: "notifications", label: "Parent Inbox", icon: Bell, badge: "3 New", category: "connect" },
+    { id: "notifications", label: "Parent Inbox", icon: Bell, badge: unreadParentNotifsCount > 0 ? `${unreadParentNotifsCount} New` : undefined, category: "connect" },
     { id: "resources", label: "Parenting & Health Guides", icon: FileText, category: "connect" },
     { id: "announcements", label: "School Events & Memos", icon: Sparkles, category: "connect" }
   ];
@@ -271,7 +275,7 @@ export const ParentDashboard: React.FC = () => {
       setInterventionsList(getActiveInterventions());
     };
     const handleNotificationsUpdate = () => {
-      setNotificationsList(getActiveNotifications());
+      setNotificationsList(getActiveNotifications("parent"));
     };
 
     window.addEventListener("sapc_student_dataset_updated", handleDatasetUpdate);

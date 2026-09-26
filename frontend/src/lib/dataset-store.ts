@@ -1273,20 +1273,55 @@ export interface AppNotification {
 const NOTIFICATIONS_STORAGE_KEY = "sapc_notifications";
 
 export const DEFAULT_NOTIFICATIONS: AppNotification[] = [
+  // Admin notifications
   {
-    id: "notif-001",
+    id: "notif-adm-001",
+    type: "system",
+    title: "SASS Batch Ingestion Sync Complete",
+    body: "500 student records synchronized with DepEd DO 8, s. 2015 weighted scoring metrics.",
+    message: "500 student records synchronized with DepEd DO 8, s. 2015 weighted scoring metrics.",
+    time: "10 min ago",
+    timestamp: new Date(Date.now() - 600000).toISOString(),
+    created_at: "10 min ago",
+    read: false,
+    is_read: false,
+    priority: "medium",
+    targetRole: "admin",
+    audience: "admin",
+    href: "/dashboard/admin"
+  },
+  {
+    id: "notif-adm-002",
+    type: "alert",
+    title: "RA 10173 Compliance Audit Verified",
+    body: "System security audit log generated and verified for compliance archives.",
+    message: "System security audit log generated and verified for compliance archives.",
+    time: "1 hr ago",
+    timestamp: new Date(Date.now() - 3600000).toISOString(),
+    created_at: "1 hr ago",
+    read: true,
+    is_read: true,
+    priority: "low",
+    targetRole: "admin",
+    audience: "admin",
+    href: "/dashboard/admin"
+  },
+
+  // Counselor / Guidance notifications
+  {
+    id: "notif-cns-001",
     type: "crisis",
     title: "Crisis Alert — High Risk Student",
-    body: "Joshua Dimaculangan logged high distress in Pre-Calculus. Counselor case conference requested.",
-    message: "Joshua Dimaculangan logged high distress in Pre-Calculus. Counselor case conference requested.",
+    body: "Joshua Dimaculangan logged elevated distress in Pre-Calculus. Counselor case conference requested.",
+    message: "Joshua Dimaculangan logged elevated distress in Pre-Calculus. Counselor case conference requested.",
     time: "5 min ago",
     timestamp: new Date(Date.now() - 300000).toISOString(),
     created_at: "5 min ago",
     read: false,
     is_read: false,
     priority: "high",
-    targetRole: "all",
-    audience: "all",
+    targetRole: "counselor",
+    audience: "counselor",
     studentId: 1,
     student_id: 1,
     studentName: "Joshua Dimaculangan",
@@ -1294,7 +1329,7 @@ export const DEFAULT_NOTIFICATIONS: AppNotification[] = [
     href: "/dashboard/guidance?tab=crisis_alerts"
   },
   {
-    id: "notif-002",
+    id: "notif-cns-002",
     type: "referral",
     title: "Teacher Referral Submitted",
     body: "Mr. Roberto Santos submitted a student support referral for Grade 11 - STEM St. Augustine.",
@@ -1314,74 +1349,153 @@ export const DEFAULT_NOTIFICATIONS: AppNotification[] = [
     href: "/dashboard/guidance?tab=referrals"
   },
   {
-    id: "notif-003",
+    id: "notif-cns-003",
     type: "session",
     title: "Counseling Session Scheduled",
     body: "Parent consultation with Mrs. Teresa Santos confirmed for Room 204 Guidance Center.",
     message: "Parent consultation with Mrs. Teresa Santos confirmed for Room 204 Guidance Center.",
-    time: "1 hr ago",
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    created_at: "1 hr ago",
-    read: false,
-    is_read: false,
+    time: "2 hrs ago",
+    timestamp: new Date(Date.now() - 7200000).toISOString(),
+    created_at: "2 hrs ago",
+    read: true,
+    is_read: true,
     priority: "medium",
-    targetRole: "all",
-    audience: "all",
+    targetRole: "counselor",
+    audience: "counselor",
     studentId: 1,
     student_id: 1,
     studentName: "Joshua Dimaculangan",
     student_name: "Joshua Dimaculangan",
     href: "/dashboard/guidance?tab=sessions"
   },
+
+  // Teacher notifications
   {
-    id: "notif-004",
-    type: "system",
-    title: "Dataset Ingestion & AHP Recalculation Complete",
-    body: "500 student records synchronized with DepEd DO 8, s. 2015 weighted scoring metrics.",
-    message: "500 student records synchronized with DepEd DO 8, s. 2015 weighted scoring metrics.",
-    time: "2 hrs ago",
-    timestamp: new Date(Date.now() - 7200000).toISOString(),
-    created_at: "2 hrs ago",
-    read: true,
-    is_read: true,
-    priority: "low",
-    targetRole: "all",
-    audience: "all"
-  },
-  {
-    id: "notif-005",
+    id: "notif-tch-001",
     type: "parent",
     title: "Parent Digital Form 138 Acknowledged",
-    body: "Parent of Mark Kenneth Bautista signed Q1 digital report card.",
-    message: "Parent of Mark Kenneth Bautista signed Q1 digital report card.",
-    time: "Yesterday",
-    timestamp: new Date(Date.now() - 86400000).toISOString(),
-    created_at: "Yesterday",
-    read: true,
-    is_read: true,
+    body: "Parent of Mark Kenneth Bautista digitally signed Q1 report card acknowledgment.",
+    message: "Parent of Mark Kenneth Bautista digitally signed Q1 report card acknowledgment.",
+    time: "15 min ago",
+    timestamp: new Date(Date.now() - 900000).toISOString(),
+    created_at: "15 min ago",
+    read: false,
+    is_read: false,
+    priority: "medium",
+    targetRole: "teacher",
+    audience: "teacher",
+    studentId: 4,
+    student_id: 4,
+    studentName: "Mark Kenneth Bautista",
+    student_name: "Mark Kenneth Bautista"
+  },
+  {
+    id: "notif-tch-002",
+    type: "deadline",
+    title: "Q2 Diagnostic Remarks Due",
+    body: "Submission deadline for 2nd Quarter formative assessment remarks is approaching on Friday.",
+    message: "Submission deadline for 2nd Quarter formative assessment remarks is approaching on Friday.",
+    time: "1 hr ago",
+    timestamp: new Date(Date.now() - 3600000).toISOString(),
+    created_at: "1 hr ago",
+    read: false,
+    is_read: false,
     priority: "low",
     targetRole: "teacher",
     audience: "teacher"
+  },
+
+  // Parent notifications
+  {
+    id: "notif-par-001",
+    type: "alert",
+    title: "Attendance & Punctuality Notice",
+    body: "Joshua Dimaculangan marked present for all morning classes (St. Augustine).",
+    message: "Joshua Dimaculangan marked present for all morning classes (St. Augustine).",
+    time: "30 min ago",
+    timestamp: new Date(Date.now() - 1800000).toISOString(),
+    created_at: "30 min ago",
+    read: false,
+    is_read: false,
+    priority: "medium",
+    targetRole: "parent",
+    audience: "parent",
+    studentId: 1,
+    student_id: 1,
+    studentName: "Joshua Dimaculangan",
+    student_name: "Joshua Dimaculangan"
+  },
+  {
+    id: "notif-par-002",
+    type: "info",
+    title: "Form 138 Quarterly Grades Ready",
+    body: "First Quarter academic evaluation cards are now available for review and signature.",
+    message: "First Quarter academic evaluation cards are now available for review and signature.",
+    time: "3 hrs ago",
+    timestamp: new Date(Date.now() - 10800000).toISOString(),
+    created_at: "3 hrs ago",
+    read: true,
+    is_read: true,
+    priority: "low",
+    targetRole: "parent",
+    audience: "parent"
+  },
+
+  // Student notifications
+  {
+    id: "notif-stu-001",
+    type: "session",
+    title: "Guidance Consultation Scheduled",
+    body: "Follow-up wellness check-in scheduled with Ms. Maria Theresa Cruz on Thursday at 2:00 PM.",
+    message: "Follow-up wellness check-in scheduled with Ms. Maria Theresa Cruz on Thursday at 2:00 PM.",
+    time: "45 min ago",
+    timestamp: new Date(Date.now() - 2700000).toISOString(),
+    created_at: "45 min ago",
+    read: false,
+    is_read: false,
+    priority: "medium",
+    targetRole: "student",
+    audience: "student"
   }
 ];
 
-export function getActiveNotifications(role?: string): AppNotification[] {
+function normalizeRoleForNotifs(r?: string): string {
+  if (!r) return "";
+  const low = r.toLowerCase().trim();
+  if (low === "guidance_counselor" || low === "counselor" || low === "guidance") return "counselor";
+  return low;
+}
+
+function getAllNotificationsRaw(): AppNotification[] {
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          if (!role || role === "all") return parsed;
-          return parsed.filter(n => !n.targetRole || n.targetRole === "all" || n.targetRole === role || n.audience === "all" || n.audience === role);
+          return parsed;
         }
       }
     } catch {
       // fallback
     }
   }
-  if (!role || role === "all") return DEFAULT_NOTIFICATIONS;
-  return DEFAULT_NOTIFICATIONS.filter(n => !n.targetRole || n.targetRole === "all" || n.targetRole === role || n.audience === "all" || n.audience === role);
+  return [...DEFAULT_NOTIFICATIONS];
+}
+
+export function getActiveNotifications(role?: string): AppNotification[] {
+  const normRole = normalizeRoleForNotifs(role);
+  const allNotifs = getAllNotificationsRaw();
+
+  if (!normRole || normRole === "all") return allNotifs;
+
+  return allNotifs.filter((n) => {
+    const target = normalizeRoleForNotifs(n.targetRole);
+    const audience = normalizeRoleForNotifs(n.audience);
+    if (!target || target === "all" || target === normRole) return true;
+    if (audience && (audience === "all" || audience === normRole)) return true;
+    return false;
+  });
 }
 
 export function saveActiveNotifications(notifications: AppNotification[]): void {
@@ -1396,7 +1510,7 @@ export function saveActiveNotifications(notifications: AppNotification[]): void 
 }
 
 export function addAppNotification(notif: Partial<AppNotification> & { title: string; body?: string; message?: string }): AppNotification {
-  const current = getActiveNotifications();
+  const current = getAllNotificationsRaw();
   const id = notif.id || `notif-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   const text = notif.body || notif.message || "";
   const fullNotif: AppNotification = {
@@ -1426,15 +1540,26 @@ export function addAppNotification(notif: Partial<AppNotification> & { title: st
 }
 
 export function markNotificationRead(id: string): void {
-  const current = getActiveNotifications();
-  const updated = current.map(n => n.id === id ? { ...n, read: true, is_read: true } : n);
+  const current = getAllNotificationsRaw();
+  const updated = current.map(n => (n.id === id ? { ...n, read: true, is_read: true } : n));
   saveActiveNotifications(updated);
 }
 
 export function markAllNotificationsRead(role?: string): void {
-  const current = getActiveNotifications();
-  const updated = current.map(n => {
-    if (!role || role === "all" || !n.targetRole || n.targetRole === "all" || n.targetRole === role) {
+  const normRole = normalizeRoleForNotifs(role);
+  const current = getAllNotificationsRaw();
+  const updated = current.map((n) => {
+    const target = normalizeRoleForNotifs(n.targetRole);
+    const audience = normalizeRoleForNotifs(n.audience);
+    if (
+      !normRole ||
+      normRole === "all" ||
+      !target ||
+      target === "all" ||
+      target === normRole ||
+      audience === "all" ||
+      audience === normRole
+    ) {
       return { ...n, read: true, is_read: true };
     }
     return n;
@@ -1443,7 +1568,7 @@ export function markAllNotificationsRead(role?: string): void {
 }
 
 export function deleteAppNotification(id: string): void {
-  const current = getActiveNotifications();
+  const current = getAllNotificationsRaw();
   const filtered = current.filter(n => n.id !== id);
   saveActiveNotifications(filtered);
 }

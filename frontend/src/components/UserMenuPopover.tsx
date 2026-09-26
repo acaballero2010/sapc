@@ -36,7 +36,7 @@ export const UserMenuPopover: React.FC<UserMenuPopoverProps> = ({
   onOpenAccount,
   onOpenChat,
   onOpenNotifications,
-  notifCount = 3,
+  notifCount = 0,
 }) => {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();

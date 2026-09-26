@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatbotModal } from "@/components/ChatbotModal";
@@ -13,6 +13,7 @@ import { DatasetArchiveModal } from "@/components/DatasetArchiveModal";
 import { useAuth } from "@/lib/auth-context";
 import { ShieldCheck, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
 import { CloudSyncIndicator } from "@/components/CloudSyncIndicator";
+import { getActiveNotifications, AppNotification } from "@/lib/dataset-store";
 
 export default function DashboardLayout({
   children,
@@ -28,6 +29,22 @@ export default function DashboardLayout({
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
+    return typeof window !== "undefined" ? getActiveNotifications(user?.role) : [];
+  });
+
+  useEffect(() => {
+    const handleNotifUpdate = () => {
+      setNotifications(getActiveNotifications(user?.role));
+    };
+    setNotifications(getActiveNotifications(user?.role));
+    window.addEventListener("sapc:notifications-updated", handleNotifUpdate);
+    return () => window.removeEventListener("sapc:notifications-updated", handleNotifUpdate);
+  }, [user?.role]);
+
+  const unreadNotifCount = useMemo(() => {
+    return notifications.filter((n) => !n.read && !n.is_read).length;
+  }, [notifications]);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -137,7 +154,7 @@ export default function DashboardLayout({
                 onOpenAccount={() => router.push("/dashboard/profile")}
                 onOpenChat={() => setIsChatOpen(true)}
                 onOpenNotifications={() => setIsNotifOpen(true)}
-                notifCount={3}
+                notifCount={unreadNotifCount}
               />
             </div>
           </header>
@@ -194,6 +211,7 @@ export default function DashboardLayout({
       <GlobalNotificationDrawer
         isOpen={isNotifOpen}
         onClose={() => setIsNotifOpen(false)}
+        role={user?.role}
         onNavigateTab={(tab) => {
           window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab } }));
         }}

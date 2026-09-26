@@ -34,6 +34,7 @@ import {
   deleteAppNotification,
   AppNotification 
 } from "@/lib/dataset-store";
+import { useAuth } from "@/lib/auth-context";
 
 const FILTER_TABS = ["All", "Unread", "Crisis", "Referral", "Session"] as const;
 type FilterTab = typeof FILTER_TABS[number];
@@ -42,48 +43,53 @@ interface GlobalNotificationDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigateTab?: (tab: string) => void;
+  role?: string;
 }
 
 export const GlobalNotificationDrawer: React.FC<GlobalNotificationDrawerProps> = ({
   isOpen,
   onClose,
+  role,
 }) => {
+  const { user } = useAuth();
+  const activeRole = role ?? user?.role;
+
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
-    return typeof window !== "undefined" ? getActiveNotifications() : [];
+    return typeof window !== "undefined" ? getActiveNotifications(activeRole) : [];
   });
   const [filter, setFilter] = useState<FilterTab>("All");
 
   useEffect(() => {
     const handleUpdate = () => {
-      setNotifications(getActiveNotifications());
+      setNotifications(getActiveNotifications(activeRole));
     };
     window.addEventListener("sapc:notifications-updated", handleUpdate);
     // Initial fetch
-    setNotifications(getActiveNotifications());
+    setNotifications(getActiveNotifications(activeRole));
     return () => window.removeEventListener("sapc:notifications-updated", handleUpdate);
-  }, [isOpen]);
+  }, [isOpen, activeRole]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read && !n.is_read).length;
 
   const filtered = notifications.filter((n) => {
     if (filter === "All") return true;
-    if (filter === "Unread") return !n.read;
+    if (filter === "Unread") return !n.read && !n.is_read;
     return n.type === filter.toLowerCase();
   });
 
   const handleMarkAllRead = () => {
-    markAllNotificationsRead();
-    setNotifications(getActiveNotifications());
+    markAllNotificationsRead(activeRole);
+    setNotifications(getActiveNotifications(activeRole));
   };
 
   const handleMarkRead = (id: string) => {
     markNotificationRead(id);
-    setNotifications(getActiveNotifications());
+    setNotifications(getActiveNotifications(activeRole));
   };
 
   const handleRemove = (id: string) => {
     deleteAppNotification(id);
-    setNotifications(getActiveNotifications());
+    setNotifications(getActiveNotifications(activeRole));
   };
 
   if (!isOpen) return null;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
@@ -33,6 +33,7 @@ import { ParentConsultationModal } from "./ParentConsultationModal";
 import { ReportExportModal } from "./ReportExportModal";
 import { AcademicCalendarModal } from "./AcademicCalendarModal";
 import { AccountManagementModal } from "./AccountManagementModal";
+import { getActiveNotifications, AppNotification } from "@/lib/dataset-store";
 
 interface NavbarProps {
   onOpenChat?: () => void;
@@ -56,7 +57,23 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
+    return typeof window !== "undefined" ? getActiveNotifications(user?.role) : [];
+  });
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleNotifUpdate = () => {
+      setNotifications(getActiveNotifications(user?.role));
+    };
+    setNotifications(getActiveNotifications(user?.role));
+    window.addEventListener("sapc:notifications-updated", handleNotifUpdate);
+    return () => window.removeEventListener("sapc:notifications-updated", handleNotifUpdate);
+  }, [user?.role]);
+
+  const unreadNotifCount = useMemo(() => {
+    return notifications.filter((n) => !n.read && !n.is_read).length;
+  }, [notifications]);
 
   useEffect(() => {
     const handleToggleCommand = () => setIsCommandPaletteOpen((prev) => !prev);
@@ -214,9 +231,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               title={t.notifications}
             >
               <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white font-bold text-[9px] flex items-center justify-center animate-pulse">
-                3
-              </span>
+              {unreadNotifCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white font-bold text-[9px] flex items-center justify-center animate-pulse">
+                  {unreadNotifCount > 9 ? "9+" : unreadNotifCount}
+                </span>
+              )}
             </button>
 
             {/* Book Consultation Modal Trigger */}
@@ -456,6 +475,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <GlobalNotificationDrawer
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
+        role={user?.role}
         onNavigateTab={handleNavigateTab}
       />
 
