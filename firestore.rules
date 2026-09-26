@@ -52,6 +52,21 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // Faculty & Guidance Counselor Records
+    match /faculty_records/{recordId} {
+      allow read, write: if true;
+    }
+
+    // Pending Registrations & Parent Linkages
+    match /pending_registrations/{regId} {
+      allow read, write: if true;
+    }
+
+    // Parent Accounts & Student Linkages
+    match /parent_records/{parentId} {
+      allow read, write: if true;
+    }
+
     // RA 10173 Immutable Audit Logs (Append-only audit integrity)
     match /audit_logs/{logId} {
       allow read: if true;

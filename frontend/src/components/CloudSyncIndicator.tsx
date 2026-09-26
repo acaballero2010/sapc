@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Cloud, CloudOff, RefreshCw, CheckCircle2 } from "lucide-react";
-import { db } from "@/lib/firebase";
+import { Cloud, CloudOff, RefreshCw } from "lucide-react";
 import { useToast } from "@/lib/toast-context";
 import { getActiveStudentDataset, saveStudentDataset } from "@/lib/dataset-store";
 

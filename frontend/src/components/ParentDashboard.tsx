@@ -34,10 +34,7 @@ import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
 import { AHPDataVisualizer } from "./AHPDataVisualizer";
-import { DomainRadarChart } from "./DomainRadarChart";
-import { QuarterlyGradeSparkline } from "./QuarterlyGradeSparkline";
 import { DepEdFormModal } from "./DepEdFormModal";
-import { useToast } from "@/lib/toast-context";
 import { 
   getActiveStudentDataset, 
   updateStudentRecord, 
@@ -77,7 +74,6 @@ export const ParentDashboard: React.FC = () => {
   const [interventionsList, setInterventionsList] = useState<InterventionCarePlan[]>(() => getActiveInterventions());
   const [notificationsList, setNotificationsList] = useState<AppNotification[]>(() => getActiveNotifications());
   const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
-  const { success: toastSuccess, info: toastInfo } = useToast();
   const catDrag = useDragScroll<HTMLDivElement>();
   const tabsDrag = useDragScroll<HTMLDivElement>();
 

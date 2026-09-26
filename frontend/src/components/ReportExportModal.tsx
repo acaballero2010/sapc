@@ -12,7 +12,7 @@ import {
   RotateCcw,
   Stamp
 } from "lucide-react";
-import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+import { SAPC_500_STUDENTS } from "@/data/students500";
 import { exportToCSV, exportToJSON } from "@/lib/export-utils";
 import { getActiveStudentDataset } from "@/lib/dataset-store";
 

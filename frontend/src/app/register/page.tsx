@@ -1,21 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
   GraduationCap, 
   Users, 
-  ShieldCheck, 
   ArrowRight, 
   KeyRound,
-  HeartHandshake,
   School,
   Lock,
   Mail,
   CheckCircle2,
   Calendar,
-  User
+  User,
+  Clock,
+  AlertCircle,
+  RotateCw
 } from "lucide-react";
 import { SapcLogo } from "@/components/SapcLogo";
 import { useAuth } from "@/lib/auth-context";
@@ -24,7 +25,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { GoogleRoleSelectionModal } from "@/components/GoogleRoleSelectionModal";
 
-type RegistrationRole = "student" | "teacher" | "guidance_counselor" | "parent" | "admin";
+type RegistrationRole = "student" | "parent";
 
 const TABS: Array<{
   id: RegistrationRole;
@@ -37,42 +38,18 @@ const TABS: Array<{
   {
     id: "student",
     label: "Student",
-    icon: <GraduationCap className="h-4 w-4 text-[#8B0014]" />,
-    activeColor: "text-[#8B0014] border-[#8B0014] bg-rose-50/50",
-    badge: "Student Registration",
-    desc: "Verify your SAPC Learner Reference Number to unlock your personal 5-domain wellness radar."
-  },
-  {
-    id: "teacher",
-    label: "Teacher",
-    icon: <School className="h-4 w-4 text-amber-700" />,
-    activeColor: "text-amber-800 border-amber-500 bg-amber-50/50",
-    badge: "Faculty Adviser",
-    desc: "Register with your SAPC Faculty ID to access SASS class rosters and submit 1-click guidance referrals."
-  },
-  {
-    id: "guidance_counselor",
-    label: "Counselor",
-    icon: <HeartHandshake className="h-4 w-4 text-rose-600" />,
-    activeColor: "text-rose-700 border-rose-600 bg-rose-50/50",
-    badge: "PRC Licensed",
-    desc: "Guidance and testing personnel registration for crisis triage, confidential case notes, and AHP synthesis."
+    icon: <GraduationCap className="h-5 w-5 text-[#8B0014]" />,
+    activeColor: "text-[#8B0014] border-[#8B0014] bg-rose-50/70 shadow-sm",
+    badge: "Student Account Claim",
+    desc: "Verify your SAPC 12-digit Learner Reference Number (LRN) and date of birth to activate your personal 5-domain academic & wellness radar."
   },
   {
     id: "parent",
     label: "Parent / Guardian",
-    icon: <Users className="h-4 w-4 text-blue-700" />,
-    activeColor: "text-blue-800 border-blue-600 bg-blue-50/50",
-    badge: "Family Linkage",
-    desc: "Link your verified child's LRN to receive automated academic updates, consultation alerts, and progress reports."
-  },
-  {
-    id: "admin",
-    label: "Admin",
-    icon: <ShieldCheck className="h-4 w-4 text-purple-700" />,
-    activeColor: "text-purple-800 border-purple-600 bg-purple-50/50",
-    badge: "Directorate",
-    desc: "System administration and guidance directorate registration with institutional master key."
+    icon: <Users className="h-5 w-5 text-blue-700" />,
+    activeColor: "text-blue-800 border-blue-600 bg-blue-50/70 shadow-sm",
+    badge: "Parent & Family Linkage",
+    desc: "Register your parent account and link your child's LRN to receive automated quarterly grade notifications, attendance alerts, and counseling consultation notes."
   }
 ];
 
@@ -86,6 +63,14 @@ export default function RegisterPage() {
   const [isGoogleRoleModalOpen, setIsGoogleRoleModalOpen] = useState(false);
   const [googleUserName, setGoogleUserName] = useState("SAPC Member");
 
+  // OTP Timer and State
+  const [expirySeconds, setExpirySeconds] = useState<number>(600);
+  const [resendCooldown, setResendCooldown] = useState<number>(60);
+  const [resendSuccessMsg, setResendSuccessMsg] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState<boolean>(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpSentTo, setOtpSentTo] = useState<string | null>(null);
+
   // Student form state
   const [studentName, setStudentName] = useState("");
   const [lrn, setLrn] = useState("");
@@ -93,36 +78,36 @@ export default function RegisterPage() {
   const [studentPassword, setStudentPassword] = useState("");
   const [studentBirthDate, setStudentBirthDate] = useState("");
 
-  // Teacher form state
-  const [teacherName, setTeacherName] = useState("");
-  const [teacherEmail, setTeacherEmail] = useState("");
-  const [teacherDept, setTeacherDept] = useState("Senior High School (STEM)");
-  const [teacherPassword, setTeacherPassword] = useState("");
-
-  // Counselor form state
-  const [counselorName, setCounselorName] = useState("");
-  const [counselorEmail, setCounselorEmail] = useState("");
-  const [counselorPrc, setCounselorPrc] = useState("");
-  const [counselorPassword, setCounselorPassword] = useState("");
-
   // Parent form state
   const [parentName, setParentName] = useState("");
   const [parentEmail, setParentEmail] = useState("");
+  const [parentPhone, setParentPhone] = useState("");
   const [childLrn, setChildLrn] = useState("");
   const [parentRelation, setParentRelation] = useState("Mother");
   const [parentPassword, setParentPassword] = useState("");
 
-  // Admin form state
-  const [adminName, setAdminName] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminKey, setAdminKey] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
+  // OTP Timer decrementing
+  useEffect(() => {
+    if (step !== "otp") return;
+    const timer = setInterval(() => {
+      setExpirySeconds(prev => (prev > 0 ? prev - 1 : 0));
+      setResendCooldown(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [step]);
+
+  const formatTimer = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) value = value[0];
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+    setOtpError(null);
 
     if (value && index < 5) {
       const nextInput = document.getElementById(`reg-page-otp-${index + 1}`);
@@ -130,44 +115,101 @@ export default function RegisterPage() {
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const sendOtpRequest = async (email: string, name: string) => {
+    try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, role: activeTab })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setOtpError(data.error || "Failed to dispatch verification code.");
+        return false;
+      }
+      setOtpSentTo(email);
+      setExpirySeconds(600);
+      setResendCooldown(60);
+      setOtp(["", "", "", "", "", ""]);
+      setOtpError(null);
+      return true;
+    } catch (err: any) {
+      console.warn("OTP send error:", err);
+      setOtpSentTo(email);
+      return true;
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setOtpError(null);
+
+    const emailToUse = activeTab === "student"
+      ? (studentEmail || `${lrn}@student.sapc.edu.ph`)
+      : (parentEmail || `${parentPhone.replace(/\D/g, "")}@parent.sapc.edu.ph`);
+    const nameToUse = activeTab === "student"
+      ? (studentName.trim() || `Student ${lrn}`)
+      : (parentName.trim() || "Parent / Guardian");
+
+    const sent = await sendOtpRequest(emailToUse, nameToUse);
+    setIsSubmitting(false);
+
+    if (sent) {
       setStep("otp");
-    }, 600);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || isResending) return;
+    setIsResending(true);
+    setResendSuccessMsg(null);
+    setOtpError(null);
+
+    const emailToUse = otpSentTo || (activeTab === "student" ? studentEmail : parentEmail);
+    const nameToUse = activeTab === "student" ? studentName : parentName;
+
+    const sent = await sendOtpRequest(emailToUse, nameToUse);
+    setIsResending(false);
+
+    if (sent) {
+      setResendSuccessMsg("A fresh 6-digit verification code has been dispatched.");
+      setTimeout(() => setResendSuccessMsg(null), 5000);
+    }
   };
 
   const handleVerifyOtp = async () => {
+    const allFilled = otp.every(d => d.length === 1);
+    if (!allFilled) {
+      setOtpError("Please enter all 6 digits of the verification code.");
+      return;
+    }
+
     setIsSubmitting(true);
+    setOtpError(null);
 
     try {
-      let emailToUse = "";
-      let passToUse = "";
-      let nameToUse = "";
+      const emailToUse = otpSentTo || (activeTab === "student"
+        ? (studentEmail || `student.${lrn}@sapc.edu.ph`)
+        : (parentEmail || "parent.new@sapc.edu.ph"));
+      const passToUse = activeTab === "student" ? (studentPassword || "student123") : (parentPassword || "parent123");
+      const nameToUse = activeTab === "student"
+        ? (studentName.trim() || (lrn ? `Student ${lrn}` : "SAPC Student"))
+        : (parentName.trim() || "Parent / Guardian");
       const roleToUse: RegistrationRole = activeTab;
 
-      if (activeTab === "student") {
-        emailToUse = studentEmail || `student.${lrn}@sapc.edu.ph`;
-        passToUse = studentPassword || "student123";
-        nameToUse = studentName.trim() || (lrn ? `Student ${lrn}` : "SAPC Student");
-      } else if (activeTab === "teacher") {
-        emailToUse = teacherEmail || "teacher.new@sapc.edu.ph";
-        passToUse = teacherPassword || "teacher123";
-        nameToUse = teacherName.trim() || "Faculty Member";
-      } else if (activeTab === "guidance_counselor") {
-        emailToUse = counselorEmail || "counselor.new@sapc.edu.ph";
-        passToUse = counselorPassword || "counselor123";
-        nameToUse = counselorName.trim() || "Registered Guidance Counselor";
-      } else if (activeTab === "parent") {
-        emailToUse = parentEmail || "parent.new@sapc.edu.ph";
-        passToUse = parentPassword || "parent123";
-        nameToUse = parentName.trim() || "Parent / Guardian";
-      } else if (activeTab === "admin") {
-        emailToUse = adminEmail || "admin.directorate@sapc.edu.ph";
-        passToUse = adminPassword || "admin123";
-        nameToUse = adminName.trim() || "Administrator";
+      // Verify OTP against server
+      const verifyRes = await fetch("/api/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailToUse, code: otp.join("") })
+      });
+      const verifyData = await verifyRes.json();
+
+      if (!verifyData.success) {
+        setOtpError(verifyData.error || "Incorrect verification code. Please check your inbox and try again.");
+        setIsSubmitting(false);
+        return;
       }
 
       if (auth && db) {
@@ -189,10 +231,10 @@ export default function RegisterPage() {
             linkageStatus: roleToUse === "parent" ? "pending_adviser_validation" : "verified",
             metadata: {
               lrn: activeTab === "student" ? lrn : null,
+              birthDate: activeTab === "student" ? studentBirthDate : null,
               childLrn: activeTab === "parent" ? childLrn : null,
               relationship: activeTab === "parent" ? parentRelation : null,
-              prcLicense: activeTab === "guidance_counselor" ? counselorPrc : null,
-              department: activeTab === "teacher" ? teacherDept : null
+              phone: activeTab === "parent" ? parentPhone : null
             }
           });
         } catch (fbErr: any) {
@@ -219,18 +261,15 @@ export default function RegisterPage() {
       await switchRole(roleToUse);
       setIsSubmitting(false);
       setStep("success");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Registration error:", err);
+      setOtpError(err?.message || "Registration verification failed. Please try again.");
       setIsSubmitting(false);
-      setStep("success");
     }
   };
 
   const handleFinish = () => {
-    if (activeTab === "guidance_counselor") router.push("/dashboard/guidance");
-    else if (activeTab === "teacher") router.push("/dashboard/teacher");
-    else if (activeTab === "parent") router.push("/dashboard/parent");
-    else if (activeTab === "admin") router.push("/dashboard/admin");
+    if (activeTab === "parent") router.push("/dashboard/parent");
     else router.push("/dashboard/student");
   };
 
@@ -319,36 +358,54 @@ export default function RegisterPage() {
 
           {step === "form" && (
             <div className="mt-6 space-y-6">
-              {/* Role Selection Tabs */}
+              {/* Role Selection Tabs - Industry standard clean persona selection */}
               <div>
                 <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                  Select your institutional affiliation:
+                  Select your self-service account type:
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {TABS.map((t) => (
                     <button
                       key={t.id}
                       type="button"
                       onClick={() => setActiveTab(t.id)}
-                      className={`p-3 rounded-2xl border text-xs font-bold transition flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
+                      className={`p-4 rounded-2xl border text-left transition flex items-start gap-3.5 cursor-pointer ${
                         activeTab === t.id
-                          ? `${t.activeColor} border-2 shadow-xs`
-                          : "border-slate-200 hover:border-slate-300 bg-slate-50/70 text-slate-600"
+                          ? `${t.activeColor} border-2 ring-2 ring-[#8B0014]/10`
+                          : "border-slate-200 hover:border-slate-300 bg-slate-50/70 text-slate-700 hover:bg-slate-50"
                       }`}
                     >
-                      {t.icon}
-                      <span className="font-extrabold">{t.label}</span>
+                      <div className="p-2 rounded-xl bg-white shadow-2xs shrink-0 border border-slate-100">
+                        {t.icon}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-slate-900">{t.label}</span>
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-200/80 text-slate-700">
+                            {t.badge}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 leading-snug line-clamp-2">
+                          {t.desc}
+                        </p>
+                      </div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Role Context Callout */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 leading-relaxed">
-                <strong className="text-slate-900 font-bold block mb-0.5">
-                  {TABS.find(t => t.id === activeTab)?.badge}:
-                </strong>
-                {TABS.find(t => t.id === activeTab)?.desc}
+              {/* Institutional Staff Notice (For Faculty, Counselors, Directorate) */}
+              <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-xs text-amber-900 flex items-start gap-2.5">
+                <School className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <span className="font-extrabold block text-slate-900">Are you a Faculty Member, Counselor, or Administrator?</span>
+                  <p className="text-slate-600 leading-relaxed">
+                    Institutional staff accounts are pre-provisioned by the SAPC Registrar. Please use your official <strong>@sapc.edu.ph Google SSO</strong> or {" "}
+                    <Link href="/login" className="font-bold text-[#8B0014] hover:underline">
+                      Sign In here →
+                    </Link>
+                  </p>
+                </div>
               </div>
 
               {/* Google Fast Sign Up Button */}
@@ -364,7 +421,7 @@ export default function RegisterPage() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                <span>Sign Up with Google SSO</span>
+                <span>Continue with Institutional Google SSO</span>
               </button>
 
               <div className="relative">
@@ -372,7 +429,7 @@ export default function RegisterPage() {
                   <div className="w-full border-t border-slate-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase font-extrabold text-slate-500">
-                  <span className="bg-white px-3 tracking-wider">or register with institutional credentials</span>
+                  <span className="bg-white px-3 tracking-wider">or register with credentials</span>
                 </div>
               </div>
 
@@ -428,7 +485,7 @@ export default function RegisterPage() {
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          SAPC Institutional Email *
+                          SAPC Institutional or Personal Email *
                         </label>
                         <div className="relative">
                           <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
@@ -437,7 +494,7 @@ export default function RegisterPage() {
                             required
                             value={studentEmail}
                             onChange={(e) => setStudentEmail(e.target.value)}
-                            placeholder="joshua.dimaculangan@sapc.edu.ph"
+                            placeholder="student@sapc.edu.ph"
                             className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                           />
                         </div>
@@ -457,150 +514,6 @@ export default function RegisterPage() {
                           placeholder="At least 8 characters"
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                         />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {activeTab === "teacher" && (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Full Name (with Professional Title) *
-                        </label>
-                        <div className="relative">
-                          <User className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="text"
-                            required
-                            value={teacherName}
-                            onChange={(e) => setTeacherName(e.target.value)}
-                            placeholder="Mr. Roberto Santos, LPT"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          SAPC Faculty Email *
-                        </label>
-                        <div className="relative">
-                          <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="email"
-                            required
-                            value={teacherEmail}
-                            onChange={(e) => setTeacherEmail(e.target.value)}
-                            placeholder="rsantos@sapc.edu.ph"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Department / Advisory Strand *
-                        </label>
-                        <select
-                          value={teacherDept}
-                          onChange={(e) => setTeacherDept(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        >
-                          <option value="Senior High School (STEM)">Senior High School (STEM)</option>
-                          <option value="Senior High School (ABM)">Senior High School (ABM)</option>
-                          <option value="Senior High School (HUMSS)">Senior High School (HUMSS)</option>
-                          <option value="Senior High School (GAS)">Senior High School (GAS)</option>
-                          <option value="College of Computer Studies">College of Computer Studies</option>
-                          <option value="Junior High School Department">Junior High School Department</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Create Password *
-                        </label>
-                        <div className="relative">
-                          <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="password"
-                            required
-                            value={teacherPassword}
-                            onChange={(e) => setTeacherPassword(e.target.value)}
-                            placeholder="At least 8 characters"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {activeTab === "guidance_counselor" && (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Counselor Name (with RGC/RPm) *
-                        </label>
-                        <div className="relative">
-                          <User className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="text"
-                            required
-                            value={counselorName}
-                            onChange={(e) => setCounselorName(e.target.value)}
-                            placeholder="Maria Theresa Cruz, RGC"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          PRC / PRB Guidance License No. *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={counselorPrc}
-                          onChange={(e) => setCounselorPrc(e.target.value)}
-                          placeholder="e.g. 0008472"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          SAPC Guidance Institutional Email *
-                        </label>
-                        <div className="relative">
-                          <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="email"
-                            required
-                            value={counselorEmail}
-                            onChange={(e) => setCounselorEmail(e.target.value)}
-                            placeholder="guidance@sapc.edu.ph"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Create Password *
-                        </label>
-                        <div className="relative">
-                          <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="password"
-                            required
-                            value={counselorPassword}
-                            onChange={(e) => setCounselorPassword(e.target.value)}
-                            placeholder="At least 8 characters"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                          />
-                        </div>
                       </div>
                     </div>
                   </>
@@ -658,6 +571,21 @@ export default function RegisterPage() {
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Contact Mobile Number *
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={parentPhone}
+                          onChange={(e) => setParentPhone(e.target.value)}
+                          placeholder="+63 9XX XXX XXXX"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                           Parent Email Address *
                         </label>
                         <div className="relative">
@@ -672,79 +600,6 @@ export default function RegisterPage() {
                           />
                         </div>
                       </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Create Password *
-                      </label>
-                      <div className="relative">
-                        <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                        <input
-                          type="password"
-                          required
-                          value={parentPassword}
-                          onChange={(e) => setParentPassword(e.target.value)}
-                          placeholder="At least 8 characters"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {activeTab === "admin" && (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Administrator Full Name *
-                        </label>
-                        <div className="relative">
-                          <User className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="text"
-                            required
-                            value={adminName}
-                            onChange={(e) => setAdminName(e.target.value)}
-                            placeholder="Director Remedios Santos"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Institutional Authorization Key *
-                        </label>
-                        <div className="relative">
-                          <KeyRound className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="password"
-                            required
-                            value={adminKey}
-                            onChange={(e) => setAdminKey(e.target.value)}
-                            placeholder="SAPC-AUTH-KEY-XXXX"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          SAPC Directorate Email *
-                        </label>
-                        <div className="relative">
-                          <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                          <input
-                            type="email"
-                            required
-                            value={adminEmail}
-                            onChange={(e) => setAdminEmail(e.target.value)}
-                            placeholder="admin@sapc.edu.ph"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                          />
-                        </div>
-                      </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                           Create Password *
@@ -754,8 +609,8 @@ export default function RegisterPage() {
                           <input
                             type="password"
                             required
-                            value={adminPassword}
-                            onChange={(e) => setAdminPassword(e.target.value)}
+                            value={parentPassword}
+                            onChange={(e) => setParentPassword(e.target.value)}
                             placeholder="At least 8 characters"
                             className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                           />
@@ -778,17 +633,54 @@ export default function RegisterPage() {
           )}
 
           {step === "otp" && (
-            <div className="mt-6 text-center space-y-6">
-              <div className="mx-auto w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-[#8B0014]">
+            <div className="mt-6 text-center space-y-5">
+              <div className="mx-auto w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-[#8B0014] shadow-xs">
                 <KeyRound className="h-7 w-7 animate-pulse" />
               </div>
 
               <div>
-                <h2 className="text-xl font-black text-slate-900">Enter Institutional OTP Code</h2>
+                <h2 className="text-xl font-black text-slate-900">Enter 6-Digit Verification PIN</h2>
                 <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                  A 6-digit verification code has been dispatched to your institutional address to confirm identity.
+                  A verification code has been dispatched to{" "}
+                  <strong className="text-slate-800 font-mono bg-slate-100 px-2 py-0.5 rounded-md">
+                    {otpSentTo || "your address"}
+                  </strong>.
                 </p>
+
+                {/* Expiration Timer Status Pill */}
+                <div className="pt-2 flex items-center justify-center">
+                  {expirySeconds > 120 ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                      <Clock className="h-3.5 w-3.5 text-emerald-600" />
+                      Code expires in <span className="font-mono font-bold">{formatTimer(expirySeconds)}</span>
+                    </span>
+                  ) : expirySeconds > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 animate-pulse shadow-2xs">
+                      <Clock className="h-3.5 w-3.5 text-amber-600" />
+                      Expiring soon: <span className="font-mono">{formatTimer(expirySeconds)}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs">
+                      <AlertCircle className="h-3.5 w-3.5 text-rose-600" />
+                      Code Expired — Please request a new PIN
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {resendSuccessMsg && (
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold text-center flex items-center justify-center gap-2 animate-fadeIn">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>{resendSuccessMsg}</span>
+                </div>
+              )}
+
+              {otpError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center flex items-center justify-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-[#8B0014] shrink-0" />
+                  <span>{otpError}</span>
+                </div>
+              )}
 
               <div className="flex justify-center gap-2 sm:gap-3">
                 {otp.map((digit, idx) => (
@@ -804,10 +696,10 @@ export default function RegisterPage() {
                 ))}
               </div>
 
-              <div className="pt-2 space-y-2">
+              <div className="pt-2 space-y-2.5">
                 <button
                   type="button"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || otp.some(d => !d)}
                   onClick={handleVerifyOtp}
                   className="w-full py-3.5 rounded-xl font-black text-sm bg-[#8B0014] hover:bg-[#700010] text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
@@ -815,13 +707,29 @@ export default function RegisterPage() {
                   <CheckCircle2 className="h-4 w-4" />
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setStep("form")}
-                  className="text-xs font-bold text-slate-500 hover:text-slate-800 transition"
-                >
-                  ← Back to details
-                </button>
+                <div className="flex items-center justify-between text-xs pt-1 px-1">
+                  <button
+                    type="button"
+                    onClick={() => setStep("form")}
+                    className="font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                  >
+                    ← Edit details
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={resendCooldown > 0 || isResending}
+                    onClick={handleResendOtp}
+                    className="font-bold text-[#8B0014] hover:underline disabled:text-slate-400 disabled:no-underline flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <RotateCw className={`h-3 w-3 ${isResending ? "animate-spin" : ""}`} />
+                    <span>
+                      {resendCooldown > 0
+                        ? `Resend in ${resendCooldown}s`
+                        : "Resend Code"}
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           )}

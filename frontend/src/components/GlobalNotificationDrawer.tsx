@@ -14,61 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-interface Notification {
-  id: string;
-  type: "crisis" | "referral" | "session" | "system" | "info";
-  title: string;
-  body: string;
-  time: string;
-  read: boolean;
-  href?: string;
-}
 
-const DEMO_NOTIFICATIONS: Notification[] = [
-  {
-    id: "n1",
-    type: "crisis",
-    title: "Crisis Alert — High Risk Student",
-    body: "Student record shows PHQ-9 score of 18 (Moderate-Severe). Immediate follow-up required.",
-    time: "5 min ago",
-    read: false,
-    href: "/dashboard/guidance?tab=crisis_alerts",
-  },
-  {
-    id: "n2",
-    type: "referral",
-    title: "Teacher Referral Submitted",
-    body: "Faculty Adviser submitted a wellness referral for a student in Grade 12 – STEM.",
-    time: "23 min ago",
-    read: false,
-    href: "/dashboard/guidance?tab=referrals",
-  },
-  {
-    id: "n3",
-    type: "session",
-    title: "Counseling Session Reminder",
-    body: "Scheduled session with student today at 2:00 PM – Guidance Room 204.",
-    time: "1 hr ago",
-    read: false,
-    href: "/dashboard/guidance?tab=sessions",
-  },
-  {
-    id: "n4",
-    type: "system",
-    title: "Dataset Ingestion Complete",
-    body: "Academic records for Q2 2026 have been processed. 147 student profiles updated.",
-    time: "2 hrs ago",
-    read: true,
-  },
-  {
-    id: "n5",
-    type: "info",
-    title: "AHP Weight Configuration Updated",
-    body: "Admin updated the Socioeconomic domain weight from 0.15 to 0.18.",
-    time: "Yesterday",
-    read: true,
-  },
-];
 
 const TYPE_META: Record<string, { icon: any; color: string; bg: string; label: string }> = {
   crisis:   { icon: AlertTriangle,  color: "text-rose-600",    bg: "bg-rose-50",    label: "Crisis" },

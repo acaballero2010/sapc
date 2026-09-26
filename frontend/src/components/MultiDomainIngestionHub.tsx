@@ -11,22 +11,44 @@ import {
   PlusCircle, 
   Check, 
   RefreshCw,
-  Info
+  Info,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Shield,
+  ArrowRight,
+  Database
 } from "lucide-react";
 import { INGESTION_DOMAINS, IngestionDomain, DomainMetadata } from "@/data/sample_templates";
-import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+import { StudentRecord } from "@/data/students500";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { 
   getActiveStudentDataset, 
   saveStudentDataset, 
   logCloudAuditEvent, 
-  recalculateAHPForDataset 
+  recalculateAHPForDataset,
+  getDomainIngestionCompleteness,
+  recordIngestionBatch,
+  DomainCompletenessStatus
 } from "@/lib/dataset-store";
 
 interface MultiDomainIngestionHubProps {
   onSuccess?: () => void;
   defaultDomain?: IngestionDomain;
+}
+
+export interface PreCommitDiffRow {
+  lrn: string;
+  name: string;
+  isMatched: boolean;
+  oldScore: number;
+  newScore: number;
+  oldTier: "high" | "medium" | "low";
+  newTier: "high" | "medium" | "low";
+  oldDriver: string;
+  newDriver: string;
+  highlightChange: boolean;
 }
 
 export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = ({ 
@@ -37,12 +59,16 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
   const [activeDomain, setActiveDomain] = useState<IngestionDomain>(defaultDomain);
   const [mode, setMode] = useState<"batch_csv" | "manual_entry">("batch_csv");
   
+  // 5-Domain Completeness State
+  const [completenessList, setCompletenessList] = useState<DomainCompletenessStatus[]>(() => getDomainIngestionCompleteness());
+
   // Batch CSV State
   const [file, setFile] = useState<File | null>(null);
   const [academicYear, setAcademicYear] = useState("2025-2026");
   const [quarter, setQuarter] = useState("Q1");
   const [isProcessing, setIsProcessing] = useState(false);
   const [parsedRows, setParsedRows] = useState<any[]>([]);
+  const [projectedDiffs, setProjectedDiffs] = useState<PreCommitDiffRow[]>([]);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [successResult, setSuccessResult] = useState<{
     batch_id: string;
@@ -50,6 +76,8 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
     successful_imports: number;
     domain: string;
     recalculated_risk_count: number;
+    riskIncreased: number;
+    riskDecreased: number;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -58,6 +86,22 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
   const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
   const [manualFormData, setManualFormData] = useState<Record<string, any>>({});
   const [manualSuccessMsg, setManualSuccessMsg] = useState<string | null>(null);
+
+  // Re-sync completeness list on global updates
+  React.useEffect(() => {
+    const refreshCompleteness = () => {
+      setCompletenessList(getDomainIngestionCompleteness());
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("sapc:dataset-updated", refreshCompleteness);
+      window.addEventListener("sapc:data-ingested", refreshCompleteness);
+      return () => {
+        window.removeEventListener("sapc:dataset-updated", refreshCompleteness);
+        window.removeEventListener("sapc:data-ingested", refreshCompleteness);
+      };
+    }
+  }, []);
+
 
   const domainMeta: DomainMetadata = INGESTION_DOMAINS[activeDomain];
 
@@ -169,6 +213,7 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           }
 
           setParsedRows(rows);
+          generateProjectedDiffs(rows);
         } catch {
           setValidationErrors(["Failed to read CSV file format. Please use standard UTF-8 comma-separated file."]);
         }
@@ -177,7 +222,99 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
     }
   };
 
-  // Process and Ingest Data with Live AHP Recalculation
+  // Helper: Generate Pre-Commit 3-to-5 Row Diff Preview
+  const generateProjectedDiffs = (rows: any[]) => {
+    const currentStudents = getActiveStudentDataset();
+    const diffList: PreCommitDiffRow[] = [];
+
+    rows.slice(0, 5).forEach((row) => {
+      const student = currentStudents.find(s => 
+        (row.lrn && String(row.lrn).trim() === String(s.lrn).trim()) ||
+        (row.student_id && String(row.student_id).trim() === String(s.id)) ||
+        (row.student_name && row.student_name.toLowerCase().trim() === s.full_name.toLowerCase().trim()) ||
+        (row.full_name && row.full_name.toLowerCase().trim() === s.full_name.toLowerCase().trim())
+      );
+
+      if (!student) {
+        diffList.push({
+          lrn: row.lrn || "N/A",
+          name: row.student_name || row.full_name || "New Student Entry",
+          isMatched: false,
+          oldScore: 0,
+          newScore: 25.0,
+          oldTier: "low",
+          newTier: "low",
+          oldDriver: "Baseline",
+          newDriver: "Academic",
+          highlightChange: false
+        });
+        return;
+      }
+
+      const oldScore = student.latest_risk_score || 25.0;
+      const oldTier = student.latest_risk_tier || "low";
+      const oldDriver = student.primary_risk_driver || "Academic";
+
+      const tempScores = { ...student.domain_scores };
+      
+      // Calculate simulated domain score based on active domain
+      if (row.academic_score) tempScores.academic = parseFloat(row.academic_score) || tempScores.academic;
+      if (row.quarter_gpa) {
+        const gpa = parseFloat(row.quarter_gpa) || 85;
+        const failing = parseInt(row.failing_subjects_count, 10) || 0;
+        const absent = parseInt(row.days_absent, 10) || 0;
+        const gpaPenalty = Math.max(0, (85 - gpa) * 3);
+        tempScores.academic = Math.min(100, Math.max(5, Math.round(gpaPenalty + failing * 18 + absent * 2.5)));
+      }
+      if (row.mental_health_score) tempScores.mental_health = parseFloat(row.mental_health_score) || tempScores.mental_health;
+      if (row.gad7_anxiety_score || row.phq9_depression_score) {
+        const gad7 = parseFloat(row.gad7_anxiety_score) || 4;
+        const phq9 = parseFloat(row.phq9_depression_score) || 3;
+        const stress = parseFloat(row.stress_level_1_to_5) || 2;
+        tempScores.mental_health = Math.min(100, Math.max(5, Math.round(((gad7 / 21) * 0.45 + (phq9 / 27) * 0.45) * 75 + (stress * 4))));
+      }
+      if (row.financial_score) tempScores.financial = parseFloat(row.financial_score) || tempScores.financial;
+      if (row.overdue_installments || row.unpaid_balance_php) {
+        const overdue = parseInt(row.overdue_installments, 10) || 0;
+        const balance = parseFloat(row.unpaid_balance_php) || 0;
+        tempScores.financial = Math.min(100, Math.max(5, 10 + (overdue * 16) + (balance > 10000 ? 20 : 5)));
+      }
+      if (row.family_score) tempScores.family = parseFloat(row.family_score) || tempScores.family;
+      if (row.health_score) tempScores.health = parseFloat(row.health_score) || tempScores.health;
+
+      // Composite AHP calculation
+      const comp = (tempScores.academic * 0.3) + (tempScores.family * 0.2) + (tempScores.health * 0.2) + (tempScores.mental_health * 0.15) + (tempScores.financial * 0.15);
+      const newScore = Number(comp.toFixed(1));
+      const newTier: "high" | "medium" | "low" = newScore >= 70 ? "high" : newScore >= 40 ? "medium" : "low";
+
+      const drivers = [
+        { name: "Academic", val: tempScores.academic },
+        { name: "Family", val: tempScores.family },
+        { name: "Health", val: tempScores.health },
+        { name: "Mental Health", val: tempScores.mental_health },
+        { name: "Financial", val: tempScores.financial }
+      ].sort((a, b) => b.val - a.val);
+
+      const newDriver = drivers[0].val >= 40 ? drivers[0].name : "Academic";
+
+      diffList.push({
+        lrn: student.lrn,
+        name: student.full_name,
+        isMatched: true,
+        oldScore,
+        newScore,
+        oldTier,
+        newTier,
+        oldDriver,
+        newDriver,
+        highlightChange: oldTier !== newTier || Math.abs(newScore - oldScore) >= 5
+      });
+    });
+
+    setProjectedDiffs(diffList);
+  };
+
+  // Process and Ingest Data with Live AHP Recalculation & Snapshot Backup
   const handleIngestCSV = async () => {
     if (!file || parsedRows.length === 0) return;
     setIsProcessing(true);
@@ -199,9 +336,9 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
       }
 
       // 2. Perform Client-Side AHP Multi-Factor Recalculation across 500-student database
-      // 2. Perform Client-Side AHP Multi-Factor Recalculation across 500-student database
       let updatedCount = 0;
       const baseStudents = getActiveStudentDataset();
+      const preImportSnapshot = JSON.parse(JSON.stringify(baseStudents)); // 100% loss-free rollback snapshot
 
       const updatedStudentList = baseStudents.map(student => {
         // Find matching row in parsed CSV by LRN or Name or ID
@@ -371,8 +508,42 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
 
       const finalCalculatedList = recalculateAHPForDataset(updatedStudentList);
       
+      // Compute summary diff statistics
+      let riskIncreased = 0;
+      let riskDecreased = 0;
+      let unchanged = 0;
+      finalCalculatedList.forEach((after) => {
+        const before = baseStudents.find(b => b.id === after.id);
+        if (before) {
+          if (after.latest_risk_score > before.latest_risk_score) riskIncreased++;
+          else if (after.latest_risk_score < before.latest_risk_score) riskDecreased++;
+          else unchanged++;
+        }
+      });
+
       // Save locally & sync to Firebase Cloud Firestore
       saveStudentDataset(finalCalculatedList, true);
+
+      // Record Ingestion Batch for 1-Click Rollback Engine
+      const batchId = `SAPC-${activeDomain.toUpperCase()}-${Date.now().toString().slice(-6)}`;
+      recordIngestionBatch({
+        id: batchId,
+        type: domainMeta.title,
+        domain: activeDomain,
+        importedBy: user?.full_name || "Authorized Staff",
+        count: parsedRows.length,
+        successRate: "100%",
+        academicYear,
+        quarter,
+        canRollback: true,
+        snapshotData: preImportSnapshot,
+        diffSummary: {
+          studentsAffected: updatedCount || parsedRows.length,
+          riskIncreased,
+          riskDecreased,
+          unchanged
+        }
+      });
 
       // Log RA 10173 Audit Record in Firestore & local audit trail (safely non-blocking)
       try {
@@ -381,12 +552,15 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           actor_role: user?.role || "guidance_counselor",
           action: "BATCH_DATA_INGESTION_CSV",
           target_resource: `Domain: ${domainMeta.title}`,
-          details: `Processed ${parsedRows.length} records. Updated ${updatedCount || parsedRows.length} cohort student risk profiles with cloud Firestore sync. Academic Year: ${academicYear}, Quarter: ${quarter}.`,
+          details: `Processed ${parsedRows.length} records. Updated ${updatedCount || parsedRows.length} cohort student risk profiles (${riskIncreased} increased, ${riskDecreased} decreased). AY: ${academicYear}, Quarter: ${quarter}. Batch: ${batchId}.`,
           ip_address: "127.0.0.1 (Campus LAN)"
         });
       } catch (auditErr) {
         console.warn("Audit log notice:", auditErr);
       }
+
+      // Refresh completeness metrics
+      setCompletenessList(getDomainIngestionCompleteness(finalCalculatedList));
 
       // Dispatch window event for live dashboard reactivity
       if (typeof window !== "undefined") {
@@ -394,11 +568,13 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
       }
 
       setSuccessResult({
-        batch_id: `SAPC-${activeDomain.toUpperCase()}-${Date.now().toString().slice(-6)}`,
+        batch_id: batchId,
         total_rows: parsedRows.length,
         successful_imports: parsedRows.length,
         domain: domainMeta.title,
-        recalculated_risk_count: updatedCount || parsedRows.length
+        recalculated_risk_count: updatedCount || parsedRows.length,
+        riskIncreased,
+        riskDecreased
       });
 
       if (onSuccess) onSuccess();
@@ -531,6 +707,69 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
         </div>
       </div>
 
+      {/* 5-Domain Ingestion Readiness & Completeness Matrix */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white border border-slate-700 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/80 pb-3">
+          <div className="flex items-center gap-2.5">
+            <Database className="h-5 w-5 text-amber-400" />
+            <div>
+              <h4 className="font-extrabold text-sm sm:text-base text-white">
+                5-Domain Intake Completeness &amp; Multi-Criteria Matrix
+              </h4>
+              <p className="text-xs text-slate-300">
+                Live screening coverage across all 5 AHP dimensions for AY 2025-2026
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-800/80 border border-slate-600 text-xs font-bold text-amber-300 shrink-0">
+            <Shield className="h-3.5 w-3.5" />
+            <span>Saaty AHP Partial-Upload Resilient</span>
+          </div>
+        </div>
+
+        {/* 5 Domain Progress Bars */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {completenessList.map((c) => (
+            <div key={c.domain} className="p-3 rounded-xl bg-slate-800/70 border border-slate-700 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-base">{c.icon}</span>
+                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                  c.status === "Complete" 
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" 
+                    : c.status === "Partial"
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    : "bg-slate-700 text-slate-300 border border-slate-600"
+                }`}>
+                  {c.pctComplete}% {c.status}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-100 truncate">{c.title.split("(")[0]}</p>
+                <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                  {c.countIngested} / {c.totalStudents} Screened
+                </p>
+              </div>
+              <div className="w-full bg-slate-700/80 rounded-full h-1.5 overflow-hidden">
+                <div 
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    c.status === "Complete" ? "bg-emerald-400" : c.status === "Partial" ? "bg-amber-400" : "bg-slate-500"
+                  }`} 
+                  style={{ width: `${Math.max(5, c.pctComplete)}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Educational Callout on Partial Dataset Behavior */}
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs leading-relaxed">
+          <Info className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+          <p>
+            <strong>Partial Ingestion Protection:</strong> If you upload 3 out of 5 datasets (e.g. Academic, Mental Health, Financial), non-uploaded domains retain nominal low-risk baselines (score 15–20). This ensures composite Saaty AHP scores calculate smoothly without divide-by-zero errors or false high-risk spikes.
+          </p>
+        </div>
+      </div>
+
       {/* 5 Domain Navigation Tabs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
         {(Object.keys(INGESTION_DOMAINS) as IngestionDomain[]).map((key) => {
@@ -544,6 +783,7 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
                 setActiveDomain(key);
                 setFile(null);
                 setParsedRows([]);
+                setProjectedDiffs([]);
                 setValidationErrors([]);
                 setSuccessResult(null);
                 setErrorMsg(null);
@@ -704,15 +944,109 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
             </div>
           )}
 
-          {/* Parsed Rows Preview */}
+          {/* Pre-Commit Projected Diff Table */}
+          {projectedDiffs.length > 0 && (
+            <div className="p-4 sm:p-5 rounded-2xl border-2 border-amber-200 bg-amber-50/40 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="p-1 rounded-md bg-amber-100 text-amber-800 font-black text-xs">PREVIEW</span>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                    Pre-Commit Risk Score &amp; Tier Shift Projection
+                  </h4>
+                </div>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Showing first {projectedDiffs.length} matched records against current registry
+                </span>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-amber-200 bg-white shadow-2xs">
+                <table className="min-w-full text-left text-xs">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+                    <tr>
+                      <th className="py-2.5 px-3">Student Name &amp; LRN</th>
+                      <th className="py-2.5 px-3">Registry Match</th>
+                      <th className="py-2.5 px-3">Risk Score Shift</th>
+                      <th className="py-2.5 px-3">AHP Tier Change</th>
+                      <th className="py-2.5 px-3">Primary Risk Driver</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-sans">
+                    {projectedDiffs.map((diff, idx) => {
+                      const isUp = diff.newScore > diff.oldScore;
+                      const isDown = diff.newScore < diff.oldScore;
+                      return (
+                        <tr key={idx} className={`hover:bg-slate-50/80 ${diff.highlightChange ? "bg-amber-50/40" : ""}`}>
+                          <td className="py-2.5 px-3">
+                            <strong className="text-slate-900 font-bold block">{diff.name}</strong>
+                            <span className="font-mono text-[11px] text-slate-500">{diff.lrn}</span>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            {diff.isMatched ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                <CheckCircle2 className="h-3 w-3" /> Matched
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 text-blue-800">
+                                + New Entry
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 font-mono font-bold">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-slate-500">{diff.oldScore}</span>
+                              <ArrowRight className="h-3 w-3 text-slate-400" />
+                              <span className={isUp ? "text-rose-600" : isDown ? "text-emerald-600" : "text-slate-800"}>
+                                {diff.newScore}
+                              </span>
+                              {isUp && <TrendingUp className="h-3.5 w-3.5 text-rose-500" />}
+                              {isDown && <TrendingDown className="h-3.5 w-3.5 text-emerald-500" />}
+                              {!isUp && !isDown && <Minus className="h-3 w-3 text-slate-400" />}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                diff.oldTier === "high" ? "bg-rose-100 text-rose-800" : diff.oldTier === "medium" ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
+                              }`}>
+                                {diff.oldTier}
+                              </span>
+                              <ArrowRight className="h-3 w-3 text-slate-400" />
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                diff.newTier === "high" ? "bg-rose-600 text-white" : diff.newTier === "medium" ? "bg-amber-500 text-white" : "bg-emerald-600 text-white"
+                              }`}>
+                                {diff.newTier}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-700 font-medium text-[11px]">
+                            {diff.oldDriver === diff.newDriver ? (
+                              <span>{diff.newDriver}</span>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <span className="text-slate-400 line-through">{diff.oldDriver}</span>
+                                <ArrowRight className="h-2.5 w-2.5 text-slate-400" />
+                                <strong className="text-[#8B0014] font-bold">{diff.newDriver}</strong>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Parsed Rows Raw Preview */}
           {parsedRows.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-slate-700 uppercase tracking-wider">
-                  Table Preview ({parsedRows.length} rows to be imported):
+                  Raw CSV Table Preview ({parsedRows.length} total rows):
                 </span>
                 <span className="text-xs text-slate-500 font-medium">
-                  Showing first 5 entries
+                  Showing first 5 rows
                 </span>
               </div>
 
@@ -744,12 +1078,17 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           )}
 
           {/* Action Ingest Button */}
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <Shield className="h-4 w-4 text-emerald-600 shrink-0" />
+              <span>Automatic rollback snapshot created before committing data.</span>
+            </div>
+
             <button
               type="button"
               disabled={!file || parsedRows.length === 0 || isProcessing}
               onClick={handleIngestCSV}
-              className="px-6 py-3 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] disabled:opacity-40 disabled:cursor-not-allowed text-white font-extrabold text-sm flex items-center gap-2 transition shadow-md cursor-pointer"
+              className="px-6 py-3 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] disabled:opacity-40 disabled:cursor-not-allowed text-white font-extrabold text-sm flex items-center justify-center gap-2 transition shadow-md cursor-pointer"
             >
               {isProcessing ? (
                 <>
@@ -1035,12 +1374,16 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
               <strong className="text-emerald-950">{successResult.total_rows} Students</strong>
             </div>
             <div className="p-2.5 rounded-xl bg-white/80 border border-emerald-200">
-              <span className="text-slate-500 font-semibold block text-[10px]">AHP Recalculated</span>
-              <strong className="text-emerald-950">{successResult.recalculated_risk_count} Profiles</strong>
+              <span className="text-slate-500 font-semibold block text-[10px]">Risk Tier Shifts</span>
+              <div className="flex items-center gap-1.5 font-bold text-[11px] mt-0.5">
+                <span className="text-rose-700">▲ {successResult.riskIncreased} Up</span>
+                <span className="text-slate-400">•</span>
+                <span className="text-emerald-700">▼ {successResult.riskDecreased} Down</span>
+              </div>
             </div>
             <div className="p-2.5 rounded-xl bg-white/80 border border-emerald-200">
-              <span className="text-slate-500 font-semibold block text-[10px]">Audit Status</span>
-              <strong className="text-emerald-950">Logged (RA 10173)</strong>
+              <span className="text-slate-500 font-semibold block text-[10px]">Audit &amp; Rollback</span>
+              <strong className="text-emerald-950 block">Snapshot Saved</strong>
             </div>
           </div>
         </div>

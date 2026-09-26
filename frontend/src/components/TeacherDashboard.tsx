@@ -36,8 +36,7 @@ import {
   Percent,
   FileText,
   Copy,
-  KeyRound,
-  Check
+  KeyRound
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
@@ -48,8 +47,6 @@ import {
   subscribeToStudentDataset,
   loadStudentDatasetFromFirestore,
   getActiveNotifications,
-  markNotificationRead,
-  markAllNotificationsRead,
   getActiveInterventions
 } from "@/lib/dataset-store";
 import { useDragScroll } from "@/lib/useDragScroll";
@@ -59,7 +56,6 @@ import { TeacherReferralModal } from "./TeacherReferralModal";
 import { SubjectFailurePredictor } from "./SubjectFailurePredictor";
 import { DepEdFormModal } from "./DepEdFormModal";
 import { BatchInterventionModal } from "./BatchInterventionModal";
-import { useToast } from "@/lib/toast-context";
 
 export type TeacherTabType = 
   | "dashboard"
@@ -114,34 +110,53 @@ export const TeacherDashboard: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<TeacherTabType>("dashboard");
 
-  // Advisory Class Dataset (Grade 11 - STEM St. Augustine default)
+  // Resolve Teacher's Assigned Advisory Section
+  const teacherSection = useMemo(() => {
+    if (user?.section) return user.section;
+    const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
+    if (user?.full_name) {
+      const match = all.find(s => s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()));
+      if (match) return match.section_name;
+    }
+    return "Grade 10 - St. Augustine";
+  }, [user]);
+
+  const filterAdvisory = React.useCallback((all: StudentRecord[]) => {
+    const advisory = all.filter(s => 
+      s.section_name === teacherSection || 
+      (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))
+    );
+    return advisory.length > 0 ? advisory : all.filter(s => s.section_name === "Grade 10 - St. Augustine");
+  }, [teacherSection, user]);
+
+  // Advisory Class Dataset Scoped strictly to teacher's section
   const [students, setStudents] = useState<StudentRecord[]>(() => {
     const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
-    return all.filter(s => s.section_name.includes("St. Augustine") || s.grade_level === 11).slice(0, 40);
+    return filterAdvisory(all);
   });
 
   useEffect(() => {
     setIsMounted(true);
     // 1. Initial async load from Cloud Firestore
     loadStudentDatasetFromFirestore().then((all) => {
-      setStudents(all.filter(s => s.section_name.includes("St. Augustine") || s.grade_level === 11).slice(0, 40));
+      setStudents(filterAdvisory(all));
     });
 
     // 2. Real-time subscription across all devices
     const unsubscribe = subscribeToStudentDataset((all) => {
-      setStudents(all.filter(s => s.section_name.includes("St. Augustine") || s.grade_level === 11).slice(0, 40));
+      setStudents(filterAdvisory(all));
     });
 
     const handleUpdate = () => {
       const all = getActiveStudentDataset();
-      setStudents(all.filter(s => s.section_name.includes("St. Augustine") || s.grade_level === 11).slice(0, 40));
+      setStudents(filterAdvisory(all));
     };
     window.addEventListener("sapc:dataset-updated", handleUpdate);
     return () => {
       window.removeEventListener("sapc:dataset-updated", handleUpdate);
       if (typeof unsubscribe === "function") unsubscribe();
     };
-  }, []);
+  }, [filterAdvisory]);
 
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState<string>("all");
@@ -165,7 +180,6 @@ export const TeacherDashboard: React.FC = () => {
   const [isReferralOpen, setIsReferralOpen] = useState(false);
   const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
-  const { success: toastSuccess, info: toastInfo } = useToast();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const catDrag = useDragScroll();
   const tabsDrag = useDragScroll();
@@ -751,6 +765,9 @@ export const TeacherDashboard: React.FC = () => {
   const medCount = students.filter(s => s.latest_risk_tier === "medium").length;
   const highCount = students.filter(s => s.latest_risk_tier === "high").length;
   const atRiskCount = medCount + highCount;
+  const acadRiskCount = students.filter(s => (s.primary_risk_driver && s.primary_risk_driver.toLowerCase().includes("academic")) || (s.domain_scores?.academic ?? 0) >= 25).length;
+  const attendanceRiskCount = students.filter(s => (s.sass_metrics?.days_absent ?? 0) >= 3 || (s.sass_metrics?.attendance_rate_pct ?? 100) < 95).length;
+  const familyRiskCount = students.filter(s => (s.primary_risk_driver && (s.primary_risk_driver.toLowerCase().includes("family") || s.primary_risk_driver.toLowerCase().includes("mental"))) || (s.domain_scores?.family ?? 0) >= 25).length;
 
   // ---------------------------------------------------------------------------
   // Action Handlers
@@ -1131,10 +1148,10 @@ export const TeacherDashboard: React.FC = () => {
               <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-300" />
               Class Adviser Portal
             </span>
-            <span className="text-[11px] sm:text-xs text-rose-200 font-semibold">• Grade 11 - STEM (St. Augustine)</span>
+            <span className="text-[11px] sm:text-xs text-rose-200 font-semibold">• {teacherSection}</span>
           </div>
           <h1 className="text-xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
-            Welcome, Mr. Roberto Santos, LPT!
+            Welcome, {user?.full_name || "Prof. Ernesto Bautista"}!
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-rose-100/90 leading-relaxed font-normal">
             Advisory class health overview, 3-step flexible CSV ingestion, automated DepEd Form 137 records, and collaborative guidance referrals.
@@ -1192,7 +1209,7 @@ export const TeacherDashboard: React.FC = () => {
           <div className="flex items-center justify-between gap-1.5">
             <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Class Size</span>
             <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
-              STEM Track
+              {students[0]?.strand || "JHS"}
             </span>
           </div>
           <div className="my-2 flex items-baseline gap-1.5 flex-wrap">
@@ -1383,24 +1400,24 @@ export const TeacherDashboard: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
                 <div>
                   <h3 className="text-lg sm:text-xl font-black text-slate-900">Advisory Class Risk Distribution</h3>
-                  <p className="text-xs text-slate-500">Breakdown of 40 Grade 11 STEM students by AHP 5-domain vulnerability</p>
+                  <p className="text-xs text-slate-500">Breakdown of {classSize} {teacherSection} students by AHP 5-domain vulnerability</p>
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 self-start sm:self-auto">
-                  70.0% Low Vulnerability
+                  {classSize > 0 ? ((lowCount / classSize) * 100).toFixed(1) : 0}% Low Vulnerability
                 </span>
               </div>
 
               {/* Multi-segment Progress Bar */}
               <div className="space-y-2">
                 <div className="h-4 w-full rounded-full bg-slate-100 flex overflow-hidden">
-                  <div className="bg-emerald-500 h-full transition-all" style={{ width: `${(lowCount / classSize) * 100}%` }} title={`Low Risk: ${lowCount}`} />
-                  <div className="bg-amber-500 h-full transition-all" style={{ width: `${(medCount / classSize) * 100}%` }} title={`Medium Risk: ${medCount}`} />
-                  <div className="bg-rose-600 h-full transition-all" style={{ width: `${(highCount / classSize) * 100}%` }} title={`High Risk: ${highCount}`} />
+                  <div className="bg-emerald-500 h-full transition-all" style={{ width: `${classSize > 0 ? (lowCount / classSize) * 100 : 0}%` }} title={`Low Risk: ${lowCount}`} />
+                  <div className="bg-amber-500 h-full transition-all" style={{ width: `${classSize > 0 ? (medCount / classSize) * 100 : 0}%` }} title={`Medium Risk: ${medCount}`} />
+                  <div className="bg-rose-600 h-full transition-all" style={{ width: `${classSize > 0 ? (highCount / classSize) * 100 : 0}%` }} title={`High Risk: ${highCount}`} />
                 </div>
                 <div className="flex justify-between text-xs font-bold pt-1">
-                  <span className="text-emerald-700 flex items-center gap-1">🟢 Low Risk: {lowCount} ({((lowCount/classSize)*100).toFixed(0)}%)</span>
-                  <span className="text-amber-700 flex items-center gap-1">🟡 Medium: {medCount} ({((medCount/classSize)*100).toFixed(0)}%)</span>
-                  <span className="text-rose-700 flex items-center gap-1">🔴 High Risk: {highCount} ({((highCount/classSize)*100).toFixed(0)}%)</span>
+                  <span className="text-emerald-700 flex items-center gap-1">🟢 Low Risk: {lowCount} ({classSize > 0 ? ((lowCount/classSize)*100).toFixed(0) : 0}%)</span>
+                  <span className="text-amber-700 flex items-center gap-1">🟡 Medium: {medCount} ({classSize > 0 ? ((medCount/classSize)*100).toFixed(0) : 0}%)</span>
+                  <span className="text-rose-700 flex items-center gap-1">🔴 High Risk: {highCount} ({classSize > 0 ? ((highCount/classSize)*100).toFixed(0) : 0}%)</span>
                 </div>
               </div>
 
@@ -1408,18 +1425,18 @@ export const TeacherDashboard: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                   <span className="text-xs font-bold text-slate-500 block">Academic Vulnerability</span>
-                  <strong className="text-base sm:text-lg font-black text-slate-900">4 Students</strong>
-                  <span className="text-[11px] text-amber-700 block">Pre-Calculus &amp; Chemistry</span>
+                  <strong className="text-base sm:text-lg font-black text-slate-900">{acadRiskCount} Students</strong>
+                  <span className="text-[11px] text-amber-700 block">Formative &amp; Subject Standing</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                   <span className="text-xs font-bold text-slate-500 block">Attendance Irregularity</span>
-                  <strong className="text-base sm:text-lg font-black text-slate-900">2 Students</strong>
-                  <span className="text-[11px] text-rose-700 block">&gt;3 Excused/Unexcused</span>
+                  <strong className="text-base sm:text-lg font-black text-slate-900">{attendanceRiskCount} Students</strong>
+                  <span className="text-[11px] text-rose-700 block">&gt;3 Absences / &lt;95% Attendance</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                  <span className="text-xs font-bold text-slate-500 block">Family &amp; Panganay Burden</span>
-                  <strong className="text-base sm:text-lg font-black text-slate-900">3 Students</strong>
-                  <span className="text-[11px] text-blue-700 block">OFW / Single Parent</span>
+                  <span className="text-xs font-bold text-slate-500 block">Family &amp; Mental Health</span>
+                  <strong className="text-base sm:text-lg font-black text-slate-900">{familyRiskCount} Students</strong>
+                  <span className="text-[11px] text-blue-700 block">Socio-Emotional Synthesis</span>
                 </div>
               </div>
             </div>
@@ -2163,7 +2180,11 @@ export const TeacherDashboard: React.FC = () => {
       {/* ========================================================================= */}
       {activeTab === "subject_predictor" && (
         <div id="subject-predictor-view" className="animate-in fade-in duration-200 scroll-mt-24">
-          <SubjectFailurePredictor />
+          <SubjectFailurePredictor 
+            scopedStudents={students} 
+            teacherSection={teacherSection} 
+            isTeacherView={true} 
+          />
         </div>
       )}
 
@@ -2174,7 +2195,7 @@ export const TeacherDashboard: React.FC = () => {
         <div id="roster" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 shadow-sm space-y-6 animate-in fade-in duration-200 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
-              <h3 className="text-lg sm:text-xl font-black text-slate-900">Grade 11 - STEM (St. Augustine) Advisory Hub</h3>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900">{teacherSection} Advisory Hub</h3>
               <p className="text-xs text-slate-500">Advisory class monitoring, student profiling, and student login credential distribution</p>
             </div>
             
@@ -2849,7 +2870,7 @@ export const TeacherDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
               <h3 className="text-lg sm:text-xl font-black text-slate-900">DepEd Digital Class Record (Form 137)</h3>
-              <p className="text-xs text-slate-500">Official composite grades, attendance rates, and conduct for Grade 11 - STEM (St. Augustine)</p>
+              <p className="text-xs text-slate-500">Official composite grades, attendance rates, and conduct for {teacherSection}</p>
             </div>
             <button
               type="button"

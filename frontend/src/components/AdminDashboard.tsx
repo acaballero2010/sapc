@@ -32,28 +32,61 @@ import {
   ChevronRight,
   BrainCircuit,
   Copy,
-  KeyRound,
   Check,
-  Lock,
-  Info
+  Plus,
+  Send,
+  RefreshCw,
+  X,
+  Printer,
+  Eye,
+  CheckSquare,
+  Square,
+  FileCheck
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
+import { FacultyImportModal } from "./FacultyImportModal";
 import { RiskBadge } from "./RiskBadge";
 import { 
   getActiveStudentDataset, 
-  saveStudentDataset, 
   computeCohortAggregates, 
   exportActiveDatasetToCSV,
   importFullCohortCSV,
-  getActiveRiskWeights,
-  saveRiskWeights,
-  recalculateAHPForDataset,
   subscribeToStudentDataset,
-  loadStudentDatasetFromFirestore
+  loadStudentDatasetFromFirestore,
+  getIngestionHistory,
+  rollbackIngestionBatch,
+  IngestionBatchRecord,
+  addStudentRecord,
+  updateStudentRecord,
+  deleteStudentRecord,
+  getActiveInterventions,
+  saveOrUpdateIntervention,
+  InterventionCarePlan,
+  addAppNotification,
+  getActiveNotifications,
+  FacultyRecord,
+  getActiveFacultyRecords,
+  saveActiveFacultyRecords,
+  loadFacultyRecordsFromFirestore,
+  subscribeToFacultyRecords,
+  addFacultyRecord,
+  updateFacultyRecord,
+  deleteFacultyRecord,
+  PendingRegistrationRecord,
+  ParentRecord,
+  getActivePendingRegistrations,
+  saveActivePendingRegistrations,
+  loadPendingRegistrationsFromFirestore,
+  subscribeToPendingRegistrations,
+  getActiveParentRecords,
+  saveActiveParentRecords,
+  loadParentRecordsFromFirestore,
+  subscribeToParentRecords,
+  DEFAULT_PENDING_REGISTRATIONS
 } from "@/lib/dataset-store";
 import { useDragScroll } from "@/lib/useDragScroll";
 import type { StudentRecord } from "@/data/students500";
@@ -73,7 +106,6 @@ export type AdminTabType =
   | "parents"
   | "pending_registrations"
   | "quarter_management"
-  | "risk_config"
   | "interventions"
   | "intervention_suggestions"
   | "reports"
@@ -129,33 +161,13 @@ export const AdminDashboard: React.FC = () => {
 
   // Modals & Sub-views
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const [showIngestionHub, setShowIngestionHub] = useState(false);
   const [isKnowledgeHubOpen, setIsKnowledgeHubOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
   const catDrag = useDragScroll();
   const tabsDrag = useDragScroll();
 
-  // 13. Risk Config Weights State (Psychometrician Validated AHP 5-Domain)
-  const [riskWeights, setRiskWeights] = useState(() => getActiveRiskWeights());
 
-  const totalWeight = useMemo(() => {
-    return Number((riskWeights.academic + riskWeights.family + riskWeights.health + riskWeights.mental + riskWeights.financial).toFixed(1));
-  }, [riskWeights]);
-
-  // Handle live AHP recalculation
-  const handleSaveAndRecalculateAHP = () => {
-    if (totalWeight !== 100.0) {
-      showToast("Weights must equal exactly 100.0% before saving.");
-      return;
-    }
-    saveRiskWeights(riskWeights);
-    const recalculated = recalculateAHPForDataset(students, riskWeights);
-    saveStudentDataset(recalculated, true);
-    setStudents(recalculated);
-    showToast(`Successfully recalculated AHP risk scores across ${recalculated.length} students with Cloud sync.`);
-  };
 
   // Handle full CSV import
   const handleFullCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,79 +247,561 @@ export const AdminDashboard: React.FC = () => {
     { id: "Q4", label: "4th Quarter (Final Clearance & Retention)", start: "2027-03-22", end: "2027-05-30", status: "Upcoming", isCurrent: false }
   ]);
 
-  // Campus Users & Faculty Directory
-  const [campusUsers, setCampusUsers] = useState([
-    { id: 1, name: "Maria Theresa Cruz, RGC", email: "counselor@sapc.edu.ph", role: "guidance_counselor", section: "Guidance Central (Lead RGC)", initialPassword: "counselor123", status: "Active" },
-    { id: 2, name: "Mr. Roberto Santos, LPT", email: "teacher.santos@sapc.edu.ph", role: "teacher", section: "Grade 11 - St. Augustine (STEM)", initialPassword: "teacher123", status: "Active" },
-    { id: 3, name: "Mrs. Clara Buenaflor, LPT", email: "teacher.buenaflor@sapc.edu.ph", role: "teacher", section: "Grade 11 - St. Thomas (HUMSS)", initialPassword: "teacher123", status: "Active" },
-    { id: 4, name: "Mr. Arnold Dizon, LPT", email: "teacher.dizon@sapc.edu.ph", role: "teacher", section: "Grade 11 - St. Clare (ABM)", initialPassword: "teacher123", status: "Active" },
-    { id: 5, name: "Prof. Annalyn Cruz, LPT", email: "teacher.cruz@sapc.edu.ph", role: "teacher", section: "Grade 12 - St. Jude (ABM)", initialPassword: "teacher123", status: "Active" },
-    { id: 6, name: "Dr. Remedios Santos, Ed.D.", email: "admin@sapc.edu.ph", role: "admin", section: "Academic Affairs & Decision Governance", initialPassword: "admin123", status: "Active" }
-  ]);
+  // Faculty & Guidance Counselors Directory (Cloud Firestore collection: faculty_records)
+  const [facultyList, setFacultyList] = useState<FacultyRecord[]>(() => getActiveFacultyRecords());
+  const [isFacultyImportOpen, setIsFacultyImportOpen] = useState(false);
+  const [facultyRoleFilter, setFacultyRoleFilter] = useState<string>("all");
+  const [facultyStatusFilter, setFacultyStatusFilter] = useState<string>("all");
+  const [facultySearch, setFacultySearch] = useState<string>("");
+  const [editingFaculty, setEditingFaculty] = useState<FacultyRecord | null>(null);
 
-  // 11. Pending Registrations & Parent Linkage Verification Queue
-  const [pendingRegistrations, setPendingRegistrations] = useState([
-    { 
-      id: "REG-201", 
-      name: "Mrs. Elena Dimaculangan", 
-      email: "parent.dimaculangan@gmail.com", 
-      phone: "+63 917 555 0192", 
-      role: "parent", 
-      relationship: "Mother / Primary Guardian", 
-      linkedStudent: "Joshua Dimaculangan", 
-      linkedLRN: "109238475001",
-      section: "Grade 11 - St. Augustine (STEM)",
-      verificationDoc: "PSA Birth Certificate Attached (Verified)", 
-      date: "2026-09-19" 
-    },
-    { 
-      id: "REG-202", 
-      name: "Mr. Arthur Reyes", 
-      email: "arthur.reyes@yahoo.com", 
-      phone: "+63 918 332 9481", 
-      role: "parent", 
-      relationship: "Father", 
-      linkedStudent: "Samantha Nicole Reyes", 
-      linkedLRN: "109238475004",
-      section: "Grade 11 - St. Thomas (HUMSS)",
-      verificationDoc: "Guardian ID & Authorization Form", 
-      date: "2026-09-20" 
-    },
-    { 
-      id: "REG-203", 
-      name: "Prof. Annalyn Cruz, LPT", 
-      email: "annalyn.cruz@sapc.edu.ph", 
-      phone: "+63 920 119 2847", 
-      role: "teacher", 
-      relationship: "Faculty Adviser", 
-      linkedStudent: "Grade 12 - St. Jude (ABM)", 
-      linkedLRN: "N/A (Faculty)",
-      section: "Grade 12 - St. Jude (ABM)",
-      verificationDoc: "Faculty Appointment PRC License", 
-      date: "2026-09-18" 
-    }
-  ]);
+  // Sync faculty with Firestore and local events
+  useEffect(() => {
+    setFacultyList(getActiveFacultyRecords());
+    loadFacultyRecordsFromFirestore().then((all) => {
+      if (all && all.length > 0) setFacultyList(all);
+    });
+    const unsubFaculty = subscribeToFacultyRecords((all) => {
+      setFacultyList(all);
+    });
+    const handleFacultyUpdate = () => {
+      setFacultyList(getActiveFacultyRecords());
+    };
+    window.addEventListener("sapc:faculty-updated", handleFacultyUpdate);
+    return () => {
+      window.removeEventListener("sapc:faculty-updated", handleFacultyUpdate);
+      if (typeof unsubFaculty === "function") unsubFaculty();
+    };
+  }, []);
 
-  const copyFacultySlip = (teacher: typeof campusUsers[0]) => {
+  const copyFacultySlip = (faculty: FacultyRecord | any) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://sapc.edu.ph";
-    const slip = `=====================================\nSAN ANTONIO DE PADUA COLLEGE (SAPC)\nFaculty & Adviser Portal Credentials\n=====================================\nFaculty Name: ${teacher.name}\nAssigned Advisory: ${teacher.section}\nInstitutional Email: ${teacher.email}\nDefault Initial Password: ${teacher.initialPassword || "teacher123"}\nSign-in Portal: ${origin}/login\n\n* Security Notice: Please sign in and update your password under Profile > Security Settings.\n=====================================`;
+    const licenseText = faculty.prc_license_no ? `\nPRC License No: ${faculty.prc_license_no}` : "";
+    const slip = `=====================================\nSAN ANTONIO DE PADUA COLLEGE (SAPC)\nInstitutional Portal Credentials Slip\n=====================================\nName: ${faculty.name}\nRole: ${(faculty.role || "teacher").toUpperCase()}\nDepartment: ${faculty.department || "Academic"}\nAssigned Advisory / Level: ${faculty.section || "General"}${licenseText}\nInstitutional Email: ${faculty.email}\nInitial Default Password: ${faculty.initial_password || faculty.initialPassword || "teacher123"}\nSign-in Portal: ${origin}/login\n\n* Security Notice: Please sign in and update your password under Profile > Security Settings.\n=====================================`;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(slip);
-      showToast(`Copied onboarding credentials slip for ${teacher.name}!`);
+      showToast(`Copied onboarding credentials slip for ${faculty.name}!`);
     }
   };
 
-  // 3. Import History Log
-  const [importHistory] = useState([
-    { id: "IMP-901", type: "DepEd SASS Grades Batch", importedBy: "Mr. Roberto Santos", count: 45, successRate: "100%", date: "2026-09-18 14:15", canRollback: true },
-    { id: "IMP-902", type: "PHQ-9 Mental Health Screenings", importedBy: "Maria Theresa Cruz", count: 120, successRate: "98.4%", date: "2026-09-16 09:30", canRollback: true },
-    { id: "IMP-903", type: "Master 500-Student Enrollment Roster", importedBy: "Dr. Remedios Santos", count: 500, successRate: "100%", date: "2026-08-15 10:00", canRollback: false }
-  ]);
+  const handleToggleFacultyStatus = async (id: string, currentStatus: string) => {
+    const nextStatus = currentStatus === "Active" ? "Suspended" : "Active";
+    const updated = await updateFacultyRecord(id, { status: nextStatus as any });
+    if (updated) {
+      setFacultyList(getActiveFacultyRecords());
+      showToast(`Account for ${updated.name} is now ${nextStatus}.`);
+    }
+  };
 
-  // Categories for 22 Tabs
+  const handleDeleteFacultyAction = async (id: string, name: string) => {
+    if (!window.confirm(`⚠️ Remove Account Confirmation\n\nAre you sure you want to remove ${name} from the Faculty & Counselor roster and Cloud Firestore?`)) {
+      return;
+    }
+    const success = await deleteFacultyRecord(id);
+    if (success) {
+      setFacultyList(getActiveFacultyRecords());
+      showToast(`Account for ${name} removed.`);
+    }
+  };
+
+  const handleExportFacultyCSV = () => {
+    const headers = ["full_name", "institutional_email", "role", "department", "advisory_section", "assigned_grade", "employee_id", "prc_license_no", "initial_password", "status", "phone"];
+    const rows = facultyList.map(f => [
+      `"${f.name}"`,
+      f.email,
+      f.role,
+      `"${f.department || ""}"`,
+      `"${f.section || ""}"`,
+      `"${f.grade_level || ""}"`,
+      f.employee_id || "",
+      f.prc_license_no || "",
+      f.initial_password || "teacher123",
+      f.status,
+      f.phone || ""
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `SAPC_Faculty_Counselors_Roster_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Exported ${facultyList.length} faculty and counselor records to CSV.`);
+  };
+
+  // 11. Pending Registrations & Parent Linkage Verification Queue
+  const [pendingRegistrations, setPendingRegistrations] = useState<PendingRegistrationRecord[]>(() => getActivePendingRegistrations());
+  const [pendingSearch, setPendingSearch] = useState("");
+  const [pendingRoleFilter, setPendingRoleFilter] = useState<string>("all");
+  const [previewDocRegistration, setPreviewDocRegistration] = useState<PendingRegistrationRecord | null>(null);
+
+  // 12. Parent Accounts & Student Linkages
+  const [parentRecords, setParentRecords] = useState<ParentRecord[]>(() => getActiveParentRecords());
+  const [parentSearch, setParentSearch] = useState("");
+  const [parentGradeFilter, setParentGradeFilter] = useState<string>("all");
+  const [parentSectionFilter, _setParentSectionFilter] = useState<string>("all");
+  const [parentStatusFilter, setParentStatusFilter] = useState<string>("all");
+  const [editingParent, setEditingParent] = useState<ParentRecord | null>(null);
+  const [isAddParentOpen, setIsAddParentOpen] = useState(false);
+  const [newParentName, setNewParentName] = useState("");
+  const [newParentEmail, setNewParentEmail] = useState("");
+  const [newParentPhone, setNewParentPhone] = useState("");
+  const [newParentRel, setNewParentRel] = useState("Mother");
+  const [newParentStudent, setNewParentStudent] = useState("");
+  const [newParentLRN, setNewParentLRN] = useState("");
+  const [newParentSection, setNewParentSection] = useState("Grade 11 - St. Augustine (STEM)");
+
+  // 13. Bulk Export Credentials State
+  const [credentialRoleFilter, setCredentialRoleFilter] = useState<"all" | "teacher" | "counselor" | "parent" | "student">("all");
+  const [credentialSearch, setCredentialSearch] = useState("");
+  const [selectedCredentialIds, setSelectedCredentialIds] = useState<Set<string>>(new Set());
+  const [isPrintSlipsOpen, setIsPrintSlipsOpen] = useState(false);
+
+  // Real-time Firestore Multi-User Sync for Pending & Parents
+  useEffect(() => {
+    loadPendingRegistrationsFromFirestore().then((res) => {
+      if (res && res.length > 0) setPendingRegistrations(res);
+    });
+    loadParentRecordsFromFirestore().then((res) => {
+      if (res && res.length > 0) setParentRecords(res);
+    });
+
+    const unsubPending = subscribeToPendingRegistrations((res) => setPendingRegistrations(res));
+    const unsubParents = subscribeToParentRecords((res) => setParentRecords(res));
+
+    const handlePendingUpdated = () => setPendingRegistrations(getActivePendingRegistrations());
+    const handleParentsUpdated = () => setParentRecords(getActiveParentRecords());
+
+    window.addEventListener("sapc:pending-registrations-updated", handlePendingUpdated);
+    window.addEventListener("sapc:parent-records-updated", handleParentsUpdated);
+
+    return () => {
+      if (typeof unsubPending === "function") unsubPending();
+      if (typeof unsubParents === "function") unsubParents();
+      window.removeEventListener("sapc:pending-registrations-updated", handlePendingUpdated);
+      window.removeEventListener("sapc:parent-records-updated", handleParentsUpdated);
+    };
+  }, []);
+
+  // Filtered Pending Registrations
+  const filteredPending = useMemo(() => {
+    let result = pendingRegistrations;
+    if (pendingSearch.trim()) {
+      const q = pendingSearch.toLowerCase();
+      result = result.filter(r => 
+        r.name.toLowerCase().includes(q) ||
+        r.email.toLowerCase().includes(q) ||
+        r.linkedStudent.toLowerCase().includes(q) ||
+        r.linkedLRN.toLowerCase().includes(q) ||
+        r.section.toLowerCase().includes(q)
+      );
+    }
+    if (pendingRoleFilter !== "all") {
+      result = result.filter(r => r.role === pendingRoleFilter);
+    }
+    return result;
+  }, [pendingRegistrations, pendingSearch, pendingRoleFilter]);
+
+  // Handle Approve Registration
+  const handleApproveRegistration = (reg: PendingRegistrationRecord) => {
+    if (reg.role === "parent") {
+      const newParent: ParentRecord = {
+        id: `PAR-${String(parentRecords.length + 101).padStart(3, "0")}`,
+        name: reg.name,
+        email: reg.email,
+        phone: reg.phone,
+        relationship: reg.relationship,
+        linkedStudentName: reg.linkedStudent,
+        linkedLRN: reg.linkedLRN,
+        section: reg.section,
+        gradeLevel: reg.section.includes("12") ? "Grade 12" : "Grade 11",
+        status: "Active",
+        verifiedAt: "2026-09-27",
+        sf9Access: true,
+        attendanceAlerts: true,
+        riskAlerts: true,
+        initialPassword: "parent2026"
+      };
+      const updatedParents = [newParent, ...parentRecords];
+      setParentRecords(updatedParents);
+      saveActiveParentRecords(updatedParents, true);
+    } else if (reg.role === "teacher" || reg.role === "counselor") {
+      const isCounselor = reg.role === "counselor";
+      const newFac: FacultyRecord = {
+        id: isCounselor ? `COUN-${String(facultyList.length + 101).padStart(3, "0")}` : `FAC-${String(facultyList.length + 101).padStart(3, "0")}`,
+        name: reg.name,
+        email: reg.email,
+        role: isCounselor ? "guidance_counselor" : "teacher",
+        department: isCounselor ? "Guidance & Counseling Center" : "Senior High Academic Department",
+        section: reg.section,
+        grade_level: reg.section.includes("12") ? "Grade 12" : "Grade 11",
+        employee_id: `SAPC-${String(facultyList.length + 101).padStart(4, "0")}`,
+        initial_password: "teacher123",
+        status: "Active",
+        phone: reg.phone,
+        created_at: "2026-09-27T00:00:00.000Z"
+      };
+      const updatedFaculty = [newFac, ...facultyList];
+      setFacultyList(updatedFaculty);
+      saveActiveFacultyRecords(updatedFaculty, true);
+    }
+
+    const updatedPending = pendingRegistrations.filter(p => p.id !== reg.id);
+    setPendingRegistrations(updatedPending);
+    saveActivePendingRegistrations(updatedPending, true);
+
+    showToast(`✓ Approved & provisioned account for ${reg.name} (${reg.role.toUpperCase()}) with Cloud Sync.`);
+  };
+
+  // Handle Decline Registration
+  const handleDeclineRegistration = (regId: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to decline registration ${regId} for ${name}?`)) return;
+    const updated = pendingRegistrations.filter(p => p.id !== regId);
+    setPendingRegistrations(updated);
+    saveActivePendingRegistrations(updated, true);
+    showToast(`Declined registration request for ${name}.`);
+  };
+
+  // Reset Demo Registrations
+  const handleResetDemoRegistrations = () => {
+    saveActivePendingRegistrations(DEFAULT_PENDING_REGISTRATIONS, true);
+    setPendingRegistrations(DEFAULT_PENDING_REGISTRATIONS);
+    showToast("Reset pending registrations queue to 3 initial applications.");
+  };
+
+  // Filtered Parent Records
+  const filteredParents = useMemo(() => {
+    let result = parentRecords;
+    if (parentSearch.trim()) {
+      const q = parentSearch.toLowerCase();
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(q) ||
+        p.email.toLowerCase().includes(q) ||
+        p.linkedStudentName.toLowerCase().includes(q) ||
+        p.linkedLRN.toLowerCase().includes(q) ||
+        p.section.toLowerCase().includes(q)
+      );
+    }
+    if (parentGradeFilter !== "all") {
+      result = result.filter(p => p.gradeLevel === parentGradeFilter);
+    }
+    if (parentSectionFilter !== "all") {
+      result = result.filter(p => p.section === parentSectionFilter);
+    }
+    if (parentStatusFilter !== "all") {
+      result = result.filter(p => p.status === parentStatusFilter);
+    }
+    return result;
+  }, [parentRecords, parentSearch, parentGradeFilter, parentSectionFilter, parentStatusFilter]);
+
+  // Parent Status Toggle
+  const handleToggleParentStatus = (parentId: string, currentStatus: string) => {
+    const nextStatus = currentStatus === "Active" ? "Suspended" : "Active";
+    const updated = parentRecords.map(p => p.id === parentId ? { ...p, status: nextStatus as any } : p);
+    setParentRecords(updated);
+    saveActiveParentRecords(updated, true);
+    showToast(`Updated parent account status to '${nextStatus}'.`);
+  };
+
+  // Delete Parent
+  const handleDeleteParentAction = (parentId: string, parentName: string) => {
+    if (!window.confirm(`Are you sure you want to delete parent account for ${parentName}?`)) return;
+    const updated = parentRecords.filter(p => p.id !== parentId);
+    setParentRecords(updated);
+    saveActiveParentRecords(updated, true);
+    showToast(`Deleted parent account for ${parentName}.`);
+  };
+
+  // Copy Parent Credential Slip
+  const copyParentSlip = (p: ParentRecord) => {
+    const slip = `=========================================
+SAN ANTONIO DE PADUA COLLEGE (SAPC)
+PARENT / GUARDIAN PORTAL ACCESS CREDENTIALS
+=========================================
+Parent Name     : ${p.name}
+Relationship    : ${p.relationship}
+Login Portal    : https://sapc-intellysys-ph.web.app/login
+Email Address   : ${p.email}
+Initial Password: ${p.initialPassword || "parent2026"}
+Linked Student  : ${p.linkedStudentName}
+Student LRN     : ${p.linkedLRN}
+Advisory Section: ${p.section}
+DepEd SF-9 Card : Authorized (Online Viewing)
+Absence Alerts  : SMS & Push Enabled
+Issued Date     : ${new Date().toLocaleDateString()}
+=========================================`;
+    navigator.clipboard.writeText(slip);
+    showToast(`Copied Parent Portal Onboarding Slip for ${p.name} to clipboard!`);
+  };
+
+  // Export Parents CSV
+  const handleExportParentsCSV = () => {
+    const headers = ["Parent ID", "Parent Name", "Email", "Phone", "Relationship", "Linked Student", "LRN", "Section", "Grade Level", "Status", "Verified Date"];
+    const rows = parentRecords.map(p => [
+      p.id,
+      `"${p.name}"`,
+      p.email,
+      `"${p.phone}"`,
+      `"${p.relationship}"`,
+      `"${p.linkedStudentName}"`,
+      `"${p.linkedLRN}"`,
+      `"${p.section}"`,
+      `"${p.gradeLevel}"`,
+      p.status,
+      p.verifiedAt
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `SAPC_Parent_Accounts_Roster_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Exported ${parentRecords.length} parent accounts to CSV.`);
+  };
+
+  // Save Parent Edit
+  const handleSaveParentEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingParent) return;
+    const updated = parentRecords.map(p => p.id === editingParent.id ? editingParent : p);
+    setParentRecords(updated);
+    saveActiveParentRecords(updated, true);
+    setEditingParent(null);
+    showToast(`Saved changes for ${editingParent.name}.`);
+  };
+
+  // Add Parent Form Submission
+  const handleAddParent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newParentName.trim() || !newParentEmail.trim() || !newParentStudent.trim()) {
+      showToast("Please complete Parent Name, Email, and Linked Student.");
+      return;
+    }
+    const newParent: ParentRecord = {
+      id: `PAR-${String(parentRecords.length + 101).padStart(3, "0")}`,
+      name: newParentName.trim(),
+      email: newParentEmail.trim(),
+      phone: newParentPhone.trim() || "+63 900 000 0000",
+      relationship: newParentRel,
+      linkedStudentName: newParentStudent.trim(),
+      linkedLRN: newParentLRN.trim() || "109238475000",
+      section: newParentSection,
+      gradeLevel: newParentSection.includes("12") ? "Grade 12" : "Grade 11",
+      status: "Active",
+      verifiedAt: "2026-09-27",
+      sf9Access: true,
+      attendanceAlerts: true,
+      riskAlerts: true,
+      initialPassword: "parent2026"
+    };
+    const updated = [newParent, ...parentRecords];
+    setParentRecords(updated);
+    saveActiveParentRecords(updated, true);
+    setIsAddParentOpen(false);
+    setNewParentName("");
+    setNewParentEmail("");
+    setNewParentPhone("");
+    setNewParentStudent("");
+    setNewParentLRN("");
+    showToast(`Created and linked parent account for ${newParent.name}!`);
+  };
+
+  // Master Unified Credentials List for Bulk Export Tab
+  interface UnifiedCredentialUser {
+    id: string;
+    name: string;
+    email: string;
+    role: "admin" | "teacher" | "counselor" | "parent" | "student";
+    roleLabel: string;
+    identifier: string; // LRN or Employee ID
+    sectionOrDept: string;
+    initialPassword: string;
+    status: string;
+  }
+
+  const allCredentialUsers: UnifiedCredentialUser[] = useMemo(() => {
+    const list: UnifiedCredentialUser[] = [];
+
+    // 1. Admin
+    list.push({
+      id: "ADMIN-01",
+      name: "Dr. Remedios Santos",
+      email: "admin@sapc.edu.ph",
+      role: "admin",
+      roleLabel: "System Administrator",
+      identifier: "SAPC-ADM-001",
+      sectionOrDept: "Platform & IT Governance",
+      initialPassword: "admin123",
+      status: "Active"
+    });
+
+    // 2. Faculty
+    facultyList.forEach(f => {
+      const isCounselor = f.role === "guidance_counselor" || f.role === "counselor";
+      list.push({
+        id: f.id,
+        name: f.name,
+        email: f.email,
+        role: isCounselor ? "counselor" : "teacher",
+        roleLabel: isCounselor ? "Guidance Counselor (RGC)" : "Faculty / Class Adviser",
+        identifier: f.employee_id || f.prc_license_no || f.id,
+        sectionOrDept: f.section || f.department || "General Faculty",
+        initialPassword: f.initial_password || (isCounselor ? "counselor123" : "teacher123"),
+        status: f.status
+      });
+    });
+
+    // 3. Parents
+    parentRecords.forEach(p => {
+      list.push({
+        id: p.id,
+        name: p.name,
+        email: p.email,
+        role: "parent",
+        roleLabel: `Parent (${p.relationship})`,
+        identifier: `LRN: ${p.linkedLRN}`,
+        sectionOrDept: `${p.linkedStudentName} (${p.section})`,
+        initialPassword: p.initialPassword || "parent2026",
+        status: p.status
+      });
+    });
+
+    // 4. Students (First 50 sample for bulk credential generator)
+    students.slice(0, 50).forEach(s => {
+      list.push({
+        id: `STU-${s.id}`,
+        name: `${s.first_name} ${s.last_name}`,
+        email: s.email || `student.${s.lrn}@sapc.edu.ph`,
+        role: "student",
+        roleLabel: `Student (${s.strand || 'SHS'})`,
+        identifier: s.lrn,
+        sectionOrDept: s.section_name || `Grade ${s.grade_level}`,
+        initialPassword: `sapc${s.lrn.slice(-4)}`,
+        status: "Active"
+      });
+    });
+
+    return list;
+  }, [facultyList, parentRecords, students]);
+
+  const filteredCredentialUsers = useMemo(() => {
+    let result = allCredentialUsers;
+    if (credentialSearch.trim()) {
+      const q = credentialSearch.toLowerCase();
+      result = result.filter(u => 
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.identifier.toLowerCase().includes(q) ||
+        u.sectionOrDept.toLowerCase().includes(q)
+      );
+    }
+    if (credentialRoleFilter !== "all") {
+      result = result.filter(u => u.role === credentialRoleFilter);
+    }
+    return result;
+  }, [allCredentialUsers, credentialSearch, credentialRoleFilter]);
+
+  const handleToggleSelectAllCredentials = () => {
+    if (selectedCredentialIds.size === filteredCredentialUsers.length) {
+      setSelectedCredentialIds(new Set());
+    } else {
+      setSelectedCredentialIds(new Set(filteredCredentialUsers.map(u => u.id)));
+    }
+  };
+
+  const handleToggleSelectCredential = (id: string) => {
+    setSelectedCredentialIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleExportSelectedCredentialsCSV = () => {
+    const targetUsers = selectedCredentialIds.size > 0 
+      ? allCredentialUsers.filter(u => selectedCredentialIds.has(u.id))
+      : filteredCredentialUsers;
+
+    const headers = ["User ID", "Full Name", "Portal Email", "Assigned Role", "Identifier (LRN / Emp ID)", "Section / Office", "Initial Password", "Status"];
+    const rows = targetUsers.map(u => [
+      u.id,
+      `"${u.name}"`,
+      u.email,
+      `"${u.roleLabel}"`,
+      `"${u.identifier}"`,
+      `"${u.sectionOrDept}"`,
+      `"${u.initialPassword}"`,
+      u.status
+    ]);
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `SAPC_Master_Credentials_Export_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Exported ${targetUsers.length} user credential records to CSV.`);
+  };
+
+  const handleCopySelectedCredentials = () => {
+    const targetUsers = selectedCredentialIds.size > 0 
+      ? allCredentialUsers.filter(u => selectedCredentialIds.has(u.id))
+      : filteredCredentialUsers.slice(0, 20);
+
+    const formatted = targetUsers.map(u => 
+      `Account: ${u.name} | Role: ${u.roleLabel} | Email: ${u.email} | Pass: ${u.initialPassword} | ID: ${u.identifier}`
+    ).join("\n");
+
+    navigator.clipboard.writeText(formatted);
+    showToast(`Copied ${targetUsers.length} credential logins to clipboard!`);
+  };
+
+  // 3. Dynamic Ingestion History & 1-Click Rollback State
+  const [importHistory, setImportHistory] = useState<IngestionBatchRecord[]>(() => getIngestionHistory());
+
+  useEffect(() => {
+    const refreshHistory = () => {
+      setImportHistory(getIngestionHistory());
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("sapc:ingestion-history-updated", refreshHistory);
+      window.addEventListener("sapc:data-ingested", refreshHistory);
+      return () => {
+        window.removeEventListener("sapc:ingestion-history-updated", refreshHistory);
+        window.removeEventListener("sapc:data-ingested", refreshHistory);
+      };
+    }
+  }, []);
+
+  const handleRollbackBatch = async (batchId: string) => {
+    const batch = importHistory.find(b => b.id === batchId);
+    const desc = batch ? `Batch ${batch.id} (${batch.type})` : `Batch ${batchId}`;
+    if (!window.confirm(`⚠️ Rollback Confirmation\n\nAre you sure you want to revert ${desc}?\n\nThis will restore the student cohort risk roster to the snapshot captured prior to this ingestion and synchronize to Cloud Firestore.`)) {
+      return;
+    }
+
+    const result = await rollbackIngestionBatch(batchId);
+    if (result.success) {
+      showToast(result.message);
+      setImportHistory(getIngestionHistory());
+      setStudents(getActiveStudentDataset());
+    } else {
+      showToast(`Rollback Failed: ${result.message}`);
+    }
+  };
+
+  // Categories for 21 Tabs
   const CATEGORIES = useMemo(() => [
-    { id: "all", label: "All Master Controls (22)" },
-    { id: "governance", label: "System & Platform Config (6)", tabIds: ["dashboard", "platform_settings", "risk_config", "quarter_management", "knowledge_base", "notifications"] },
+    { id: "all", label: "All Master Controls (21)" },
+    { id: "governance", label: "System & Platform Config (5)", tabIds: ["dashboard", "platform_settings", "quarter_management", "knowledge_base", "notifications"] },
     { id: "ingestion", label: "Master Ingestion & Rollback (5)", tabIds: ["import_wizard", "import_history", "revert_import", "verify_assessments", "export_import_history"] },
     { id: "students", label: "Student Master Registry (3)", tabIds: ["students", "create_student", "student_profile"] },
     { id: "users", label: "Campus Accounts & Security (5)", tabIds: ["teachers", "create_user", "parents", "pending_registrations", "export_credentials"] },
@@ -317,7 +811,6 @@ export const AdminDashboard: React.FC = () => {
   const TAB_ITEMS: Array<{ id: AdminTabType; label: string; icon: any; badge?: string; category: string }> = [
     { id: "dashboard", label: "System Command Center", icon: Users, badge: "Master", category: "governance" },
     { id: "platform_settings", label: "Platform & Campus Logo", icon: Building, badge: "Admin Only", category: "governance" },
-    { id: "risk_config", label: "AHP 5-Domain Risk Config", icon: Sliders, badge: "Weights", category: "governance" },
     { id: "quarter_management", label: "Quarter Management", icon: Calendar, badge: "Q2 Active", category: "governance" },
     { id: "import_wizard", label: "Master Import Wizard", icon: Layers, badge: "DepEd SASS", category: "ingestion" },
     { id: "import_history", label: "Import Audit History", icon: ShieldCheck, badge: `${importHistory.length}`, category: "ingestion" },
@@ -325,9 +818,9 @@ export const AdminDashboard: React.FC = () => {
     { id: "students", label: "Master Student Registry", icon: BookOpen, badge: `${cohortStats.total || 500}`, category: "students" },
     { id: "create_student", label: "Create Single Student", icon: UserPlus, category: "students" },
     { id: "student_profile", label: "Student Override Editor", icon: Edit, category: "students" },
-    { id: "teachers", label: "Teacher Accounts Roster", icon: GraduationCap, badge: "4 Active", category: "users" },
+    { id: "teachers", label: "Faculty & Counselors Roster", icon: GraduationCap, badge: `${facultyList.length} Active`, category: "users" },
     { id: "create_user", label: "Create Campus Account", icon: Key, category: "users" },
-    { id: "parents", label: "Parent Accounts & Links", icon: Users, category: "users" },
+    { id: "parents", label: "Parent Accounts & Links", icon: Users, badge: `${parentRecords.length} Active`, category: "users" },
     { id: "pending_registrations", label: "Pending Registrations", icon: UserCheck, badge: `${pendingRegistrations.length} Due`, category: "users" },
     { id: "interventions", label: "System-Wide Interventions", icon: ShieldAlert, category: "compliance" },
     { id: "intervention_suggestions", label: "Bulk Recommendations", icon: Sparkles, category: "compliance" },
@@ -343,20 +836,410 @@ export const AdminDashboard: React.FC = () => {
     ? TAB_ITEMS
     : TAB_ITEMS.filter(t => t.category === selectedNavCategory);
 
+  // ==========================================
+  // 1. STUDENT REGISTRY PAGINATION & FILTERING
+  // ==========================================
+  const [studentPage, setStudentPage] = useState<number>(1);
+  const [studentPageSize, setStudentPageSize] = useState<number>(25);
+  const [studentGradeFilter, setStudentGradeFilter] = useState<string>("all");
+  const [studentTierFilter, setStudentTierFilter] = useState<string>("all");
+  const [studentSectionFilter, setStudentSectionFilter] = useState<string>("all");
+
   const selectedStudentObj = useMemo(() => {
-    return students.find(s => s.id === selectedStudentId) || students[0];
+    return students.find(s => s.id === selectedStudentId) || students[0] || {} as StudentRecord;
   }, [students, selectedStudentId]);
 
+  const uniqueSections = useMemo(() => {
+    const set = new Set<string>();
+    students.forEach(s => { if (s.section_name) set.add(s.section_name); });
+    return Array.from(set).sort();
+  }, [students]);
+
   const filteredStudents = useMemo(() => {
-    if (!searchQuery.trim()) return students.slice(0, 10);
-    const q = searchQuery.toLowerCase();
-    return students.filter(s => 
-      s.first_name.toLowerCase().includes(q) ||
-      s.last_name.toLowerCase().includes(q) ||
-      s.lrn.includes(searchQuery) ||
-      (s.section_name && s.section_name.toLowerCase().includes(q))
-    ).slice(0, 15);
-  }, [students, searchQuery]);
+    let result = [...students];
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(s => 
+        s.first_name.toLowerCase().includes(q) ||
+        s.last_name.toLowerCase().includes(q) ||
+        s.lrn.includes(searchQuery) ||
+        (s.section_name && s.section_name.toLowerCase().includes(q))
+      );
+    }
+    if (studentGradeFilter !== "all") {
+      result = result.filter(s => String(s.grade_level) === studentGradeFilter);
+    }
+    if (studentTierFilter !== "all") {
+      result = result.filter(s => s.latest_risk_tier === studentTierFilter);
+    }
+    if (studentSectionFilter !== "all") {
+      result = result.filter(s => s.section_name === studentSectionFilter);
+    }
+    return result;
+  }, [students, searchQuery, studentGradeFilter, studentTierFilter, studentSectionFilter]);
+
+  const totalStudentPages = useMemo(() => {
+    if (studentPageSize >= 500) return 1;
+    return Math.max(1, Math.ceil(filteredStudents.length / studentPageSize));
+  }, [filteredStudents.length, studentPageSize]);
+
+  const paginatedStudents = useMemo(() => {
+    if (studentPageSize >= 500) return filteredStudents;
+    const start = (studentPage - 1) * studentPageSize;
+    return filteredStudents.slice(start, start + studentPageSize);
+  }, [filteredStudents, studentPage, studentPageSize]);
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setStudentPage(1);
+  }, [searchQuery, studentGradeFilter, studentTierFilter, studentSectionFilter, studentPageSize]);
+
+  // ==========================================
+  // 2. CREATE STUDENT FORM STATE
+  // ==========================================
+  const [newStudentFirstName, setNewStudentFirstName] = useState("");
+  const [newStudentLastName, setNewStudentLastName] = useState("");
+  const [newStudentLRN, setNewStudentLRN] = useState("");
+  const [newStudentGradeLevel, setNewStudentGradeLevel] = useState<number>(11);
+  const [newStudentStrand, setNewStudentStrand] = useState("STEM");
+  const [newStudentSection, setNewStudentSection] = useState("Grade 11 - St. Augustine (STEM)");
+  const [newStudentGWA, setNewStudentGWA] = useState<number>(85);
+  const [newStudentAttendance, setNewStudentAttendance] = useState<number>(95);
+  const [newStudentPHQ9, setNewStudentPHQ9] = useState<number>(3);
+  const [newStudentIncome, setNewStudentIncome] = useState("10k-25k");
+  const [newStudentIsSubmitting, setNewStudentIsSubmitting] = useState(false);
+
+  const handleEnrollSingleStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStudentFirstName.trim() || !newStudentLastName.trim() || !newStudentLRN.trim()) {
+      showToast("Please fill in First Name, Last Name, and 12-digit LRN.");
+      return;
+    }
+    if (newStudentLRN.trim().length !== 12) {
+      showToast("LRN must be exactly 12 digits (DepEd Standard).");
+      return;
+    }
+
+    setNewStudentIsSubmitting(true);
+    try {
+      const gpa = Number(newStudentGWA);
+      const att = Number(newStudentAttendance);
+      const fails = gpa < 75 ? 2 : 0;
+      const abs = Math.max(0, Math.round((100 - att) / 5));
+      const phq = Number(newStudentPHQ9);
+      const finRisk = newStudentIncome === "<10k" ? 35 : newStudentIncome === "10k-25k" ? 20 : 10;
+
+      const newRec = await addStudentRecord({
+        first_name: newStudentFirstName.trim(),
+        last_name: newStudentLastName.trim(),
+        full_name: `${newStudentFirstName.trim()} ${newStudentLastName.trim()}`,
+        lrn: newStudentLRN.trim(),
+        grade_level: Number(newStudentGradeLevel),
+        strand: newStudentStrand,
+        section_name: newStudentSection,
+        adviser_name: "Class Adviser",
+        email: `${newStudentFirstName.toLowerCase().replace(/\s+/g, '')}.${newStudentLastName.toLowerCase().replace(/\s+/g, '')}@sapc.edu.ph`,
+        domain_scores: {
+          academic: Math.max(0, 100 - gpa),
+          mental_health: phq * 3.5,
+          financial: finRisk,
+          family: 15,
+          health: Math.max(0, 100 - att)
+        },
+        sass_metrics: {
+          gpa,
+          failing_subjects_count: fails,
+          days_absent: abs,
+          attendance_rate_pct: att,
+          incomplete_requirements_count: 0,
+          extracurricular_club: "General Student Association",
+          club_participation_level: "Moderate",
+          hobbies_interests: "Academic & Campus Activities"
+        }
+      });
+
+      setStudents(getActiveStudentDataset());
+      showToast(`Successfully enrolled student ${newRec.first_name} ${newRec.last_name} into ${newRec.section_name}!`);
+      // Reset form
+      setNewStudentFirstName("");
+      setNewStudentLastName("");
+      setNewStudentLRN("");
+      // Navigate to students registry
+      handleTabChange("students");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to enroll student. Please check input fields.");
+    } finally {
+      setNewStudentIsSubmitting(false);
+    }
+  };
+
+  // ==========================================
+  // 3. STUDENT OVERRIDE FORM STATE
+  // ==========================================
+  const [overrideGWA, setOverrideGWA] = useState<number>(85);
+  const [overrideAttendance, setOverrideAttendance] = useState<number>(95);
+  const [overrideFailedCount, setOverrideFailedCount] = useState<number>(0);
+  const [overridePHQ9, setOverridePHQ9] = useState<number>(3);
+  const [overrideFamilySupport, setOverrideFamilySupport] = useState<string>("Stable");
+  const [overrideIncome, setOverrideIncome] = useState<string>("10k-25k");
+
+  useEffect(() => {
+    if (selectedStudentObj && selectedStudentObj.id) {
+      setOverrideGWA(selectedStudentObj.sass_metrics?.gpa || 85);
+      setOverrideAttendance(selectedStudentObj.sass_metrics?.attendance_rate_pct || 95);
+      setOverrideFailedCount(selectedStudentObj.sass_metrics?.failing_subjects_count || 0);
+      setOverridePHQ9(Math.round((selectedStudentObj.domain_scores?.mental_health || 10) / 3.5));
+      setOverrideFamilySupport(selectedStudentObj.domain_scores?.family >= 25 ? "OFW Parents" : "Stable");
+      setOverrideIncome(selectedStudentObj.domain_scores?.financial >= 30 ? "<10k" : "10k-25k");
+    }
+  }, [selectedStudentObj]);
+
+  const handleSaveStudentOverride = async () => {
+    if (!selectedStudentObj || !selectedStudentObj.id) return;
+    try {
+      const gpa = Number(overrideGWA);
+      const att = Number(overrideAttendance);
+      const fails = Number(overrideFailedCount);
+      const abs = Math.max(0, Math.round((100 - att) / 5));
+      const phq = Number(overridePHQ9);
+      const famRisk = overrideFamilySupport === "OFW Parents" ? 30 : overrideFamilySupport === "Single Parent" ? 25 : 10;
+      const finRisk = overrideIncome === "<10k" ? 35 : overrideIncome === "10k-25k" ? 20 : 10;
+
+      const updated = await updateStudentRecord(selectedStudentObj.id, {
+        domain_scores: {
+          academic: Math.max(0, 100 - gpa),
+          mental_health: phq * 3.5,
+          family: famRisk,
+          financial: finRisk,
+          health: Math.max(0, 100 - att)
+        },
+        sass_metrics: {
+          ...selectedStudentObj.sass_metrics,
+          gpa,
+          failing_subjects_count: fails,
+          attendance_rate_pct: att,
+          days_absent: abs
+        }
+      });
+      setStudents(getActiveStudentDataset());
+      showToast(`Saved manual override for ${selectedStudentObj.first_name} ${selectedStudentObj.last_name}. New AHP Score: ${updated?.latest_risk_score}/100 (${updated?.latest_risk_tier?.toUpperCase()})`);
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save student override.");
+    }
+  };
+
+  const handleDeleteStudentAction = async (studentId: number, name: string) => {
+    if (!window.confirm(`⚠️ Permanently Delete Student Record\n\nAre you sure you want to delete ${name} (ID: ${studentId}) from the Master Student Registry?\n\nThis will remove the student from Firestore and re-aggregate cohort analytics.`)) {
+      return;
+    }
+    const success = await deleteStudentRecord(studentId);
+    if (success) {
+      setStudents(getActiveStudentDataset());
+      showToast(`Student record for ${name} removed.`);
+    } else {
+      showToast("Failed to delete student record.");
+    }
+  };
+
+  // ==========================================
+  // 4. CREATE CAMPUS USER ACCOUNT FORM STATE
+  // ==========================================
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserRole, setNewUserRole] = useState("teacher");
+  const [newUserSection, setNewUserSection] = useState("Grade 11 - St. Augustine (STEM)");
+  const [newUserDepartment, _setNewUserDepartment] = useState("Senior High STEM");
+  const [newUserPassword, setNewUserPassword] = useState("sapc2026");
+
+  const handleProvisionCampusUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserName.trim() || !newUserEmail.trim()) {
+      showToast("Please enter Full Name and Institutional Email.");
+      return;
+    }
+    const isCounselor = newUserRole === "guidance_counselor" || newUserRole === "counselor";
+    const createdRecord = await addFacultyRecord({
+      name: newUserName.trim(),
+      email: newUserEmail.trim(),
+      role: newUserRole as any,
+      section: newUserSection.trim(),
+      department: newUserDepartment.trim() || (isCounselor ? "Guidance & Counseling Center" : "Academic Department"),
+      initial_password: newUserPassword.trim() || (isCounselor ? "counselor123" : "teacher123"),
+      status: "Active"
+    });
+    
+    setFacultyList(getActiveFacultyRecords());
+    showToast(`Account provisioned for ${createdRecord.name}! Initial password: ${createdRecord.initial_password}`);
+    setNewUserName("");
+    setNewUserEmail("");
+    handleTabChange("teachers");
+  };
+
+  const filteredFaculty = useMemo(() => {
+    let result = [...facultyList];
+    if (facultySearch.trim()) {
+      const q = facultySearch.toLowerCase();
+      result = result.filter(f => 
+        f.name.toLowerCase().includes(q) ||
+        f.email.toLowerCase().includes(q) ||
+        (f.department && f.department.toLowerCase().includes(q)) ||
+        (f.section && f.section.toLowerCase().includes(q)) ||
+        (f.employee_id && f.employee_id.toLowerCase().includes(q)) ||
+        (f.prc_license_no && f.prc_license_no.toLowerCase().includes(q))
+      );
+    }
+    if (facultyRoleFilter !== "all") {
+      if (facultyRoleFilter === "counselor") {
+        result = result.filter(f => f.role === "guidance_counselor" || f.role === "counselor");
+      } else {
+        result = result.filter(f => f.role === facultyRoleFilter);
+      }
+    }
+    if (facultyStatusFilter !== "all") {
+      result = result.filter(f => f.status === facultyStatusFilter);
+    }
+    return result;
+  }, [facultyList, facultySearch, facultyRoleFilter, facultyStatusFilter]);
+
+  const handleSaveFacultyEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingFaculty) return;
+    const updated = await updateFacultyRecord(editingFaculty.id, editingFaculty);
+    if (updated) {
+      setFacultyList(getActiveFacultyRecords());
+      showToast(`Updated account details for ${updated.name}.`);
+      setEditingFaculty(null);
+    }
+  };
+
+  // ==========================================
+  // 5. SYSTEM-WIDE INTERVENTIONS STATE
+  // ==========================================
+  const [carePlans, setCarePlans] = useState<InterventionCarePlan[]>(() => getActiveInterventions());
+  const [newCarePlanStudentId, setNewCarePlanStudentId] = useState<number>(1);
+  const [newCarePlanTitle, setNewCarePlanTitle] = useState<string>("Academic Remediation / Peer Tutoring");
+  const [newCarePlanDomain, setNewCarePlanDomain] = useState<string>("Academic");
+  const [newCarePlanDescription, setNewCarePlanDescription] = useState<string>("Provide weekly subject coaching to elevate Pre-Calculus GWA above 80.");
+  const [newCarePlanCounselor, setNewCarePlanCounselor] = useState<string>("Maria Theresa Cruz, RGC");
+  const [newCarePlanGoals, _setNewCarePlanGoals] = useState<string>("Stabilize quarterly grades and attendance");
+
+  useEffect(() => {
+    const handleInterventionsUpdate = () => {
+      setCarePlans(getActiveInterventions());
+    };
+    window.addEventListener("sapc:interventions-updated", handleInterventionsUpdate);
+    window.addEventListener("sapc_interventions_updated", handleInterventionsUpdate);
+    return () => {
+      window.removeEventListener("sapc:interventions-updated", handleInterventionsUpdate);
+      window.removeEventListener("sapc_interventions_updated", handleInterventionsUpdate);
+    };
+  }, []);
+
+  const handleCreateCarePlan = (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetStudent = students.find(s => s.id === Number(newCarePlanStudentId)) || students[0];
+    if (!targetStudent) {
+      showToast("Select a valid student record.");
+      return;
+    }
+    const plan = saveOrUpdateIntervention({
+      student_id: targetStudent.id,
+      student_name: `${targetStudent.first_name} ${targetStudent.last_name}`,
+      title: newCarePlanTitle,
+      description: newCarePlanDescription,
+      target_domain: newCarePlanDomain,
+      goals: newCarePlanGoals,
+      assigned_counselor: newCarePlanCounselor,
+      status: "Active"
+    });
+    setCarePlans(getActiveInterventions());
+    showToast(`Care plan activated for ${plan.student_name}!`);
+  };
+
+  const handleQuickDeployAIPan = (student: StudentRecord) => {
+    let recTitle = "Academic Remediation & Peer Tutoring";
+    let recDomain = "Academic";
+    let recDesc = "Establish weekly tutoring and diagnostic review with Subject Adviser.";
+
+    if (student.domain_scores?.mental_health >= 30) {
+      recTitle = "Psychological First Aid & Clinical Intake";
+      recDomain = "Mental Health";
+      recDesc = "Conduct 1-on-1 counseling session and provide emotional regulation coping strategies.";
+    } else if (student.domain_scores?.family >= 25) {
+      recTitle = "Parent-Teacher Case Conference";
+      recDomain = "Family Support";
+      recDesc = "Schedule guidance conference with guardian to establish structured home study habits.";
+    } else if (student.sass_metrics?.attendance_rate_pct < 88) {
+      recTitle = "Attendance Contract & Health Check";
+      recDomain = "Health & Attendance";
+      recDesc = "Formulate flexible attendance recovery agreement and coordinate with campus clinic.";
+    } else if (student.domain_scores?.financial >= 30) {
+      recTitle = "Tuition Voucher & Financial Grant Endorsement";
+      recDomain = "Financial Assistance";
+      recDesc = "Endorse student to SAPC Alumni Foundation and PEAC voucher emergency subsidy.";
+    }
+
+    saveOrUpdateIntervention({
+      student_id: student.id,
+      student_name: `${student.first_name} ${student.last_name}`,
+      title: recTitle,
+      target_domain: recDomain,
+      description: recDesc,
+      goals: "Target risk reduction below 40 AHP points within 4 weeks",
+      assigned_counselor: "Maria Theresa Cruz, RGC",
+      status: "Active"
+    });
+    setCarePlans(getActiveInterventions());
+    showToast(`AI Care Plan deployed for ${student.first_name} ${student.last_name}!`);
+    handleTabChange("interventions");
+  };
+
+  // ==========================================
+  // 6. BROADCAST ANNOUNCEMENTS STATE
+  // ==========================================
+  const [broadcastAudience, setBroadcastAudience] = useState<"all" | "teacher" | "parent" | "counselor">("all");
+  const [broadcastPriority, setBroadcastPriority] = useState<"info" | "urgent" | "alert">("urgent");
+  const [broadcastTitle, setBroadcastTitle] = useState("");
+  const [broadcastMessage, setBroadcastMessage] = useState("");
+  const [activeBroadcasts, setActiveBroadcasts] = useState(() => getActiveNotifications());
+
+  const handleSendBroadcast = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!broadcastTitle.trim() || !broadcastMessage.trim()) {
+      showToast("Please enter announcement title and message content.");
+      return;
+    }
+    addAppNotification({
+      type: broadcastPriority === "urgent" ? "alert" : broadcastPriority === "alert" ? "alert" : "system",
+      title: `[ADMIN BROADCAST] ${broadcastTitle.trim()}`,
+      body: broadcastMessage.trim(),
+      message: broadcastMessage.trim(),
+      targetRole: broadcastAudience,
+      audience: broadcastAudience,
+      href: "/dashboard"
+    });
+    setActiveBroadcasts(getActiveNotifications());
+    showToast(`Broadcast dispatched to ${broadcastAudience.toUpperCase()} recipients across SAPC.`);
+    setBroadcastTitle("");
+    setBroadcastMessage("");
+  };
+
+  // ==========================================
+  // 7. VERIFY SUBMITTED SCREENERS QUEUE
+  // ==========================================
+  const [screenerQueue, setScreenerQueue] = useState([
+    { id: "SCR-901", studentName: "Joshua Dimaculangan", lrn: "109238475001", section: "Grade 11 - St. Augustine (STEM)", type: "GAD-7 Anxiety Screener", submittedBy: "Class Adviser", score: "Score: 14/21 (Moderate)", date: "2026-09-25", status: "Pending Verification" },
+    { id: "SCR-902", studentName: "Samantha Nicole Reyes", lrn: "109238475004", section: "Grade 11 - St. Thomas (HUMSS)", type: "DepEd SASS Attendance Slip", submittedBy: "Subject Teacher", score: "12 Unexcused Absences", date: "2026-09-24", status: "Pending Verification" },
+    { id: "SCR-903", studentName: "Althea Garcia", lrn: "109238470002", section: "Grade 7 - St. Bernadette", type: "PHQ-9 Depression Screener", submittedBy: "Guidance Staff", score: "Score: 6/27 (Mild)", date: "2026-09-23", status: "Pending Verification" },
+    { id: "SCR-904", studentName: "Karl Patrick Mendoza", lrn: "109238475008", section: "Grade 12 - St. Jude (ABM)", type: "Midterm Diagnostic Exam", submittedBy: "Math Dept Head", score: "Score: 71/100 (Below 75 Threshold)", date: "2026-09-22", status: "Pending Verification" }
+  ]);
+
+  const handleVerifyScreener = (id: string, name: string) => {
+    setScreenerQueue(prev => prev.filter(s => s.id !== id));
+    showToast(`Verified screener ${id} for ${name}. Ingested into AHP Multi-Domain calculation engine.`);
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -460,10 +1343,10 @@ export const AdminDashboard: React.FC = () => {
               <span className="text-xs sm:text-sm text-rose-100 font-semibold">• System Administration &amp; Governance</span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-snug">
-              Master System &amp; AHP Decision Governance
+              Master System &amp; Campus Governance
             </h1>
             <p className="text-xs sm:text-sm md:text-base text-rose-50/95 leading-relaxed font-normal">
-              Configure institutional AHP risk criteria weights, oversee DepEd SASS batch ingestion, manage campus user accounts, and enforce immutable RA 10173 audit logs.
+              Oversee campus student master registry, manage DepEd SASS batch ingestion, configure campus user accounts, and enforce immutable RA 10173 audit logs.
             </p>
           </div>
 
@@ -478,19 +1361,19 @@ export const AdminDashboard: React.FC = () => {
             </button>
 
             <button
-              onClick={() => handleTabChange("risk_config")}
+              onClick={() => handleTabChange("reports")}
               className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-2"
             >
-              <Sliders className="h-4 w-4 text-[#8B0014]" />
-              <span>Configure AHP Weights</span>
+              <Award className="h-4 w-4 text-[#8B0014]" />
+              <span>DepEd Reports Hub</span>
             </button>
 
             <button
               onClick={() => setIsReportOpen(true)}
               className="px-4 py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white border border-white/20 font-extrabold text-xs sm:text-sm transition flex items-center gap-2"
             >
-              <Award className="h-4 w-4 text-amber-300" />
-              <span>Executive Report</span>
+              <FileSpreadsheet className="h-4 w-4 text-amber-300" />
+              <span>Executive Summary</span>
             </button>
           </div>
         </div>
@@ -872,167 +1755,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* 2. RISK CONFIG (risk_config) - THE MOST IMPORTANT ADMIN PAGE */}
-      {/* ========================================================= */}
-      {activeTab === "risk_config" && (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <Sliders className="h-6 w-6 text-[#8B0014]" />
-                  AHP 5-Domain Criteria Weights &amp; Threshold Configuration
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500">
-                  Configure the master risk calculation weights based on the psychometrician interview standard
-                </p>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <span className={`px-3 py-1.5 rounded-full text-xs font-black ${
-                  totalWeight === 100.0 ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-rose-100 text-rose-800 border border-rose-300"
-                }`}>
-                  Total: {totalWeight}% ({totalWeight === 100.0 ? "Valid 100%" : "Must Equal 100%"})
-                </span>
-              </div>
-            </div>
-
-            {/* Sliders for 5 Domains */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-xs">
-              <div className="p-5 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-black text-blue-950 text-sm">1. Academic Factor</span>
-                  <span className="font-mono text-base font-black text-blue-900">{riskWeights.academic}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="60"
-                  step="5"
-                  value={riskWeights.academic}
-                  onChange={(e) => setRiskWeights(prev => ({ ...prev, academic: Number(e.target.value) }))}
-                  className="w-full accent-[#8B0014] cursor-pointer"
-                />
-                <p className="text-slate-600 text-[11px]">SASS grades, quizzes, exam marks, and quarterly GPA trends.</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-black text-amber-950 text-sm">2. Family Dynamics</span>
-                  <span className="font-mono text-base font-black text-amber-900">{riskWeights.family}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="60"
-                  step="5"
-                  value={riskWeights.family}
-                  onChange={(e) => setRiskWeights(prev => ({ ...prev, family: Number(e.target.value) }))}
-                  className="w-full accent-amber-600 cursor-pointer"
-                />
-                <p className="text-slate-600 text-[11px]">Parental support, home stability, and attendance cooperation.</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-black text-rose-950 text-sm">3. Physical Health</span>
-                  <span className="font-mono text-base font-black text-rose-900">{riskWeights.health}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="60"
-                  step="5"
-                  value={riskWeights.health}
-                  onChange={(e) => setRiskWeights(prev => ({ ...prev, health: Number(e.target.value) }))}
-                  className="w-full accent-rose-600 cursor-pointer"
-                />
-                <p className="text-slate-600 text-[11px]">Clinic visits, chronic illnesses, and sleep deprivation indicators.</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-black text-purple-950 text-sm">4. Mental Health</span>
-                  <span className="font-mono text-base font-black text-purple-900">{riskWeights.mental}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="60"
-                  step="5"
-                  value={riskWeights.mental}
-                  onChange={(e) => setRiskWeights(prev => ({ ...prev, mental: Number(e.target.value) }))}
-                  className="w-full accent-purple-600 cursor-pointer"
-                />
-                <p className="text-slate-600 text-[11px]">Standardized PHQ-9, GAD-7, and NLP chatbot distress detection.</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-black text-emerald-950 text-sm">5. Financial Strain</span>
-                  <span className="font-mono text-base font-black text-emerald-900">{riskWeights.financial}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="60"
-                  step="5"
-                  value={riskWeights.financial}
-                  onChange={(e) => setRiskWeights(prev => ({ ...prev, financial: Number(e.target.value) }))}
-                  className="w-full accent-emerald-600 cursor-pointer"
-                />
-                <p className="text-slate-600 text-[11px]">Tuition arrears, 4Ps status, and working student employment burden.</p>
-              </div>
-            </div>
-
-            {/* Threshold Configuration */}
-            <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
-              <h4 className="font-extrabold text-sm text-slate-900">Risk Tier Classification Boundaries:</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                  <span className="text-emerald-700 font-bold block">🟢 Low Risk Tier</span>
-                  <p className="font-mono text-slate-900 font-bold">0.0 to 39.9</p>
-                </div>
-                <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                  <span className="text-amber-800 font-bold block">🟡 Medium Risk Tier</span>
-                  <p className="font-mono text-slate-900 font-bold">40.0 to 69.9</p>
-                </div>
-                <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                  <span className="text-rose-700 font-bold block">🔴 High Risk Tier</span>
-                  <p className="font-mono text-slate-900 font-bold">70.0 to 100.0</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const baselineWeights = { academic: 30.0, family: 20.0, health: 20.0, mental: 15.0, financial: 15.0 };
-                  setRiskWeights(baselineWeights);
-                  saveRiskWeights(baselineWeights);
-                  const recalculated = recalculateAHPForDataset(students, baselineWeights);
-                  saveStudentDataset(recalculated);
-                  setStudents(recalculated);
-                  showToast("Reset to Psychometrician Standard (30/20/20/15/15) and recalculated cohort.");
-                }}
-                className="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition cursor-pointer"
-              >
-                Reset to Psychometrician Baseline
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveAndRecalculateAHP}
-                className="px-5 py-2.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs transition cursor-pointer shadow-md flex items-center gap-1.5"
-              >
-                <Sliders className="h-3.5 w-3.5 text-amber-300" />
-                <span>Save &amp; Recalculate School Cohort</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ========================================================= */}
       {/* 3. QUARTER MANAGEMENT (quarter_management) */}
@@ -1122,46 +1845,93 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === "import_history" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="h-6 w-6 text-[#8B0014]" />
-                System-Wide Ingestion Audit Trail &amp; Import Logs
-              </h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <ShieldCheck className="h-6 w-6 text-[#8B0014]" />
+                  System-Wide Ingestion Audit Trail &amp; Import Logs
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  Chronological record of all bulk CSV uploads, schema matches, and automated AHP risk recalculations
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedNavCategory("ingestion");
+                    handleTabChange("import_wizard");
+                  }}
+                  className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition shadow-xs flex items-center gap-1.5"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  <span>New Batch Ingestion</span>
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto rounded-2xl border border-slate-200">
               <table className="min-w-full text-left text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-xs font-black uppercase text-slate-600">
-                    <th className="py-3 px-4">Batch ID</th>
-                    <th className="py-3 px-4">Import Type</th>
+                    <th className="py-3 px-4">Batch Ref ID</th>
+                    <th className="py-3 px-4">Domain &amp; Type</th>
                     <th className="py-3 px-4">Imported By</th>
-                    <th className="py-3 px-4">Records Count</th>
-                    <th className="py-3 px-4">Success Rate</th>
+                    <th className="py-3 px-4">Records</th>
+                    <th className="py-3 px-4">Risk Shifts</th>
                     <th className="py-3 px-4">Timestamp</th>
-                    <th className="py-3 px-4 text-right">Action</th>
+                    <th className="py-3 px-4 text-right">Safeguard Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
                   {importHistory.map((h) => (
-                    <tr key={h.id} className="hover:bg-slate-50">
-                      <td className="py-3 px-4 font-mono font-bold text-slate-900">{h.id}</td>
-                      <td className="py-3 px-4 font-bold text-slate-800">{h.type}</td>
-                      <td className="py-3 px-4 text-slate-600">{h.importedBy}</td>
-                      <td className="py-3 px-4 font-bold text-slate-900">{h.count} rows</td>
-                      <td className="py-3 px-4 text-emerald-700 font-bold">{h.successRate}</td>
-                      <td className="py-3 px-4 text-slate-500">{h.date}</td>
+                    <tr key={h.id} className="hover:bg-slate-50 transition">
+                      <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                        <span>{h.id}</span>
+                        {h.rolledBack && (
+                          <span className="block text-[10px] text-slate-400 font-sans font-medium">
+                            (Rolled Back)
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <strong className="font-bold text-slate-900 block">{h.type}</strong>
+                        <span className="text-[11px] text-slate-500 capitalize">{h.academicYear || "AY 2025-2026"} • {h.quarter || "Q1"}</span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 font-medium">{h.importedBy}</td>
+                      <td className="py-3 px-4 font-bold text-slate-900">
+                        {h.count} students
+                      </td>
+                      <td className="py-3 px-4">
+                        {h.diffSummary ? (
+                          <div className="flex items-center gap-1.5 font-bold text-[11px]">
+                            <span className="text-rose-700">▲ {h.diffSummary.riskIncreased}</span>
+                            <span className="text-slate-400">•</span>
+                            <span className="text-emerald-700">▼ {h.diffSummary.riskDecreased}</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 font-mono text-[11px]">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">{h.date}</td>
                       <td className="py-3 px-4 text-right">
-                        {h.canRollback && (
+                        {h.rolledBack ? (
+                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                            Reverted
+                          </span>
+                        ) : h.canRollback ? (
                           <button
-                            onClick={() => {
-                              setSelectedNavCategory("ingestion");
-                              handleTabChange("revert_import");
-                            }}
-                            className="text-xs font-bold text-rose-700 hover:underline"
+                            type="button"
+                            onClick={() => handleRollbackBatch(h.id)}
+                            className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#8B0014] border border-rose-200 font-bold text-xs transition shadow-2xs cursor-pointer"
                           >
-                            Rollback
+                            1-Click Rollback
                           </button>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-50 text-slate-400 border border-slate-100">
+                            Baseline Locked
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -1182,26 +1952,92 @@ export const AdminDashboard: React.FC = () => {
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
                 <RotateCcw className="h-6 w-6 text-rose-600" />
-                Emergency Ingestion Undo &amp; Rollback Safeguards
+                Emergency Ingestion Undo &amp; Snapshot Rollback Engine
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500">
-                Safely revert erroneous bulk imports with multi-factor audit confirmation
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                Safely revert erroneous bulk imports with 100% loss-free pre-import snapshot recovery
               </p>
             </div>
 
-            <div className="p-5 rounded-3xl bg-rose-50/60 border border-rose-200 space-y-3 text-xs text-slate-700">
-              <h4 className="font-black text-rose-950 text-sm">Emergency Rollback Queue:</h4>
-              <p className="leading-relaxed">
-                If an adviser mistakenly imported an outdated grade sheet, click <strong>Rollback Batch</strong> to restore previous records without database corruption.
+            <div className="p-5 rounded-3xl bg-amber-50/60 border border-amber-200 space-y-3 text-xs text-slate-700">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
+                <h4 className="font-black text-slate-900 text-sm">How Snapshot Rollback Works</h4>
+              </div>
+              <p className="leading-relaxed text-slate-600">
+                Whenever a staff member or counselor ingests a batch CSV, IntellySys AGY automatically captures an immutable memory snapshot of all 500 student records before mutations are applied. Reverting a batch restores this snapshot instantly and synchronizes changes across client dashboards and Firebase Cloud Firestore.
               </p>
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => showToast("Simulated rollback: Batch IMP-901 reverted to pre-import state.")}
-                  className="px-4 py-2 rounded-xl bg-rose-700 text-white font-bold text-xs hover:bg-rose-800 transition"
-                >
-                  Rollback Batch IMP-901 (45 STEM Grades)
-                </button>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+                Active Ingestion Batches Available for Rollback ({importHistory.filter(h => h.canRollback && !h.rolledBack).length})
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {importHistory.filter(h => h.canRollback && !h.rolledBack).map((batch) => (
+                  <div key={batch.id} className="p-5 rounded-2xl border-2 border-rose-200/70 bg-rose-50/30 space-y-4 shadow-xs flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                          {batch.id}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-100 text-rose-800 border border-rose-200">
+                          Ready for Undo
+                        </span>
+                      </div>
+
+                      <h5 className="font-extrabold text-slate-900 text-sm">
+                        {batch.type}
+                      </h5>
+
+                      <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600 pt-1">
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Actor / Imported By</span>
+                          <strong className="text-slate-800">{batch.importedBy}</strong>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Timestamp</span>
+                          <strong className="text-slate-800 font-mono">{batch.date}</strong>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Dataset Size</span>
+                          <strong className="text-slate-800">{batch.count} Students</strong>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Risk Shifts</span>
+                          {batch.diffSummary ? (
+                            <strong className="text-slate-800">
+                              ▲ {batch.diffSummary.riskIncreased} | ▼ {batch.diffSummary.riskDecreased}
+                            </strong>
+                          ) : (
+                            <strong className="text-slate-800">Standard</strong>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-rose-200/50 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-500">
+                        {batch.snapshotData ? "✓ Snapshot Valid" : "Baseline Fallback"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRollbackBatch(batch.id)}
+                        className="px-4 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span>Rollback Batch</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {importHistory.filter(h => h.canRollback && !h.rolledBack).length === 0 && (
+                  <div className="col-span-2 p-8 text-center rounded-2xl border border-slate-200 bg-slate-50/50 text-slate-500 text-xs">
+                    No active rollback batches in queue. All recent imports have either been finalized or already reverted.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1213,25 +2049,33 @@ export const AdminDashboard: React.FC = () => {
       {/* ========================================================= */}
       {activeTab === "students" && (
         <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
+            {/* Header with Title and Actions */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-                  Master Student Database ({cohortStats.total} Students)
-                </h3>
+                <div className="flex items-center gap-2.5 mb-1">
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900">
+                    Master Student Registry ({cohortStats.total} Students)
+                  </h3>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Cloud Firestore Live Sync
+                  </span>
+                </div>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  Full administrative access across all {cohortStats.sectionBreakdown.length || 12} sections with dynamic AHP scoring
+                  Full administrative access across all {cohortStats.sectionBreakdown.length || 12} sections with dynamic AHP 5-domain risk scoring
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+              <div className="flex flex-wrap items-center gap-2 self-start lg:self-auto">
                 <button
                   type="button"
                   onClick={() => exportActiveDatasetToCSV(students)}
                   className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Download all 500 student records in CSV format"
                 >
                   <Download className="h-3.5 w-3.5 text-slate-600" />
-                  <span>Export Active CSV</span>
+                  <span>Export Active CSV ({students.length})</span>
                 </button>
 
                 <label className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
@@ -1247,58 +2091,277 @@ export const AdminDashboard: React.FC = () => {
 
                 <button
                   onClick={() => handleTabChange("create_student")}
-                  className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition"
+                  className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
-                  + Add Single Student
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Add Single Student</span>
                 </button>
               </div>
             </div>
 
-            <div className="relative">
-              <Search className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search by student name, LRN, section..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#8B0014]"
-              />
+            {/* Filter & Search Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
+              {/* Search input */}
+              <div className="lg:col-span-5 relative">
+                <Search className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by student name, LRN, section..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#8B0014] focus:ring-1 focus:ring-[#8B0014]"
+                />
+              </div>
+
+              {/* Grade Filter */}
+              <div className="lg:col-span-2">
+                <select
+                  value={studentGradeFilter}
+                  onChange={(e) => setStudentGradeFilter(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-[#8B0014]"
+                >
+                  <option value="all">All Grade Levels</option>
+                  <option value="7">Grade 7 (JHS)</option>
+                  <option value="8">Grade 8 (JHS)</option>
+                  <option value="9">Grade 9 (JHS)</option>
+                  <option value="10">Grade 10 (JHS)</option>
+                  <option value="11">Grade 11 (SHS)</option>
+                  <option value="12">Grade 12 (SHS)</option>
+                </select>
+              </div>
+
+              {/* Tier Filter */}
+              <div className="lg:col-span-2">
+                <select
+                  value={studentTierFilter}
+                  onChange={(e) => setStudentTierFilter(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-[#8B0014]"
+                >
+                  <option value="all">All Risk Tiers</option>
+                  <option value="High Risk">Tier 1: High Risk</option>
+                  <option value="Moderate Risk">Tier 2: Moderate Risk</option>
+                  <option value="Low Risk">Tier 3: Low Risk</option>
+                </select>
+              </div>
+
+              {/* Section Filter */}
+              <div className="lg:col-span-3">
+                <select
+                  value={studentSectionFilter}
+                  onChange={(e) => setStudentSectionFilter(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-[#8B0014]"
+                >
+                  <option value="all">All Sections ({uniqueSections.length})</option>
+                  {uniqueSections.map((sec) => (
+                    <option key={sec} value={sec}>{sec}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
+            {/* Table & Pagination Info Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-600 px-1">
+              <div className="font-semibold">
+                Showing <strong className="text-slate-900">{filteredStudents.length === 0 ? 0 : (studentPage - 1) * studentPageSize + 1}</strong> to <strong className="text-slate-900">{Math.min(studentPage * studentPageSize, filteredStudents.length)}</strong> of <strong className="text-slate-900">{filteredStudents.length}</strong> filtered records (Total Cohort: {students.length})
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500 font-medium">Rows per page:</span>
+                <select
+                  value={studentPageSize}
+                  onChange={(e) => setStudentPageSize(Number(e.target.value))}
+                  className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800"
+                >
+                  <option value={10}>10 rows</option>
+                  <option value={25}>25 rows</option>
+                  <option value={50}>50 rows</option>
+                  <option value={100}>100 rows</option>
+                  <option value={500}>All 500 rows</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Students Table */}
             <div className="overflow-x-auto rounded-2xl border border-slate-200">
-              <table className="min-w-full text-left text-sm">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-xs font-black uppercase text-slate-600">
-                    <th className="py-3 px-4">Student</th>
-                    <th className="py-3 px-4">LRN</th>
-                    <th className="py-3 px-4">Section</th>
-                    <th className="py-3 px-4">AHP Score</th>
+              <table className="min-w-full text-left text-xs sm:text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200 uppercase font-black text-slate-600 text-[11px]">
+                  <tr>
+                    <th className="py-3 px-4">#</th>
+                    <th className="py-3 px-4">Student &amp; LRN</th>
+                    <th className="py-3 px-4">Grade &amp; Section</th>
+                    <th className="py-3 px-4">5-Domain Profile</th>
+                    <th className="py-3 px-4">AHP Composite Risk</th>
                     <th className="py-3 px-4 text-right">Admin Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {filteredStudents.map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-50">
-                      <td className="py-3 px-4 font-bold text-slate-900">{s.first_name} {s.last_name}</td>
-                      <td className="py-3 px-4 font-mono text-slate-600">{s.lrn}</td>
-                      <td className="py-3 px-4 text-slate-700">{s.section_name}</td>
-                      <td className="py-3 px-4"><RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" /></td>
-                      <td className="py-3 px-4 text-right space-x-2">
-                        <button
-                          onClick={() => {
-                            setSelectedStudentId(s.id);
-                            handleTabChange("student_profile");
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 font-bold text-xs hover:bg-slate-200"
-                        >
-                          Override / Edit
-                        </button>
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  {paginatedStudents.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-10 text-center text-slate-500 text-xs">
+                        No student records match the search filter.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    paginatedStudents.map((s, idx) => {
+                      const rowNum = (studentPage - 1) * studentPageSize + idx + 1;
+                      return (
+                        <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                          <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
+                            {rowNum}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <strong className="text-slate-900 font-extrabold block text-xs sm:text-sm">
+                              {s.first_name} {s.last_name}
+                            </strong>
+                            <span className="font-mono text-[11px] text-slate-500">
+                              LRN: {s.lrn}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="font-bold text-slate-800 block text-xs">
+                              {s.section_name}
+                            </span>
+                            <span className="text-[11px] text-slate-500">
+                              Grade {s.grade_level} {s.strand ? `• ${s.strand}` : ""}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="flex flex-wrap gap-1 text-[10px]">
+                              <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-100" title="Academic GPA">
+                                GPA: {s.sass_metrics?.gpa || 85}
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-100" title="Attendance Rate">
+                                Att: {s.sass_metrics?.attendance_rate_pct || 95}%
+                              </span>
+                              {s.domain_scores?.mental_health !== undefined && s.domain_scores.mental_health > 15 && (
+                                <span className={`px-1.5 py-0.5 rounded font-bold border ${s.domain_scores.mental_health >= 30 ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-purple-50 text-purple-700 border-purple-100"}`} title="Mental Health Domain Risk">
+                                  Mental: {s.domain_scores.mental_health}
+                                </span>
+                              )}
+                              {s.domain_scores?.family !== undefined && s.domain_scores.family > 20 && (
+                                <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 font-bold border border-amber-200" title="Family Risk Indicator">
+                                  Family: {s.domain_scores.family}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" />
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedStudentId(s.id);
+                                  handleTabChange("student_profile");
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-[#8B0014] hover:text-white text-slate-800 font-bold text-xs transition shadow-2xs cursor-pointer flex items-center gap-1"
+                                title="Override / Edit Student Data"
+                              >
+                                <Edit className="h-3 w-3" />
+                                <span>Override</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteStudentAction(s.id, `${s.first_name} ${s.last_name}`)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                                title="Delete student record"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls Footer */}
+            {totalStudentPages > 1 && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
+                <div className="text-slate-500">
+                  Page <strong className="text-slate-800">{studentPage}</strong> of <strong className="text-slate-800">{totalStudentPages}</strong>
+                </div>
+
+                <div className="flex items-center gap-1.5 self-center sm:self-auto">
+                  <button
+                    type="button"
+                    disabled={studentPage <= 1}
+                    onClick={() => setStudentPage(1)}
+                    className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    title="First Page"
+                  >
+                    « First
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={studentPage <= 1}
+                    onClick={() => setStudentPage(prev => Math.max(1, prev - 1))}
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                    <span>Prev</span>
+                  </button>
+
+                  {/* Page Jump Numeric Display */}
+                  <div className="flex items-center gap-1 px-1">
+                    {(() => {
+                      const count = Math.min(5, totalStudentPages);
+                      let start = Math.max(1, studentPage - Math.floor(count / 2));
+                      let end = start + count - 1;
+                      if (end > totalStudentPages) {
+                        end = totalStudentPages;
+                        start = Math.max(1, end - count + 1);
+                      }
+                      const pageNumbers: number[] = [];
+                      for (let i = start; i <= end; i++) {
+                        pageNumbers.push(i);
+                      }
+                      return pageNumbers.map((p) => (
+                        <button
+                          key={`page-${p}`}
+                          type="button"
+                          onClick={() => setStudentPage(p)}
+                          className={`w-7 h-7 rounded-lg text-xs font-black transition ${
+                            studentPage === p
+                              ? "bg-[#8B0014] text-white shadow-xs"
+                              : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      ));
+                    })()}
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={studentPage >= totalStudentPages}
+                    onClick={() => setStudentPage(prev => Math.min(totalStudentPages, prev + 1))}
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1"
+                  >
+                    <span>Next</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={studentPage >= totalStudentPages}
+                    onClick={() => setStudentPage(totalStudentPages)}
+                    className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold disabled:opacity-40 disabled:cursor-not-allowed transition"
+                    title="Last Page"
+                  >
+                    Last »
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1309,47 +2372,191 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === "create_student" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <UserPlus className="h-6 w-6 text-[#8B0014]" />
-                Manually Enroll Single Student Record
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500">For mid-term transferees, late enrollees, or special track admissions</p>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <UserPlus className="h-6 w-6 text-[#8B0014]" />
+                  Manually Enroll Single Student Record
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Instantly enroll transferees or special track students directly into the master registry &amp; Cloud Firestore
+                </p>
+              </div>
+              <button
+                onClick={() => handleTabChange("students")}
+                className="text-xs font-bold text-slate-500 hover:text-[#8B0014] transition"
+              >
+                ← Back to Student Registry
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700">First Name:</label>
-                <input type="text" placeholder="e.g. Juan" className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
-              </div>
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700">Last Name:</label>
-                <input type="text" placeholder="e.g. Dela Cruz" className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
-              </div>
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700">Learner Reference Number (LRN - 12 Digits):</label>
-                <input type="text" placeholder="109238475..." className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
-              </div>
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700">Assigned Advisory Section:</label>
-                <select className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl">
-                  <option value="Grade 11 - St. Augustine (STEM)">Grade 11 - St. Augustine (STEM)</option>
-                  <option value="Grade 11 - St. Thomas (HUMSS)">Grade 11 - St. Thomas (HUMSS)</option>
-                  <option value="Grade 11 - St. Clare (ABM)">Grade 11 - St. Clare (ABM)</option>
-                  <option value="Grade 12 - St. Jude (ABM)">Grade 12 - St. Jude (ABM)</option>
-                </select>
+            <form onSubmit={handleEnrollSingleStudent} className="space-y-6">
+              {/* Section 1: Demographics */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 text-xs">
+                <h4 className="font-black text-slate-900 text-sm">1. Student Identification &amp; Demographics</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">First Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Juan"
+                      value={newStudentFirstName}
+                      onChange={(e) => setNewStudentFirstName(e.target.value)}
+                      className="w-full p-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Last Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Dela Cruz"
+                      value={newStudentLastName}
+                      onChange={(e) => setNewStudentLastName(e.target.value)}
+                      className="w-full p-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">12-Digit LRN (DepEd) *</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={12}
+                      placeholder="109238475099"
+                      value={newStudentLRN}
+                      onChange={(e) => setNewStudentLRN(e.target.value)}
+                      className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="sm:col-span-2 pt-2">
+              {/* Section 2: Academic & Section */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 text-xs">
+                <h4 className="font-black text-slate-900 text-sm">2. Grade Level &amp; Advisory Section</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Grade Level</label>
+                    <select
+                      value={newStudentGradeLevel}
+                      onChange={(e) => setNewStudentGradeLevel(Number(e.target.value))}
+                      className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold"
+                    >
+                      <option value={7}>Grade 7 (JHS)</option>
+                      <option value={8}>Grade 8 (JHS)</option>
+                      <option value={9}>Grade 9 (JHS)</option>
+                      <option value={10}>Grade 10 (JHS)</option>
+                      <option value={11}>Grade 11 (SHS)</option>
+                      <option value={12}>Grade 12 (SHS)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Strand / Track</label>
+                    <select
+                      value={newStudentStrand}
+                      onChange={(e) => setNewStudentStrand(e.target.value)}
+                      className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold"
+                    >
+                      <option value="STEM">STEM (Science, Tech, Eng, Math)</option>
+                      <option value="HUMSS">HUMSS (Humanities & Social Sciences)</option>
+                      <option value="ABM">ABM (Accountancy, Business, Management)</option>
+                      <option value="GAS">GAS (General Academic Strand)</option>
+                      <option value="TVL">TVL (Technical-Vocational Track)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Advisory Section</label>
+                    <select
+                      value={newStudentSection}
+                      onChange={(e) => setNewStudentSection(e.target.value)}
+                      className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold"
+                    >
+                      {uniqueSections.map((sec) => (
+                        <option key={sec} value={sec}>{sec}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Diagnostic 5-Domain Baselines */}
+              <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-4 text-xs">
+                <h4 className="font-black text-amber-950 text-sm">3. Diagnostic 5-Domain Intake Baselines</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-bold text-amber-900">Academic GWA (70-100)</label>
+                    <input
+                      type="number"
+                      min="65"
+                      max="100"
+                      value={newStudentGWA}
+                      onChange={(e) => setNewStudentGWA(Number(e.target.value))}
+                      className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-amber-900">Attendance Rate (%)</label>
+                    <input
+                      type="number"
+                      min="50"
+                      max="100"
+                      value={newStudentAttendance}
+                      onChange={(e) => setNewStudentAttendance(Number(e.target.value))}
+                      className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-amber-900">PHQ-9 Screener (0-27)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="27"
+                      value={newStudentPHQ9}
+                      onChange={(e) => setNewStudentPHQ9(Number(e.target.value))}
+                      className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-amber-900">Monthly Family Income</label>
+                    <select
+                      value={newStudentIncome}
+                      onChange={(e) => setNewStudentIncome(e.target.value)}
+                      className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
+                    >
+                      <option value="<10k">&lt; ₱10,000 (Low Income)</option>
+                      <option value="10k-25k">₱10,000 - ₱25,000 (Lower Middle)</option>
+                      <option value="25k-50k">₱25,000 - ₱50,000 (Middle)</option>
+                      <option value=">50k">&gt; ₱50,000 (Upper Middle)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => showToast("New student registered successfully.")}
-                  className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition"
+                  onClick={() => handleTabChange("students")}
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition"
                 >
-                  Enroll Student
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={newStudentIsSubmitting}
+                  className="px-6 py-2.5 rounded-xl bg-[#8B0014] text-white font-extrabold text-xs hover:bg-[#6D0010] transition shadow-md flex items-center gap-2"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>{newStudentIsSubmitting ? "Enrolling & Recalculating..." : "Enroll Student & Recalculate AHP"}</span>
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
@@ -1364,133 +2571,534 @@ export const AdminDashboard: React.FC = () => {
               <div>
                 <button
                   onClick={() => handleTabChange("students")}
-                  className="text-xs font-bold text-slate-500 hover:text-[#8B0014] mb-2 block"
+                  className="text-xs font-bold text-slate-500 hover:text-[#8B0014] mb-2 flex items-center gap-1"
                 >
-                  ← Back to Student Registry
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <span>Back to Student Registry</span>
                 </button>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900">
                   Admin Data Override: {selectedStudentObj.first_name} {selectedStudentObj.last_name}
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-500">LRN: {selectedStudentObj.lrn} • {selectedStudentObj.section_name}</p>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  LRN: {selectedStudentObj.lrn} • {selectedStudentObj.section_name} • Grade {selectedStudentObj.grade_level}
+                </p>
               </div>
               <RiskBadge score={selectedStudentObj.latest_risk_score} tier={selectedStudentObj.latest_risk_tier} size="md" />
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3 text-xs">
-              <h4 className="font-extrabold text-slate-900">Data Correction &amp; Manual Override:</h4>
-              <p className="text-slate-600 leading-relaxed">
-                System administrators can override erroneous grade inputs or reset AHP calculation caches if an adviser uploaded corrupted CSV records.
-              </p>
-              <div className="flex gap-2 pt-1">
-                <button
-                  onClick={() => showToast(`Triggered AHP score re-computation for ${selectedStudentObj.first_name}`)}
-                  className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition"
-                >
-                  Force Recalculate AHP Risk Score
-                </button>
+            {/* Quick Student Selector */}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <span className="font-bold text-slate-700">Select Student to Override:</span>
+              <select
+                value={selectedStudentId}
+                onChange={(e) => setSelectedStudentId(Number(e.target.value))}
+                className="px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900"
+              >
+                {students.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.first_name} {s.last_name} ({s.section_name} - {s.latest_risk_tier})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Comprehensive Multi-Domain Override Form */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-3">
+                <span className="font-black text-blue-950 block text-sm">1. Academic Domain</span>
+                <div className="space-y-1.5">
+                  <label className="font-bold text-blue-900">General Weighted Average (GWA)</label>
+                  <input
+                    type="number"
+                    min="65"
+                    max="100"
+                    value={overrideGWA}
+                    onChange={(e) => setOverrideGWA(Number(e.target.value))}
+                    className="w-full p-2.5 bg-white border border-blue-300 rounded-xl font-bold text-slate-900"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="font-bold text-blue-900">Failed Subjects Count</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="8"
+                    value={overrideFailedCount}
+                    onChange={(e) => setOverrideFailedCount(Number(e.target.value))}
+                    className="w-full p-2.5 bg-white border border-blue-300 rounded-xl font-bold text-slate-900"
+                  />
+                </div>
               </div>
+
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+                <span className="font-black text-emerald-950 block text-sm">2. Attendance &amp; Health</span>
+                <div className="space-y-1.5">
+                  <label className="font-bold text-emerald-900">Quarter Attendance Rate (%)</label>
+                  <input
+                    type="number"
+                    min="50"
+                    max="100"
+                    value={overrideAttendance}
+                    onChange={(e) => setOverrideAttendance(Number(e.target.value))}
+                    className="w-full p-2.5 bg-white border border-emerald-300 rounded-xl font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-3">
+                <span className="font-black text-purple-950 block text-sm">3. Mental Health Screener</span>
+                <div className="space-y-1.5">
+                  <label className="font-bold text-purple-900">PHQ-9 Depression Screener Score (0-27)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="27"
+                    value={overridePHQ9}
+                    onChange={(e) => setOverridePHQ9(Number(e.target.value))}
+                    className="w-full p-2.5 bg-white border border-purple-300 rounded-xl font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3">
+                <span className="font-black text-amber-950 block text-sm">4. Family Domain</span>
+                <div className="space-y-1.5">
+                  <label className="font-bold text-amber-900">Family Support Status</label>
+                  <select
+                    value={overrideFamilySupport}
+                    onChange={(e) => setOverrideFamilySupport(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold text-slate-900"
+                  >
+                    <option value="Stable">Two-Parent Stable Home</option>
+                    <option value="OFW Parents">OFW Parent(s) Working Abroad</option>
+                    <option value="Single Parent">Single Parent Household</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-3">
+                <span className="font-black text-rose-950 block text-sm">5. Financial Status</span>
+                <div className="space-y-1.5">
+                  <label className="font-bold text-rose-900">Household Income Level</label>
+                  <select
+                    value={overrideIncome}
+                    onChange={(e) => setOverrideIncome(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-rose-300 rounded-xl font-bold text-slate-900"
+                  >
+                    <option value="<10k">&lt; ₱10,000 (Low Income / Subsidy Priority)</option>
+                    <option value="10k-25k">₱10,000 - ₱25,000 (Lower Middle)</option>
+                    <option value="25k-50k">₱25,000 - ₱50,000 (Middle)</option>
+                    <option value=">50k">&gt; ₱50,000 (Upper Middle)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleSaveStudentOverride}
+                className="px-6 py-2.5 rounded-xl bg-[#8B0014] text-white font-extrabold text-xs hover:bg-[#6D0010] transition shadow-md flex items-center gap-2"
+              >
+                <Sliders className="h-4 w-4 text-amber-300" />
+                <span>Save Override &amp; Recalculate AHP Risk</span>
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 10. TEACHER ACCOUNTS & CREDENTIALS DIRECTORY (teachers) */}
+      {/* 10. FACULTY & COUNSELORS ROSTER (teachers) */}
       {/* ========================================================= */}
       {activeTab === "teachers" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <GraduationCap className="h-6 w-6 text-[#8B0014]" />
-                  Faculty &amp; Class Adviser Accounts Directory
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500">
-                  Provisioned institutional accounts, advisory section assignments, and default temporary passwords
-                </p>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-10 w-10 rounded-2xl bg-[#8B0014]/10 text-[#8B0014] flex items-center justify-center font-bold">
+                    <GraduationCap className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                      Faculty &amp; Guidance Counselors Roster
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500">
+                      Manage teachers, class advisers, licensed guidance counselors (RGC), and institutional credentials
+                    </p>
+                  </div>
+                </div>
               </div>
-              <button
-                onClick={() => handleTabChange("create_user")}
-                className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition self-start sm:self-auto flex items-center gap-1.5 shadow-xs"
-              >
-                <UserPlus className="h-4 w-4" />
-                <span>+ Provision Faculty User</span>
-              </button>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>🟢 Cloud Firestore: faculty_records Live</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsFacultyImportOpen(true)}
+                  className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  <span>Import Faculty &amp; Counselors CSV</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabChange("create_user")}
+                  className="px-3.5 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                  <span>Provision Faculty / Counselor</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportFacultyCSV}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export Roster CSV</span>
+                </button>
+              </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
-              <Info className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <span className="font-extrabold block">Administrator Faculty Hand-Off Guide:</span>
-                <p className="leading-relaxed text-amber-800">
-                  Below are the pre-configured accounts for faculty and homeroom advisers. You can copy individual onboarding slips to give to teachers during faculty orientation. Teachers will use their default password on initial login and can update it under <strong>Profile &gt; Security Settings</strong>.
-                </p>
+            {/* Quick Metrics Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                <span className="text-slate-500 block font-bold text-[11px]">Total Accounts</span>
+                <span className="text-xl font-black text-slate-900">{facultyList.length}</span>
+              </div>
+              <div className="p-3.5 bg-blue-50/70 rounded-2xl border border-blue-200">
+                <span className="text-blue-700 block font-bold text-[11px]">Class Advisers &amp; Teachers</span>
+                <span className="text-xl font-black text-blue-950">
+                  {facultyList.filter(f => f.role === "teacher").length}
+                </span>
+              </div>
+              <div className="p-3.5 bg-purple-50/70 rounded-2xl border border-purple-200">
+                <span className="text-purple-700 block font-bold text-[11px]">Guidance Counselors (RGC)</span>
+                <span className="text-xl font-black text-purple-950">
+                  {facultyList.filter(f => f.role === "guidance_counselor" || f.role === "counselor").length}
+                </span>
+              </div>
+              <div className="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200">
+                <span className="text-emerald-700 block font-bold text-[11px]">Active Portal Status</span>
+                <span className="text-xl font-black text-emerald-950">
+                  {facultyList.filter(f => f.status === "Active").length} / {facultyList.length}
+                </span>
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-200">
-              <table className="min-w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
-                  <tr>
-                    <th className="py-3.5 px-4">Faculty Name</th>
-                    <th className="py-3.5 px-4">Assigned Section / Track</th>
-                    <th className="py-3.5 px-4">Institutional Email</th>
-                    <th className="py-3.5 px-3">Initial Password</th>
-                    <th className="py-3.5 px-3 text-center">Status</th>
-                    <th className="py-3.5 px-4 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
-                  {campusUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50/80 transition">
-                      <td className="py-3.5 px-4">
-                        <strong className="text-slate-900 font-extrabold block">{u.name}</strong>
-                        <span className="text-xs text-slate-500 capitalize">{u.role.replace(/_/g, " ")}</span>
-                      </td>
-                      <td className="py-3.5 px-4 text-xs font-semibold text-slate-700">
-                        {u.section}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-slate-700">
-                        {u.email}
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <span className="px-2 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-800 font-mono text-xs font-bold">
-                          {u.initialPassword || "teacher123"}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-center">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          {u.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => copyFacultySlip(u)}
-                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[#8B0014] hover:text-white text-slate-800 font-bold text-xs transition flex items-center gap-1 shadow-2xs cursor-pointer"
-                            title="Copy Onboarding Credential Slip"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                            <span>Copy Slip</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => showToast(`Password reset link dispatched to ${u.email}`)}
-                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
-                            title="Dispatch password reset token"
-                          >
-                            Reset
-                          </button>
-                        </div>
-                      </td>
+            {/* Filters and Search Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
+              {/* Search */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search faculty name, email, advisory section, or PRC license..."
+                  value={facultySearch}
+                  onChange={(e) => setFacultySearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014] text-slate-900"
+                />
+              </div>
+
+              {/* Role & Status Filter Pills */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+                  <button
+                    onClick={() => setFacultyRoleFilter("all")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] ${
+                      facultyRoleFilter === "all" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    All ({facultyList.length})
+                  </button>
+                  <button
+                    onClick={() => setFacultyRoleFilter("teacher")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] ${
+                      facultyRoleFilter === "teacher" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Teachers ({facultyList.filter(f => f.role === "teacher").length})
+                  </button>
+                  <button
+                    onClick={() => setFacultyRoleFilter("counselor")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] ${
+                      facultyRoleFilter === "counselor" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Counselors ({facultyList.filter(f => f.role === "guidance_counselor" || f.role === "counselor").length})
+                  </button>
+                </div>
+
+                <select
+                  value={facultyStatusFilter}
+                  onChange={(e) => setFacultyStatusFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 text-xs"
+                >
+                  <option value="all">All Status</option>
+                  <option value="Active">Active Only</option>
+                  <option value="Pending Activation">Pending Only</option>
+                  <option value="Suspended">Suspended</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Roster Table */}
+            <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3">Faculty / Counselor</th>
+                      <th className="p-3">Role &amp; Credentials</th>
+                      <th className="p-3">Advisory / Department</th>
+                      <th className="p-3">Institutional Contact</th>
+                      <th className="p-3 text-center">Status</th>
+                      <th className="p-3 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredFaculty.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-400">
+                          <Users className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                          <p className="font-bold">No faculty or counselor records match the current filters.</p>
+                          <button
+                            onClick={() => { setFacultySearch(""); setFacultyRoleFilter("all"); setFacultyStatusFilter("all"); }}
+                            className="mt-2 text-[#8B0014] font-bold hover:underline"
+                          >
+                            Reset filters
+                          </button>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredFaculty.map((f) => {
+                        const isCounselor = f.role === "guidance_counselor" || f.role === "counselor";
+                        return (
+                          <tr key={f.id} className="hover:bg-slate-50/70 transition">
+                            {/* Profile */}
+                            <td className="p-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className={`h-9 w-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                                  isCounselor ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+                                }`}>
+                                  {f.name.slice(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                  <div className="font-black text-slate-900">{f.name}</div>
+                                  <div className="text-[10px] text-slate-400 font-mono">
+                                    ID: {f.employee_id || f.id}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Role & License */}
+                            <td className="p-3">
+                              <div className="space-y-0.5">
+                                <span className={`inline-block px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                                  isCounselor ? "bg-purple-100 text-purple-900" : (f.role === "admin" ? "bg-rose-100 text-rose-900" : "bg-blue-100 text-blue-900")
+                                }`}>
+                                  {isCounselor ? "Guidance Counselor (RGC)" : (f.role === "admin" ? "System Admin" : "Faculty / Class Adviser")}
+                                </span>
+                                {f.prc_license_no && (
+                                  <div className="text-[10px] font-mono text-emerald-700 font-bold">
+                                    {f.prc_license_no}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Department / Advisory */}
+                            <td className="p-3 text-slate-700">
+                              <div className="font-bold text-slate-800">{f.section || "General Faculty"}</div>
+                              <div className="text-[10px] text-slate-500">{f.department || "Academic Department"}</div>
+                            </td>
+
+                            {/* Contact */}
+                            <td className="p-3">
+                              <div className="font-mono text-slate-700 flex items-center gap-1">
+                                <span>{f.email}</span>
+                              </div>
+                              {f.phone && (
+                                <div className="text-[10px] text-slate-500">{f.phone}</div>
+                              )}
+                            </td>
+
+                            {/* Status */}
+                            <td className="p-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleFacultyStatus(f.id, f.status)}
+                                title="Click to toggle status"
+                                className={`px-2.5 py-1 rounded-full font-bold text-[10px] transition cursor-pointer ${
+                                  f.status === "Active" 
+                                    ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200" 
+                                    : (f.status === "Suspended" ? "bg-rose-100 text-rose-800 hover:bg-rose-200" : "bg-amber-100 text-amber-800 hover:bg-amber-200")
+                                }`}
+                              >
+                                {f.status}
+                              </button>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="p-3 text-right">
+                              <div className="inline-flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => copyFacultySlip(f)}
+                                  title="Copy Onboarding Credential Slip"
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-[#8B0014] text-slate-600 hover:text-white transition"
+                                >
+                                  <Copy className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingFaculty(f)}
+                                  title="Edit Record"
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-600 text-slate-600 hover:text-white transition"
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteFacultyAction(f.id, f.name)}
+                                  title="Delete Record"
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-600 text-slate-600 hover:text-white transition"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+
+          {/* Edit Faculty Modal */}
+          {editingFaculty && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h4 className="font-black text-slate-900 text-base flex items-center gap-2">
+                    <Edit className="h-4 w-4 text-[#8B0014]" />
+                    Edit Account: {editingFaculty.name}
+                  </h4>
+                  <button onClick={() => setEditingFaculty(null)} className="text-slate-400 hover:text-slate-700">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSaveFacultyEdit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingFaculty.name}
+                      onChange={(e) => setEditingFaculty({ ...editingFaculty, name: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Institutional Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={editingFaculty.email}
+                      onChange={(e) => setEditingFaculty({ ...editingFaculty, email: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Role</label>
+                    <select
+                      value={editingFaculty.role}
+                      onChange={(e) => setEditingFaculty({ ...editingFaculty, role: e.target.value as any })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold"
+                    >
+                      <option value="teacher">Teacher / Class Adviser</option>
+                      <option value="guidance_counselor">Guidance Counselor (RGC)</option>
+                      <option value="admin">System Administrator</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Account Status</label>
+                    <select
+                      value={editingFaculty.status}
+                      onChange={(e) => setEditingFaculty({ ...editingFaculty, status: e.target.value as any })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Pending Activation">Pending Activation</option>
+                      <option value="Suspended">Suspended</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Department</label>
+                    <input
+                      type="text"
+                      value={editingFaculty.department || ""}
+                      onChange={(e) => setEditingFaculty({ ...editingFaculty, department: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Advisory Section / Office</label>
+                    <input
+                      type="text"
+                      value={editingFaculty.section || ""}
+                      onChange={(e) => setEditingFaculty({ ...editingFaculty, section: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Employee ID</label>
+                    <input
+                      type="text"
+                      value={editingFaculty.employee_id || ""}
+                      onChange={(e) => setEditingFaculty({ ...editingFaculty, employee_id: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">PRC License No. (Counselors)</label>
+                    <input
+                      type="text"
+                      placeholder="PRC-RGC-000000"
+                      value={editingFaculty.prc_license_no || ""}
+                      onChange={(e) => setEditingFaculty({ ...editingFaculty, prc_license_no: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-mono"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 pt-3 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditingFaculty(null)}
+                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 bg-[#8B0014] text-white rounded-xl font-bold hover:bg-[#6D0010] transition shadow-md"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1500,46 +3108,1377 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === "create_user" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <Key className="h-6 w-6 text-[#8B0014]" />
-                Provision New Campus User Account
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500">Create login credentials for Teachers, Counselors, Parents, or Students</p>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <Key className="h-6 w-6 text-[#8B0014]" />
+                  Provision New Campus User Account
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">Create login credentials for Faculty, Guidance Counselors, Parents, or Students</p>
+              </div>
+              <button
+                onClick={() => handleTabChange("teachers")}
+                className="text-xs font-bold text-slate-500 hover:text-[#8B0014] transition"
+              >
+                ← View Accounts Roster
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <form onSubmit={handleProvisionCampusUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Full Name:</label>
-                <input type="text" placeholder="e.g. Maria Clara Santos, LPT" className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
+                <label className="font-bold text-slate-700">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Maria Clara Santos, LPT"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                />
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Institutional Email:</label>
-                <input type="email" placeholder="user@sapc.edu.ph" className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
+                <label className="font-bold text-slate-700">Institutional Email *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="user@sapc.edu.ph"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                />
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Assigned Role:</label>
-                <select className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl">
+                <label className="font-bold text-slate-700">Assigned Institutional Role *</label>
+                <select
+                  value={newUserRole}
+                  onChange={(e) => setNewUserRole(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold"
+                >
                   <option value="teacher">Teacher / Class Adviser</option>
-                  <option value="guidance_counselor">Guidance Counselor</option>
+                  <option value="guidance_counselor">Guidance Counselor (RGC)</option>
                   <option value="parent">Parent / Guardian</option>
                   <option value="student">Student</option>
                   <option value="admin">System Administrator</option>
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Assigned Section / Department:</label>
-                <input type="text" placeholder="e.g. Grade 11 - St. Augustine (STEM)" className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl" />
+                <label className="font-bold text-slate-700">Assigned Section / Department</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Grade 11 - St. Augustine (STEM)"
+                  value={newUserSection}
+                  onChange={(e) => setNewUserSection(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <label className="font-bold text-slate-700">Initial Onboarding Password</label>
+                <input
+                  type="text"
+                  placeholder="sapc2026"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                />
+                <span className="text-[11px] text-slate-500">User will be prompted to update this password upon initial authentication.</span>
               </div>
 
-              <div className="sm:col-span-2 pt-2">
+              <div className="sm:col-span-2 pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition shadow-md flex items-center gap-1.5"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>Provision Account &amp; Generate Credentials</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 12. PARENT ACCOUNTS & LINKS (parents) */}
+      {/* ========================================================= */}
+      {activeTab === "parents" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-10 w-10 rounded-2xl bg-[#8B0014]/10 text-[#8B0014] flex items-center justify-center font-bold">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                      Parent Accounts &amp; Student Linkage Roster
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500">
+                      Manage verified parent &amp; guardian accounts, Form 138 digital access, and real-time SMS attendance alerts
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>🟢 Cloud Firestore: parent_records Live</span>
+                </span>
                 <button
                   type="button"
-                  onClick={() => showToast("User created with default onboarding credentials.")}
-                  className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition"
+                  onClick={() => setIsAddParentOpen(true)}
+                  className="px-3.5 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
                 >
-                  Create Account &amp; Send Credentials
+                  <UserPlus className="h-3.5 w-3.5" />
+                  <span>Link New Parent Account</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={handleExportParentsCSV}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export Parents CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Metrics Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                <span className="text-slate-500 block font-bold text-[11px]">Verified Parent Accounts</span>
+                <span className="text-xl font-black text-slate-900">{parentRecords.length}</span>
+              </div>
+              <div className="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200">
+                <span className="text-emerald-700 block font-bold text-[11px]">Active Portal Access</span>
+                <span className="text-xl font-black text-emerald-950">
+                  {parentRecords.filter(p => p.status === "Active").length} / {parentRecords.length}
+                </span>
+              </div>
+              <div className="p-3.5 bg-blue-50/70 rounded-2xl border border-blue-200">
+                <span className="text-blue-700 block font-bold text-[11px]">Form 138 (SF-9) Authorized</span>
+                <span className="text-xl font-black text-blue-950">
+                  {parentRecords.filter(p => p.sf9Access).length} Parents
+                </span>
+              </div>
+              <div className="p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200">
+                <span className="text-amber-800 block font-bold text-[11px]">Real-time SMS Push Alert</span>
+                <span className="text-xl font-black text-amber-950">
+                  {parentRecords.filter(p => p.attendanceAlerts).length} Enabled
+                </span>
+              </div>
+            </div>
+
+            {/* Filters and Search Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
+              <div className="relative flex-1 max-w-md">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search parent name, student name, LRN, email, or section..."
+                  value={parentSearch}
+                  onChange={(e) => setParentSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014] text-slate-900"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={parentGradeFilter}
+                  onChange={(e) => setParentGradeFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 text-xs"
+                >
+                  <option value="all">All Grade Levels</option>
+                  <option value="Grade 11">Grade 11</option>
+                  <option value="Grade 12">Grade 12</option>
+                </select>
+
+                <select
+                  value={parentStatusFilter}
+                  onChange={(e) => setParentStatusFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 text-xs"
+                >
+                  <option value="all">All Status</option>
+                  <option value="Active">Active Only</option>
+                  <option value="Pending Activation">Pending Only</option>
+                  <option value="Suspended">Suspended</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Parents Table */}
+            <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3">Parent / Guardian</th>
+                      <th className="p-3">Relationship &amp; Permissions</th>
+                      <th className="p-3">Linked Student &amp; LRN</th>
+                      <th className="p-3">Advisory Section</th>
+                      <th className="p-3 text-center">Status</th>
+                      <th className="p-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredParents.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-400">
+                          <Users className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                          <p className="font-bold">No parent accounts match the current filters.</p>
+                          <button
+                            onClick={() => { setParentSearch(""); setParentGradeFilter("all"); setParentStatusFilter("all"); }}
+                            className="mt-2 text-[#8B0014] font-bold hover:underline"
+                          >
+                            Reset filters
+                          </button>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredParents.map((p) => (
+                        <tr key={p.id} className="hover:bg-slate-50/70 transition">
+                          {/* Parent Profile */}
+                          <td className="p-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-9 w-9 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-black text-xs shrink-0">
+                                {p.name.slice(0, 2).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="font-black text-slate-900">{p.name}</div>
+                                <div className="text-[10px] text-slate-400 font-mono flex items-center gap-2">
+                                  <span>ID: {p.id}</span>
+                                  <span>•</span>
+                                  <span>{p.email}</span>
+                                </div>
+                                {p.phone && <div className="text-[10px] text-slate-500">{p.phone}</div>}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Relationship & Permissions */}
+                          <td className="p-3">
+                            <div className="space-y-1">
+                              <span className="inline-block px-2 py-0.5 rounded-full font-bold text-[10px] bg-amber-100 text-amber-900">
+                                {p.relationship}
+                              </span>
+                              <div className="flex items-center gap-1 text-[10px]">
+                                <span className="px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 font-bold border border-blue-200">
+                                  SF-9 Form 138
+                                </span>
+                                <span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                                  SMS Alerts
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Linked Student */}
+                          <td className="p-3">
+                            <div className="font-black text-slate-900">{p.linkedStudentName}</div>
+                            <div className="text-[10px] font-mono text-emerald-700 font-bold">
+                              LRN: {p.linkedLRN}
+                            </div>
+                          </td>
+
+                          {/* Section */}
+                          <td className="p-3 text-slate-700">
+                            <div className="font-bold text-slate-800">{p.section}</div>
+                            <div className="text-[10px] text-slate-500">Verified: {p.verifiedAt}</div>
+                          </td>
+
+                          {/* Status */}
+                          <td className="p-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleParentStatus(p.id, p.status)}
+                              title="Click to toggle status"
+                              className={`px-2.5 py-1 rounded-full font-bold text-[10px] transition cursor-pointer ${
+                                p.status === "Active" 
+                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200" 
+                                  : (p.status === "Suspended" ? "bg-rose-100 text-rose-800 hover:bg-rose-200" : "bg-amber-100 text-amber-800 hover:bg-amber-200")
+                              }`}
+                            >
+                              {p.status}
+                            </button>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="p-3 text-right">
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => copyParentSlip(p)}
+                                title="Copy Parent Portal Onboarding Slip"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-[#8B0014] text-slate-600 hover:text-white transition cursor-pointer"
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingParent(p)}
+                                title="Edit Parent Record"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-600 text-slate-600 hover:text-white transition cursor-pointer"
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteParentAction(p.id, p.name)}
+                                title="Delete Parent Record"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-600 text-slate-600 hover:text-white transition cursor-pointer"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Add Parent Modal */}
+          {isAddParentOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h4 className="font-black text-slate-900 text-base flex items-center gap-2">
+                    <UserPlus className="h-4 w-4 text-[#8B0014]" />
+                    Link &amp; Provision New Parent Account
+                  </h4>
+                  <button onClick={() => setIsAddParentOpen(false)} className="text-slate-400 hover:text-slate-700">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleAddParent} className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Parent / Guardian Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Mrs. Maria Santos"
+                      value={newParentName}
+                      onChange={(e) => setNewParentName(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Parent Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="parent@gmail.com"
+                      value={newParentEmail}
+                      onChange={(e) => setNewParentEmail(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Mobile Phone Number</label>
+                    <input
+                      type="text"
+                      placeholder="+63 917 000 0000"
+                      value={newParentPhone}
+                      onChange={(e) => setNewParentPhone(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Relationship to Student</label>
+                    <select
+                      value={newParentRel}
+                      onChange={(e) => setNewParentRel(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold"
+                    >
+                      <option value="Mother">Mother / Primary Guardian</option>
+                      <option value="Father">Father</option>
+                      <option value="Legal Guardian">Legal Guardian</option>
+                      <option value="Grandmother">Grandmother</option>
+                      <option value="Grandfather">Grandfather</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Linked Student Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Juan Carlos Santos"
+                      value={newParentStudent}
+                      onChange={(e) => setNewParentStudent(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">12-Digit Student LRN</label>
+                    <input
+                      type="text"
+                      maxLength={12}
+                      placeholder="109238475001"
+                      value={newParentLRN}
+                      onChange={(e) => setNewParentLRN(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="font-bold text-slate-700">Student Section</label>
+                    <select
+                      value={newParentSection}
+                      onChange={(e) => setNewParentSection(e.target.value)}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold"
+                    >
+                      {uniqueSections.map((sec) => (
+                        <option key={sec} value={sec}>{sec}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2 pt-3 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsAddParentOpen(false)}
+                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 bg-[#8B0014] text-white rounded-xl font-bold hover:bg-[#6D0010] transition shadow-md"
+                    >
+                      Link &amp; Provision Account
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Parent Modal */}
+          {editingParent && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h4 className="font-black text-slate-900 text-base flex items-center gap-2">
+                    <Edit className="h-4 w-4 text-[#8B0014]" />
+                    Edit Parent Record: {editingParent.name}
+                  </h4>
+                  <button onClick={() => setEditingParent(null)} className="text-slate-400 hover:text-slate-700">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSaveParentEdit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Parent Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingParent.name}
+                      onChange={(e) => setEditingParent({ ...editingParent, name: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Parent Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={editingParent.email}
+                      onChange={(e) => setEditingParent({ ...editingParent, email: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Mobile Phone</label>
+                    <input
+                      type="text"
+                      value={editingParent.phone}
+                      onChange={(e) => setEditingParent({ ...editingParent, phone: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Relationship</label>
+                    <input
+                      type="text"
+                      value={editingParent.relationship}
+                      onChange={(e) => setEditingParent({ ...editingParent, relationship: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Linked Student Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingParent.linkedStudentName}
+                      onChange={(e) => setEditingParent({ ...editingParent, linkedStudentName: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Student LRN</label>
+                    <input
+                      type="text"
+                      value={editingParent.linkedLRN}
+                      onChange={(e) => setEditingParent({ ...editingParent, linkedLRN: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Section</label>
+                    <input
+                      type="text"
+                      value={editingParent.section}
+                      onChange={(e) => setEditingParent({ ...editingParent, section: e.target.value })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Account Status</label>
+                    <select
+                      value={editingParent.status}
+                      onChange={(e) => setEditingParent({ ...editingParent, status: e.target.value as any })}
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Pending Activation">Pending Activation</option>
+                      <option value="Suspended">Suspended</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2 pt-3 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditingParent(null)}
+                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 bg-[#8B0014] text-white rounded-xl font-bold hover:bg-[#6D0010] transition shadow-md"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 13. PENDING REGISTRATIONS & PARENT LINKAGE QUEUE (pending_registrations) */}
+      {/* ========================================================= */}
+      {activeTab === "pending_registrations" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-10 w-10 rounded-2xl bg-amber-500/10 text-amber-700 flex items-center justify-center font-bold">
+                    <UserCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                      Pending Registrations &amp; Parent Linkage Queue
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500">
+                      Review, verify PSA birth certificates / faculty appointments, and authorize institutional portal access
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>🟢 Cloud Firestore: pending_registrations Live</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleResetDemoRegistrations}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                  title="Restore initial 3 sample pending registrations"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>Reset Demo Queue (3)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTabChange("parents")}
+                  className="px-3.5 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  <span>View Verified Parents Roster ({parentRecords.length})</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Metrics Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200">
+                <span className="text-amber-800 block font-bold text-[11px]">Total Applications Due</span>
+                <span className="text-2xl font-black text-amber-950">{pendingRegistrations.length}</span>
+              </div>
+              <div className="p-3.5 bg-blue-50/70 rounded-2xl border border-blue-200">
+                <span className="text-blue-700 block font-bold text-[11px]">Parent Verification Requests</span>
+                <span className="text-2xl font-black text-blue-950">
+                  {pendingRegistrations.filter(r => r.role === "parent").length}
+                </span>
+              </div>
+              <div className="p-3.5 bg-purple-50/70 rounded-2xl border border-purple-200">
+                <span className="text-purple-700 block font-bold text-[11px]">Faculty &amp; Staff Requests</span>
+                <span className="text-2xl font-black text-purple-950">
+                  {pendingRegistrations.filter(r => r.role === "teacher" || r.role === "counselor").length}
+                </span>
+              </div>
+              <div className="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200">
+                <span className="text-emerald-700 block font-bold text-[11px]">PSA &amp; ID Proofs Attached</span>
+                <span className="text-2xl font-black text-emerald-950">100% Verified</span>
+              </div>
+            </div>
+
+            {/* Filter and Search */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
+              <div className="relative flex-1 max-w-md">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search applicant name, email, student, LRN, or section..."
+                  value={pendingSearch}
+                  onChange={(e) => setPendingSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014] text-slate-900"
+                />
+              </div>
+
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+                <button
+                  onClick={() => setPendingRoleFilter("all")}
+                  className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                    pendingRoleFilter === "all" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  All ({pendingRegistrations.length})
+                </button>
+                <button
+                  onClick={() => setPendingRoleFilter("parent")}
+                  className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                    pendingRoleFilter === "parent" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Parents ({pendingRegistrations.filter(r => r.role === "parent").length})
+                </button>
+                <button
+                  onClick={() => setPendingRoleFilter("teacher")}
+                  className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                    pendingRoleFilter === "teacher" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Faculty ({pendingRegistrations.filter(r => r.role === "teacher").length})
+                </button>
+              </div>
+            </div>
+
+            {/* Pending Queue Table */}
+            <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3">Applicant &amp; Contact</th>
+                      <th className="p-3">Requested Role &amp; Link</th>
+                      <th className="p-3">Linked Student / Section</th>
+                      <th className="p-3">Attached Document Proof</th>
+                      <th className="p-3">Submitted</th>
+                      <th className="p-3 text-right">Review Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredPending.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-10 text-center text-slate-400">
+                          <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-emerald-500 opacity-80" />
+                          <p className="font-extrabold text-slate-800 text-sm">All Registration Requests Cleared!</p>
+                          <p className="text-xs text-slate-500 mt-1">There are no pending accounts waiting in the verification queue.</p>
+                          <button
+                            onClick={handleResetDemoRegistrations}
+                            className="mt-3 px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition inline-flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <RefreshCw className="h-3.5 w-3.5" />
+                            <span>Load Demo Sample Applications (3)</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredPending.map((reg) => {
+                        const isParent = reg.role === "parent";
+                        return (
+                          <tr key={reg.id} className="hover:bg-slate-50/70 transition">
+                            {/* Applicant */}
+                            <td className="p-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className={`h-9 w-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                                  isParent ? "bg-amber-100 text-amber-900" : "bg-purple-100 text-purple-900"
+                                }`}>
+                                  {reg.name.slice(0, 2).toUpperCase()}
+                                </div>
+                                <div>
+                                  <div className="font-black text-slate-900">{reg.name}</div>
+                                  <div className="text-[10px] text-slate-500">{reg.email}</div>
+                                  <div className="text-[10px] text-slate-400">{reg.phone}</div>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Role */}
+                            <td className="p-3">
+                              <span className={`inline-block px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                                isParent ? "bg-blue-100 text-blue-900" : "bg-purple-100 text-purple-900"
+                              }`}>
+                                {isParent ? "Parent / Guardian" : (reg.role === "counselor" ? "Counselor (RGC)" : "Faculty / Teacher")}
+                              </span>
+                              <div className="text-[10px] text-slate-600 font-medium mt-0.5">
+                                {reg.relationship}
+                              </div>
+                            </td>
+
+                            {/* Linked Student / Section */}
+                            <td className="p-3">
+                              <div className="font-black text-slate-900">{reg.linkedStudent}</div>
+                              {reg.linkedLRN !== "N/A (Faculty)" && (
+                                <div className="text-[10px] font-mono text-emerald-700 font-bold">
+                                  LRN: {reg.linkedLRN}
+                                </div>
+                              )}
+                              <div className="text-[10px] text-slate-500">{reg.section}</div>
+                            </td>
+
+                            {/* Document Proof */}
+                            <td className="p-3">
+                              <button
+                                type="button"
+                                onClick={() => setPreviewDocRegistration(reg)}
+                                className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[10px] border border-slate-200 transition flex items-center gap-1.5 cursor-pointer"
+                                title="Click to view attached verification document"
+                              >
+                                <FileCheck className="h-3.5 w-3.5 text-emerald-600" />
+                                <span>{reg.verificationDoc}</span>
+                                <Eye className="h-3 w-3 text-slate-400" />
+                              </button>
+                            </td>
+
+                            {/* Date */}
+                            <td className="p-3 text-slate-500 font-mono text-[11px]">
+                              {reg.date}
+                            </td>
+
+                            {/* Actions */}
+                            <td className="p-3 text-right">
+                              <div className="inline-flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveRegistration(reg)}
+                                  className="px-3.5 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                                  title="Approve registration and provision credentials"
+                                >
+                                  <Check className="h-3.5 w-3.5" />
+                                  <span>Approve</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeclineRegistration(reg.id, reg.name)}
+                                  className="p-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-700 transition cursor-pointer"
+                                  title="Decline application"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Document Preview Modal */}
+          {previewDocRegistration && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h4 className="font-black text-slate-900 text-base flex items-center gap-2">
+                    <FileCheck className="h-5 w-5 text-emerald-600" />
+                    Verification Document Proof
+                  </h4>
+                  <button onClick={() => setPreviewDocRegistration(null)} className="text-slate-400 hover:text-slate-700">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-slate-500 font-bold">{previewDocRegistration.id}</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-900">
+                      Pending Verification
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <strong className="text-slate-900 font-black text-sm block">{previewDocRegistration.name}</strong>
+                    <p className="text-slate-600">Email: {previewDocRegistration.email} • Tel: {previewDocRegistration.phone}</p>
+                    <p className="text-slate-600">Relationship: <strong>{previewDocRegistration.relationship}</strong></p>
+                    <p className="text-slate-600">Linked Student: <strong>{previewDocRegistration.linkedStudent}</strong> (LRN: {previewDocRegistration.linkedLRN})</p>
+                  </div>
+
+                  <div className="p-4 bg-white rounded-xl border border-emerald-300 space-y-2">
+                    <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                      <span>{previewDocRegistration.verificationDoc}</span>
+                    </div>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">
+                      {previewDocRegistration.notes || "Official Philippine Statistics Authority (PSA) / PRC credentials verified against master institutional enrolment database."}
+                    </p>
+                    <div className="text-[10px] font-mono text-slate-400 pt-1 border-t border-slate-100 flex justify-between">
+                      <span>DepEd Matched: Yes</span>
+                      <span>Security Hash: SHA-256 Valid</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDocRegistration(null)}
+                    className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition text-xs cursor-pointer"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const reg = previewDocRegistration;
+                      setPreviewDocRegistration(null);
+                      handleApproveRegistration(reg);
+                    }}
+                    className="px-5 py-2 bg-[#8B0014] text-white rounded-xl font-bold hover:bg-[#6D0010] transition shadow-md text-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    <span>Approve &amp; Provision Credentials</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 13.5 BULK EXPORT CREDENTIALS (export_credentials) */}
+      {/* ========================================================= */}
+      {activeTab === "export_credentials" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-10 w-10 rounded-2xl bg-[#8B0014]/10 text-[#8B0014] flex items-center justify-center font-bold">
+                    <Download className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                      Bulk Export Credentials &amp; Onboarding Slips
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500">
+                      Batch generate, copy, and print official login credentials and onboarding slips for Faculty, Parents, and Students
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportSelectedCredentialsCSV}
+                  className="px-4 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  <span>Export Selected CSV ({selectedCredentialIds.size > 0 ? selectedCredentialIds.size : filteredCredentialUsers.length})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPrintSlipsOpen(true)}
+                  className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Printer className="h-3.5 w-3.5" />
+                  <span>Print Onboarding Slips</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopySelectedCredentials}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Copy Logins</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Filter and Role Pills */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
+              <div className="relative flex-1 max-w-md">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search name, email, LRN, employee ID, section..."
+                  value={credentialSearch}
+                  onChange={(e) => setCredentialSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014] text-slate-900"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+                  <button
+                    onClick={() => setCredentialRoleFilter("all")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                      credentialRoleFilter === "all" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    All ({allCredentialUsers.length})
+                  </button>
+                  <button
+                    onClick={() => setCredentialRoleFilter("teacher")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                      credentialRoleFilter === "teacher" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Faculty ({facultyList.filter(f => f.role === "teacher").length})
+                  </button>
+                  <button
+                    onClick={() => setCredentialRoleFilter("parent")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                      credentialRoleFilter === "parent" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Parents ({parentRecords.length})
+                  </button>
+                  <button
+                    onClick={() => setCredentialRoleFilter("student")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                      credentialRoleFilter === "student" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Students (50)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Selection info */}
+            <div className="flex items-center justify-between text-xs text-slate-600 px-1">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAllCredentials}
+                  className="font-bold text-[#8B0014] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  {selectedCredentialIds.size === filteredCredentialUsers.length ? (
+                    <CheckSquare className="h-4 w-4" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                  <span>
+                    {selectedCredentialIds.size === filteredCredentialUsers.length ? "Deselect All" : "Select All Visible"}
+                  </span>
+                </button>
+                <span>•</span>
+                <span>Selected: <strong className="text-slate-900">{selectedCredentialIds.size}</strong> of {filteredCredentialUsers.length} records</span>
+              </div>
+            </div>
+
+            {/* Credentials Table */}
+            <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3 w-10 text-center">#</th>
+                      <th className="p-3">User &amp; Identifier</th>
+                      <th className="p-3">Assigned Role</th>
+                      <th className="p-3">Portal Login Email</th>
+                      <th className="p-3">Initial Password</th>
+                      <th className="p-3">Section / Office</th>
+                      <th className="p-3 text-right">Quick Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredCredentialUsers.map((u) => {
+                      const isSelected = selectedCredentialIds.has(u.id);
+                      return (
+                        <tr key={u.id} className={`hover:bg-slate-50/70 transition ${isSelected ? 'bg-amber-50/50' : ''}`}>
+                          {/* Checkbox */}
+                          <td className="p-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleSelectCredential(u.id)}
+                              className="text-slate-400 hover:text-[#8B0014] cursor-pointer"
+                            >
+                              {isSelected ? (
+                                <CheckSquare className="h-4 w-4 text-[#8B0014]" />
+                              ) : (
+                                <Square className="h-4 w-4" />
+                              )}
+                            </button>
+                          </td>
+
+                          {/* User & ID */}
+                          <td className="p-3">
+                            <div className="font-black text-slate-900">{u.name}</div>
+                            <div className="text-[10px] font-mono text-slate-500">{u.identifier}</div>
+                          </td>
+
+                          {/* Role */}
+                          <td className="p-3">
+                            <span className={`inline-block px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                              u.role === "admin" ? "bg-rose-100 text-rose-900" :
+                              u.role === "counselor" ? "bg-purple-100 text-purple-900" :
+                              u.role === "parent" ? "bg-amber-100 text-amber-900" :
+                              u.role === "student" ? "bg-emerald-100 text-emerald-900" :
+                              "bg-blue-100 text-blue-900"
+                            }`}>
+                              {u.roleLabel}
+                            </span>
+                          </td>
+
+                          {/* Email */}
+                          <td className="p-3 font-mono text-slate-700">
+                            {u.email}
+                          </td>
+
+                          {/* Password */}
+                          <td className="p-3">
+                            <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-slate-100 rounded-lg font-mono text-slate-800 text-[11px]">
+                              <span>{u.initialPassword}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(u.initialPassword);
+                                  showToast(`Copied password '${u.initialPassword}' to clipboard!`);
+                                }}
+                                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                                title="Copy password"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </td>
+
+                          {/* Section */}
+                          <td className="p-3 text-slate-600 font-medium">
+                            {u.sectionOrDept}
+                          </td>
+
+                          {/* Quick Action */}
+                          <td className="p-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const slip = `SAPC CREDENTIALS: ${u.name} | Email: ${u.email} | Password: ${u.initialPassword} | Role: ${u.roleLabel}`;
+                                navigator.clipboard.writeText(slip);
+                                showToast(`Copied credential slip for ${u.name}!`);
+                              }}
+                              className="px-2.5 py-1 bg-slate-100 hover:bg-[#8B0014] text-slate-600 hover:text-white rounded-lg font-bold text-[10px] transition cursor-pointer"
+                            >
+                              Copy Slip
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Printable Slips Modal */}
+          {isPrintSlipsOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <div className="bg-white border border-slate-200 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col p-6 shadow-2xl space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h4 className="font-black text-slate-900 text-base flex items-center gap-2">
+                    <Printer className="h-5 w-5 text-[#8B0014]" />
+                    Official SAPC Onboarding Credential Slips
+                  </h4>
+                  <button onClick={() => setIsPrintSlipsOpen(false)} className="text-slate-400 hover:text-slate-700">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto space-y-4 p-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {(selectedCredentialIds.size > 0 
+                      ? allCredentialUsers.filter(u => selectedCredentialIds.has(u.id))
+                      : filteredCredentialUsers.slice(0, 10)
+                    ).map((u) => (
+                      <div key={u.id} className="p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 space-y-2 text-xs">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                          <div className="font-black text-[#8B0014] text-xs">SAPC IntellySys 2026</div>
+                          <span className="font-mono text-[10px] font-bold text-slate-500">{u.id}</span>
+                        </div>
+                        <div>
+                          <strong className="text-slate-900 text-sm block">{u.name}</strong>
+                          <span className="text-slate-500 text-[10px]">{u.roleLabel} • {u.sectionOrDept}</span>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg border border-slate-200 space-y-0.5 font-mono text-[11px]">
+                          <div><strong>Login URL :</strong> https://sapc-intellysys-ph.web.app</div>
+                          <div><strong>Email     :</strong> {u.email}</div>
+                          <div><strong>Password  :</strong> <span className="text-[#8B0014] font-bold">{u.initialPassword}</span></div>
+                        </div>
+                        <div className="text-[9px] text-slate-400">
+                          Please change your password upon initial login. RA 10173 Protected.
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsPrintSlipsOpen(false)}
+                    className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition text-xs cursor-pointer"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.print();
+                    }}
+                    className="px-5 py-2 bg-[#8B0014] text-white rounded-xl font-bold hover:bg-[#6D0010] transition shadow-md text-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    <span>Print Slips</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 13.8 OFFICIAL DEPED / CHED REPORTS (reports) */}
+      {/* ========================================================= */}
+      {activeTab === "reports" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-10 w-10 rounded-2xl bg-[#8B0014]/10 text-[#8B0014] flex items-center justify-center font-bold">
+                    <Award className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                      DepEd &amp; CHED Institutional Compliance Reports
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500">
+                      Standardized School Forms (SF-1, SF-2, SF-9, SF-10), AHP 5-Domain Early Warning Summaries, and Audit Certificates
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsReportOpen(true)}
+                className="px-5 py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs shadow-md transition flex items-center gap-2 cursor-pointer self-start md:self-auto"
+              >
+                <Sparkles className="h-4 w-4 text-amber-300" />
+                <span>Open Interactive DSS Report Hub</span>
+              </button>
+            </div>
+
+            {/* Catalog of Official Reports */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+              {/* SF-1 */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md font-mono text-[10px] font-black uppercase bg-blue-100 text-blue-900">
+                      DepEd SF-1
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">DO 4, s. 2014</span>
+                  </div>
+                  <h4 className="font-extrabold text-sm text-slate-900">School Register &amp; Demographic Census</h4>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    Master list of 500 enrolled learners with 12-digit LRN, advisory sections, birth certificates, and guardian contacts.
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                  <span className="text-[10px] text-emerald-700 font-bold">500 Students Ready</span>
+                  <button
+                    type="button"
+                    onClick={() => exportActiveDatasetToCSV(students)}
+                    className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <Download className="h-3 w-3" />
+                    <span>Download CSV</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* SF-2 */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md font-mono text-[10px] font-black uppercase bg-emerald-100 text-emerald-900">
+                      DepEd SF-2
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">DO 8, s. 2015</span>
+                  </div>
+                  <h4 className="font-extrabold text-sm text-slate-900">Daily Attendance &amp; Absenteeism Log</h4>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    Quarterly attendance registry tracking chronic absenteeism thresholds and medical excuses across 12 sections.
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                  <span className="text-[10px] text-emerald-700 font-bold">Mean: 95.8% Att</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsReportOpen(true);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <Eye className="h-3 w-3" />
+                    <span>View Report</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* SF-9 */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md font-mono text-[10px] font-black uppercase bg-amber-100 text-amber-900">
+                      DepEd SF-9 (Form 138)
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">DO 36, s. 2016</span>
+                  </div>
+                  <h4 className="font-extrabold text-sm text-slate-900">Learner Progress Report Card (Form 138)</h4>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    Quarterly academic marks, core subject descriptors, and behavioral ratings synchronized with parent portals.
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                  <span className="text-[10px] text-amber-800 font-bold">Q2 Active Term</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsReportOpen(true);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <Eye className="h-3 w-3" />
+                    <span>Generate</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* AHP 5-Domain Early Warning */}
+              <div className="p-5 rounded-2xl bg-rose-50/50 border border-rose-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md font-mono text-[10px] font-black uppercase bg-rose-100 text-rose-900">
+                      AHP EWS Matrix
+                    </span>
+                    <span className="text-[10px] text-rose-700 font-mono">Saaty Validated</span>
+                  </div>
+                  <h4 className="font-extrabold text-sm text-slate-900">5-Domain Dropout Risk Executive Report</h4>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    Algorithmic risk distribution detailing Tier 1 High Risk ({cohortStats.highRiskCount} cases), 5-domain scores, and clinical triage.
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-rose-200/60 flex items-center justify-between">
+                  <span className="text-[10px] text-rose-700 font-bold">CR = 0.048 Valid</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsReportOpen(true)}
+                    className="px-3 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-[11px] transition flex items-center gap-1 cursor-pointer shadow-2xs"
+                  >
+                    <Sparkles className="h-3 w-3 text-amber-300" />
+                    <span>Executive Hub</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Guidance Accomplishment */}
+              <div className="p-5 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md font-mono text-[10px] font-black uppercase bg-purple-100 text-purple-900">
+                      RGC Guidance Log
+                    </span>
+                    <span className="text-[10px] text-purple-700 font-mono">RA 11036</span>
+                  </div>
+                  <h4 className="font-extrabold text-sm text-slate-900">Guidance Intervention Accomplishment</h4>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    Documentation of counseling intakes, psychological first aid sessions, and parent-teacher case conferences.
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-purple-200/60 flex items-center justify-between">
+                  <span className="text-[10px] text-purple-700 font-bold">{carePlans.length} Care Plans</span>
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange("interventions")}
+                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>View Care Plans</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* RA 10173 Compliance */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md font-mono text-[10px] font-black uppercase bg-emerald-100 text-emerald-900">
+                      NPC / RA 10173
+                    </span>
+                    <span className="text-[10px] text-emerald-700 font-mono">Data Privacy Act</span>
+                  </div>
+                  <h4 className="font-extrabold text-sm text-slate-900">Data Privacy &amp; Security Compliance Audit</h4>
+                  <p className="text-slate-600 text-[11px] leading-relaxed">
+                    National Privacy Commission audit log verifying end-to-end encryption, role-based masking, and immutable logs.
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                  <span className="text-[10px] text-emerald-700 font-bold">✓ 100% Compliant</span>
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange("import_history")}
+                    className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Audit Logs</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1547,78 +4486,397 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 12. PENDING REGISTRATIONS & PARENT LINKAGE QUEUE */}
+      {/* 14. SYSTEM-WIDE INTERVENTIONS (interventions) */}
       {/* ========================================================= */}
-      {activeTab === "pending_registrations" && (
+      {activeTab === "interventions" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <UserCheck className="h-6 w-6 text-[#8B0014]" />
-                  Parent Linkage &amp; Security Verification Queue
+                  <ShieldAlert className="h-6 w-6 text-[#8B0014]" />
+                  Active Guidance Care Plans &amp; Multi-Tier Interventions
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  Verify parent-student legal guardianship before granting access to confidential academic &amp; wellness records (DepEd DO 40 / RA 10173)
+                  Track and manage targeted interventions deployed for vulnerable and high-risk learners across SAPC
                 </p>
               </div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 self-start sm:self-auto">
-                {pendingRegistrations.length} Pending Approvals
+              <button
+                onClick={() => handleTabChange("intervention_suggestions")}
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold text-xs transition flex items-center gap-1.5 shadow-xs"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>AI Bulk Recommendations ({cohortStats.highRiskCount})</span>
+              </button>
+            </div>
+
+            {/* List of Active Care Plans */}
+            <div className="space-y-3">
+              <h4 className="font-black text-slate-900 text-sm">
+                Live Active Care Plans ({carePlans.length})
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {carePlans.map((plan) => (
+                  <div key={plan.id} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <strong className="text-slate-900 font-black text-sm block">{plan.student_name}</strong>
+                        <span className="text-slate-500 text-[11px]">Domain: {plan.target_domain}</span>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        {plan.status}
+                      </span>
+                    </div>
+
+                    <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
+                      <span className="font-extrabold text-slate-900 block">{plan.title}</span>
+                      <p className="text-slate-600 text-[11px] leading-relaxed">{plan.description}</p>
+                      {plan.goals && (
+                        <p className="text-[#8B0014] font-medium text-[10px] pt-1">Target Goals: {plan.goals}</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
+                      <span>Counselor: <strong>{plan.assigned_counselor}</strong></span>
+                      <span>Created: <strong className="font-mono">{plan.created_at ? new Date(plan.created_at).toLocaleDateString() : "Active"}</strong></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Create New Care Plan Form */}
+            <div className="p-6 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-4 text-xs">
+              <h4 className="font-black text-amber-950 text-sm">Create New Intervention Care Plan</h4>
+              <form onSubmit={handleCreateCarePlan} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-amber-900">Target Student *</label>
+                  <select
+                    value={newCarePlanStudentId}
+                    onChange={(e) => setNewCarePlanStudentId(Number(e.target.value))}
+                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
+                  >
+                    {students.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.first_name} {s.last_name} ({s.section_name} - {s.latest_risk_tier?.toUpperCase()})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-amber-900">Target Domain</label>
+                  <select
+                    value={newCarePlanDomain}
+                    onChange={(e) => setNewCarePlanDomain(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
+                  >
+                    <option value="Academic">Academic Remediation</option>
+                    <option value="Mental Health">Mental Health & Well-being</option>
+                    <option value="Family Support">Family & Home Support</option>
+                    <option value="Health & Attendance">Health & Attendance Recovery</option>
+                    <option value="Financial Assistance">Financial Aid & Subsidy</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-amber-900">Intervention Title / Protocol</label>
+                  <input
+                    type="text"
+                    required
+                    value={newCarePlanTitle}
+                    onChange={(e) => setNewCarePlanTitle(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
+                    placeholder="e.g. Intensive Pre-Calculus Coaching & Recitation Support"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-amber-900">Assigned Counselor</label>
+                  <input
+                    type="text"
+                    value={newCarePlanCounselor}
+                    onChange={(e) => setNewCarePlanCounselor(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1 sm:col-span-3">
+                  <label className="font-bold text-amber-900">Action Items &amp; Description</label>
+                  <textarea
+                    rows={2}
+                    value={newCarePlanDescription}
+                    onChange={(e) => setNewCarePlanDescription(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-medium"
+                    placeholder="Describe specific intervention action items..."
+                  />
+                </div>
+
+                <div className="sm:col-span-3 flex justify-end pt-1">
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl bg-[#8B0014] text-white font-extrabold text-xs hover:bg-[#6D0010] transition shadow-md cursor-pointer"
+                  >
+                    Activate Care Plan
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 15. AI BULK RECOMMENDATIONS (intervention_suggestions) */}
+      {/* ========================================================= */}
+      {activeTab === "intervention_suggestions" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-amber-500" />
+                  AI Automated Intervention Recommendations
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Algorithmic triage mapping multi-domain risk indicators to evidence-based guidance interventions
+                </p>
+              </div>
+              <button
+                onClick={() => handleTabChange("interventions")}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition cursor-pointer"
+              >
+                View Active Plans ({carePlans.length})
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                  High-Risk Learners Requiring Priority Care Plans ({students.filter(s => s.latest_risk_tier === "high" || s.latest_risk_score >= 60).length})
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {students.filter(s => s.latest_risk_tier === "high" || s.latest_risk_score >= 60).map((student) => (
+                  <div key={student.id} className="p-5 rounded-2xl bg-rose-50/40 border border-rose-200 space-y-3 text-xs flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <strong className="text-slate-900 font-black text-sm block">{student.first_name} {student.last_name}</strong>
+                          <span className="text-slate-500 text-[11px]">{student.section_name} • LRN: {student.lrn}</span>
+                        </div>
+                        <RiskBadge score={student.latest_risk_score} tier={student.latest_risk_tier} size="sm" />
+                      </div>
+
+                      <div className="p-3 bg-white rounded-xl border border-rose-200/80 space-y-1">
+                        <span className="font-extrabold text-rose-900 block">
+                          AI Recommended Modality: {
+                            student.domain_scores?.mental_health >= 30 ? "Psychological First Aid & Clinical Intake" :
+                            student.sass_metrics?.attendance_rate_pct < 88 ? "Attendance Recovery Contract" :
+                            student.domain_scores?.family >= 25 ? "Parent-Teacher Case Conference" :
+                            student.domain_scores?.financial >= 30 ? "Tuition Voucher & Financial Grant" :
+                            "Academic Remediation & Peer Tutoring"
+                          }
+                        </span>
+                        <p className="text-slate-600 text-[11px]">
+                          Primary Risk Trigger: <strong>{student.primary_risk_driver || "Multi-Domain Vulnerability"}</strong> (Score: {student.latest_risk_score}/100)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-rose-200/60 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-500">Auto-assigned: Maria Theresa Cruz, RGC</span>
+                      <button
+                        type="button"
+                        onClick={() => handleQuickDeployAIPan(student)}
+                        className="px-3.5 py-1.5 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                      >
+                        <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                        <span>Deploy Plan</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 16. BROADCAST ANNOUNCEMENTS (notifications) */}
+      {/* ========================================================= */}
+      {activeTab === "notifications" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-4">
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                <Bell className="h-6 w-6 text-[#8B0014]" />
+                Institutional Broadcast Announcements &amp; Push Alerts
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500">
+                Dispatch system alerts, deadline notices, and emergency advisories across campus portals
+              </p>
+            </div>
+
+            {/* Broadcast Composer */}
+            <form onSubmit={handleSendBroadcast} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 text-xs">
+              <h4 className="font-black text-slate-900 text-sm">Compose Campus Announcement</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Target Audience</label>
+                  <select
+                    value={broadcastAudience}
+                    onChange={(e) => setBroadcastAudience(e.target.value as any)}
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-900"
+                  >
+                    <option value="all">All Campus Users (Students, Teachers, Parents, Counselors)</option>
+                    <option value="teacher">Faculty &amp; Class Advisers Only</option>
+                    <option value="parent">Parents &amp; Guardians Only</option>
+                    <option value="counselor">Guidance Counselors Only</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Priority Level</label>
+                  <select
+                    value={broadcastPriority}
+                    onChange={(e) => setBroadcastPriority(e.target.value as any)}
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-900"
+                  >
+                    <option value="urgent">🔴 Urgent / Priority Notice</option>
+                    <option value="alert">🟡 Important Administrative Update</option>
+                    <option value="info">🔵 General Announcement</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-slate-700">Announcement Headline *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 2nd Quarter SASS Diagnostic Ingestion Deadline: Friday 5:00 PM"
+                    value={broadcastTitle}
+                    onChange={(e) => setBroadcastTitle(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-900"
+                  />
+                </div>
+
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-slate-700">Detailed Message Body *</label>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="Write announcement body..."
+                    value={broadcastMessage}
+                    onChange={(e) => setBroadcastMessage(e.target.value)}
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-medium text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-1">
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl bg-[#8B0014] text-white font-extrabold text-xs hover:bg-[#6D0010] transition shadow-md flex items-center gap-2"
+                >
+                  <Send className="h-3.5 w-3.5 text-amber-300" />
+                  <span>Dispatch Broadcast Announcement</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Active Notifications Feed */}
+            <div className="space-y-3">
+              <h4 className="font-black text-slate-900 text-sm">Active Broadcast Feeds</h4>
+              <div className="space-y-2.5">
+                {activeBroadcasts.slice(0, 5).map((n) => (
+                  <div key={n.id} className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-start justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <strong className="text-slate-900 font-extrabold">{n.title}</strong>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-slate-200 text-slate-700">
+                          {n.audience || "ALL"}
+                        </span>
+                      </div>
+                      <p className="text-slate-600">{n.body || n.message}</p>
+                    </div>
+                    <span className="text-[10px] text-slate-400 shrink-0 font-mono">Active</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 17. VERIFY SUBMITTED SCREENERS (verify_assessments) */}
+      {/* ========================================================= */}
+      {activeTab === "verify_assessments" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                  <Activity className="h-6 w-6 text-[#8B0014]" />
+                  Verify Submitted Screeners &amp; Diagnostic Records
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Review and authorize mental health, attendance, and clinic health screeners submitted by teachers
+                </p>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900">
+                {screenerQueue.length} Pending Verifications
               </span>
             </div>
 
             <div className="space-y-3">
-              {pendingRegistrations.length === 0 ? (
+              {screenerQueue.length === 0 ? (
                 <div className="p-8 text-center text-xs text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                  No pending parent or faculty registrations in queue.
+                  All diagnostic screeners have been verified and ingested.
                 </div>
               ) : (
-                pendingRegistrations.map((p) => (
-                  <div key={p.id} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                screenerQueue.map((item) => (
+                  <div key={item.id} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-extrabold text-sm text-slate-900">{p.name}</h4>
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
-                            p.role === "parent" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
-                          }`}>
-                            {p.role}
+                          <span className="font-mono text-slate-500 font-bold">{item.id}</span>
+                          <strong className="text-slate-900 font-extrabold text-sm">{item.studentName}</strong>
+                          <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-bold">
+                            {item.type}
                           </span>
                         </div>
                         <p className="text-slate-600">
-                          <strong>Contact:</strong> {p.email} • {p.phone}
+                          <strong>Section:</strong> {item.section} (LRN: {item.lrn}) • <strong>Submitted by:</strong> {item.submittedBy}
                         </p>
-                        <p className="text-slate-700">
-                          <strong>Target Child / Student:</strong> <span className="font-bold text-[#8B0014]">{p.linkedStudent}</span> (LRN: {p.linkedLRN})
-                        </p>
-                        <p className="text-slate-600">
-                          <strong>Relationship / Track:</strong> {p.relationship} • {p.section}
-                        </p>
-                        <p className="text-slate-500 text-[11px] flex items-center gap-1 pt-1">
-                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                          <span>Document Status: <strong>{p.verificationDoc}</strong> (Requested {p.date})</span>
+                        <p className="text-[#8B0014] font-bold">
+                          Diagnostic Result: {item.score}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2 self-start sm:self-center shrink-0 pt-2 sm:pt-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
-                          onClick={() => {
-                            setPendingRegistrations(prev => prev.filter(item => item.id !== p.id));
-                            showToast(`Approved & linked student records for ${p.name}`);
-                          }}
-                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition cursor-pointer flex items-center gap-1"
+                          type="button"
+                          onClick={() => handleVerifyScreener(item.id, item.studentName)}
+                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1 shadow-2xs cursor-pointer"
                         >
                           <Check className="h-3.5 w-3.5" />
-                          <span>Approve &amp; Link</span>
+                          <span>Verify &amp; Ingest</span>
                         </button>
+
                         <button
+                          type="button"
                           onClick={() => {
-                            setPendingRegistrations(prev => prev.filter(item => item.id !== p.id));
-                            showToast(`Declined registration for ${p.name}`);
+                            setScreenerQueue(prev => prev.filter(s => s.id !== item.id));
+                            showToast(`Flagged ${item.id} for counselor clinical review.`);
                           }}
-                          className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs transition cursor-pointer"
+                          className="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition cursor-pointer"
                         >
-                          Decline
+                          Flag
                         </button>
                       </div>
                     </div>
@@ -1631,98 +4889,71 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 13. PARENT DIRECTORY (parents) */}
+      {/* 18. EXPORT INGESTION LOGS (export_import_history) */}
       {/* ========================================================= */}
-      {activeTab === "parents" && (
+      {activeTab === "export_import_history" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <Users className="h-6 w-6 text-[#8B0014]" />
-                  Verified Parent &amp; Guardian Directory
+                  <FileSpreadsheet className="h-6 w-6 text-[#8B0014]" />
+                  DepEd SASS Ingestion History &amp; Immutable Audit Trail
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  Approved parent accounts linked to enrolled students with multi-channel SMS/Email notification bindings
+                  Comprehensive log of all CSV batch ingestion sessions with snapshot rollback anchors
                 </p>
               </div>
+
               <button
-                onClick={() => handleTabChange("pending_registrations")}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition flex items-center gap-1.5"
+                type="button"
+                onClick={() => {
+                  const csvData = "Batch ID,Domain Type,Records,Imported By,Timestamp,Status\n" +
+                    importHistory.map(h => `"${h.id}","${h.type}",${h.count},"${h.importedBy}","${h.date}","${h.rolledBack ? 'Rolled Back' : 'Active'}"`).join("\n");
+                  const blob = new Blob([csvData], { type: "text/csv" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `SAPC_Ingestion_Audit_Trail_${new Date().toISOString().slice(0,10)}.csv`;
+                  a.click();
+                  showToast("Ingestion audit trail exported to CSV.");
+                }}
+                className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-1.5 shadow-xs"
               >
-                <UserCheck className="h-4 w-4" />
-                <span>View Approvals Queue ({pendingRegistrations.length})</span>
+                <Download className="h-4 w-4 text-amber-300" />
+                <span>Export Audit Logs (CSV)</span>
               </button>
             </div>
 
             <div className="overflow-x-auto rounded-2xl border border-slate-200">
               <table className="min-w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
+                <thead className="bg-slate-50 border-b border-slate-200 uppercase font-black text-slate-600 text-[11px]">
                   <tr>
-                    <th className="py-3.5 px-4">Parent / Guardian</th>
-                    <th className="py-3.5 px-4">Contact Details</th>
-                    <th className="py-3.5 px-4">Linked Student &amp; LRN</th>
-                    <th className="py-3.5 px-3">Relationship</th>
-                    <th className="py-3.5 px-3 text-center">Linkage Status</th>
-                    <th className="py-3.5 px-4 text-center">Action</th>
+                    <th className="py-3 px-4">Batch ID</th>
+                    <th className="py-3 px-4">Domain &amp; Ingestion Type</th>
+                    <th className="py-3 px-4">Imported By</th>
+                    <th className="py-3 px-4">Records</th>
+                    <th className="py-3 px-4">Timestamp</th>
+                    <th className="py-3 px-4 text-right">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
-                  <tr className="hover:bg-slate-50/80 transition">
-                    <td className="py-3.5 px-4">
-                      <strong className="text-slate-900 font-extrabold block">Mrs. Elena Dimaculangan</strong>
-                      <span className="text-xs text-slate-500">PTCA Representative</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-700">
-                      parent@sapc.edu.ph • +63 917 555 0192
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <strong className="text-[#8B0014] font-bold block">Joshua Dimaculangan</strong>
-                      <span className="font-mono text-xs text-slate-500">LRN: 109238475001 • Grade 11 STEM</span>
-                    </td>
-                    <td className="py-3.5 px-3">Mother</td>
-                    <td className="py-3.5 px-3 text-center">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        ✓ Verified &amp; Linked
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <button
-                        onClick={() => showToast("Parent consultation details dispatched.")}
-                        className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold"
-                      >
-                        Contact
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-50/80 transition">
-                    <td className="py-3.5 px-4">
-                      <strong className="text-slate-900 font-extrabold block">Mr. Arthur Reyes</strong>
-                      <span className="text-xs text-slate-500">Guardian</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-700">
-                      arthur.reyes@yahoo.com • +63 918 332 9481
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <strong className="text-[#8B0014] font-bold block">Samantha Nicole Reyes</strong>
-                      <span className="font-mono text-xs text-slate-500">LRN: 109238475004 • Grade 11 HUMSS</span>
-                    </td>
-                    <td className="py-3.5 px-3">Father</td>
-                    <td className="py-3.5 px-3 text-center">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        ✓ Verified &amp; Linked
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <button
-                        onClick={() => showToast("Parent consultation details dispatched.")}
-                        className="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold"
-                      >
-                        Contact
-                      </button>
-                    </td>
-                  </tr>
+                  {importHistory.map((h) => (
+                    <tr key={h.id} className="hover:bg-slate-50/80 transition">
+                      <td className="py-3 px-4 font-mono font-bold text-slate-900">{h.id}</td>
+                      <td className="py-3 px-4 font-bold text-slate-800">{h.type}</td>
+                      <td className="py-3 px-4 text-slate-600">{h.importedBy}</td>
+                      <td className="py-3 px-4 font-bold text-slate-900">{h.count} students</td>
+                      <td className="py-3 px-4 font-mono text-slate-500 text-[11px]">{h.date}</td>
+                      <td className="py-3 px-4 text-right">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          h.rolledBack ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        }`}>
+                          {h.rolledBack ? "Reverted" : "Active Ingested"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -1731,118 +4962,48 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 13. KNOWLEDGE BASE & ALL REMAINING VIEWS (Fallbacks) */}
+      {/* 19. KNOWLEDGE BASE (knowledge_base) */}
       {/* ========================================================= */}
-      {/* ========================================================= */}
-      {/* 13. REPORTS, EXPORTS & KNOWLEDGE BASE */}
-      {/* ========================================================= */}
-      {activeTab === "reports" && (
+      {activeTab === "knowledge_base" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <Award className="h-6 w-6 text-[#8B0014]" />
-                  Official DepEd &amp; CHED Institutional Guidance Reports
+                  <HelpCircle className="h-6 w-6 text-[#8B0014]" />
+                  Guidance AI Knowledge Base &amp; Institutional SOPs
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  Generate compliance documents, multi-domain audit summaries, and accredited retention reports
+                  Custom institutional context repository powering the AI Guidance Counselor assistant
                 </p>
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsReportOpen(true)}
-                  className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-1.5 shadow-xs"
-                >
-                  <Award className="h-4 w-4 text-amber-300" />
-                  <span>Generate Official Report</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => exportActiveDatasetToCSV(students, "DepEd_Compliance_SAPC_Cohort.csv")}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition flex items-center gap-1.5"
-                >
-                  <Download className="h-4 w-4 text-slate-600" />
-                  <span>Export SASS CSV</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsKnowledgeHubOpen(true)}
+                className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2"
+              >
+                <BrainCircuit className="h-4 w-4 text-purple-200" />
+                <span>Open AI Training Hub</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <span className="font-extrabold text-slate-900 block">DepEd Form 137 / 138 Sync</span>
-                <p className="text-slate-600">Quarterly scholastic academic achievement and attendance summary.</p>
-                <button onClick={() => exportActiveDatasetToCSV(students, "DepEd_Form_138_Sync.csv")} className="text-[#8B0014] font-bold hover:underline block pt-1">Download DepEd Format →</button>
+                <strong className="text-slate-900 block font-black">DepEd Child Protection Policy (DO 40, s. 2012)</strong>
+                <p className="text-slate-600">Institutional protocol for student safety, positive discipline, and anti-bullying guidelines.</p>
+                <span className="text-[10px] font-bold text-emerald-600 block">✓ Ingested in AI Knowledge Store</span>
               </div>
+
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <span className="font-extrabold text-slate-900 block">AHP Longitudinal Retention Audit</span>
-                <p className="text-slate-600">Multi-semester risk tier progression and early dropout prevention data.</p>
-                <button onClick={() => setIsReportOpen(true)} className="text-[#8B0014] font-bold hover:underline block pt-1">Open Audit Modal →</button>
+                <strong className="text-slate-900 block font-black">Mental Health Act (RA 11036) Standard</strong>
+                <p className="text-slate-600">Confidentiality protocols, crisis referral pathways, and psychometrician guidelines.</p>
+                <span className="text-[10px] font-bold text-emerald-600 block">✓ Ingested in AI Knowledge Store</span>
               </div>
+
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                <span className="font-extrabold text-slate-900 block">Mental Health &amp; Crisis Log Report</span>
-                <p className="text-slate-600">DepEd Child Protection &amp; Mental Health Act RA 11036 compliance summary.</p>
-                <button onClick={() => showToast("Mental Health compliance log exported.")} className="text-[#8B0014] font-bold hover:underline block pt-1">Export RA 11036 Log →</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "export_credentials" && (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                  <Download className="h-6 w-6 text-[#8B0014]" />
-                  Bulk Export Campus Credentials &amp; Cohort Roster
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500">Secure credential distribution for faculty, guidance staff, and parent accounts</p>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-3">
-              <span className="font-extrabold text-amber-950 block">Active Student Cohort Export ({cohortStats.total} Records)</span>
-              <p className="text-amber-900 leading-relaxed">
-                Download the complete 5-domain dataset with LRNs, advisory sections, composite risk scores, and granular scores. You can modify this spreadsheet and re-upload it via the Master Import Wizard or Student Registry to test custom scenarios.
-              </p>
-              <button
-                type="button"
-                onClick={() => exportActiveDatasetToCSV(students)}
-                className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-2 shadow-xs"
-              >
-                <Download className="h-4 w-4 text-amber-300" />
-                <span>Download Complete 5-Domain Cohort CSV ({cohortStats.total} Rows)</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {(activeTab === "parents" || activeTab === "interventions" || activeTab === "intervention_suggestions" || activeTab === "notifications" || activeTab === "knowledge_base" || activeTab === "verify_assessments" || activeTab === "export_import_history") && (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900 capitalize">
-                {activeTab.replace(/_/g, " ")} Module
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-500">San Antonio de Padua College administrative oversight console</p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 text-xs">
-              <p className="text-slate-700 leading-relaxed font-medium">
-                Administrative tools active for {activeTab.replace(/_/g, " ")}. All operations are logged under the immutable RA 10173 audit trail.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => showToast(`Operation executed for ${activeTab}`)}
-                  className="px-4 py-2 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition"
-                >
-                  Execute Administrative Action
-                </button>
+                <strong className="text-slate-900 block font-black">SAPC Student Handbook 2026-2027</strong>
+                <p className="text-slate-600">Grading scale, clearance rules, absence thresholds, and institutional scholarships.</p>
+                <span className="text-[10px] font-bold text-emerald-600 block">✓ Ingested in AI Knowledge Store</span>
               </div>
             </div>
           </div>
@@ -1860,6 +5021,15 @@ export const AdminDashboard: React.FC = () => {
         onClose={() => setIsKnowledgeHubOpen(false)}
         currentUserRole="admin"
         currentUserName="System Administrator"
+      />
+
+      <FacultyImportModal
+        isOpen={isFacultyImportOpen}
+        onClose={() => setIsFacultyImportOpen(false)}
+        onSuccess={(count) => {
+          setFacultyList(getActiveFacultyRecords());
+          showToast(`Successfully imported and synchronized ${count} faculty and counselor accounts with Cloud Firestore.`);
+        }}
       />
     </div>
   );

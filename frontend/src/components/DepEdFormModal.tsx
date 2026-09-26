@@ -5,13 +5,6 @@ import {
   X,
   Printer,
   FileText,
-  Award,
-  CheckCircle2,
-  AlertTriangle,
-  Download,
-  Calendar,
-  School,
-  User,
 } from "lucide-react";
 import { StudentRecord, getActiveStudentDataset } from "@/lib/dataset-store";
 import { useToast } from "@/lib/toast-context";
@@ -28,6 +21,7 @@ export function DepEdFormModal({
   selectedStudent,
 }: DepEdFormModalProps) {
   const { success } = useToast();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const dataset = useMemo(() => getActiveStudentDataset(), [isOpen]);
   const [activeForm, setActiveForm] = useState<"SF9" | "SF10">("SF9");
   const [studentId, setStudentId] = useState<string>(

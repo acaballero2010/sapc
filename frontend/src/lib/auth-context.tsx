@@ -6,6 +6,8 @@ import { auth, db, googleProvider } from "./firebase";
 import { signInWithEmailAndPassword, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
+import { getActiveFacultyRecords } from "./dataset-store";
+
 export type RoleType = "admin" | "guidance_counselor" | "teacher" | "parent" | "student";
 
 export interface UserProfile {
@@ -16,6 +18,10 @@ export interface UserProfile {
   student_id?: number | null;
   firebaseUid?: string;
   avatar_url?: string | null;
+  section?: string;
+  strand?: string;
+  department?: string;
+  employee_id?: string;
 }
 
 interface AuthContextType {
@@ -73,6 +79,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     setServerError(null);
 
+    const cleanEmail = (email || "").trim().toLowerCase();
+
+    // Check if this matches an imported faculty/counselor record or standard preset demo email
+    const facultyRoster = typeof window !== "undefined" ? getActiveFacultyRecords() : [];
+    const matchedFaculty = facultyRoster.find(f => f.email && f.email.toLowerCase() === cleanEmail);
+
+    const fallbackRole: RoleType = targetRole || (
+      matchedFaculty ? (
+        matchedFaculty.role === "guidance_counselor" || matchedFaculty.role === "counselor" ? "guidance_counselor" :
+        matchedFaculty.role === "admin" ? "admin" : "teacher"
+      ) :
+      cleanEmail.includes("admin") ? "admin" :
+      cleanEmail.includes("counselor") ? "guidance_counselor" :
+      cleanEmail.includes("teacher") ? "teacher" :
+      cleanEmail.includes("parent") ? "parent" : "student"
+    );
+
+    const isDemoOrFaculty = 
+      ["admin@sapc.edu.ph", "counselor@sapc.edu.ph", "teacher@sapc.edu.ph", "student@sapc.edu.ph", "parent@sapc.edu.ph"].includes(cleanEmail) ||
+      Boolean(matchedFaculty) ||
+      cleanEmail.endsWith("@sapc.edu.ph");
+
+    if (isDemoOrFaculty) {
+      const demoProfile = DEMO_PROFILES[fallbackRole];
+      let storedName = matchedFaculty?.name || demoProfile?.name || cleanEmail.split("@")[0];
+
+      if (typeof window !== "undefined") {
+        const savedCustom = localStorage.getItem("sapc_custom_profile");
+        if (savedCustom) {
+          try {
+            const parsed = JSON.parse(savedCustom);
+            if (parsed && (parsed.email === cleanEmail || parsed.role === fallbackRole)) {
+              storedName = parsed.full_name || storedName;
+            }
+          } catch {}
+        }
+      }
+
+      const demoUser: UserProfile = {
+        id: 1,
+        email: cleanEmail || demoProfile?.email || "user@sapc.edu.ph",
+        full_name: storedName,
+        role: fallbackRole,
+        student_id: fallbackRole === "student" || fallbackRole === "parent" ? 1 : null,
+        section: matchedFaculty?.section || (fallbackRole === "teacher" ? "Grade 10 - St. Augustine" : undefined),
+        department: matchedFaculty?.department
+      };
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_token", `token_${fallbackRole}_${Date.now()}`);
+        localStorage.setItem("sapc_custom_profile", JSON.stringify(demoUser));
+        localStorage.setItem("sapc_user", JSON.stringify(demoUser));
+      }
+
+      setUser(demoUser);
+      setToken(`token_${fallbackRole}_${Date.now()}`);
+      setServerError(null);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // 1. Attempt Firebase Authentication First
       let firebaseUser: any = null;
@@ -120,7 +187,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch {
         clearTimeout(timeoutId);
-        // Backend FastAPI not running
       }
 
       // 3. If Firebase user logged in, check Firestore profile
@@ -144,54 +210,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      // 4. Seamless demo fallback
-      const fallbackRole = targetRole || (
-        email.includes("teacher") ? "teacher" :
-        email.includes("student") ? "student" :
-        email.includes("parent") ? "parent" :
-        email.includes("admin") ? "admin" : "guidance_counselor"
-      );
       const profile = DEMO_PROFILES[fallbackRole];
-
-      let storedName = profile.name;
-      if (typeof window !== "undefined") {
-        const savedCustom = localStorage.getItem("sapc_custom_profile");
-        if (savedCustom) {
-          try {
-            const parsed = JSON.parse(savedCustom);
-            if (parsed && (parsed.email === email || parsed.role === fallbackRole)) {
-              storedName = parsed.full_name || storedName;
-            }
-          } catch {
-            // keep fallback
-          }
-        }
-      }
-
-      // If custom non-demo email entered, format from email
-      if (email && !email.includes("student@sapc.edu.ph") && email.includes("@")) {
-        const localPart = email.split("@")[0].replace(/[._-]/g, " ");
-        const capitalized = localPart.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-        if (capitalized.length > 2) {
-          storedName = capitalized;
-        }
-      }
-
       const demoUser: UserProfile = {
         id: 1,
         email: email || profile.email,
-        full_name: storedName,
+        full_name: profile.name,
         role: fallbackRole,
         student_id: profile.student_id || null
       };
 
       if (typeof window !== "undefined") {
-        localStorage.setItem("sapc_token", `demo_token_${fallbackRole}_${Date.now()}`);
+        localStorage.setItem("sapc_token", `token_${fallbackRole}_${Date.now()}`);
         localStorage.setItem("sapc_custom_profile", JSON.stringify(demoUser));
+        localStorage.setItem("sapc_user", JSON.stringify(demoUser));
       }
 
       setUser(demoUser);
-      setToken(`demo_token_${fallbackRole}_${Date.now()}`);
+      setToken(`token_${fallbackRole}_${Date.now()}`);
       setServerError(null);
     } finally {
       setIsLoading(false);

@@ -14,14 +14,11 @@ import {
   BrainCircuit, 
   MessageSquare, 
   Download, 
-  Upload, 
   RefreshCw,
   Shield,
   Tag,
   Layers,
-  ArrowRight,
-  ExternalLink,
-  ChevronRight
+  ArrowRight
 } from "lucide-react";
 import { 
   CounselorKnowledgeItem, 

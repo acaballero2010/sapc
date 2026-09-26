@@ -33,8 +33,6 @@ import {
 import { 
   getActiveStudentDataset, 
   updateStudentRecord, 
-  getActiveInterventions, 
-  getActiveNotifications, 
   scheduleCounselingSession, 
   addAppNotification 
 } from "@/lib/dataset-store";
@@ -42,9 +40,7 @@ import { useAuth } from "@/lib/auth-context";
 import { fetchWithAuth } from "@/lib/api";
 import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
-import { QuarterlyGradeSparkline } from "./QuarterlyGradeSparkline";
 import { DepEdFormModal } from "./DepEdFormModal";
-import { useToast } from "@/lib/toast-context";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
 import { AccountManagementModal } from "./AccountManagementModal";
 import { useDragScroll } from "@/lib/useDragScroll";
@@ -76,7 +72,6 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
-  const { success: toastSuccess, info: toastInfo } = useToast();
   const tabsDrag = useDragScroll<HTMLDivElement>();
   const [student, setStudent] = useState<any | null>(null);
   const [riskData, setRiskData] = useState<any | null>(null);
@@ -346,7 +341,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
 
     window.addEventListener("sapc:dataset-updated", handleDatasetSync);
     return () => window.removeEventListener("sapc:dataset-updated", handleDatasetSync);
-  }, [user?.student_id, user?.email, user?.full_name]);
+  }, [user?.student_id, user?.email, user?.full_name, student?.id]);
+
+
 
   if (!isMounted) {
     return (
@@ -442,30 +439,6 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
       }
     } catch {}
   };
-
-  const [activeInterventionsList, setActiveInterventionsList] = useState<any[]>(() => {
-    return typeof window !== "undefined" ? getActiveInterventions() : [];
-  });
-  const [studentNotificationsList, setStudentNotificationsList] = useState<any[]>(() => {
-    return typeof window !== "undefined" ? getActiveNotifications("student") : [];
-  });
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const handleInterventionsUpdate = () => {
-        setActiveInterventionsList(getActiveInterventions());
-      };
-      const handleNotifUpdate = () => {
-        setStudentNotificationsList(getActiveNotifications("student"));
-      };
-      window.addEventListener("sapc_interventions_updated", handleInterventionsUpdate);
-      window.addEventListener("sapc:notifications-updated", handleNotifUpdate);
-      return () => {
-        window.removeEventListener("sapc_interventions_updated", handleInterventionsUpdate);
-        window.removeEventListener("sapc:notifications-updated", handleNotifUpdate);
-      };
-    }
-  }, []);
 
   const handleAssessmentSubmit = async (type: string) => {
     if (!student) return;

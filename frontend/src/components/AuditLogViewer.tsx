@@ -11,7 +11,6 @@ import {
   Lock, 
   Eye
 } from "lucide-react";
-import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 interface AuditLogEntry {

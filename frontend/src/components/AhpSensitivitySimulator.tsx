@@ -9,12 +9,10 @@ import {
   Check,
   AlertTriangle,
   Users,
-  ArrowRight,
   ShieldCheck,
   Zap,
 } from "lucide-react";
 import {
-  StudentRecord,
   getActiveStudentDataset,
   saveStudentDataset,
   DEFAULT_AHP_WEIGHTS,
@@ -33,6 +31,7 @@ export function AhpSensitivitySimulator({
   onApplied,
 }: AhpSensitivitySimulatorProps) {
   const { success, info } = useToast();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const dataset = useMemo(() => getActiveStudentDataset(), [isOpen]);
 
   const [weights, setWeights] = useState<{

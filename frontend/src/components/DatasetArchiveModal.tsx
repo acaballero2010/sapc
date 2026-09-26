@@ -15,7 +15,6 @@ import {
   FileCode
 } from "lucide-react";
 import { INGESTION_DOMAINS, IngestionDomain } from "@/data/sample_templates";
-import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { getActiveStudentDataset } from "@/lib/dataset-store";
 
 interface ArchiveSnapshot {

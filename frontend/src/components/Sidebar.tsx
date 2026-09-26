@@ -48,6 +48,7 @@ import {
   Heart
 } from "lucide-react";
 import { useAuth, RoleType } from "@/lib/auth-context";
+import { getActiveStudentDataset } from "@/lib/dataset-store";
 import { SapcLogo } from "./SapcLogo";
 
 interface SidebarProps {
@@ -111,6 +112,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const currentRole: RoleType = user?.role || "guidance_counselor";
 
+  // Dynamic Teacher Advisory Student Count
+  const teacherAdvisoryCount = React.useMemo(() => {
+    if (typeof window === "undefined") return 34;
+    try {
+      const all = getActiveStudentDataset();
+      const teacherSection = user?.section || "Grade 10 - St. Augustine";
+      const advisory = all.filter(s => 
+        s.section_name === teacherSection || 
+        (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))
+      );
+      return advisory.length > 0 ? advisory.length : 34;
+    } catch {
+      return 34;
+    }
+  }, [user]);
+
   // Dedicated Workspace navigation items per role grouped logically
   const roleWorkspaces: Record<RoleType, NavGroup[]> = {
     guidance_counselor: [
@@ -154,6 +171,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: "Analytics & Reports",
         items: [
+          { name: "AHP 5-Domain Risk Weights", href: "/dashboard/guidance?tab=analytics#trend-analytics", icon: Sliders, badge: "WEIGHTS" },
           { name: "5-Domain Cohort Analytics", href: "/dashboard/guidance?tab=analytics#trend-analytics", icon: TrendingUp, badge: "AHP 5-DOMAIN" },
           { name: "DepEd / CHED Reports", href: "/dashboard/guidance?tab=reports#reports-view", icon: Award },
           { name: "Alerts & Messages", href: "/dashboard/guidance?tab=notifications#notifications-view", icon: Bell }
@@ -166,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { name: "Class Overview", href: "/dashboard/teacher?tab=dashboard#advisory-overview", icon: BarChart3, badge: "HEALTH" },
           { name: "Subject Failure Predictor", href: "/dashboard/teacher?tab=subject_predictor#subject-predictor-view", icon: BookOpen, badge: "PREDICTIVE" },
-          { name: "Advisory Class Roster", href: "/dashboard/teacher?tab=students#roster", icon: Users, badge: "40" },
+          { name: "Advisory Class Roster", href: "/dashboard/teacher?tab=students#roster", icon: Users, badge: String(teacherAdvisoryCount) },
           { name: "At-Risk Priority Focus", href: "/dashboard/teacher?tab=at_risk#at-risk-view", icon: AlertTriangle, badge: "PRIORITY" },
           { name: "Student Profile", href: "/dashboard/teacher?tab=student_profile#profile-view", icon: Eye },
           { name: "Longitudinal Progress", href: "/dashboard/teacher?tab=student_progress#progress-view", icon: TrendingUp }
@@ -278,7 +296,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { name: "System Command Center", href: "/dashboard/admin?tab=dashboard#admin-overview", icon: Users, badge: "MASTER" },
           { name: "Platform & Campus Logo", href: "/dashboard/admin?tab=platform_settings#platform-settings", icon: Building, badge: "ADMIN ONLY" },
-          { name: "AHP 5-Domain Risk Config", href: "/dashboard/admin?tab=risk_config#weights", icon: Sliders, badge: "WEIGHTS" },
           { name: "Quarter Calendar", href: "/dashboard/admin?tab=quarter_management#calendar", icon: Calendar, badge: "Q2 ACTIVE" },
           { name: "Broadcast Announcements", href: "/dashboard/admin?tab=notifications#notifications-view", icon: Bell },
           { name: "Knowledge Base & FAQs", href: "/dashboard/admin?tab=knowledge_base#knowledge-view", icon: HelpCircle }
@@ -305,7 +322,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: "Campus Accounts & Security",
         items: [
-          { name: "Teacher Accounts Roster", href: "/dashboard/admin?tab=teachers#teachers", icon: GraduationCap, badge: "4 ACTIVE" },
+          { name: "Faculty & Counselors Roster", href: "/dashboard/admin?tab=teachers#teachers", icon: GraduationCap, badge: "ACTIVE" },
           { name: "Create Campus Account", href: "/dashboard/admin?tab=create_user#create", icon: Key },
           { name: "Parent Accounts & Links", href: "/dashboard/admin?tab=parents#parents-view", icon: Users },
           { name: "Pending Registrations", href: "/dashboard/admin?tab=pending_registrations#pending-view", icon: UserCheck, badge: "DUE" },

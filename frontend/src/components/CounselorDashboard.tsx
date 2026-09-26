@@ -46,12 +46,9 @@ import { CohortTrendAnalytics } from "./CohortTrendAnalytics";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
 import { AHPDataVisualizer } from "./AHPDataVisualizer";
-import { DomainRadarChart } from "./DomainRadarChart";
-import { QuarterlyGradeSparkline } from "./QuarterlyGradeSparkline";
 import { AhpSensitivitySimulator } from "./AhpSensitivitySimulator";
 import { DepEdFormModal } from "./DepEdFormModal";
 import { BatchInterventionModal } from "./BatchInterventionModal";
-import { useToast } from "@/lib/toast-context";
 import { SAPC_500_STUDENTS, SAPC_COHORT_SUMMARY } from "@/data/students500";
 import type { StudentRecord } from "@/data/students500";
 import { 
@@ -61,22 +58,14 @@ import {
   subscribeToStudentDataset,
   loadStudentDatasetFromFirestore,
   getActiveInterventions,
-  saveActiveInterventions,
-  saveOrUpdateIntervention,
-  deleteIntervention,
   getActiveReferrals,
-  saveActiveReferrals,
-  updateReferralStatus,
   getActiveCounselingSessions,
-  saveActiveCounselingSessions,
   scheduleCounselingSession,
   updateSessionStatus,
   getActiveNotifications,
-  markNotificationRead,
   DEFAULT_REFERRALS,
   DEFAULT_SESSIONS,
   DEFAULT_NOTIFICATIONS,
-  updateStudentRecord,
   InterventionCarePlan
 } from "@/lib/dataset-store";
 
@@ -118,33 +107,6 @@ interface FlaggedAlert {
   family_phone: string;
   previous_flags_count: number;
   actions_taken: string[];
-}
-
-interface TeacherReferralItem {
-  id: string;
-  student_id: number;
-  student_name: string;
-  lrn: string;
-  section: string;
-  referring_teacher: string;
-  concern_type: string;
-  urgency: "crisis" | "priority" | "routine" | string;
-  observations: string;
-  attempted_interventions: string[];
-  created_at: string;
-  status: "pending_review" | "accepted" | "in_progress" | "declined";
-}
-
-interface CounselingSessionItem {
-  id: string;
-  student_id: number;
-  student_name: string;
-  time: string;
-  date: string;
-  type: "1-on-1 Crisis Check-in" | "Academic Anxiety Counseling" | "Parent-Student Case Conference" | "Routine Follow-up";
-  status: "Confirmed" | "Completed" | "Pending Acknowledgment" | "Rescheduled";
-  room: string;
-  notes: string;
 }
 
 const DEFAULT_ANALYTICS = SAPC_COHORT_SUMMARY;
@@ -306,7 +268,7 @@ export const CounselorDashboard: React.FC = () => {
   }, []);
 
   const [_analytics, setAnalytics] = useState<any | null>(DEFAULT_ANALYTICS);
-  const [flaggedSessions, setFlaggedSessions] = useState<FlaggedAlert[]>(DEFAULT_FLAGGED_ALERTS);
+  const [flaggedSessions, _setFlaggedSessions] = useState<FlaggedAlert[]>(DEFAULT_FLAGGED_ALERTS);
   const [interventions, setInterventions] = useState<InterventionCarePlan[]>(() => {
     return typeof window !== "undefined" ? getActiveInterventions() : DEFAULT_INTERVENTIONS;
   });
@@ -327,7 +289,6 @@ export const CounselorDashboard: React.FC = () => {
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isDepEdFormOpen, setIsDepEdFormOpen] = useState(false);
   const [isBatchInterventionOpen, setIsBatchInterventionOpen] = useState(false);
-  const { success: toastSuccess, error: toastError, info: toastInfo } = useToast();
   const catDrag = useDragScroll();
   const tabsDrag = useDragScroll();
 

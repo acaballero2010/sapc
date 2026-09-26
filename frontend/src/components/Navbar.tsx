@@ -108,9 +108,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     icon: "🎓"
   };
 
-  const handleNavigateTab = (tabName: string) => {
-    window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab: tabName } }));
+  const handleNavigateTab = (tabName: string, _role?: string) => {
     if (typeof window !== "undefined") {
+      const adminTabs = ["teachers", "create_user", "parents", "pending_registrations", "export_credentials", "import_wizard", "import_history", "revert_import", "quarter_management", "platform_settings"];
+      if (adminTabs.includes(tabName) && !window.location.pathname.includes("/dashboard/admin") && user?.role === "admin") {
+        router.push(`/dashboard/admin?tab=${tabName}`);
+        return;
+      }
+
+      window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab: tabName } }));
       const url = new URL(window.location.href);
       url.searchParams.set("tab", tabName);
       window.history.replaceState({}, "", url.toString());

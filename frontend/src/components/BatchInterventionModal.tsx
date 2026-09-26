@@ -7,15 +7,11 @@ import {
   Users,
   CheckSquare,
   Square,
-  AlertCircle,
-  Sparkles,
-  ShieldCheck,
   Calendar,
   MessageSquare,
   HeartHandshake,
 } from "lucide-react";
 import {
-  StudentRecord,
   getActiveStudentDataset,
   createInterventionCarePlan,
   addAppNotification,
@@ -35,6 +31,7 @@ export function BatchInterventionModal({
   onDispatched,
 }: BatchInterventionModalProps) {
   const { success, warning } = useToast();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const dataset = useMemo(() => getActiveStudentDataset(), [isOpen]);
 
   const [riskFilter, setRiskFilter] = useState<string>("Critical");
@@ -44,7 +41,7 @@ export function BatchInterventionModal({
   const [actionType, setActionType] = useState<"care_plan" | "notification" | "counseling">("care_plan");
   const [title, setTitle] = useState("Targeted Academic & Wellbeing Follow-up");
   const [details, setDetails] = useState("Immediate counseling triage scheduled to address multiple domain vulnerability indicators.");
-  const [scheduledDate, setScheduledDate] = useState(new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0]);
+  const [scheduledDate, setScheduledDate] = useState(() => new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0]);
 
   // Filtered student list
   const filteredStudents = useMemo(() => {

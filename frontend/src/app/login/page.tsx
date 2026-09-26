@@ -15,6 +15,7 @@ import {
 import { SapcLogo } from "@/components/SapcLogo";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { GoogleRoleSelectionModal } from "@/components/GoogleRoleSelectionModal";
+import { getActiveFacultyRecords } from "@/lib/dataset-store";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,15 +41,20 @@ export default function LoginPage() {
     setErrorMessage(null);
     setIsSubmitting(true);
     try {
+      const cleanEmail = email.trim().toLowerCase();
+      const facultyList = getActiveFacultyRecords();
+      const matched = facultyList.find(f => f.email && f.email.toLowerCase() === cleanEmail);
+
       const targetRole: RoleType = 
-        email.includes("admin") ? "admin" :
-        email.includes("teacher") ? "teacher" :
-        email.includes("parent") ? "parent" :
-        email.includes("counselor") ? "guidance_counselor" : "student";
-      await login(email, password, targetRole);
+        matched ? (matched.role === "guidance_counselor" || matched.role === "counselor" ? "guidance_counselor" : matched.role === "admin" ? "admin" : "teacher") :
+        cleanEmail.includes("admin") ? "admin" :
+        cleanEmail.includes("counselor") ? "guidance_counselor" :
+        cleanEmail.includes("teacher") ? "teacher" :
+        cleanEmail.includes("parent") ? "parent" : "student";
+
+      await login(cleanEmail, password, targetRole);
       router.push(ROLE_ROUTES[targetRole] || "/dashboard/student");
     } catch (err: any) {
-      // Show error — do NOT redirect on failed authentication
       const msg = err?.message || "Authentication failed. Please check your credentials and try again.";
       setErrorMessage(msg.includes("OfflineError") || msg.includes("offline") 
         ? "Could not reach the authentication server. Please check your connection."

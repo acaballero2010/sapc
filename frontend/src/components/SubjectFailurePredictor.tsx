@@ -23,25 +23,63 @@ import {
   simulateRemediationOutcome 
 } from "@/lib/subject-prediction";
 
-export function SubjectFailurePredictor() {
+export interface SubjectFailurePredictorProps {
+  scopedStudents?: StudentRecord[];
+  teacherSection?: string;
+  isTeacherView?: boolean;
+}
+
+export function SubjectFailurePredictor({
+  scopedStudents,
+  teacherSection,
+  isTeacherView = false
+}: SubjectFailurePredictorProps = {}) {
   const [students, setStudents] = useState<StudentRecord[]>(() => {
+    if (scopedStudents && scopedStudents.length > 0) return scopedStudents;
     return typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
   });
 
   React.useEffect(() => {
+    if (scopedStudents && scopedStudents.length > 0) {
+      setStudents(scopedStudents);
+      return;
+    }
     const handleUpdate = () => {
       setStudents(getActiveStudentDataset());
     };
     window.addEventListener("sapc:dataset-updated", handleUpdate);
     return () => window.removeEventListener("sapc:dataset-updated", handleUpdate);
-  }, []);
+  }, [scopedStudents]);
+
+  // Determine initial strand and subject based on scoped student grade level
+  const initialStrand = useMemo(() => {
+    if (scopedStudents && scopedStudents.length > 0 && scopedStudents[0].grade_level) {
+      return `Grade ${scopedStudents[0].grade_level}`;
+    }
+    return "Grade 10";
+  }, [scopedStudents]);
+
+  const initialSubjectCode = useMemo(() => {
+    if (initialStrand === "Grade 10") return "JHS-MATH10";
+    if (initialStrand === "Grade 9") return "JHS-MATH9";
+    if (initialStrand === "Grade 8") return "JHS-MATH8";
+    if (initialStrand === "Grade 7") return "JHS-MATH7";
+    return "JHS-MATH10";
+  }, [initialStrand]);
   
   // Selection states
-  const [selectedStrand, setSelectedStrand] = useState<string>("Grade 7");
-  const [selectedSubjectCode, setSelectedSubjectCode] = useState<string>("JHS-MATH7");
-  const [selectedSection, setSelectedSection] = useState<string>("all");
+  const [selectedStrand, setSelectedStrand] = useState<string>(initialStrand);
+  const [selectedSubjectCode, setSelectedSubjectCode] = useState<string>(initialSubjectCode);
+  const [selectedSection, setSelectedSection] = useState<string>(teacherSection || "all");
   const [riskTierFilter, setRiskTierFilter] = useState<"ALL" | "CRITICAL_RISK" | "MODERATE_RISK" | "ON_TRACK">("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Sync if initial strand changes
+  React.useEffect(() => {
+    setSelectedStrand(initialStrand);
+    setSelectedSubjectCode(initialSubjectCode);
+    if (teacherSection) setSelectedSection(teacherSection);
+  }, [initialStrand, initialSubjectCode, teacherSection]);
 
   // "What-If" Remediation Simulator Modal State
   const [simulatingStudent, setSimulatingStudent] = useState<StudentSubjectPrediction | null>(null);
@@ -66,31 +104,35 @@ export function SubjectFailurePredictor() {
     return sections.sort();
   }, [students]);
 
-  // Compute predictions for all students
+  // Compute predictions for scoped students
   const predictions = useMemo(() => {
     return students.map(st => calculateSubjectFailurePrediction(st, currentSubjectMeta.code));
   }, [students, currentSubjectMeta]);
 
-  // Filtered predictions
+  // Scoped predictions for active section
+  const scopedPredictions = useMemo(() => {
+    return predictions.filter(p => selectedSection === "all" || p.section_name === selectedSection);
+  }, [predictions, selectedSection]);
+
+  // Filtered predictions (search & risk tier)
   const filteredPredictions = useMemo(() => {
-    return predictions.filter(p => {
-      const matchSection = selectedSection === "all" || p.section_name === selectedSection;
+    return scopedPredictions.filter(p => {
       const matchTier = riskTierFilter === "ALL" || p.risk_tier === riskTierFilter;
       const matchSearch = searchQuery === "" || 
         p.student_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.lrn.includes(searchQuery) ||
         p.section_name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchSection && matchTier && matchSearch;
+      return matchTier && matchSearch;
     }).sort((a, b) => b.failure_probability_pct - a.failure_probability_pct);
-  }, [predictions, selectedSection, riskTierFilter, searchQuery]);
+  }, [scopedPredictions, riskTierFilter, searchQuery]);
 
-  // Summary Metrics
+  // Summary Metrics calculated strictly from the scoped/active section cohort
   const metrics = useMemo(() => {
-    const total = predictions.length;
-    const critical = predictions.filter(p => p.risk_tier === "CRITICAL_RISK").length;
-    const moderate = predictions.filter(p => p.risk_tier === "MODERATE_RISK").length;
-    const onTrack = predictions.filter(p => p.risk_tier === "ON_TRACK").length;
-    const avgGrade = total > 0 ? predictions.reduce((acc, p) => acc + p.projected_final_grade, 0) / total : 0;
+    const total = scopedPredictions.length;
+    const critical = scopedPredictions.filter(p => p.risk_tier === "CRITICAL_RISK").length;
+    const moderate = scopedPredictions.filter(p => p.risk_tier === "MODERATE_RISK").length;
+    const onTrack = scopedPredictions.filter(p => p.risk_tier === "ON_TRACK").length;
+    const avgGrade = total > 0 ? scopedPredictions.reduce((acc, p) => acc + p.projected_final_grade, 0) / total : 0;
     const passingRate = total > 0 ? ((onTrack / total) * 100) : 0;
 
     return {
@@ -101,7 +143,7 @@ export function SubjectFailurePredictor() {
       avgGrade: avgGrade.toFixed(1),
       passingRate: passingRate.toFixed(1)
     };
-  }, [predictions]);
+  }, [scopedPredictions]);
 
   // Simulation calculation
   const simulationResult = useMemo(() => {
@@ -167,7 +209,7 @@ export function SubjectFailurePredictor() {
         <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/30 text-amber-300 text-xs font-black tracking-wider uppercase flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
                 Early Academic Warning Engine
@@ -175,6 +217,11 @@ export function SubjectFailurePredictor() {
               <span className="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-400/30 text-[11px] font-bold">
                 DepEd DO 8, s. 2015 Compliant
               </span>
+              {isTeacherView && teacherSection && (
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold">
+                  Scoped: {teacherSection}
+                </span>
+              )}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
               Subject-Level Failure Risk Predictor
@@ -310,14 +357,23 @@ export function SubjectFailurePredictor() {
             <select
               value={selectedSection}
               onChange={(e) => setSelectedSection(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold rounded-xl p-2.5 focus:ring-2 focus:ring-[#8B0014] focus:outline-none"
+              disabled={isTeacherView && Boolean(teacherSection)}
+              className={`w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold rounded-xl p-2.5 focus:ring-2 focus:ring-[#8B0014] focus:outline-none ${
+                isTeacherView && Boolean(teacherSection) ? "opacity-90 cursor-not-allowed bg-slate-100 dark:bg-slate-800/80" : ""
+              }`}
             >
-              <option value="all">🌐 All Sections ({availableSections.length})</option>
-              {availableSections.map((sec) => (
-                <option key={sec} value={sec}>
-                  {sec}
-                </option>
-              ))}
+              {isTeacherView && teacherSection ? (
+                <option value={teacherSection}>🏫 {teacherSection} (Advisory Class)</option>
+              ) : (
+                <>
+                  <option value="all">🌐 All Sections ({availableSections.length})</option>
+                  {availableSections.map((sec) => (
+                    <option key={sec} value={sec}>
+                      {sec}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
           </div>
 

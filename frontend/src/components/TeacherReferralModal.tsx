@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { RiskBadge } from "./RiskBadge";
+import { addTeacherReferral } from "@/lib/dataset-store";
 
 interface TeacherReferralModalProps {
   isOpen: boolean;
@@ -90,7 +91,6 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
 
     // Save to unified referrals store
     try {
-      const { addTeacherReferral } = require("@/lib/dataset-store");
       addTeacherReferral(referralPayload);
     } catch {
       if (typeof window !== "undefined") {
