@@ -82,10 +82,67 @@ import {
   saveActiveParentRecords,
   loadParentRecordsFromFirestore,
   subscribeToParentRecords,
+  ALL_JHS_SECTIONS,
   DEFAULT_PENDING_REGISTRATIONS
 } from "@/lib/dataset-store";
 import { useDragScroll } from "@/lib/useDragScroll";
 import type { StudentRecord } from "@/data/students500";
+
+export const PROVISION_DEPARTMENTS_BY_ROLE: Record<string, string[]> = {
+  teacher: [
+    "Junior High School Faculty",
+    "Mathematics & Science Department",
+    "English & Foreign Languages Department",
+    "Filipino & Social Studies (Araling Panlipunan)",
+    "Values Education & ESP",
+    "MAPEH & TLE Department",
+    "Information & Communications Technology (ICT)"
+  ],
+  guidance_counselor: [
+    "Guidance & Counseling Department",
+    "Student Welfare & Psychosocial Services",
+    "Institutional Retention & Casework Office"
+  ],
+  admin: [
+    "Institutional IT & Academic Administration",
+    "Office of the Registrar & Admissions",
+    "Office of the Principal & Academic Affairs",
+    "Executive Board & Administration"
+  ],
+  student: [
+    "Junior High School Student Body"
+  ],
+  parent: [
+    "Parent-Teacher Community Association (PTCA)",
+    "Junior High School Parent Council"
+  ]
+};
+
+export const PROVISION_SECTIONS_BY_ROLE: Record<string, string[]> = {
+  teacher: [
+    "Subject Teacher (Non-Advisory)",
+    ...ALL_JHS_SECTIONS
+  ],
+  guidance_counselor: [
+    "Central Guidance Consultation Room 204",
+    "Junior High School Counseling Unit",
+    "Crisis Intervention & Triage Office",
+    "Guidance & Counseling Center"
+  ],
+  admin: [
+    "Administration Building, 2nd Floor",
+    "Registrar Office (St. Anthony Hall)",
+    "IT Systems Management Office",
+    "Central Records & Compliance"
+  ],
+  student: [
+    ...ALL_JHS_SECTIONS
+  ],
+  parent: [
+    "Parent Representative, Junior High School",
+    ...ALL_JHS_SECTIONS
+  ]
+};
 
 // Tab types for all Admin Modules
 export type AdminTabType = 
@@ -989,9 +1046,34 @@ Issued Date     : ${new Date().toLocaleDateString()}
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserRole, setNewUserRole] = useState("teacher");
-  const [newUserSection, setNewUserSection] = useState("Grade 11 - St. Augustine (STEM)");
-  const [newUserDepartment, _setNewUserDepartment] = useState("Senior High STEM");
-  const [newUserPassword, setNewUserPassword] = useState("sapc2026");
+  const [newUserDepartment, setNewUserDepartment] = useState(PROVISION_DEPARTMENTS_BY_ROLE.teacher[0]);
+  const [newUserSection, setNewUserSection] = useState(PROVISION_SECTIONS_BY_ROLE.teacher[0]);
+  const [newUserCustomDepartment, setNewUserCustomDepartment] = useState("");
+  const [newUserCustomSection, setNewUserCustomSection] = useState("");
+  const [newUserEmployeeId, setNewUserEmployeeId] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("teacher123");
+
+  const handleProvisionRoleChange = (role: string) => {
+    setNewUserRole(role);
+    const depts = PROVISION_DEPARTMENTS_BY_ROLE[role] || PROVISION_DEPARTMENTS_BY_ROLE.teacher;
+    const secs = PROVISION_SECTIONS_BY_ROLE[role] || PROVISION_SECTIONS_BY_ROLE.teacher;
+    setNewUserDepartment(depts[0]);
+    setNewUserSection(secs[0]);
+    setNewUserCustomDepartment("");
+    setNewUserCustomSection("");
+
+    if (role === "guidance_counselor") {
+      setNewUserPassword("counselor123");
+    } else if (role === "teacher") {
+      setNewUserPassword("teacher123");
+    } else if (role === "admin") {
+      setNewUserPassword("admin123");
+    } else if (role === "student") {
+      setNewUserPassword("student123");
+    } else if (role === "parent") {
+      setNewUserPassword("parent2026");
+    }
+  };
 
   const handleProvisionCampusUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1000,12 +1082,21 @@ Issued Date     : ${new Date().toLocaleDateString()}
       return;
     }
     const isCounselor = newUserRole === "guidance_counselor" || newUserRole === "counselor";
+    const finalDepartment = newUserDepartment === "custom"
+      ? (newUserCustomDepartment.trim() || "Academic Department")
+      : (newUserDepartment.trim() || (isCounselor ? "Guidance & Counseling Center" : "Junior High School Faculty"));
+    
+    const finalSection = newUserSection === "custom"
+      ? (newUserCustomSection.trim() || "General Campus")
+      : (newUserSection.trim() || (isCounselor ? "Central Guidance Consultation Room 204" : "Grade 7 - Love"));
+
     const createdRecord = await addFacultyRecord({
       name: newUserName.trim(),
       email: newUserEmail.trim(),
       role: newUserRole as any,
-      section: newUserSection.trim(),
-      department: newUserDepartment.trim() || (isCounselor ? "Guidance & Counseling Center" : "Academic Department"),
+      section: finalSection,
+      department: finalDepartment,
+      employee_id: newUserEmployeeId.trim() || undefined,
       initial_password: newUserPassword.trim() || (isCounselor ? "counselor123" : "teacher123"),
       status: "Active"
     });
@@ -1014,6 +1105,9 @@ Issued Date     : ${new Date().toLocaleDateString()}
     showToast(`Account provisioned for ${createdRecord.name}! Initial password: ${createdRecord.initial_password}`);
     setNewUserName("");
     setNewUserEmail("");
+    setNewUserEmployeeId("");
+    setNewUserCustomDepartment("");
+    setNewUserCustomSection("");
     handleTabChange("teachers");
   };
 
@@ -2892,22 +2986,28 @@ Issued Date     : ${new Date().toLocaleDateString()}
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Department</label>
-                    <input
-                      type="text"
-                      value={editingFaculty.department || ""}
+                    <label className="font-bold text-slate-700">Department *</label>
+                    <select
+                      value={editingFaculty.department || (PROVISION_DEPARTMENTS_BY_ROLE[editingFaculty.role] ? PROVISION_DEPARTMENTS_BY_ROLE[editingFaculty.role][0] : "")}
                       onChange={(e) => setEditingFaculty({ ...editingFaculty, department: e.target.value })}
-                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
-                    />
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-medium"
+                    >
+                      {(PROVISION_DEPARTMENTS_BY_ROLE[editingFaculty.role] || PROVISION_DEPARTMENTS_BY_ROLE.teacher).map((dept) => (
+                        <option key={dept} value={dept}>{dept}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-700">Advisory Section / Office</label>
-                    <input
-                      type="text"
-                      value={editingFaculty.section || ""}
+                    <label className="font-bold text-slate-700">Assigned Advisory Section / Office *</label>
+                    <select
+                      value={editingFaculty.section || (PROVISION_SECTIONS_BY_ROLE[editingFaculty.role] ? PROVISION_SECTIONS_BY_ROLE[editingFaculty.role][0] : "")}
                       onChange={(e) => setEditingFaculty({ ...editingFaculty, section: e.target.value })}
-                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl"
-                    />
+                      className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-medium"
+                    >
+                      {(PROVISION_SECTIONS_BY_ROLE[editingFaculty.role] || PROVISION_SECTIONS_BY_ROLE.teacher).map((sec) => (
+                        <option key={sec} value={sec}>{sec}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="space-y-1">
                     <label className="font-bold text-slate-700">Employee ID</label>
@@ -2963,7 +3063,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
                   <Key className="h-6 w-6 text-[#8B0014]" />
                   Provision New Campus User Account
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-500">Create login credentials for Faculty, Guidance Counselors, Parents, or Students</p>
+                <p className="text-xs sm:text-sm text-slate-500">Create login credentials for Faculty, Guidance Counselors, Parents, or Students with automated department &amp; section assignment</p>
               </div>
               <button
                 onClick={() => handleTabChange("teachers")}
@@ -2979,12 +3079,19 @@ Issued Date     : ${new Date().toLocaleDateString()}
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Maria Clara Santos, LPT"
+                  placeholder={
+                    newUserRole === "teacher" ? "e.g. Maria Clara Santos, LPT" :
+                    newUserRole === "guidance_counselor" ? "e.g. Dr. Elena Ramos, RGC" :
+                    newUserRole === "student" ? "e.g. Juan Miguel Dela Cruz" :
+                    newUserRole === "parent" ? "e.g. Mrs. Teresa Dela Cruz" :
+                    "e.g. Admin User"
+                  }
                   value={newUserName}
                   onChange={(e) => setNewUserName(e.target.value)}
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
                 />
               </div>
+
               <div className="space-y-1">
                 <label className="font-bold text-slate-700">Institutional Email *</label>
                 <input
@@ -2996,40 +3103,116 @@ Issued Date     : ${new Date().toLocaleDateString()}
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
                 />
               </div>
+
               <div className="space-y-1">
                 <label className="font-bold text-slate-700">Assigned Institutional Role *</label>
                 <select
                   value={newUserRole}
-                  onChange={(e) => setNewUserRole(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold"
+                  onChange={(e) => handleProvisionRoleChange(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900"
                 >
                   <option value="teacher">Teacher / Class Adviser</option>
                   <option value="guidance_counselor">Guidance Counselor (RGC)</option>
-                  <option value="parent">Parent / Guardian</option>
-                  <option value="student">Student</option>
                   <option value="admin">System Administrator</option>
+                  <option value="student">Student</option>
+                  <option value="parent">Parent / Guardian</option>
                 </select>
               </div>
+
+              {/* Dynamic Employee / PRC / LRN ID */}
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Assigned Section / Department</label>
+                <label className="font-bold text-slate-700">
+                  {newUserRole === "guidance_counselor" ? "PRC License No. / Staff ID" :
+                   newUserRole === "teacher" ? "Faculty Employee ID" :
+                   newUserRole === "student" ? "Learner Reference Number (LRN)" :
+                   newUserRole === "parent" ? "Parent / Guardian Contact ID" :
+                   "Institutional ID"}
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Grade 11 - St. Augustine (STEM)"
-                  value={newUserSection}
-                  onChange={(e) => setNewUserSection(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  placeholder={
+                    newUserRole === "guidance_counselor" ? "PRC-RGC-008924" :
+                    newUserRole === "teacher" ? "SAPC-FAC-2026-001" :
+                    newUserRole === "student" ? "109482719283" :
+                    newUserRole === "parent" ? "+63 917 555 0192" :
+                    "SAPC-ADM-2026-001"
+                  }
+                  value={newUserEmployeeId}
+                  onChange={(e) => setNewUserEmployeeId(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
                 />
               </div>
+
+              {/* Intelligent Department Dropdown */}
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 flex items-center justify-between">
+                  <span>Assigned Department *</span>
+                  <span className="text-[10px] text-emerald-600 font-bold">✓ Populated for {newUserRole.replace('_', ' ')}</span>
+                </label>
+                <select
+                  value={newUserDepartment}
+                  onChange={(e) => setNewUserDepartment(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                >
+                  {(PROVISION_DEPARTMENTS_BY_ROLE[newUserRole] || PROVISION_DEPARTMENTS_BY_ROLE.teacher).map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                  <option value="custom">➕ Enter Custom Department...</option>
+                </select>
+                {newUserDepartment === "custom" && (
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter custom department name"
+                    value={newUserCustomDepartment}
+                    onChange={(e) => setNewUserCustomDepartment(e.target.value)}
+                    className="w-full mt-1.5 p-2 bg-white border border-amber-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  />
+                )}
+              </div>
+
+              {/* Intelligent Section / Office Dropdown */}
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 flex items-center justify-between">
+                  <span>
+                    {newUserRole === "teacher" || newUserRole === "student" || newUserRole === "parent"
+                      ? "Assigned Section *"
+                      : "Assigned Office / Station *"}
+                  </span>
+                  <span className="text-[10px] text-emerald-600 font-bold">✓ Populated for {newUserRole.replace('_', ' ')}</span>
+                </label>
+                <select
+                  value={newUserSection}
+                  onChange={(e) => setNewUserSection(e.target.value)}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                >
+                  {(PROVISION_SECTIONS_BY_ROLE[newUserRole] || PROVISION_SECTIONS_BY_ROLE.teacher).map((sec) => (
+                    <option key={sec} value={sec}>{sec}</option>
+                  ))}
+                  <option value="custom">➕ Enter Custom Section / Office...</option>
+                </select>
+                {newUserSection === "custom" && (
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter custom section or office name"
+                    value={newUserCustomSection}
+                    onChange={(e) => setNewUserCustomSection(e.target.value)}
+                    className="w-full mt-1.5 p-2 bg-white border border-amber-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  />
+                )}
+              </div>
+
               <div className="space-y-1 sm:col-span-2">
                 <label className="font-bold text-slate-700">Initial Onboarding Password</label>
                 <input
                   type="text"
-                  placeholder="sapc2026"
+                  placeholder="teacher123"
                   value={newUserPassword}
                   onChange={(e) => setNewUserPassword(e.target.value)}
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
                 />
-                <span className="text-[11px] text-slate-500">User will be prompted to update this password upon initial authentication.</span>
+                <span className="text-[11px] text-slate-500">Default password is set automatically based on role standard. User will be prompted to update upon first login.</span>
               </div>
 
               <div className="sm:col-span-2 pt-2 flex justify-end">
