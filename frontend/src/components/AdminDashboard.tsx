@@ -2992,6 +2992,9 @@ Issued Date     : ${new Date().toLocaleDateString()}
                       onChange={(e) => setEditingFaculty({ ...editingFaculty, department: e.target.value })}
                       className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-medium"
                     >
+                      {editingFaculty.department && !(PROVISION_DEPARTMENTS_BY_ROLE[editingFaculty.role] || []).includes(editingFaculty.department) && (
+                        <option value={editingFaculty.department}>{editingFaculty.department} (Custom)</option>
+                      )}
                       {(PROVISION_DEPARTMENTS_BY_ROLE[editingFaculty.role] || PROVISION_DEPARTMENTS_BY_ROLE.teacher).map((dept) => (
                         <option key={dept} value={dept}>{dept}</option>
                       ))}
@@ -3004,6 +3007,9 @@ Issued Date     : ${new Date().toLocaleDateString()}
                       onChange={(e) => setEditingFaculty({ ...editingFaculty, section: e.target.value })}
                       className="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-medium"
                     >
+                      {editingFaculty.section && !(PROVISION_SECTIONS_BY_ROLE[editingFaculty.role] || []).includes(editingFaculty.section) && (
+                        <option value={editingFaculty.section}>{editingFaculty.section} (Custom)</option>
+                      )}
                       {(PROVISION_SECTIONS_BY_ROLE[editingFaculty.role] || PROVISION_SECTIONS_BY_ROLE.teacher).map((sec) => (
                         <option key={sec} value={sec}>{sec}</option>
                       ))}
