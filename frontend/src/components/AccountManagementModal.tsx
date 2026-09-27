@@ -203,26 +203,29 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
     }
   };
 
-  const handleRemovePhoto = () => {
+  const handleRemovePhoto = async () => {
     setAvatarUrl(null);
-    updateUserProfile({ avatar_url: null });
+    await updateUserProfile({ avatar_url: null });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    updateUserProfile({
-      full_name: fullName,
-      avatar_url: avatarUrl,
-      grade_level: gradeLevel,
-      section: section
-    });
-    saveTimerRef.current = setTimeout(() => {
+    try {
+      await updateUserProfile({
+        full_name: fullName,
+        avatar_url: avatarUrl,
+        grade_level: gradeLevel,
+        section: section
+      });
       setIsSaving(false);
       setSaveSuccess(true);
       saveTimerRef.current = setTimeout(() => setSaveSuccess(false), 3000);
-    }, 600);
+    } catch {
+      setIsSaving(false);
+      setUploadError("Failed to update profile settings.");
+    }
   };
 
   const handleLogout = () => {

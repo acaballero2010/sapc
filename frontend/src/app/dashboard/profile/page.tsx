@@ -173,16 +173,16 @@ function UserProfileContent() {
   };
 
   // Handle Profile Details Save
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     setErrorMessage(null);
 
-    setTimeout(() => {
+    try {
       if (updateUserProfile) {
-        updateUserProfile({
+        await updateUserProfile({
           full_name: fullName,
-          avatar_url: avatarUrl || undefined,
+          avatar_url: avatarUrl || null,
           grade_level: gradeLevel,
           section: sectionName,
         });
@@ -190,7 +190,10 @@ function UserProfileContent() {
       setIsSaving(false);
       setSaveSuccess("Your personal and institutional profile details have been saved.");
       setTimeout(() => setSaveSuccess(null), 4000);
-    }, 600);
+    } catch {
+      setIsSaving(false);
+      setErrorMessage("Failed to save profile changes. Please try again.");
+    }
   };
 
   // Handle Password Update

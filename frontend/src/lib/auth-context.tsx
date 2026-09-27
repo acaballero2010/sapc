@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE_URL } from "./api";
 import { auth, db, googleProvider } from "./firebase";
-import { signInWithEmailAndPassword, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 import { getActiveFacultyRecords, getActiveStudentDataset, getActiveParentRecords } from "./dataset-store";
@@ -40,6 +40,32 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * Recovers a permanently saved avatar for the specified user email from localStorage
+ * or custom profile caches, falling back to any provided default.
+ */
+export const getPersistedAvatar = (email?: string | null, fallbackAvatar?: string | null): string | null => {
+  if (typeof window !== "undefined") {
+    if (email) {
+      const perUserKey = `sapc_avatar_${email.toLowerCase().trim()}`;
+      const saved = localStorage.getItem(perUserKey);
+      if (saved !== null && saved !== "") {
+        return saved;
+      }
+    }
+    try {
+      const customSaved = localStorage.getItem("sapc_custom_profile");
+      if (customSaved) {
+        const parsed = JSON.parse(customSaved);
+        if (parsed?.avatar_url && (!email || parsed.email?.toLowerCase() === email.toLowerCase())) {
+          return parsed.avatar_url;
+        }
+      }
+    } catch {}
+  }
+  return fallbackAvatar || null;
+};
 
 const DEMO_PROFILES: Record<RoleType, { email: string; pass: string; name: string; student_id?: number }> = {
   guidance_counselor: { 
@@ -113,6 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.data();
         const role = (userData?.role || targetRoleHint || "student") as RoleType;
+        const avatar = getPersistedAvatar(firebaseUser.email || cleanId, userData?.avatar_url || firebaseUser.photoURL || null);
         const profile: UserProfile = {
           id: 1,
           email: firebaseUser.email || cleanId,
@@ -120,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: role,
           student_id: userData?.student_id || (role === "student" || role === "parent" ? 1 : null),
           firebaseUid: firebaseUser.uid,
-          avatar_url: firebaseUser.photoURL || null
+          avatar_url: avatar
         };
 
         const tokenStr = `token_${role}_${Date.now()}`;
@@ -162,12 +189,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (res.ok) {
         const data = await res.json();
+        const avatar = getPersistedAvatar(data.email, data.avatar_url || null);
         const profile: UserProfile = {
           id: 1,
           email: data.email,
           full_name: data.full_name,
           role: data.role as RoleType,
-          student_id: data.student_id
+          student_id: data.student_id,
+          avatar_url: avatar
         };
 
         if (typeof window !== "undefined") {
@@ -210,6 +239,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           throw new Error("Invalid email or password. Please try again.");
         }
 
+        const avatar = getPersistedAvatar(demo.email, null);
         const profile: UserProfile = {
           id: demo.student_id || 1,
           email: demo.email,
@@ -217,7 +247,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: roleKey,
           student_id: demo.student_id || null,
           section: roleKey === "teacher" ? "Grade 10 - St. Augustine" : undefined,
-          department: roleKey === "guidance_counselor" ? "Guidance & Counseling Center" : roleKey === "teacher" ? "Senior High STEM" : undefined
+          department: roleKey === "guidance_counselor" ? "Guidance & Counseling Center" : roleKey === "teacher" ? "Senior High STEM" : undefined,
+          avatar_url: avatar
         };
 
         const tokenStr = `token_${roleKey}_${Date.now()}`;
@@ -256,6 +287,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         matchedFaculty.role === "guidance_counselor" || matchedFaculty.role === "counselor" ? "guidance_counselor" :
         matchedFaculty.role === "admin" ? "admin" : "teacher";
 
+      const avatar = getPersistedAvatar(matchedFaculty.email, null);
       const profile: UserProfile = {
         id: 1,
         email: matchedFaculty.email,
@@ -263,7 +295,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: facultyRole,
         section: matchedFaculty.section,
         department: matchedFaculty.department,
-        employee_id: matchedFaculty.employee_id
+        employee_id: matchedFaculty.employee_id,
+        avatar_url: avatar
       };
 
       const tokenStr = `token_${facultyRole}_${Date.now()}`;
@@ -297,14 +330,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Invalid email or password. Please try again.");
       }
 
+      const studentEmail = matchedStudent.email || `${matchedStudent.lrn}@sapc.edu.ph`;
+      const avatar = getPersistedAvatar(studentEmail, null);
       const profile: UserProfile = {
         id: matchedStudent.id,
-        email: matchedStudent.email || `${matchedStudent.lrn}@sapc.edu.ph`,
+        email: studentEmail,
         full_name: matchedStudent.full_name,
         role: "student",
         student_id: matchedStudent.id,
         section: matchedStudent.section_name,
-        strand: matchedStudent.strand
+        strand: matchedStudent.strand,
+        avatar_url: avatar
       };
 
       const tokenStr = `token_student_${Date.now()}`;
@@ -337,12 +373,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Invalid email or password. Please try again.");
       }
 
+      const parentEmail = matchedParent.email || `parent.${matchedParent.linkedLRN}@sapc.edu.ph`;
+      const avatar = getPersistedAvatar(parentEmail, null);
       const profile: UserProfile = {
         id: 1,
-        email: matchedParent.email || `parent.${matchedParent.linkedLRN}@sapc.edu.ph`,
+        email: parentEmail,
         full_name: matchedParent.name,
         role: "parent",
-        student_id: 1
+        student_id: 1,
+        avatar_url: avatar
       };
 
       const tokenStr = `token_parent_${Date.now()}`;
@@ -376,12 +415,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 throw new Error("Invalid email or password. Please try again.");
               }
 
+              const avatar = getPersistedAvatar(matchedReg.email, matchedReg.avatar_url || null);
               const profile: UserProfile = {
                 id: matchedReg.student_id || 1,
                 email: matchedReg.email,
                 full_name: matchedReg.name || matchedReg.full_name,
                 role: (matchedReg.role || "student") as RoleType,
-                student_id: matchedReg.student_id || null
+                student_id: matchedReg.student_id || null,
+                avatar_url: avatar
               };
 
               const tokenStr = `token_${profile.role}_${Date.now()}`;
@@ -443,6 +484,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
 
+        const avatar = getPersistedAvatar(fbUser.email, fbUser.photoURL || null);
         const profile: UserProfile = {
           id: 1,
           email: fbUser.email || "",
@@ -450,8 +492,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: role,
           student_id: studentId,
           firebaseUid: fbUser.uid,
-          avatar_url: fbUser.photoURL || null
+          avatar_url: avatar
         };
+
+        const tokenStr = `token_${role}_${Date.now()}`;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("sapc_token", tokenStr);
+          localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
+          localStorage.setItem("sapc_user", JSON.stringify(profile));
+        }
 
         setUser(profile);
         setServerError(null);
@@ -469,23 +518,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateUserProfile = async (updates: Partial<UserProfile>) => {
+    let currentEmail = user?.email;
     setUser((prev) => {
       if (!prev) return null;
+      currentEmail = prev.email || currentEmail;
       const updated = { ...prev, ...updates };
       if (typeof window !== "undefined") {
         localStorage.setItem("sapc_custom_profile", JSON.stringify(updated));
+        localStorage.setItem("sapc_user", JSON.stringify(updated));
+
+        // If avatar_url was explicitly updated
+        if (updates.avatar_url !== undefined) {
+          const emailKey = (updated.email || currentEmail || "").toLowerCase().trim();
+          if (emailKey) {
+            if (updates.avatar_url) {
+              localStorage.setItem(`sapc_avatar_${emailKey}`, updates.avatar_url);
+            } else {
+              localStorage.removeItem(`sapc_avatar_${emailKey}`);
+            }
+          }
+          // Also sync with sapc_registered_accounts if present
+          try {
+            const rawAccounts = localStorage.getItem("sapc_registered_accounts");
+            if (rawAccounts) {
+              const accounts = JSON.parse(rawAccounts);
+              if (Array.isArray(accounts)) {
+                const idx = accounts.findIndex((a: any) => a.email?.toLowerCase() === emailKey);
+                if (idx !== -1) {
+                  accounts[idx].avatar_url = updates.avatar_url;
+                  localStorage.setItem("sapc_registered_accounts", JSON.stringify(accounts));
+                }
+              }
+            }
+          } catch {}
+        }
       }
       return updated;
     });
 
-    if (auth.currentUser && db) {
+    if (auth.currentUser) {
       try {
-        await setDoc(doc(db, "users", auth.currentUser.uid), {
-          ...updates,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-      } catch (err) {
-        console.warn("Firestore profile update notice:", err);
+        if (updates.avatar_url !== undefined || updates.full_name) {
+          await updateProfile(auth.currentUser, {
+            ...(updates.full_name ? { displayName: updates.full_name } : {}),
+            ...(updates.avatar_url !== undefined ? { photoURL: updates.avatar_url || "" } : {})
+          });
+        }
+      } catch (authErr) {
+        console.warn("Firebase Auth profile update notice:", authErr);
+      }
+
+      if (db) {
+        try {
+          await setDoc(doc(db, "users", auth.currentUser.uid), {
+            ...updates,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (err) {
+          console.warn("Firestore profile update notice:", err);
+        }
       }
     }
   };
@@ -532,6 +623,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const customSaved = typeof window !== "undefined" ? localStorage.getItem("sapc_custom_profile") : null;
           const parsed = customSaved ? JSON.parse(customSaved) : null;
 
+          const avatar = getPersistedAvatar(fbUser.email, parsed?.avatar_url || userData?.avatar_url || fbUser.photoURL || null);
+
           const restoredUser: UserProfile = {
             id: 1,
             email: fbUser.email || "",
@@ -540,7 +633,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Read student_id from Firestore document rather than always using 1
             student_id: userData?.student_id || parsed?.student_id || null,
             firebaseUid: fbUser.uid,
-            avatar_url: parsed?.avatar_url || userData?.avatar_url || fbUser.photoURL || null
+            avatar_url: avatar
           };
           setUser(restoredUser);
           if (typeof window !== "undefined") {
@@ -559,6 +652,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (savedToken && customSaved) {
             try {
               const parsed = JSON.parse(customSaved);
+              const avatar = getPersistedAvatar(parsed?.email, parsed?.avatar_url);
+              parsed.avatar_url = avatar;
               setUser(parsed);
               setToken(savedToken);
             } catch {
