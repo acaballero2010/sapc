@@ -183,24 +183,10 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   };
 
   const handleSelectPreset = (preset: typeof AVATAR_PRESETS[0]) => {
-    // Generate a quick SVG/canvas preset avatar URL or emoji marker
-    const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.fillStyle = preset.id === "grad" ? "#8B0014" : preset.id === "lion" ? "#D97706" : preset.id === "stem" ? "#2563EB" : preset.id === "star" ? "#9333EA" : "#059669";
-      ctx.beginPath();
-      ctx.arc(64, 64, 64, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.font = "60px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(preset.emoji, 64, 70);
-      const dataUrl = canvas.toDataURL();
-      setAvatarUrl(dataUrl);
-      updateUserProfile({ avatar_url: dataUrl });
-    }
+    const bgHex = preset.id === "grad" ? "%238B0014" : preset.id === "lion" ? "%23D97706" : preset.id === "stem" ? "%232563EB" : preset.id === "star" ? "%239333EA" : "%23059669";
+    const presetSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" fill="${bgHex}"/><text x="50%" y="54%" font-size="64" text-anchor="middle" dominant-baseline="middle">${preset.emoji}</text></svg>`;
+    setAvatarUrl(presetSvg);
+    updateUserProfile({ avatar_url: presetSvg });
   };
 
   const handleRemovePhoto = async () => {
@@ -240,15 +226,17 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
         {/* Top Header */}
         <div className="p-6 bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] text-white flex items-center justify-between border-t-4 border-amber-400">
           <div className="flex items-center gap-3.5">
-            <div className="relative">
+            <div className="relative shrink-0">
               {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={fullName}
-                  className="h-13 w-13 rounded-2xl object-cover border-2 border-amber-400 shadow-md"
-                />
+                <div className="h-14 w-14 rounded-2xl overflow-hidden border-2 border-amber-400 shadow-md flex items-center justify-center bg-slate-900/40">
+                  <img
+                    src={avatarUrl}
+                    alt={fullName}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
               ) : (
-                <div className="h-13 w-13 rounded-2xl bg-gradient-to-br from-amber-400 to-[#D97706] text-[#7B0012] flex items-center justify-center font-black text-2xl shadow-md">
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-amber-400 to-[#D97706] text-[#7B0012] flex items-center justify-center font-black text-2xl shadow-md border-2 border-amber-300">
                   {fullName ? fullName.charAt(0).toUpperCase() : "U"}
                 </div>
               )}
@@ -366,14 +354,16 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                 <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
                   <div className="relative group shrink-0">
                     {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt="Profile preview"
-                        className="h-20 w-20 rounded-2xl object-cover border-2 border-[#8B0014] shadow-sm"
-                      />
+                      <div className="h-20 w-20 rounded-2xl overflow-hidden border-2 border-[#8B0014] shadow-sm flex items-center justify-center bg-slate-100">
+                        <img
+                          src={avatarUrl}
+                          alt="Profile preview"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
                     ) : (
                       <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#5A000D] border-2 border-amber-400 flex items-center justify-center text-white text-3xl font-black shadow-sm">
-                        {fullName.charAt(0).toUpperCase()}
+                        {fullName ? fullName.charAt(0).toUpperCase() : "U"}
                       </div>
                     )}
                     <button

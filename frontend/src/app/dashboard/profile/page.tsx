@@ -152,7 +152,8 @@ function UserProfileContent() {
 
   // Handle Avatar Preset Selection
   const handleSelectPreset = (preset: typeof AVATAR_PRESETS[0]) => {
-    const presetSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="%238B0014"/><text x="50%" y="54%" font-size="52" text-anchor="middle" dominant-baseline="middle">${preset.emoji}</text></svg>`;
+    const bgHex = preset.id === "grad" ? "%238B0014" : preset.id === "lion" ? "%23D97706" : preset.id === "stem" ? "%232563EB" : preset.id === "star" ? "%239333EA" : "%23059669";
+    const presetSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" fill="${bgHex}"/><text x="50%" y="54%" font-size="64" text-anchor="middle" dominant-baseline="middle">${preset.emoji}</text></svg>`;
     setAvatarUrl(presetSvg);
     if (updateUserProfile) {
       updateUserProfile({ avatar_url: presetSvg });
@@ -260,11 +261,13 @@ function UserProfileContent() {
           {/* Avatar with Upload Hover Trigger */}
           <div className="relative group shrink-0">
             {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={fullName}
-                className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl object-cover border-4 border-amber-400 shadow-2xl"
-              />
+              <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden border-4 border-amber-400 shadow-2xl flex items-center justify-center bg-slate-900/40">
+                <img
+                  src={avatarUrl}
+                  alt={fullName}
+                  className="h-full w-full object-cover"
+                />
+              </div>
             ) : (
               <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl bg-gradient-to-br from-[#8B0014] to-[#4A000A] border-4 border-amber-400 flex items-center justify-center text-white text-3xl font-black shadow-2xl">
                 {initials}
