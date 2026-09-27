@@ -1589,36 +1589,70 @@ await deleteStudentRecord("109238479999");`}
             <div className="space-y-4">
               {/* Guidance Counselor Guide */}
               {(rolePerspective === "guidance_counselor" || rolePerspective === "all" || (!isStudentOrParent && !isTeacher)) && (
-                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "guidance_counselor" ? "bg-rose-50/80 dark:bg-rose-950/40 border-2 border-[#8B0014] shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-3`}>
+                <div className={`p-6 rounded-2xl transition-all ${rolePerspective === "guidance_counselor" ? "bg-rose-50/80 dark:bg-rose-950/40 border-2 border-[#8B0014] shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-4`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Brain className="h-5 w-5 text-[#8B0014] dark:text-rose-400" />
                       <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                        1. Guidance Counselor Operations Guide
+                        1. Registered Guidance Counselor Workspace &amp; Capabilities (/dashboard/guidance)
                       </h3>
                     </div>
                     <span className="px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-[#8B0014] dark:text-rose-300 text-xs font-black">
-                      {rolePerspective === "guidance_counselor" ? "⭐ Active Role SOP" : "Primary Triage"}
+                      {rolePerspective === "guidance_counselor" ? "⭐ Active Role SOP" : "Clinical Triage & Interventions"}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Registered Guidance Counselors hold primary clinical jurisdiction over student psychosocial records and the 5-domain AHP retention engine.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">Crisis Alerts Queue</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">🚨 Crisis Triage Stream</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Monitor incoming distress flags from screeners or AI chat. Triage immediately by severity.
+                        Real-time alerts for student distress keywords, severe grade drops, or urgent teacher referrals.
                       </p>
                     </div>
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">Intervention Plans</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">📋 Intervention Kanban</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Create tailored care plans (Counseling, Family Conference, Tutoring), assign milestones, and log progress.
+                        Create and track clinical interventions across Identified, In Progress, Under Review, and Resolved.
                       </p>
                     </div>
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">Clinical Screeners</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">🔍 Student 360 Dossier</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Administer and review standardized PHQ-9 (Depression) and GAD-7 (Anxiety) screening protocols.
+                        In-depth profile with 5-domain radar balance, longitudinal quarterly grades, and private clinical notes.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📑 DepEd Form Generator</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Export official SF9/SF10-aligned case intervention summaries and academic retention documentation.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">👥 Batch Interventions</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Deploy cohort-wide care plans for students sharing common risk vectors (e.g. STEM remedial or financial aid).
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📈 Academic Recovery Simulator</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Model potential GPA and composite risk recovery based on targeted attendance and tutoring milestones.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📅 Parent Consultation Hub</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Schedule parent conferences, record meeting logs, and dispatch automated SMS/Email alerts.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📚 Knowledge Hub</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Clinical reference library for adolescent counseling techniques and DepEd Mental Health frameworks.
                       </p>
                     </div>
                   </div>
@@ -1627,36 +1661,58 @@ await deleteStudentRecord("109238479999");`}
 
               {/* Teacher Guide */}
               {(rolePerspective === "teacher" || rolePerspective === "all" || rolePerspective === "guidance_counselor" || rolePerspective === "admin") && (
-                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "teacher" ? "bg-blue-50/80 dark:bg-blue-950/40 border-2 border-blue-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-3`}>
+                <div className={`p-6 rounded-2xl transition-all ${rolePerspective === "teacher" ? "bg-blue-50/80 dark:bg-blue-950/40 border-2 border-blue-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-4`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                        2. Teacher &amp; Class Adviser Operations Guide
+                        2. Subject Teacher &amp; Class Adviser Workspace &amp; Capabilities (/dashboard/teacher)
                       </h3>
                     </div>
                     <span className="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-black">
-                      {rolePerspective === "teacher" ? "⭐ Active Role SOP" : "Advisory Hub"}
+                      {rolePerspective === "teacher" ? "⭐ Active Role SOP" : "Classroom Diagnostics"}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Subject Teachers and Class Advisers monitor academic trajectories within their assigned sections and refer at-risk learners for early guidance support.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">3-Step SASS Wizard</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">🗺️ Section Risk Heatmap</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Upload quarterly CSV files, verify column mappings, and compute updated academic risk scores instantly.
+                        Visual color-coded matrix mapping students against subject competencies to spot struggling clusters.
                       </p>
                     </div>
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">At-Risk Focus List</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">🎯 Subject Failure Predictor</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Filter priority students with failing marks or &gt;3 absences to coordinate remedial tutoring.
+                        Calculates subject-level failure risk probability based on attendance and assignment trends.
                       </p>
                     </div>
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">In-Browser CSV Editor</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">✉️ Teacher Guidance Referral</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Correct grade or attendance entries directly in the web UI with automated validation.
+                        Structured submission form to refer students directly to the Guidance Office with behavioral notes.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📊 Quarterly Grade Sparklines</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Interactive mini-charts displaying student grade progress across Q1 to Q4 terms.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📅 Attendance Radar</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Log and monitor daily student attendance with automated warnings on chronic unexcused absences.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">🔒 RA 10173 Privacy Boundary</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Teachers cannot view confidential psychological therapy notes or private family financial records.
                       </p>
                     </div>
                   </div>
@@ -1665,78 +1721,195 @@ await deleteStudentRecord("109238479999");`}
 
               {/* Administrator Guide */}
               {(rolePerspective === "admin" || rolePerspective === "all" || rolePerspective === "guidance_counselor") && (
-                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "admin" ? "bg-amber-50/80 dark:bg-amber-950/40 border-2 border-amber-500 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-3`}>
+                <div className={`p-6 rounded-2xl transition-all ${rolePerspective === "admin" ? "bg-amber-50/80 dark:bg-amber-950/40 border-2 border-amber-500 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-4`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Key className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                       <h3 className="font-bold text-slate-900 dark:text-white text-base">
-                        3. School Administrator Operations Guide
+                        3. Institutional Administrator Workspace &amp; Capabilities (/dashboard/admin)
                       </h3>
                     </div>
                     <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-xs font-black">
-                      {rolePerspective === "admin" ? "⭐ Active Role SOP" : "Master Config"}
+                      {rolePerspective === "admin" ? "⭐ Active Role SOP" : "System Governance"}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Administrators oversee system infrastructure, user accounts, multi-domain ingestion pipelines, and compliance audit trails.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">AHP Weights Config</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">📂 Multi-Domain Ingestion Hub</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Audit domain weights and verify mathematical consistency (CR &le; 0.10).
+                        Ingest SASS CSV exports, Clinic logs, Family surveys, and Financial records with schema validation.
                       </p>
                     </div>
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">Audit &amp; Rollback</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">📜 Full System Audit Log</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Inspect cryptographic SHA-256 batch logs and revert any flawed CSV upload with one click.
+                        Comprehensive log tracking all dataset uploads, roster edits, and role changes with before/after diffs.
                       </p>
                     </div>
                     <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                      <span className="font-bold text-slate-900 dark:text-white block">User Accounts</span>
+                      <span className="font-bold text-slate-900 dark:text-white block">⚖️ AHP Sensitivity Simulator</span>
                       <p className="text-slate-500 dark:text-slate-400">
-                        Provision faculty, student, and parent accounts, export credentials, and manage quarter calendars.
+                        Adjust domain weights and test mathematical consistency to simulate population risk shifts in real-time.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">👥 Faculty &amp; Roster Manager</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Provision credentials, assign advisory sections, and import bulk staff lists.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">🎨 Institutional Branding</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Upload official institutional logos, edit school mottos, and configure theme accents.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">💾 Dataset Snapshot Archive</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Create point-in-time backups of the student dataset with one-click restoration.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">✉️ Email/SMS Gateway Config</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Configure institutional notification channels for automated emergency and conference alerts.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">🚫 Academic Integrity Lock</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Admin cannot manually override student grades or inspect private mental health session transcripts.
                       </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Student & Parent Guides */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "student" ? "bg-purple-50/80 dark:bg-purple-950/40 border-2 border-purple-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-2`}>
+              {/* Student Guide */}
+              {(rolePerspective === "student" || rolePerspective === "all") && (
+                <div className={`p-6 rounded-2xl transition-all ${rolePerspective === "student" ? "bg-purple-50/80 dark:bg-purple-950/40 border-2 border-purple-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-4`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
                       <GraduationCap className="h-5 w-5 text-purple-600" />
-                      <span>4. Student Portal Guide</span>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                        4. Student Portal &amp; Padua Assist Companion (/dashboard/student)
+                      </h3>
                     </div>
-                    {rolePerspective === "student" && (
-                      <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-black uppercase">
-                        Active View
-                      </span>
-                    )}
+                    <span className="px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-black uppercase">
+                      {rolePerspective === "student" ? "⭐ Active View" : "Student Experience"}
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    View your 5-Domain Wellness Polygon, interact with the confidential AI Guidance Companion, log daily mood check-ins, and run &quot;what-if&quot; grade simulations.
-                  </p>
-                </div>
 
-                <div className={`p-5 rounded-2xl transition-all ${rolePerspective === "parent" ? "bg-rose-50/80 dark:bg-rose-950/40 border-2 border-rose-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-2`}>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Students track personal academic growth, check in daily with emotional wellness tools, and converse with Padua Assist AI in complete confidentiality.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">🤖 Padua Assist NLP Chatbot</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        24/7 empathetic guidance companion for study strategies, stress relief, and crisis support.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">😊 Daily Mood Check-In</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        5-point emotional wellness logger with uplifting suggestions and guidance advice.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📊 Domain Wellness Radar</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Visual balance wheel showing personal wellness balance across academic and non-academic domains.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">🎯 Action Plan Milestones</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Interactive checklist of assigned academic recovery tasks and study habits.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📅 Confidential Appointment Request</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Private one-click scheduling to request a 1-on-1 meeting with a guidance counselor.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📈 Quarterly Grades Overview</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Live grades summary, attendance tally, and General Weighted Average (GWA).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Parent Guide */}
+              {(rolePerspective === "parent" || rolePerspective === "all") && (
+                <div className={`p-6 rounded-2xl transition-all ${rolePerspective === "parent" ? "bg-rose-50/80 dark:bg-rose-950/40 border-2 border-rose-600 shadow-sm" : "bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70"} space-y-4`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
                       <HeartHandshake className="h-5 w-5 text-rose-600" />
-                      <span>5. Parent &amp; Guardian Portal Guide</span>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                        5. Parent &amp; Guardian Portal Guide (/dashboard/parent)
+                      </h3>
                     </div>
-                    {rolePerspective === "parent" && (
-                      <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-black uppercase">
-                        Active View
-                      </span>
-                    )}
+                    <span className="px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-black uppercase">
+                      {rolePerspective === "parent" ? "⭐ Active View" : "Parent Transparency"}
+                    </span>
                   </div>
+
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Review your child&apos;s holistic wellness progress, acknowledge joint home-school care plans, inspect official Form 138 report cards, and request Parent-Teacher-Counselor conferences.
+                    Parents and guardians monitor their child&apos;s academic stability, review attendance records, and coordinate conferences with educators.
                   </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📋 Child Academic Dossier</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Jargon-free overview of child&apos;s quarterly subject grades and general average.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📅 Attendance Calendar</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Real-time calendar tracking student presence, tardiness, and verified absences.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">🔔 Guidance Advisory Notices</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Receive official alerts regarding academic milestones and counseling suggestions.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">🤝 Consultation Scheduler</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Book direct conferences with class advisers and registered guidance counselors.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">📖 Parenting &amp; Study Resources</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Curated articles on home study environments and adolescent emotional support.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
+                      <span className="font-bold text-slate-900 dark:text-white block">🔒 RA 10173 Strict Scope</span>
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Access is strictly restricted to the legally linked child&apos;s academic overview.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
