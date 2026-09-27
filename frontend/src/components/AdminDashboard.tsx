@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { 
-  Sliders, 
   ShieldCheck, 
   Award, 
   Users, 
@@ -62,7 +61,6 @@ import {
   rollbackIngestionBatch,
   IngestionBatchRecord,
   addStudentRecord,
-  updateStudentRecord,
   deleteStudentRecord,
   addAppNotification,
   getActiveNotifications,
@@ -847,10 +845,6 @@ Issued Date     : ${new Date().toLocaleDateString()}
   const [studentPageSize, setStudentPageSize] = useState<number>(25);
   const [studentGradeFilter, setStudentGradeFilter] = useState<string>("all");
   const [studentSectionFilter, setStudentSectionFilter] = useState<string>("all");
-
-  const selectedStudentObj = useMemo(() => {
-    return students.find(s => s.id === selectedStudentId) || students[0] || {} as StudentRecord;
-  }, [students, selectedStudentId]);
 
   const uniqueSections = useMemo(() => {
     const set = new Set<string>();
@@ -1675,21 +1669,23 @@ Issued Date     : ${new Date().toLocaleDateString()}
                   <div className="flex flex-wrap gap-3 pt-1">
                     <button
                       type="button"
+                      disabled={isUploadingLogo}
                       onClick={() => logoInputRef.current?.click()}
-                      className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-2 shadow-xs cursor-pointer"
+                      className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-2 shadow-xs cursor-pointer disabled:opacity-50"
                     >
                       <Upload className="h-4 w-4 text-amber-300" />
-                      <span>Upload New Institutional Logo</span>
+                      <span>{isUploadingLogo ? "Uploading & Syncing..." : "Upload New Institutional Logo"}</span>
                     </button>
 
                     {customLogo && (
                       <button
                         type="button"
+                        disabled={isUploadingLogo}
                         onClick={handleResetInstitutionalLogo}
-                        className="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition flex items-center gap-2 cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
                       >
                         <Trash2 className="h-4 w-4 text-rose-600" />
-                        <span>Reset to Default SAPC Crest</span>
+                        <span>{isUploadingLogo ? "Resetting..." : "Reset to Default SAPC Crest"}</span>
                       </button>
                     )}
                   </div>

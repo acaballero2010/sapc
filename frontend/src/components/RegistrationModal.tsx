@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { 
   X, 
   CheckCircle2, 
@@ -538,6 +538,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     </div>
                   </div>
 
+                  {submitError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={isSubmitting || lrn.length < 5}
@@ -659,6 +666,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                     />
                   </div>
+
+                  {submitError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
 
                   <button
                     type="submit"

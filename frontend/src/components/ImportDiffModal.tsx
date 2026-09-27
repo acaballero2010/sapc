@@ -5,15 +5,12 @@ import {
   X,
   ShieldCheck,
   Search,
-  Filter,
-  Download,
   FileSpreadsheet,
   ArrowRight,
   TrendingUp,
   TrendingDown,
   Minus,
   CheckCircle2,
-  AlertTriangle,
   UserPlus,
   Edit3,
   Calendar,
@@ -21,7 +18,7 @@ import {
   Layers,
   Sparkles
 } from "lucide-react";
-import { IngestionBatchRecord, IngestionBatchItemDiff, IngestionFieldDiff } from "@/lib/dataset-store";
+import { IngestionBatchRecord, IngestionBatchItemDiff } from "@/lib/dataset-store";
 
 interface ImportDiffModalProps {
   isOpen: boolean;
@@ -354,7 +351,6 @@ export const ImportDiffModal: React.FC<ImportDiffModalProps> = ({
               const riskShift = item.riskShift;
               const hasRiskShift = riskShift && riskShift.oldScore !== undefined && riskShift.newScore !== undefined && riskShift.oldScore !== riskShift.newScore;
               const isRiskUp = hasRiskShift && (riskShift.newScore || 0) > (riskShift.oldScore || 0);
-              const isRiskDown = hasRiskShift && (riskShift.newScore || 0) < (riskShift.oldScore || 0);
 
               return (
                 <div 

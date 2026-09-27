@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, onSnapshot, serverTimestamp, Unsubscribe } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, serverTimestamp, Unsubscribe } from "firebase/firestore";
 
 export const LOGO_STORAGE_KEY = "sapc_custom_logo";
 const BRANDING_DOC_PATH = "system_settings";

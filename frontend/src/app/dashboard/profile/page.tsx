@@ -497,6 +497,17 @@ function UserProfileContent() {
                     placeholder="e.g. Junior High School Department"
                   />
                 </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Office / Station Location</label>
+                  <input
+                    type="text"
+                    value={officeLocation}
+                    onChange={(e) => setOfficeLocation(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    placeholder="e.g. Faculty Room, St. Anthony Hall"
+                  />
+                </div>
               </div>
 
               {(user?.role === "student" || user?.role === "parent") && (
