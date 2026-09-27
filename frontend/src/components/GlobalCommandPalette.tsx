@@ -474,7 +474,7 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
                     key={s.id}
                     onClick={() => {
                       if (onSelectStudent) onSelectStudent(s);
-                      if (onNavigateTab) onNavigateTab(user?.role === "teacher" ? "students" : "student_profile");
+                      if (onNavigateTab) onNavigateTab(user?.role === "guidance_counselor" ? "student_profile" : "students");
                       onClose();
                     }}
                     className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer flex items-center justify-between gap-3 group"

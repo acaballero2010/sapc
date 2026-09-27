@@ -9,11 +9,8 @@ import {
   ShieldCheck, 
   FileText, 
   ArrowRight, 
-  KeyRound,
   School,
   Lock,
-  Clock,
-  RotateCw,
   AlertCircle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -21,6 +18,17 @@ import { useAuth } from "@/lib/auth-context";
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { 
+  JHS_GRADE_LEVELS, 
+  getSectionsForGrade, 
+  addStudentRecord,
+  getActivePendingRegistrations,
+  saveActivePendingRegistrations,
+  getActiveParentRecords,
+  saveActiveParentRecords,
+  PendingRegistrationRecord,
+  ParentRecord
+} from "@/lib/dataset-store";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -56,46 +64,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const router = useRouter();
   const { switchRole, loginWithGoogle, updateUserProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<RegistrationRole>("student");
-  const [step, setStep] = useState<"form" | "otp" | "success">("form");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [step, setStep] = useState<"form" | "success">("form");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // OTP Timer and Resend State
-  const [expirySeconds, setExpirySeconds] = useState<number>(600); // 10 minutes overall TTL
-  const [resendCooldown, setResendCooldown] = useState<number>(60); // 60 seconds resend cooldown
-  const [resendSuccessMsg, setResendSuccessMsg] = useState<string | null>(null);
-  const [isResending, setIsResending] = useState<boolean>(false);
-
-  // Live timer decrementing every second when in OTP verification step
-  useEffect(() => {
-    if (step !== "otp") return;
-
-    const timer = setInterval(() => {
-      setExpirySeconds(prev => (prev > 0 ? prev - 1 : 0));
-      setResendCooldown(prev => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [step]);
-
-  // Format seconds into MM:SS
-  const formatTimer = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
-  // Track pending form-transition timers so they can be cleared on unmount
-  const formTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  React.useEffect(() => {
-    const timerRef = formTimerRef;
-    return () => { 
-      if (timerRef.current) clearTimeout(timerRef.current); 
-    };
-  }, []);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Student form state
+  const [studentFullName, setStudentFullName] = useState("");
   const [lrn, setLrn] = useState("");
+  const [studentGradeLevel, setStudentGradeLevel] = useState<string>(JHS_GRADE_LEVELS[0].label);
+  const [studentSection, setStudentSection] = useState<string>(getSectionsForGrade(JHS_GRADE_LEVELS[0].level)[0]);
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
   const [studentBirthDate, setStudentBirthDate] = useState("");
@@ -104,10 +81,10 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [parentName, setParentName] = useState("");
   const [parentPhone, setParentPhone] = useState("");
   const [parentLrn, setParentLrn] = useState("");
+  const [parentStudentGradeLevel, setParentStudentGradeLevel] = useState<string>(JHS_GRADE_LEVELS[0].label);
+  const [parentStudentSection, setParentStudentSection] = useState<string>(getSectionsForGrade(JHS_GRADE_LEVELS[0].level)[0]);
   const [relationship, setRelationship] = useState("Mother");
-  const [otpError, setOtpError] = useState<string | null>(null);
-  const [otpSentTo, setOtpSentTo] = useState<string | null>(null);
-  const [otpSendError, setOtpSendError] = useState<string | null>(null);
+  const [parentPassword, setParentPassword] = useState("");
 
   // Helper: translate Firebase error codes to user-friendly messages
   const getFirebaseErrorMsg = (err: any): string | null => {
@@ -134,189 +111,190 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     }
   };
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) value = value.slice(-1);
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      prevInput?.focus();
-    } else if (e.key === "ArrowLeft" && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      prevInput?.focus();
-    } else if (e.key === "ArrowRight" && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (!pasted) return;
-
-    const newOtp = [...otp];
-    for (let i = 0; i < 6; i++) {
-      newOtp[i] = pasted[i] || "";
-    }
-    setOtp(newOtp);
-
-    const targetIdx = Math.min(pasted.length, 5);
-    const el = document.getElementById(`otp-${targetIdx}`);
-    el?.focus();
-  };
-
-  // Centralized OTP dispatch — calls /api/send-otp and advances to OTP step on success
-  const sendOtp = async (email: string, name: string, role: string): Promise<boolean> => {
-    setOtpSendError(null);
-    try {
-      const res = await fetch("/api/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, role })
-      });
-      const data = await res.json();
-      if (!data.success) {
-        setOtpSendError(data.error || "Failed to send verification code. Please try again.");
-        return false;
-      }
-      setOtpSentTo(email);
-      return true;
-    } catch {
-      setOtpSendError("Network error sending OTP. Please check your connection.");
-      return false;
-    }
-  };
-
-  const handleResendOtp = async () => {
-    if (resendCooldown > 0 || isResending || isSubmitting || !otpSentTo) return;
-    setIsResending(true);
-    setOtpError(null);
-    setOtpSendError(null);
-    setResendSuccessMsg(null);
-
-    const role = activeTab === "student" ? "student" : "parent";
-    const name = activeTab === "student" ? `Student ${lrn}` : parentName;
-    const sent = await sendOtp(otpSentTo, name, role);
-
-    if (sent) {
-      setExpirySeconds(600);
-      setResendCooldown(60);
-      setOtp(["", "", "", "", "", ""]);
-      setResendSuccessMsg("A new 6-digit verification PIN has been dispatched to your email.");
-      const firstInput = document.getElementById("otp-0");
-      firstInput?.focus();
-      setTimeout(() => setResendSuccessMsg(null), 5000);
-    }
-    setIsResending(false);
-  };
-
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     setIsSubmitting(true);
-    const email = studentEmail || `${lrn}@student.sapc.edu.ph`;
-    const sent = await sendOtp(email, `Student ${lrn}`, "student");
-    setIsSubmitting(false);
-    if (sent) {
-      setExpirySeconds(600);
-      setResendCooldown(60);
-      setOtp(["", "", "", "", "", ""]);
-      setResendSuccessMsg(null);
-      setStep("otp");
+
+    try {
+      const finalEmail = studentEmail || `${lrn}@student.sapc.edu.ph`;
+      const finalPass = studentPassword || "Student@SAPC2026!";
+      const displayName = studentFullName.trim() || `Student ${lrn}`;
+      const gradeNum = parseInt(studentGradeLevel.replace(/\D/g, ""), 10) || 7;
+
+      // 1. Auto-enlist student into dataset roster
+      await addStudentRecord({
+        full_name: displayName,
+        lrn: lrn,
+        email: finalEmail,
+        grade_level: gradeNum,
+        section_name: studentSection,
+        strand: "JHS"
+      });
+
+      // 2. Create Firebase Auth & Firestore record
+      if (auth && db) {
+        try {
+          const userCred = await createUserWithEmailAndPassword(auth, finalEmail, finalPass);
+          await updateProfile(userCred.user, { displayName: displayName });
+          await setDoc(doc(db, "users", userCred.user.uid), {
+            lrn: lrn,
+            email: finalEmail,
+            birthDate: studentBirthDate,
+            role: "student",
+            displayName: displayName,
+            grade_level: studentGradeLevel,
+            section: studentSection,
+            roleConfirmed: true,
+            authProvider: "password",
+            createdAt: serverTimestamp(),
+            isVerified: true
+          });
+        } catch (e: any) {
+          console.warn("Firebase user create note:", e);
+        }
+      }
+
+      // 3. Save into local persistent registered accounts cache
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("sapc_registered_accounts");
+          const registeredList = raw ? JSON.parse(raw) : [];
+          const existingIdx = registeredList.findIndex((acc: any) => acc.email?.toLowerCase() === finalEmail.toLowerCase());
+          const newAcc = {
+            email: finalEmail.toLowerCase(),
+            password: finalPass,
+            name: displayName,
+            role: "student",
+            lrn: lrn,
+            grade_level: studentGradeLevel,
+            section: studentSection,
+            student_id: 1
+          };
+          if (existingIdx >= 0) {
+            registeredList[existingIdx] = newAcc;
+          } else {
+            registeredList.push(newAcc);
+          }
+          localStorage.setItem("sapc_registered_accounts", JSON.stringify(registeredList));
+        } catch {}
+      }
+
+      setStep("success");
+    } catch (err: any) {
+      const msg = getFirebaseErrorMsg(err);
+      setSubmitError(msg || "Student registration failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleParentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     setIsSubmitting(true);
-    const sanitizedPhone = parentPhone.replace(/\D/g, "") || "09170000000";
-    const email = `${sanitizedPhone}@parent.sapc.edu.ph`;
-    const sent = await sendOtp(email, parentName, "parent");
-    setIsSubmitting(false);
-    if (sent) {
-      setExpirySeconds(600);
-      setResendCooldown(60);
-      setOtp(["", "", "", "", "", ""]);
-      setResendSuccessMsg(null);
-      setStep("otp");
-    }
-  };
 
-
-
-  const handleVerifyOtp = async () => {
-    const allFilled = otp.every(d => d.length === 1);
-    if (!allFilled) {
-      setOtpError("Please enter all 6 digits of the verification code.");
-      return;
-    }
-    setOtpError(null);
-    setIsSubmitting(true);
     try {
-      // Step 1: Verify OTP against server
-      const verifyRes = await fetch("/api/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: otpSentTo, code: otp.join("") })
-      });
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success) {
-        setOtpError(verifyData.error || "Incorrect verification code. Please try again.");
-        setIsSubmitting(false);
-        return;
+      const sanitizedPhone = parentPhone.replace(/\D/g, "") || "09170000000";
+      const parentEmail = `${sanitizedPhone}@parent.sapc.edu.ph`;
+      const finalPass = parentPassword || "Parent@SAPC2026!";
+      const displayName = parentName.trim() || "Parent / Guardian";
+      const childGradeNum = parseInt(parentStudentGradeLevel.replace(/\D/g, ""), 10) || 7;
+
+      // 1. Create Firebase Auth & Firestore record
+      if (auth && db) {
+        try {
+          const userCred = await createUserWithEmailAndPassword(auth, parentEmail, finalPass);
+          await updateProfile(userCred.user, { displayName: displayName });
+          await setDoc(doc(db, "users", userCred.user.uid), {
+            name: displayName,
+            phone: parentPhone,
+            linkedLrn: parentLrn,
+            studentGradeLevel: parentStudentGradeLevel,
+            studentSection: parentStudentSection,
+            relationship: relationship,
+            role: "parent",
+            email: parentEmail,
+            roleConfirmed: true,
+            authProvider: "password",
+            createdAt: serverTimestamp(),
+            isVerified: false,
+            verification_status: "pending_school_approval",
+            linkageStatus: "pending_adviser_validation"
+          });
+        } catch (e: any) {
+          console.warn("Firebase parent create note:", e);
+        }
       }
 
-      // Step 2: OTP verified — create Firebase account
-      if (activeTab === "student") {
-        const finalEmail = studentEmail || `${lrn}@student.sapc.edu.ph`;
-        const finalPass = studentPassword || "Student@SAPC2026!";
-        const userCred = await createUserWithEmailAndPassword(auth, finalEmail, finalPass);
-        await updateProfile(userCred.user, { displayName: `Student ${lrn}` });
-        await setDoc(doc(db, "users", userCred.user.uid), {
-          lrn: lrn,
-          email: finalEmail,
-          birthDate: studentBirthDate,
-          role: "student",
-          displayName: `Student ${lrn}`,
-          roleConfirmed: true,
-          authProvider: "password",
-          createdAt: serverTimestamp(),
-          isVerified: true
-        });
-      } else if (activeTab === "parent") {
-        const sanitizedPhone = parentPhone.replace(/\D/g, "") || "09170000000";
-        const parentEmail = `${sanitizedPhone}@parent.sapc.edu.ph`;
-        const userCred = await createUserWithEmailAndPassword(auth, parentEmail, "Parent@SAPC2026!");
-        await updateProfile(userCred.user, { displayName: parentName });
-        await setDoc(doc(db, "users", userCred.user.uid), {
-          name: parentName,
-          phone: parentPhone,
-          linkedLrn: parentLrn,
-          relationship: relationship,
-          role: "parent",
-          email: parentEmail,
-          roleConfirmed: true,
-          authProvider: "password",
-          createdAt: serverTimestamp(),
-          isVerified: false,
-          verification_status: "pending_school_approval",
-          linkageStatus: "pending_adviser_validation"
-        });
+      // 2. Add to Pending Registrations & Parent Records
+      const currentPending = getActivePendingRegistrations();
+      const pendingRec: PendingRegistrationRecord = {
+        id: `REG-${Date.now().toString().slice(-4)}`,
+        name: displayName,
+        email: parentEmail,
+        phone: parentPhone,
+        role: "parent",
+        relationship: relationship,
+        linkedStudent: parentLrn ? `Learner ${parentLrn}` : "Enrolled Learner",
+        linkedLRN: parentLrn || "109238475001",
+        section: parentStudentSection,
+        verificationDoc: "Self-Registered via Portal (Direct Online Verification)",
+        date: new Date().toISOString().split("T")[0],
+        status: "Approved",
+        notes: `Linked to Grade ${childGradeNum} (${parentStudentSection})`
+      };
+      saveActivePendingRegistrations([pendingRec, ...currentPending], true);
+
+      const currentParents = getActiveParentRecords();
+      const newParent: ParentRecord = {
+        id: `PAR-${Date.now().toString().slice(-4)}`,
+        name: displayName,
+        email: parentEmail,
+        phone: parentPhone,
+        relationship: relationship,
+        linkedStudentName: parentLrn ? `Learner ${parentLrn}` : "Enrolled Learner",
+        linkedLRN: parentLrn || "109238475001",
+        section: parentStudentSection,
+        gradeLevel: `Grade ${childGradeNum}`,
+        status: "Active",
+        verifiedAt: new Date().toISOString().split("T")[0],
+        sf9Access: true,
+        attendanceAlerts: true,
+        riskAlerts: true,
+        initialPassword: finalPass
+      };
+      saveActiveParentRecords([newParent, ...currentParents], true);
+
+      // 3. Save into local persistent registered accounts cache
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("sapc_registered_accounts");
+          const registeredList = raw ? JSON.parse(raw) : [];
+          const existingIdx = registeredList.findIndex((acc: any) => acc.email?.toLowerCase() === parentEmail.toLowerCase());
+          const newAcc = {
+            email: parentEmail.toLowerCase(),
+            password: finalPass,
+            name: displayName,
+            role: "parent",
+            lrn: parentLrn,
+            grade_level: parentStudentGradeLevel,
+            section: parentStudentSection,
+            student_id: 1
+          };
+          if (existingIdx >= 0) {
+            registeredList[existingIdx] = newAcc;
+          } else {
+            registeredList.push(newAcc);
+          }
+          localStorage.setItem("sapc_registered_accounts", JSON.stringify(registeredList));
+        } catch {}
       }
+
       setStep("success");
     } catch (err: any) {
       const msg = getFirebaseErrorMsg(err);
-      setOtpError(msg || "Account creation failed. Please try again.");
+      setSubmitError(msg || "Parent registration failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -360,9 +338,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
               <span className="text-xs text-rose-200">• Student &amp; Parent Portals</span>
             </div>
             <h3 className="text-xl font-black text-white">
-              {step === "form" && "Create Account / Registration"}
-              {step === "otp" && "Verify SMS / Email OTP Token"}
-              {step === "success" && "Account Verified & Activated!"}
+              {step === "form" ? "Create Account / Registration" : "Account Verified & Activated!"}
             </h3>
           </div>
           <button
@@ -457,27 +433,38 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                 <form onSubmit={handleStudentSubmit} className="space-y-4 text-left">
                   <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
                     <strong className="font-bold flex items-center gap-1 text-[#8B0014]">
-                      <FileText className="h-3.5 w-3.5" /> DepEd Learner Reference Number (LRN) Required
+                      <FileText className="h-3.5 w-3.5" /> Junior High School DepEd Enrollment & LRN
                     </strong>
                     <p className="text-slate-600 leading-relaxed">
-                      Enter your official 12-digit LRN found on your SAPC Enrollment Slip or DepEd Form 138 report card.
+                      Select your Junior High School grade level and section. Your advisory teacher will immediately receive your verified profile.
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">12-Digit LRN</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Student Full Name</label>
                     <input
                       type="text"
                       required
-                      maxLength={12}
-                      value={lrn}
-                      onChange={(e) => setLrn(e.target.value.replace(/\D/g, ""))}
-                      placeholder="e.g. 109482719283"
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      value={studentFullName}
+                      onChange={(e) => setStudentFullName(e.target.value)}
+                      placeholder="e.g. Maria Angela Santos"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">12-Digit LRN</label>
+                      <input
+                        type="text"
+                        required
+                        maxLength={12}
+                        value={lrn}
+                        onChange={(e) => setLrn(e.target.value.replace(/\D/g, ""))}
+                        placeholder="e.g. 109482719283"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      />
+                    </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Birthdate</label>
                       <input
@@ -488,6 +475,44 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                       />
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Grade Level</label>
+                      <select
+                        value={studentGradeLevel}
+                        onChange={(e) => {
+                          const newGrade = e.target.value;
+                          setStudentGradeLevel(newGrade);
+                          const sections = getSectionsForGrade(newGrade);
+                          if (sections.length > 0) {
+                            setStudentSection(sections[0]);
+                          }
+                        }}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      >
+                        {JHS_GRADE_LEVELS.map((g) => (
+                          <option key={g.level} value={g.label}>{g.label} (Junior High)</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Assigned Section</label>
+                      <select
+                        value={studentSection}
+                        onChange={(e) => setStudentSection(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      >
+                        {getSectionsForGrade(studentGradeLevel).map((sec) => (
+                          <option key={sec} value={sec}>{sec}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">SAPC Student Email</label>
                       <input
@@ -499,19 +524,18 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Set Account Password</label>
-                    <input
-                      type="password"
-                      required
-                      minLength={6}
-                      value={studentPassword}
-                      onChange={(e) => setStudentPassword(e.target.value)}
-                      placeholder="Minimum 6 characters"
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                    />
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Set Password</label>
+                      <input
+                        type="password"
+                        required
+                        minLength={6}
+                        value={studentPassword}
+                        onChange={(e) => setStudentPassword(e.target.value)}
+                        placeholder="Min. 6 characters"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      />
+                    </div>
                   </div>
 
                   <button
@@ -519,7 +543,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     disabled={isSubmitting || lrn.length < 5}
                     className="w-full py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2 cursor-pointer"
                   >
-                    {isSubmitting ? "Matching LRN Records..." : "Create Student Account →"}
+                    {isSubmitting ? "Processing Enlistment..." : "Create Student Account →"}
                   </button>
                 </form>
               )}
@@ -533,7 +557,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                       <Users className="h-3.5 w-3.5" /> Family Link & SMS Verification
                     </strong>
                     <p className="text-slate-600 leading-relaxed">
-                      Link your parent profile with your child’s academic standing to receive attendance notices and schedule counselor meetings.
+                      Link your parent profile with your child’s Junior High School standing to receive attendance notices and view academic progress.
                     </p>
                   </div>
 
@@ -588,12 +612,60 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     />
                   </div>
 
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Child&apos;s Grade Level</label>
+                      <select
+                        value={parentStudentGradeLevel}
+                        onChange={(e) => {
+                          const newGrade = e.target.value;
+                          setParentStudentGradeLevel(newGrade);
+                          const sections = getSectionsForGrade(newGrade);
+                          if (sections.length > 0) {
+                            setParentStudentSection(sections[0]);
+                          }
+                        }}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      >
+                        {JHS_GRADE_LEVELS.map((g) => (
+                          <option key={g.level} value={g.label}>{g.label} (Junior High)</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Child&apos;s Section</label>
+                      <select
+                        value={parentStudentSection}
+                        onChange={(e) => setParentStudentSection(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                      >
+                        {getSectionsForGrade(parentStudentGradeLevel).map((sec) => (
+                          <option key={sec} value={sec}>{sec}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Set Password</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={parentPassword}
+                      onChange={(e) => setParentPassword(e.target.value)}
+                      placeholder="Min. 6 characters"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    />
+                  </div>
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                    className="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2 cursor-pointer"
                   >
-                    {isSubmitting ? "Sending SMS OTP..." : "Request Parent SMS Verification →"}
+                    {isSubmitting ? "Creating Parent Account..." : "Create Parent Account →"}
                   </button>
                 </form>
               )}
@@ -601,144 +673,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
             </>
           )}
 
-          {/* STEP 2: OTP VERIFICATION */}
-          {step === "otp" && (
-            <div className="space-y-5 text-center py-2">
-              <div className="w-14 h-14 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-center mx-auto text-[#8B0014] shadow-xs">
-                <KeyRound className="h-7 w-7" />
-              </div>
-
-              <div className="space-y-1.5 max-w-sm mx-auto">
-                <h4 className="text-lg font-black text-slate-900">Enter 6-Digit One-Time PIN</h4>
-                <p className="text-xs text-slate-500">
-                  A verification code was dispatched to{" "}
-                  <strong className="text-slate-800 font-mono bg-slate-100 px-1.5 py-0.5 rounded-md">{otpSentTo || "your email"}</strong>.
-                </p>
-
-                {/* Expiration Timer Status Pill */}
-                <div className="pt-1 flex items-center justify-center">
-                  {expirySeconds > 120 ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-                      <Clock className="h-3.5 w-3.5 text-emerald-600" />
-                      Code expires in <span className="font-mono font-bold">{formatTimer(expirySeconds)}</span>
-                    </span>
-                  ) : expirySeconds > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 animate-pulse shadow-2xs">
-                      <Clock className="h-3.5 w-3.5 text-amber-600" />
-                      Expiring soon: <span className="font-mono">{formatTimer(expirySeconds)}</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs">
-                      <AlertCircle className="h-3.5 w-3.5 text-rose-600" />
-                      Code Expired — Please request a new PIN
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {resendSuccessMsg && (
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold text-center flex items-center justify-center gap-2 animate-fadeIn">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>{resendSuccessMsg}</span>
-                </div>
-              )}
-
-              {otpSendError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center flex items-center justify-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
-                  <span>{otpSendError}</span>
-                </div>
-              )}
-
-              {/* 6-Digit OTP Inputs */}
-              <div>
-                <div className="flex justify-center gap-2 sm:gap-3">
-                  {otp.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      id={`otp-${idx}`}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      disabled={isSubmitting || expirySeconds === 0}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(idx, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                      onPaste={handleOtpPaste}
-                      className={`w-11 h-14 text-center text-2xl font-mono font-black rounded-xl border-2 transition shadow-xs focus:outline-none ${
-                        expirySeconds === 0
-                          ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
-                          : "bg-slate-50 border-slate-300 text-slate-900 focus:border-[#8B0014] focus:bg-white focus:ring-2 focus:ring-[#8B0014]/20"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className="text-[11px] text-slate-400 mt-2">
-                  Tip: You can paste the entire 6-digit code directly
-                </p>
-              </div>
-
-              {otpError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center flex items-center justify-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
-                  <span>{otpError}</span>
-                </div>
-              )}
-
-              {/* Resend Option with Cooldown Timer */}
-              <div className="text-xs text-slate-500 pt-1">
-                {resendCooldown > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 text-slate-500 font-medium">
-                    <Clock className="h-3.5 w-3.5 text-slate-400" />
-                    Didn&apos;t receive the code? Resend available in{" "}
-                    <strong className="font-mono text-slate-700">{resendCooldown}s</strong>
-                  </span>
-                ) : (
-                  <div className="flex items-center justify-center gap-1.5">
-                    <span>Didn&apos;t receive it?</span>
-                    <button
-                      type="button"
-                      onClick={handleResendOtp}
-                      disabled={isResending || isSubmitting}
-                      className="inline-flex items-center gap-1 font-bold text-[#8B0014] hover:text-[#5A000D] hover:underline transition disabled:opacity-50"
-                    >
-                      <RotateCw className={`h-3.5 w-3.5 ${isResending ? "animate-spin" : ""}`} />
-                      <span>{isResending ? "Dispatching PIN..." : "Resend Verification Code"}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setStep("form")}
-                  className="flex-1 py-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-sm transition"
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={handleVerifyOtp}
-                  disabled={isSubmitting || expirySeconds === 0 || otp.some(d => d.length !== 1)}
-                  className="flex-2 py-3 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition disabled:opacity-40 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <RotateCw className="h-4 w-4 animate-spin" />
-                      <span>Verifying PIN...</span>
-                    </>
-                  ) : expirySeconds === 0 ? (
-                    "PIN Expired — Please Resend"
-                  ) : (
-                    "Verify & Complete Onboarding →"
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: SUCCESS */}
+          {/* STEP 2: SUCCESS */}
           {step === "success" && (
             <div className="space-y-6 text-center py-4">
               <div className="w-16 h-16 bg-emerald-50 border-2 border-emerald-200 rounded-3xl flex items-center justify-center mx-auto text-emerald-600 shadow-sm animate-bounce">

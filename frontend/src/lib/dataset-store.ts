@@ -79,6 +79,51 @@ export const DEFAULT_AHP_WEIGHTS = {
   financial: 0.15
 };
 
+// ============================================================================
+// SAPC Junior High School (JHS) Academic Structure Constants
+// Grade 7: Love, Integrity
+// Grade 8: Hope, Faith
+// Grade 9: Chastity, Prudence
+// Grade 10: Charity, Humility
+// ============================================================================
+export interface JHSGradeOption {
+  level: number;
+  label: string;
+}
+
+export const JHS_GRADE_LEVELS: JHSGradeOption[] = [
+  { level: 7, label: "Grade 7" },
+  { level: 8, label: "Grade 8" },
+  { level: 9, label: "Grade 9" },
+  { level: 10, label: "Grade 10" },
+];
+
+export const JHS_SECTIONS_BY_GRADE: Record<number, string[]> = {
+  7: ["Grade 7 - Love", "Grade 7 - Integrity"],
+  8: ["Grade 8 - Hope", "Grade 8 - Faith"],
+  9: ["Grade 9 - Chastity", "Grade 9 - Prudence"],
+  10: ["Grade 10 - Charity", "Grade 10 - Humility"],
+};
+
+export const ALL_JHS_SECTIONS: string[] = [
+  "Grade 7 - Love",
+  "Grade 7 - Integrity",
+  "Grade 8 - Hope",
+  "Grade 8 - Faith",
+  "Grade 9 - Chastity",
+  "Grade 9 - Prudence",
+  "Grade 10 - Charity",
+  "Grade 10 - Humility",
+];
+
+export function getSectionsForGrade(gradeLevel: number | string): string[] {
+  const num = typeof gradeLevel === "string" ? parseInt(gradeLevel.replace(/\D/g, ""), 10) : Number(gradeLevel);
+  if (num && JHS_SECTIONS_BY_GRADE[num]) {
+    return JHS_SECTIONS_BY_GRADE[num];
+  }
+  return ALL_JHS_SECTIONS;
+}
+
 const STORAGE_KEY = "sapc_custom_student_data";
 const WEIGHTS_KEY = "sapc_custom_risk_weights";
 const AUDIT_STORAGE_KEY = "sapc_audit_logs";
@@ -242,9 +287,9 @@ export async function addStudentRecord(newStudent: Partial<StudentRecord>): Prom
     full_name: newStudent.full_name || `${newStudent.last_name || "Student"}, ${newStudent.first_name || "New"}`,
     first_name: newStudent.first_name || "New",
     last_name: newStudent.last_name || "Student",
-    grade_level: newStudent.grade_level || 11,
-    strand: newStudent.strand || "STEM",
-    section_name: newStudent.section_name || "Grade 11 - St. Augustine (STEM)",
+    grade_level: newStudent.grade_level || 7,
+    strand: "JHS",
+    section_name: newStudent.section_name || "Grade 7 - Love",
     adviser_name: newStudent.adviser_name || "Adviser",
     email: newStudent.email || `student${nextId}@sapc.edu.ph`,
     latest_risk_score: newStudent.latest_risk_score || 25.0,
@@ -815,6 +860,28 @@ export async function importFullCohortCSV(csvText: string): Promise<{ success: b
 // ============================================================================
 // UNIFIED INGESTION HISTORY & 1-CLICK SNAPSHOT ROLLBACK ENGINE
 // ============================================================================
+export interface IngestionFieldDiff {
+  field: string;
+  fieldLabel: string;
+  oldValue: any;
+  newValue: any;
+}
+
+export interface IngestionBatchItemDiff {
+  lrn: string;
+  studentName: string;
+  gradeLevel?: number | string;
+  section?: string;
+  changeType: "added" | "modified" | "unchanged";
+  fieldsChanged: IngestionFieldDiff[];
+  riskShift?: {
+    oldTier?: string;
+    newTier?: string;
+    oldScore?: number;
+    newScore?: number;
+  };
+}
+
 export interface IngestionBatchRecord {
   id: string;
   type: string;
@@ -833,7 +900,10 @@ export interface IngestionBatchRecord {
     riskIncreased: number;
     riskDecreased: number;
     unchanged: number;
+    added?: number;
+    modified?: number;
   };
+  changesList?: IngestionBatchItemDiff[];
 }
 
 const INGESTION_HISTORY_KEY = "sapc_import_history";
@@ -852,11 +922,67 @@ export const DEFAULT_INGESTION_HISTORY: IngestionBatchRecord[] = [
     canRollback: true,
     rolledBack: false,
     diffSummary: {
-      studentsAffected: 45,
+      studentsAffected: 18,
       riskIncreased: 6,
       riskDecreased: 12,
-      unchanged: 27
-    }
+      unchanged: 27,
+      added: 0,
+      modified: 18
+    },
+    changesList: [
+      {
+        lrn: "109238475002",
+        studentName: "Dela Cruz, Angelica R.",
+        gradeLevel: 10,
+        section: "Grade 10 - Charity",
+        changeType: "modified",
+        fieldsChanged: [
+          { field: "general_average", fieldLabel: "General Average (GWA)", oldValue: 74.2, newValue: 78.5 },
+          { field: "attendance_rate", fieldLabel: "Attendance Rate", oldValue: "82.0%", newValue: "91.5%" },
+          { field: "days_absent", fieldLabel: "Days Absent", oldValue: "8 days", newValue: "4 days" },
+          { field: "latest_risk_score", fieldLabel: "Composite Risk Score", oldValue: 76.4, newValue: 48.2 },
+          { field: "risk_tier", fieldLabel: "Risk Classification Tier", oldValue: "HIGH", newValue: "MEDIUM" }
+        ],
+        riskShift: { oldTier: "high", newTier: "medium", oldScore: 76.4, newScore: 48.2 }
+      },
+      {
+        lrn: "109238475004",
+        studentName: "Aquino, Sophia Nicole",
+        gradeLevel: 7,
+        section: "Grade 7 - Love",
+        changeType: "modified",
+        fieldsChanged: [
+          { field: "general_average", fieldLabel: "General Average (GWA)", oldValue: 81.0, newValue: 73.8 },
+          { field: "days_absent", fieldLabel: "Days Absent", oldValue: "2 days", newValue: "7 days" },
+          { field: "latest_risk_score", fieldLabel: "Composite Risk Score", oldValue: 34.0, newValue: 72.5 },
+          { field: "risk_tier", fieldLabel: "Risk Classification Tier", oldValue: "LOW", newValue: "HIGH" }
+        ],
+        riskShift: { oldTier: "low", newTier: "high", oldScore: 34.0, newScore: 72.5 }
+      },
+      {
+        lrn: "109238475007",
+        studentName: "Villanueva, Christian Dave G.",
+        gradeLevel: 8,
+        section: "Grade 8 - Hope",
+        changeType: "modified",
+        fieldsChanged: [
+          { field: "general_average", fieldLabel: "General Average (GWA)", oldValue: 75.0, newValue: 79.5 },
+          { field: "attendance_rate", fieldLabel: "Attendance Rate", oldValue: "86.0%", newValue: "94.0%" },
+          { field: "latest_risk_score", fieldLabel: "Composite Risk Score", oldValue: 52.0, newValue: 38.0 },
+          { field: "risk_tier", fieldLabel: "Risk Classification Tier", oldValue: "MEDIUM", newValue: "LOW" }
+        ],
+        riskShift: { oldTier: "medium", newTier: "low", oldScore: 52.0, newScore: 38.0 }
+      },
+      {
+        lrn: "109238475001",
+        studentName: "Santos, Jerome M.",
+        gradeLevel: 9,
+        section: "Grade 9 - Chastity",
+        changeType: "unchanged",
+        fieldsChanged: [],
+        riskShift: { oldTier: "low", newTier: "low", oldScore: 24.5, newScore: 24.5 }
+      }
+    ]
   },
   {
     id: "IMP-2026-902",
@@ -871,11 +997,41 @@ export const DEFAULT_INGESTION_HISTORY: IngestionBatchRecord[] = [
     canRollback: true,
     rolledBack: false,
     diffSummary: {
-      studentsAffected: 120,
+      studentsAffected: 36,
       riskIncreased: 14,
       riskDecreased: 22,
-      unchanged: 84
-    }
+      unchanged: 84,
+      added: 0,
+      modified: 36
+    },
+    changesList: [
+      {
+        lrn: "109238475012",
+        studentName: "Ramos, Gian Carlo",
+        gradeLevel: 10,
+        section: "Grade 10 - Humility",
+        changeType: "modified",
+        fieldsChanged: [
+          { field: "domain_mental_health", fieldLabel: "Mental Health (PHQ-9/GAD-7) Risk", oldValue: 20, newValue: 85 },
+          { field: "latest_risk_score", fieldLabel: "Composite Risk Score", oldValue: 36.5, newValue: 74.0 },
+          { field: "risk_tier", fieldLabel: "Risk Classification Tier", oldValue: "LOW", newValue: "HIGH" }
+        ],
+        riskShift: { oldTier: "low", newTier: "high", oldScore: 36.5, newScore: 74.0 }
+      },
+      {
+        lrn: "109238475015",
+        studentName: "Navarro, Alyssa Marie",
+        gradeLevel: 8,
+        section: "Grade 8 - Faith",
+        changeType: "modified",
+        fieldsChanged: [
+          { field: "domain_mental_health", fieldLabel: "Mental Health (PHQ-9/GAD-7) Risk", oldValue: 65, newValue: 25 },
+          { field: "latest_risk_score", fieldLabel: "Composite Risk Score", oldValue: 58.0, newValue: 39.5 },
+          { field: "risk_tier", fieldLabel: "Risk Classification Tier", oldValue: "MEDIUM", newValue: "LOW" }
+        ],
+        riskShift: { oldTier: "medium", newTier: "low", oldScore: 58.0, newScore: 39.5 }
+      }
+    ]
   },
   {
     id: "IMP-2026-903",
@@ -893,10 +1049,259 @@ export const DEFAULT_INGESTION_HISTORY: IngestionBatchRecord[] = [
       studentsAffected: 500,
       riskIncreased: 0,
       riskDecreased: 0,
-      unchanged: 500
-    }
+      unchanged: 0,
+      added: 500,
+      modified: 0
+    },
+    changesList: [
+      {
+        lrn: "109238475001",
+        studentName: "Santos, Jerome M.",
+        gradeLevel: 9,
+        section: "Grade 9 - Chastity",
+        changeType: "added",
+        fieldsChanged: [
+          { field: "status", fieldLabel: "Enrollment Status", oldValue: null, newValue: "Newly Enrolled" },
+          { field: "general_average", fieldLabel: "General Weighted Average (GWA)", oldValue: null, newValue: 88.5 },
+          { field: "attendance_rate", fieldLabel: "Attendance Rate", oldValue: null, newValue: "96.5%" },
+          { field: "latest_risk_score", fieldLabel: "Composite Risk Score", oldValue: null, newValue: 24.5 },
+          { field: "risk_tier", fieldLabel: "Risk Tier", oldValue: null, newValue: "LOW" }
+        ],
+        riskShift: { newTier: "low", newScore: 24.5 }
+      },
+      {
+        lrn: "109238475002",
+        studentName: "Dela Cruz, Angelica R.",
+        gradeLevel: 10,
+        section: "Grade 10 - Charity",
+        changeType: "added",
+        fieldsChanged: [
+          { field: "status", fieldLabel: "Enrollment Status", oldValue: null, newValue: "Newly Enrolled" },
+          { field: "general_average", fieldLabel: "General Weighted Average (GWA)", oldValue: null, newValue: 74.2 },
+          { field: "attendance_rate", fieldLabel: "Attendance Rate", oldValue: null, newValue: "82.0%" },
+          { field: "latest_risk_score", fieldLabel: "Composite Risk Score", oldValue: null, newValue: 76.4 },
+          { field: "risk_tier", fieldLabel: "Risk Tier", oldValue: null, newValue: "HIGH" }
+        ],
+        riskShift: { newTier: "high", newScore: 76.4 }
+      }
+    ]
   }
 ];
+
+export function computeStudentDatasetDiff(
+  beforeStudents: StudentRecord[],
+  afterStudents: StudentRecord[]
+): {
+  summary: {
+    studentsAffected: number;
+    riskIncreased: number;
+    riskDecreased: number;
+    unchanged: number;
+    added: number;
+    modified: number;
+  };
+  changesList: IngestionBatchItemDiff[];
+} {
+  const beforeMap = new Map<string, StudentRecord>();
+  beforeStudents.forEach((s) => {
+    beforeMap.set(String(s.lrn || s.id), s);
+  });
+
+  const changesList: IngestionBatchItemDiff[] = [];
+  let riskIncreased = 0;
+  let riskDecreased = 0;
+  let unchangedCount = 0;
+  let addedCount = 0;
+  let modifiedCount = 0;
+
+  afterStudents.forEach((after) => {
+    const key = String(after.lrn || after.id);
+    const before = beforeMap.get(key);
+
+    const studentName = after.full_name || `${after.first_name} ${after.last_name}`;
+    const gradeLevel = after.grade_level;
+    const section = after.section_name;
+
+    if (!before) {
+      // New student added
+      addedCount++;
+      const fieldsChanged: IngestionFieldDiff[] = [
+        { field: "status", fieldLabel: "Enrollment Status", oldValue: null, newValue: "Newly Enrolled" },
+        { field: "general_average", fieldLabel: "General Weighted Average (GWA)", oldValue: null, newValue: after.sass_metrics?.gpa || 85 },
+        { field: "attendance_rate", fieldLabel: "Attendance Rate", oldValue: null, newValue: `${after.sass_metrics?.attendance_rate_pct || 95}%` },
+        { field: "latest_risk_score", fieldLabel: "Composite Risk Score", oldValue: null, newValue: after.latest_risk_score },
+        { field: "risk_tier", fieldLabel: "Risk Tier", oldValue: null, newValue: (after.latest_risk_tier || "low").toUpperCase() }
+      ];
+
+      changesList.push({
+        lrn: String(after.lrn),
+        studentName,
+        gradeLevel,
+        section,
+        changeType: "added",
+        fieldsChanged,
+        riskShift: {
+          newTier: after.latest_risk_tier,
+          newScore: after.latest_risk_score
+        }
+      });
+    } else {
+      // Existing student: compute field-level diffs
+      const fieldsChanged: IngestionFieldDiff[] = [];
+
+      // Check Risk Score & Tier
+      if (after.latest_risk_score !== before.latest_risk_score) {
+        fieldsChanged.push({
+          field: "latest_risk_score",
+          fieldLabel: "Composite Risk Score",
+          oldValue: before.latest_risk_score,
+          newValue: after.latest_risk_score
+        });
+      }
+      if (after.latest_risk_tier !== before.latest_risk_tier) {
+        fieldsChanged.push({
+          field: "risk_tier",
+          fieldLabel: "Risk Classification Tier",
+          oldValue: (before.latest_risk_tier || "").toUpperCase(),
+          newValue: (after.latest_risk_tier || "").toUpperCase()
+        });
+      }
+
+      // Check GWA
+      const oldGWA = before.sass_metrics?.gpa;
+      const newGWA = after.sass_metrics?.gpa;
+      if (oldGWA !== undefined && newGWA !== undefined && oldGWA !== newGWA) {
+        fieldsChanged.push({
+          field: "general_average",
+          fieldLabel: "General Average (GWA)",
+          oldValue: oldGWA,
+          newValue: newGWA
+        });
+      }
+
+      // Check Attendance Rate
+      const oldAtt = before.sass_metrics?.attendance_rate_pct;
+      const newAtt = after.sass_metrics?.attendance_rate_pct;
+      if (oldAtt !== undefined && newAtt !== undefined && oldAtt !== newAtt) {
+        fieldsChanged.push({
+          field: "attendance_rate",
+          fieldLabel: "Attendance Rate",
+          oldValue: `${oldAtt}%`,
+          newValue: `${newAtt}%`
+        });
+      }
+
+      // Check Days Absent
+      const oldAbs = before.sass_metrics?.days_absent;
+      const newAbs = after.sass_metrics?.days_absent;
+      if (oldAbs !== undefined && newAbs !== undefined && oldAbs !== newAbs) {
+        fieldsChanged.push({
+          field: "days_absent",
+          fieldLabel: "Days Absent",
+          oldValue: `${oldAbs} days`,
+          newValue: `${newAbs} days`
+        });
+      }
+
+      // Check Domain Scores
+      if (before.domain_scores && after.domain_scores) {
+        if (before.domain_scores.academic !== after.domain_scores.academic) {
+          fieldsChanged.push({
+            field: "domain_academic",
+            fieldLabel: "Academic Risk Score",
+            oldValue: before.domain_scores.academic,
+            newValue: after.domain_scores.academic
+          });
+        }
+        if (before.domain_scores.family !== after.domain_scores.family) {
+          fieldsChanged.push({
+            field: "domain_family",
+            fieldLabel: "Family Support Risk Score",
+            oldValue: before.domain_scores.family,
+            newValue: after.domain_scores.family
+          });
+        }
+        if (before.domain_scores.health !== after.domain_scores.health) {
+          fieldsChanged.push({
+            field: "domain_health",
+            fieldLabel: "Health & Nutrition Risk Score",
+            oldValue: before.domain_scores.health,
+            newValue: after.domain_scores.health
+          });
+        }
+        if (before.domain_scores.mental_health !== after.domain_scores.mental_health) {
+          fieldsChanged.push({
+            field: "domain_mental_health",
+            fieldLabel: "Mental Health (PHQ-9/GAD-7) Risk",
+            oldValue: before.domain_scores.mental_health,
+            newValue: after.domain_scores.mental_health
+          });
+        }
+        if (before.domain_scores.financial !== after.domain_scores.financial) {
+          fieldsChanged.push({
+            field: "domain_financial",
+            fieldLabel: "Socioeconomic & Financial Risk",
+            oldValue: before.domain_scores.financial,
+            newValue: after.domain_scores.financial
+          });
+        }
+      }
+
+      // Risk Shift Direction
+      if (after.latest_risk_score > before.latest_risk_score) {
+        riskIncreased++;
+      } else if (after.latest_risk_score < before.latest_risk_score) {
+        riskDecreased++;
+      }
+
+      if (fieldsChanged.length > 0) {
+        modifiedCount++;
+        changesList.push({
+          lrn: String(after.lrn),
+          studentName,
+          gradeLevel,
+          section,
+          changeType: "modified",
+          fieldsChanged,
+          riskShift: {
+            oldTier: before.latest_risk_tier,
+            newTier: after.latest_risk_tier,
+            oldScore: before.latest_risk_score,
+            newScore: after.latest_risk_score
+          }
+        });
+      } else {
+        unchangedCount++;
+        changesList.push({
+          lrn: String(after.lrn),
+          studentName,
+          gradeLevel,
+          section,
+          changeType: "unchanged",
+          fieldsChanged: [],
+          riskShift: {
+            oldTier: before.latest_risk_tier,
+            newTier: after.latest_risk_tier,
+            oldScore: before.latest_risk_score,
+            newScore: after.latest_risk_score
+          }
+        });
+      }
+    }
+  });
+
+  return {
+    summary: {
+      studentsAffected: addedCount + modifiedCount,
+      riskIncreased,
+      riskDecreased,
+      unchanged: unchangedCount,
+      added: addedCount,
+      modified: modifiedCount
+    },
+    changesList
+  };
+}
 
 export function getIngestionHistory(): IngestionBatchRecord[] {
   if (typeof window !== "undefined") {
@@ -1852,9 +2257,9 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     name: "Mr. Roberto Santos, LPT",
     email: "roberto.santos@sapc.edu.ph",
     role: "teacher",
-    department: "Senior High STEM",
-    section: "Grade 11 - St. Augustine (STEM)",
-    grade_level: "Grade 11",
+    department: "Junior High School",
+    section: "Grade 7 - Love",
+    grade_level: "Grade 7",
     employee_id: "SAPC-FAC-2023-014",
     initial_password: "teacher123",
     status: "Active",
@@ -1866,9 +2271,9 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     name: "Mrs. Teresa Santos, LPT",
     email: "teresa.santos@sapc.edu.ph",
     role: "teacher",
-    department: "Junior High Department",
-    section: "Grade 10 - St. Thomas Aquinas",
-    grade_level: "Grade 10",
+    department: "Junior High School",
+    section: "Grade 8 - Hope",
+    grade_level: "Grade 8",
     employee_id: "SAPC-FAC-2022-089",
     initial_password: "teacher123",
     status: "Active",
@@ -1880,9 +2285,9 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     name: "Prof. Annalyn Cruz, LPT",
     email: "annalyn.cruz@sapc.edu.ph",
     role: "teacher",
-    department: "Senior High ABM",
-    section: "Grade 12 - St. Jude (ABM)",
-    grade_level: "Grade 12",
+    department: "Junior High School",
+    section: "Grade 9 - Chastity",
+    grade_level: "Grade 9",
     employee_id: "SAPC-FAC-2024-002",
     initial_password: "teacher123",
     status: "Active",
@@ -1896,7 +2301,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     role: "guidance_counselor",
     department: "Guidance & Counseling Center",
     section: "Guidance Office - Room 204",
-    grade_level: "Grades 11-12 (Senior High)",
+    grade_level: "Grades 7-10 (Junior High)",
     employee_id: "SAPC-COUN-2021-008",
     prc_license_no: "PRC-RGC-008924",
     initial_password: "counselor123",
@@ -1924,9 +2329,9 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     name: "Engr. Paul Valdez",
     email: "paul.valdez@sapc.edu.ph",
     role: "teacher",
-    department: "Senior High STEM",
-    section: "Chemistry & Physics Faculty",
-    grade_level: "Grade 11-12",
+    department: "Junior High School",
+    section: "Grade 10 - Charity",
+    grade_level: "Grade 10",
     employee_id: "SAPC-FAC-2021-045",
     initial_password: "teacher123",
     status: "Active",
@@ -1938,13 +2343,55 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     name: "Ms. Jessica Alcantara, LPT",
     email: "jessica.alcantara@sapc.edu.ph",
     role: "teacher",
-    department: "Senior High HUMSS",
-    section: "Grade 11 - San Lorenzo Ruiz (HUMSS)",
-    grade_level: "Grade 11",
+    department: "Junior High School",
+    section: "Grade 7 - Integrity",
+    grade_level: "Grade 7",
     employee_id: "SAPC-FAC-2024-019",
     initial_password: "teacher123",
     status: "Active",
     phone: "+63 915 678 1234",
+    created_at: "2026-08-18T08:00:00.000Z"
+  },
+  {
+    id: "FAC-008",
+    name: "Mr. Mark Anthony Reyes, LPT",
+    email: "mark.reyes@sapc.edu.ph",
+    role: "teacher",
+    department: "Junior High School",
+    section: "Grade 8 - Faith",
+    grade_level: "Grade 8",
+    employee_id: "SAPC-FAC-2024-033",
+    initial_password: "teacher123",
+    status: "Active",
+    phone: "+63 917 223 8819",
+    created_at: "2026-08-18T08:00:00.000Z"
+  },
+  {
+    id: "FAC-009",
+    name: "Ms. Sarah Jane Mendoza, LPT",
+    email: "sarah.mendoza@sapc.edu.ph",
+    role: "teacher",
+    department: "Junior High School",
+    section: "Grade 9 - Prudence",
+    grade_level: "Grade 9",
+    employee_id: "SAPC-FAC-2024-041",
+    initial_password: "teacher123",
+    status: "Active",
+    phone: "+63 918 776 1120",
+    created_at: "2026-08-18T08:00:00.000Z"
+  },
+  {
+    id: "FAC-010",
+    name: "Mr. Carlo Dominic Villanueva, LPT",
+    email: "carlo.villanueva@sapc.edu.ph",
+    role: "teacher",
+    department: "Junior High School",
+    section: "Grade 10 - Humility",
+    grade_level: "Grade 10",
+    employee_id: "SAPC-FAC-2024-055",
+    initial_password: "teacher123",
+    status: "Active",
+    phone: "+63 920 445 6678",
     created_at: "2026-08-18T08:00:00.000Z"
   }
 ];
@@ -2368,11 +2815,11 @@ export const DEFAULT_PENDING_REGISTRATIONS: PendingRegistrationRecord[] = [
     relationship: "Mother / Primary Guardian",
     linkedStudent: "Joshua Dimaculangan",
     linkedLRN: "109238475001",
-    section: "Grade 11 - St. Augustine (STEM)",
+    section: "Grade 7 - Love",
     verificationDoc: "PSA Birth Certificate (PSA-BC-2009-88219)",
     date: "2026-09-19",
     status: "Pending Verification",
-    notes: "PSA verified; matching Grade 11 STEM class master list."
+    notes: "PSA verified; matching Grade 7 Love class master list."
   },
   {
     id: "REG-202",
@@ -2383,7 +2830,7 @@ export const DEFAULT_PENDING_REGISTRATIONS: PendingRegistrationRecord[] = [
     relationship: "Father",
     linkedStudent: "Samantha Nicole Reyes",
     linkedLRN: "109238475004",
-    section: "Grade 11 - St. Thomas (HUMSS)",
+    section: "Grade 8 - Hope",
     verificationDoc: "Guardian Gov ID & Enrollment Slip",
     date: "2026-09-20",
     status: "Pending Verification",
@@ -2396,13 +2843,13 @@ export const DEFAULT_PENDING_REGISTRATIONS: PendingRegistrationRecord[] = [
     phone: "+63 920 119 2847",
     role: "teacher",
     relationship: "Faculty Adviser",
-    linkedStudent: "Grade 12 - St. Jude (ABM)",
+    linkedStudent: "Grade 9 - Chastity",
     linkedLRN: "N/A (Faculty)",
-    section: "Grade 12 - St. Jude (ABM)",
+    section: "Grade 9 - Chastity",
     verificationDoc: "Faculty Appointment & PRC License No. 049821",
     date: "2026-09-18",
     status: "Pending Verification",
-    notes: "Senior High ABM Advisory assignment verified by Academic Dean."
+    notes: "Junior High Grade 9 Advisory assignment verified by Academic Dean."
   }
 ];
 
@@ -2415,8 +2862,8 @@ export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
     relationship: "Mother",
     linkedStudentName: "Juan Carlos Santos",
     linkedLRN: "109238475001",
-    section: "Grade 11 - St. Augustine (STEM)",
-    gradeLevel: "Grade 11",
+    section: "Grade 7 - Love",
+    gradeLevel: "Grade 7",
     status: "Active",
     verifiedAt: "2026-08-15",
     sf9Access: true,
@@ -2432,8 +2879,8 @@ export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
     relationship: "Father",
     linkedStudentName: "Angela Mae Garcia",
     linkedLRN: "109238475002",
-    section: "Grade 11 - St. Augustine (STEM)",
-    gradeLevel: "Grade 11",
+    section: "Grade 8 - Hope",
+    gradeLevel: "Grade 8",
     status: "Active",
     verifiedAt: "2026-08-16",
     sf9Access: true,
@@ -2449,8 +2896,8 @@ export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
     relationship: "Mother",
     linkedStudentName: "Gabriel Ramos",
     linkedLRN: "109238475003",
-    section: "Grade 11 - St. Augustine (STEM)",
-    gradeLevel: "Grade 11",
+    section: "Grade 9 - Chastity",
+    gradeLevel: "Grade 9",
     status: "Active",
     verifiedAt: "2026-08-18",
     sf9Access: true,
@@ -2466,8 +2913,8 @@ export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
     relationship: "Father",
     linkedStudentName: "Chloe Nicole De Jesus",
     linkedLRN: "109238475004",
-    section: "Grade 11 - St. Thomas (HUMSS)",
-    gradeLevel: "Grade 11",
+    section: "Grade 10 - Charity",
+    gradeLevel: "Grade 10",
     status: "Active",
     verifiedAt: "2026-08-20",
     sf9Access: true,
@@ -2483,8 +2930,8 @@ export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
     relationship: "Mother / OFW Guardian",
     linkedStudentName: "Mark Anthony Mendoza",
     linkedLRN: "109238475005",
-    section: "Grade 11 - St. Thomas (HUMSS)",
-    gradeLevel: "Grade 11",
+    section: "Grade 7 - Integrity",
+    gradeLevel: "Grade 7",
     status: "Active",
     verifiedAt: "2026-08-22",
     sf9Access: true,
@@ -2500,8 +2947,8 @@ export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
     relationship: "Father",
     linkedStudentName: "Christian Dave Bautista",
     linkedLRN: "109238475006",
-    section: "Grade 12 - St. Jude (ABM)",
-    gradeLevel: "Grade 12",
+    section: "Grade 8 - Faith",
+    gradeLevel: "Grade 8",
     status: "Active",
     verifiedAt: "2026-08-25",
     sf9Access: true,
@@ -2517,8 +2964,8 @@ export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
     relationship: "Grandmother / Guardian",
     linkedStudentName: "Patricia Alcantara",
     linkedLRN: "109238475007",
-    section: "Grade 12 - St. Jude (ABM)",
-    gradeLevel: "Grade 12",
+    section: "Grade 9 - Prudence",
+    gradeLevel: "Grade 9",
     status: "Active",
     verifiedAt: "2026-08-28",
     sf9Access: true,
@@ -2534,8 +2981,8 @@ export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
     relationship: "Father",
     linkedStudentName: "Ethan Soriano",
     linkedLRN: "109238475008",
-    section: "Grade 12 - St. Jude (ABM)",
-    gradeLevel: "Grade 12",
+    section: "Grade 10 - Humility",
+    gradeLevel: "Grade 10",
     status: "Active",
     verifiedAt: "2026-09-01",
     sf9Access: true,

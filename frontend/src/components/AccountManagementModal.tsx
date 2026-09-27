@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { SapcLogo } from "./SapcLogo";
+import { getActiveCustomLogo, saveCustomLogo, compressLogoImage, subscribeCustomLogo } from "@/lib/branding-store";
+import { JHS_GRADE_LEVELS, getSectionsForGrade } from "@/lib/dataset-store";
 
 interface AccountManagementModalProps {
   isOpen: boolean;
@@ -48,15 +50,11 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const [fullName, setFullName] = useState(user?.full_name || "");
   const [email, setEmail] = useState(user?.email || "user@sapc.edu.ph");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
-  const [customLogo, setCustomLogo] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("sapc_custom_logo");
-    }
-    return null;
-  });
+  const [customLogo, setCustomLogo] = useState<string | null>(() => getActiveCustomLogo());
   const [lrn, setLrn] = useState("109482719283");
-  const [strand, setStrand] = useState("Senior High STEM Strand Faculty");
-  const [section, setSection] = useState("Grade 11 - St. Augustine (Adviser)");
+  const [gradeLevel, setGradeLevel] = useState<string>(user?.grade_level || JHS_GRADE_LEVELS[0].label);
+  const [strand, setStrand] = useState("Junior High School Faculty");
+  const [section, setSection] = useState<string>(user?.section || getSectionsForGrade(JHS_GRADE_LEVELS[0].level)[0]);
   const [guardianName, setGuardianName] = useState("Mrs. Elena Dimaculangan");
   const [guardianContact, setGuardianContact] = useState("+63 917 555 0192");
   const [isSaving, setIsSaving] = useState(false);
@@ -74,11 +72,13 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
       setFullName(user.full_name || "");
       setEmail(user.email || "user@sapc.edu.ph");
       setAvatarUrl(user.avatar_url || null);
+      if (user.grade_level) setGradeLevel(user.grade_level);
+      if (user.section) setSection(user.section);
 
       if (user.role === "teacher") {
-        setLrn("FAC-2026-STEM-04");
-        setStrand("Senior High STEM Strand Faculty");
-        setSection("Grade 11 - St. Augustine (Class Adviser)");
+        setLrn("FAC-2026-JHS-01");
+        setStrand("Junior High School Faculty");
+        setSection(user.section || "Grade 7 - Love");
         setGuardianName("SAPC Academic Affairs Office");
         setGuardianContact("+63 (049) 559-0192");
       } else if (user.role === "guidance_counselor") {
@@ -94,30 +94,38 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
         setGuardianName("Office of the President");
         setGuardianContact("+63 (049) 559-0100");
       } else if (user.role === "student") {
-        setLrn("109482719283");
-        setStrand("Grade 11 - STEM (Science, Technology, Engineering, and Mathematics)");
-        setSection("Grade 11 - St. Augustine");
+        setLrn(user.lrn || "109482719283");
+        setStrand("Junior High School Department");
+        setSection(user.section || "Grade 7 - Love");
         setGuardianName("Mrs. Elena Dimaculangan");
         setGuardianContact("+63 917 555 0192");
       } else if (user.role === "parent") {
         setLrn("PRNT-10948271");
-        setStrand("Parent of Joshua Dimaculangan (Grade 11 STEM)");
-        setSection("Parent-Teacher Community Association (PTCA)");
+        setStrand("Parent-Teacher Community Association (PTCA)");
+        setSection(user.section || "Grade 7 - Love");
         setGuardianName("Mrs. Elena Dimaculangan (Self)");
         setGuardianContact("+63 917 555 0192");
       }
     }
   }, [isOpen, user]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const unsub = subscribeCustomLogo((logo) => {
+      setCustomLogo(logo);
+    });
+    return () => unsub();
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  const handleInstitutionalLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInstitutionalLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 4 * 1024 * 1024) {
-      setUploadError("Logo file size must be less than 4MB.");
+    if (file.size > 8 * 1024 * 1024) {
+      setUploadError("Logo file size must be less than 8MB.");
       return;
     }
 
@@ -126,25 +134,25 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      if (result) {
-        localStorage.setItem("sapc_custom_logo", result);
-        setCustomLogo(result);
-        window.dispatchEvent(new Event("sapc_logo_updated"));
-        setSaveSuccess(true);
-        saveTimerRef.current = setTimeout(() => setSaveSuccess(false), 3000);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressLogoImage(file, 360);
+      await saveCustomLogo(compressed);
+      setCustomLogo(compressed);
+      setSaveSuccess(true);
+      saveTimerRef.current = setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: any) {
+      setUploadError(err?.message || "Failed to process logo.");
+    }
   };
 
-  const handleResetInstitutionalLogo = () => {
-    localStorage.removeItem("sapc_custom_logo");
-    setCustomLogo(null);
-    window.dispatchEvent(new Event("sapc_logo_updated"));
-    if (logoInputRef.current) logoInputRef.current.value = "";
+  const handleResetInstitutionalLogo = async () => {
+    try {
+      await saveCustomLogo(null);
+      setCustomLogo(null);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    } catch {
+      setUploadError("Failed to reset logo.");
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,7 +214,9 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
     setIsSaving(true);
     updateUserProfile({
       full_name: fullName,
-      avatar_url: avatarUrl
+      avatar_url: avatarUrl,
+      grade_level: gradeLevel,
+      section: section
     });
     saveTimerRef.current = setTimeout(() => {
       setIsSaving(false);
@@ -557,34 +567,57 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
           {/* TAB 2: Academic & Family */}
           {activeTab === "academic" && (
             <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    {user?.role === "teacher" ? "Advisory Grade Level" : user?.role === "parent" ? "Child's Grade Level" : "Grade Level"}
+                  </label>
+                  <select
+                    value={gradeLevel}
+                    onChange={(e) => {
+                      const newGrade = e.target.value;
+                      setGradeLevel(newGrade);
+                      const available = getSectionsForGrade(newGrade);
+                      if (available.length > 0) {
+                        setSection(available[0]);
+                      }
+                    }}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                  >
+                    {JHS_GRADE_LEVELS.map((g) => (
+                      <option key={g.level} value={g.label}>{g.label} (Junior High)</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    {user?.role === "teacher" ? "Assigned Advisory Section" : user?.role === "parent" ? "Child's Section" : "Assigned Section"}
+                  </label>
+                  <select
+                    value={section}
+                    onChange={(e) => setSection(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                  >
+                    {getSectionsForGrade(gradeLevel).map((sec) => (
+                      <option key={sec} value={sec}>{sec}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  {user?.role === "student" ? "Academic Track / Strand"
+                  {user?.role === "student" ? "Academic Track / Department"
                     : user?.role === "teacher" ? "Subject / Department"
                     : user?.role === "guidance_counselor" ? "Specialization / Department"
-                    : user?.role === "parent" ? "Linked Student Strand"
+                    : user?.role === "parent" ? "Linked Student Department"
                     : "Administrative Role / Division"}
                 </label>
                 <input
                   type="text"
                   value={strand}
                   onChange={(e) => setStrand(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  {user?.role === "student" ? "Section & Class Adviser"
-                    : user?.role === "teacher" ? "Assigned Section(s) / Advisory"
-                    : user?.role === "guidance_counselor" ? "Office Room / Schedule"
-                    : user?.role === "parent" ? "Child's Section"
-                    : "Office / Campus Location"}
-                </label>
-                <input
-                  type="text"
-                  value={section}
-                  onChange={(e) => setSection(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
                 />
               </div>

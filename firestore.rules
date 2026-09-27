@@ -12,8 +12,12 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Public / System Config
+    // Public / System Config & Institutional Branding
     match /system_config/{configId} {
+      allow read, write: if true;
+    }
+
+    match /system_settings/{settingId} {
       allow read, write: if true;
     }
 

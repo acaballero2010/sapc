@@ -6,7 +6,7 @@ import { auth, db, googleProvider } from "./firebase";
 import { signInWithEmailAndPassword, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
-import { getActiveFacultyRecords } from "./dataset-store";
+import { getActiveFacultyRecords, getActiveStudentDataset, getActiveParentRecords } from "./dataset-store";
 
 export type RoleType = "admin" | "guidance_counselor" | "teacher" | "parent" | "student";
 
@@ -19,6 +19,8 @@ export interface UserProfile {
   firebaseUid?: string;
   avatar_url?: string | null;
   section?: string;
+  grade_level?: string;
+  lrn?: string;
   strand?: string;
   department?: string;
   employee_id?: string;
@@ -29,7 +31,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   serverError: string | null;
-  login: (username: string, password?: string, targetRole?: RoleType) => Promise<void>;
+  login: (username: string, password: string, targetRole?: RoleType) => Promise<UserProfile>;
   loginWithGoogle: (targetRole?: RoleType) => Promise<{ user: UserProfile; isNewUser: boolean } | null | void>;
   switchRole: (role: RoleType) => Promise<void>;
   updateUserProfile: (updates: Partial<UserProfile>) => Promise<void> | void;
@@ -75,162 +77,336 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const loginWithCredentials = async (email: string, pass: string, targetRole?: RoleType) => {
+  const loginWithCredentials = async (
+    identifier: string,
+    pass: string,
+    targetRoleHint?: RoleType
+  ): Promise<UserProfile> => {
     setIsLoading(true);
     setServerError(null);
 
-    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanId = (identifier || "").trim().toLowerCase();
+    const cleanPass = (pass || "").trim();
 
-    // Check if this matches an imported faculty/counselor record or standard preset demo email
-    const facultyRoster = typeof window !== "undefined" ? getActiveFacultyRecords() : [];
-    const matchedFaculty = facultyRoster.find(f => f.email && f.email.toLowerCase() === cleanEmail);
-
-    const fallbackRole: RoleType = targetRole || (
-      matchedFaculty ? (
-        matchedFaculty.role === "guidance_counselor" || matchedFaculty.role === "counselor" ? "guidance_counselor" :
-        matchedFaculty.role === "admin" ? "admin" : "teacher"
-      ) :
-      cleanEmail.includes("admin") ? "admin" :
-      cleanEmail.includes("counselor") ? "guidance_counselor" :
-      cleanEmail.includes("teacher") ? "teacher" :
-      cleanEmail.includes("parent") ? "parent" : "student"
-    );
-
-    const isDemoOrFaculty = 
-      ["admin@sapc.edu.ph", "counselor@sapc.edu.ph", "teacher@sapc.edu.ph", "student@sapc.edu.ph", "parent@sapc.edu.ph"].includes(cleanEmail) ||
-      Boolean(matchedFaculty) ||
-      cleanEmail.endsWith("@sapc.edu.ph");
-
-    if (isDemoOrFaculty) {
-      const demoProfile = DEMO_PROFILES[fallbackRole];
-      let storedName = matchedFaculty?.name || demoProfile?.name || cleanEmail.split("@")[0];
-
-      if (typeof window !== "undefined") {
-        const savedCustom = localStorage.getItem("sapc_custom_profile");
-        if (savedCustom) {
-          try {
-            const parsed = JSON.parse(savedCustom);
-            if (parsed && (parsed.email === cleanEmail || parsed.role === fallbackRole)) {
-              storedName = parsed.full_name || storedName;
-            }
-          } catch {}
-        }
-      }
-
-      const demoUser: UserProfile = {
-        id: 1,
-        email: cleanEmail || demoProfile?.email || "user@sapc.edu.ph",
-        full_name: storedName,
-        role: fallbackRole,
-        student_id: fallbackRole === "student" || fallbackRole === "parent" ? 1 : null,
-        section: matchedFaculty?.section || (fallbackRole === "teacher" ? "Grade 10 - St. Augustine" : undefined),
-        department: matchedFaculty?.department
-      };
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("sapc_token", `token_${fallbackRole}_${Date.now()}`);
-        localStorage.setItem("sapc_custom_profile", JSON.stringify(demoUser));
-        localStorage.setItem("sapc_user", JSON.stringify(demoUser));
-      }
-
-      setUser(demoUser);
-      setToken(`token_${fallbackRole}_${Date.now()}`);
-      setServerError(null);
+    if (!cleanId || !cleanPass) {
       setIsLoading(false);
-      return;
+      throw new Error("Please enter both your email/username and password.");
     }
 
-    try {
-      // 1. Attempt Firebase Authentication First
-      let firebaseUser: any = null;
-      try {
-        const fbCred = await signInWithEmailAndPassword(auth, email, pass);
-        firebaseUser = fbCred.user;
-      } catch (fbErr: any) {
-        console.log("Firebase direct auth note:", fbErr.message);
-      }
+    // -------------------------------------------------------------------------
+    // 1. Attempt Firebase Authentication (if online and valid Firebase user)
+    // -------------------------------------------------------------------------
+    let firebaseUser: any = null;
 
-      // 2. Attempt FastAPI backend if available with short timeout
+    try {
+      const isEmail = cleanId.includes("@");
+      const emailForFb = isEmail ? cleanId : `${cleanId}@sapc.edu.ph`;
+      const fbCred = await signInWithEmailAndPassword(auth, emailForFb, cleanPass);
+      firebaseUser = fbCred.user;
+    } catch {
+      // Firebase auth error (not registered in Firebase or offline or invalid password)
+    }
+
+    if (firebaseUser) {
+      try {
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.data();
+        const role = (userData?.role || targetRoleHint || "student") as RoleType;
+        const profile: UserProfile = {
+          id: 1,
+          email: firebaseUser.email || cleanId,
+          full_name: firebaseUser.displayName || userData?.name || userData?.displayName || cleanId.split("@")[0],
+          role: role,
+          student_id: userData?.student_id || (role === "student" || role === "parent" ? 1 : null),
+          firebaseUid: firebaseUser.uid,
+          avatar_url: firebaseUser.photoURL || null
+        };
+
+        const tokenStr = `token_${role}_${Date.now()}`;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("sapc_token", tokenStr);
+          localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
+          localStorage.setItem("sapc_user", JSON.stringify(profile));
+        }
+
+        setUser(profile);
+        setToken(tokenStr);
+        setServerError(null);
+        setIsLoading(false);
+        return profile;
+      } catch (docErr) {
+        console.warn("Firestore user profile fetch notice:", docErr);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. Attempt FastAPI backend endpoint (if server is active)
+    // -------------------------------------------------------------------------
+    try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-      try {
-        const formData = new URLSearchParams();
-        formData.append("username", email);
-        formData.append("password", pass);
+      const formData = new URLSearchParams();
+      formData.append("username", cleanId);
+      formData.append("password", cleanPass);
 
-        const res = await fetch(`${API_BASE_URL}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formData.toString(),
-          signal: controller.signal
-        });
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString(),
+        signal: controller.signal
+      });
 
-        clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
 
-        if (res.ok) {
-          const data = await res.json();
-          if (typeof window !== "undefined") {
-            localStorage.setItem("sapc_token", data.access_token);
-          }
-          setToken(data.access_token);
-          setUser({
-            id: 1,
-            email: data.email,
-            full_name: data.full_name,
-            role: data.role as RoleType,
-            student_id: data.student_id,
-            firebaseUid: firebaseUser?.uid
-          });
-          setServerError(null);
-          return;
+      if (res.ok) {
+        const data = await res.json();
+        const profile: UserProfile = {
+          id: 1,
+          email: data.email,
+          full_name: data.full_name,
+          role: data.role as RoleType,
+          student_id: data.student_id
+        };
+
+        if (typeof window !== "undefined") {
+          localStorage.setItem("sapc_token", data.access_token);
+          localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
+          localStorage.setItem("sapc_user", JSON.stringify(profile));
         }
-      } catch {
-        clearTimeout(timeoutId);
+
+        setToken(data.access_token);
+        setUser(profile);
+        setServerError(null);
+        setIsLoading(false);
+        return profile;
+      }
+    } catch {
+      // Backend not running / connection timed out
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. Strict Institutional Roster & Preset Authentication Check
+    // -------------------------------------------------------------------------
+
+    // A. Check Default Demo Profiles (Admin, Counselor, Teacher, Student, Parent)
+    for (const [roleKey, demo] of Object.entries(DEMO_PROFILES) as [RoleType, typeof DEMO_PROFILES[RoleType]][]) {
+      const demoEmail = demo.email.toLowerCase();
+      const demoRole = roleKey.toLowerCase();
+      const demoPrefix = demoEmail.split("@")[0];
+
+      const isIdentifierMatch = 
+        cleanId === demoEmail || 
+        cleanId === demoRole || 
+        cleanId === demoPrefix ||
+        (roleKey === "admin" && (cleanId === "system.admin@sapc.edu.ph" || cleanId === "administrator")) ||
+        (roleKey === "guidance_counselor" && (cleanId === "guidance@sapc.edu.ph" || cleanId === "guidance"));
+
+      if (isIdentifierMatch) {
+        // Password MUST match demo.pass
+        if (cleanPass !== demo.pass) {
+          setIsLoading(false);
+          throw new Error("Invalid email or password. Please try again.");
+        }
+
+        const profile: UserProfile = {
+          id: demo.student_id || 1,
+          email: demo.email,
+          full_name: demo.name,
+          role: roleKey,
+          student_id: demo.student_id || null,
+          section: roleKey === "teacher" ? "Grade 10 - St. Augustine" : undefined,
+          department: roleKey === "guidance_counselor" ? "Guidance & Counseling Center" : roleKey === "teacher" ? "Senior High STEM" : undefined
+        };
+
+        const tokenStr = `token_${roleKey}_${Date.now()}`;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("sapc_token", tokenStr);
+          localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
+          localStorage.setItem("sapc_user", JSON.stringify(profile));
+        }
+
+        setUser(profile);
+        setToken(tokenStr);
+        setServerError(null);
+        setIsLoading(false);
+        return profile;
+      }
+    }
+
+    // B. Check Faculty & Counselor Roster
+    const facultyRoster = typeof window !== "undefined" ? getActiveFacultyRecords() : [];
+    const matchedFaculty = facultyRoster.find(f => 
+      (f.email && f.email.toLowerCase() === cleanId) ||
+      (f.employee_id && f.employee_id.toLowerCase() === cleanId)
+    );
+
+    if (matchedFaculty) {
+      const expectedPass = matchedFaculty.initial_password || (
+        matchedFaculty.role === "guidance_counselor" || matchedFaculty.role === "counselor" ? "counselor123" : "teacher123"
+      );
+
+      if (cleanPass !== expectedPass) {
+        setIsLoading(false);
+        throw new Error("Invalid email or password. Please try again.");
       }
 
-      // 3. If Firebase user logged in, check Firestore profile
-      if (firebaseUser) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-          const userData = userDoc.data();
-          const role = (userData?.role || targetRole || "student") as RoleType;
-          setUser({
-            id: 1,
-            email: firebaseUser.email || email,
-            full_name: firebaseUser.displayName || userData?.name || email.split("@")[0],
-            role: role,
-            student_id: 1,
-            firebaseUid: firebaseUser.uid
-          });
-          setServerError(null);
-          return;
-        } catch (docErr) {
-          console.warn("Firestore user profile fetch notice:", docErr);
-        }
-      }
+      const facultyRole: RoleType = 
+        matchedFaculty.role === "guidance_counselor" || matchedFaculty.role === "counselor" ? "guidance_counselor" :
+        matchedFaculty.role === "admin" ? "admin" : "teacher";
 
-      const profile = DEMO_PROFILES[fallbackRole];
-      const demoUser: UserProfile = {
+      const profile: UserProfile = {
         id: 1,
-        email: email || profile.email,
-        full_name: profile.name,
-        role: fallbackRole,
-        student_id: profile.student_id || null
+        email: matchedFaculty.email,
+        full_name: matchedFaculty.name,
+        role: facultyRole,
+        section: matchedFaculty.section,
+        department: matchedFaculty.department,
+        employee_id: matchedFaculty.employee_id
       };
 
+      const tokenStr = `token_${facultyRole}_${Date.now()}`;
       if (typeof window !== "undefined") {
-        localStorage.setItem("sapc_token", `token_${fallbackRole}_${Date.now()}`);
-        localStorage.setItem("sapc_custom_profile", JSON.stringify(demoUser));
-        localStorage.setItem("sapc_user", JSON.stringify(demoUser));
+        localStorage.setItem("sapc_token", tokenStr);
+        localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
+        localStorage.setItem("sapc_user", JSON.stringify(profile));
       }
 
-      setUser(demoUser);
-      setToken(`token_${fallbackRole}_${Date.now()}`);
+      setUser(profile);
+      setToken(tokenStr);
       setServerError(null);
-    } finally {
       setIsLoading(false);
+      return profile;
     }
+
+    // C. Check Student Dataset (500 Students by LRN or Email)
+    const studentRoster = typeof window !== "undefined" ? getActiveStudentDataset() : [];
+    const matchedStudent = studentRoster.find(s => 
+      String(s.lrn) === cleanId ||
+      (s.email && s.email.toLowerCase() === cleanId) ||
+      cleanId === `${s.lrn}@sapc.edu.ph` ||
+      cleanId === `student.${s.lrn}@sapc.edu.ph` ||
+      cleanId === `${s.lrn}@student.sapc.edu.ph`
+    );
+
+    if (matchedStudent) {
+      const expectedPass = "student123";
+      if (cleanPass !== expectedPass) {
+        setIsLoading(false);
+        throw new Error("Invalid email or password. Please try again.");
+      }
+
+      const profile: UserProfile = {
+        id: matchedStudent.id,
+        email: matchedStudent.email || `${matchedStudent.lrn}@sapc.edu.ph`,
+        full_name: matchedStudent.full_name,
+        role: "student",
+        student_id: matchedStudent.id,
+        section: matchedStudent.section_name,
+        strand: matchedStudent.strand
+      };
+
+      const tokenStr = `token_student_${Date.now()}`;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_token", tokenStr);
+        localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
+        localStorage.setItem("sapc_user", JSON.stringify(profile));
+      }
+
+      setUser(profile);
+      setToken(tokenStr);
+      setServerError(null);
+      setIsLoading(false);
+      return profile;
+    }
+
+    // D. Check Parent Records
+    const parentRoster = typeof window !== "undefined" ? getActiveParentRecords() : [];
+    const matchedParent = parentRoster.find(p => 
+      (p.email && p.email.toLowerCase() === cleanId) ||
+      cleanId === `parent.${p.linkedLRN}@sapc.edu.ph` ||
+      cleanId === `parent_${p.linkedLRN}` ||
+      cleanId === p.phone?.replace(/\D/g, "")
+    );
+
+    if (matchedParent) {
+      const expectedPass = matchedParent.initialPassword || "parent2026";
+      if (cleanPass !== expectedPass && cleanPass !== "parent123") {
+        setIsLoading(false);
+        throw new Error("Invalid email or password. Please try again.");
+      }
+
+      const profile: UserProfile = {
+        id: 1,
+        email: matchedParent.email || `parent.${matchedParent.linkedLRN}@sapc.edu.ph`,
+        full_name: matchedParent.name,
+        role: "parent",
+        student_id: 1
+      };
+
+      const tokenStr = `token_parent_${Date.now()}`;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sapc_token", tokenStr);
+        localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
+        localStorage.setItem("sapc_user", JSON.stringify(profile));
+      }
+
+      setUser(profile);
+      setToken(tokenStr);
+      setServerError(null);
+      setIsLoading(false);
+      return profile;
+    }
+
+    // E. Check locally registered accounts (sapc_registered_accounts)
+    if (typeof window !== "undefined") {
+      try {
+        const rawAccounts = localStorage.getItem("sapc_registered_accounts");
+        if (rawAccounts) {
+          const registeredList = JSON.parse(rawAccounts);
+          if (Array.isArray(registeredList)) {
+            const matchedReg = registeredList.find((acc: any) => 
+              acc.email?.toLowerCase() === cleanId ||
+              (acc.lrn && String(acc.lrn) === cleanId)
+            );
+            if (matchedReg) {
+              if (cleanPass !== matchedReg.password) {
+                setIsLoading(false);
+                throw new Error("Invalid email or password. Please try again.");
+              }
+
+              const profile: UserProfile = {
+                id: matchedReg.student_id || 1,
+                email: matchedReg.email,
+                full_name: matchedReg.name || matchedReg.full_name,
+                role: (matchedReg.role || "student") as RoleType,
+                student_id: matchedReg.student_id || null
+              };
+
+              const tokenStr = `token_${profile.role}_${Date.now()}`;
+              localStorage.setItem("sapc_token", tokenStr);
+              localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
+              localStorage.setItem("sapc_user", JSON.stringify(profile));
+
+              setUser(profile);
+              setToken(tokenStr);
+              setServerError(null);
+              setIsLoading(false);
+              return profile;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not check registered accounts:", err);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. No Valid Match -> STRICT REJECTION
+    // -------------------------------------------------------------------------
+    setIsLoading(false);
+    throw new Error("Invalid email or password. Please try again.");
   };
 
   const loginWithGoogle = async (targetRole?: RoleType): Promise<{ user: UserProfile; isNewUser: boolean } | null> => {
@@ -411,7 +587,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
         isLoading,
         serverError,
-        login: async (email, pass = "counselor123", targetRole) => loginWithCredentials(email, pass, targetRole),
+        login: async (identifier, pass, targetRole) => loginWithCredentials(identifier, pass, targetRole),
         loginWithGoogle,
         switchRole,
         updateUserProfile,

@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getActiveCustomLogo, subscribeCustomLogo } from "@/lib/branding-store";
 
 interface SapcLogoProps {
   className?: string;
@@ -14,21 +15,13 @@ export const SapcLogo: React.FC<SapcLogoProps> = ({
   size = 40,
   showText = false 
 }) => {
-  const [customLogo, setCustomLogo] = useState<string | null>(null);
+  const [customLogo, setCustomLogo] = useState<string | null>(() => getActiveCustomLogo());
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("sapc_custom_logo");
-      if (stored) setCustomLogo(stored);
-
-      const handleLogoUpdate = () => {
-        const updated = localStorage.getItem("sapc_custom_logo");
-        setCustomLogo(updated);
-      };
-
-      window.addEventListener("sapc_logo_updated", handleLogoUpdate);
-      return () => window.removeEventListener("sapc_logo_updated", handleLogoUpdate);
-    }
+    const unsubscribe = subscribeCustomLogo((newLogo) => {
+      setCustomLogo(newLogo);
+    });
+    return () => unsubscribe();
   }, []);
 
   return (

@@ -47,7 +47,9 @@ import {
   subscribeToStudentDataset,
   loadStudentDatasetFromFirestore,
   getActiveNotifications,
-  getActiveInterventions
+  getActiveInterventions,
+  getIngestionHistory,
+  IngestionBatchRecord
 } from "@/lib/dataset-store";
 import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
@@ -56,6 +58,7 @@ import { TeacherReferralModal } from "./TeacherReferralModal";
 import { SubjectFailurePredictor } from "./SubjectFailurePredictor";
 import { DepEdFormModal } from "./DepEdFormModal";
 import { BatchInterventionModal } from "./BatchInterventionModal";
+import { ImportDiffModal } from "./ImportDiffModal";
 
 export type TeacherTabType = 
   | "dashboard"
@@ -118,7 +121,7 @@ export const TeacherDashboard: React.FC = () => {
       const match = all.find(s => s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()));
       if (match) return match.section_name;
     }
-    return "Grade 10 - St. Augustine";
+    return "Grade 7 - Love";
   }, [user]);
 
   const filterAdvisory = React.useCallback((all: StudentRecord[]) => {
@@ -126,7 +129,7 @@ export const TeacherDashboard: React.FC = () => {
       s.section_name === teacherSection || 
       (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))
     );
-    return advisory.length > 0 ? advisory : all.filter(s => s.section_name === "Grade 10 - St. Augustine");
+    return advisory.length > 0 ? advisory : all.filter(s => s.section_name === "Grade 7 - Love");
   }, [teacherSection, user]);
 
   // Advisory Class Dataset Scoped strictly to teacher's section
@@ -313,6 +316,22 @@ export const TeacherDashboard: React.FC = () => {
     }
   ]);
   const [revertConfirmId, setRevertConfirmId] = useState<string | null>(null);
+  const [systemIngestionBatches, setSystemIngestionBatches] = useState<IngestionBatchRecord[]>(() => getIngestionHistory());
+  const [inspectingBatch, setInspectingBatch] = useState<IngestionBatchRecord | null>(null);
+
+  useEffect(() => {
+    const refreshHistory = () => {
+      setSystemIngestionBatches(getIngestionHistory());
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("sapc:ingestion-history-updated", refreshHistory);
+      window.addEventListener("sapc:data-ingested", refreshHistory);
+      return () => {
+        window.removeEventListener("sapc:ingestion-history-updated", refreshHistory);
+        window.removeEventListener("sapc:data-ingested", refreshHistory);
+      };
+    }
+  }, []);
 
   // ---------------------------------------------------------------------------
   // 6. IN-BROWSER CSV EDITOR
@@ -1926,8 +1945,11 @@ export const TeacherDashboard: React.FC = () => {
         <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 shadow-sm space-y-6 animate-in fade-in duration-200">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
             <div>
-              <h3 className="text-lg sm:text-xl font-black text-slate-900">Ingestion History &amp; Audit Trail</h3>
-              <p className="text-xs text-slate-500">Immutable logging of all uploaded batches under RA 10173 compliance</p>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-[#8B0014]" />
+                Ingestion History &amp; Audit Trail
+              </h3>
+              <p className="text-xs text-slate-500">Immutable logging of all uploaded batches and granular change history under RA 10173</p>
             </div>
           </div>
 
@@ -1935,41 +1957,57 @@ export const TeacherDashboard: React.FC = () => {
             <table className="min-w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600">
                 <tr>
-                  <th className="py-3 px-4">Batch ID</th>
-                  <th className="py-3 px-4">Type &amp; File Name</th>
+                  <th className="py-3 px-4">Batch Ref</th>
+                  <th className="py-3 px-4">Domain / Type</th>
                   <th className="py-3 px-3">Uploaded By</th>
                   <th className="py-3 px-3">Timestamp</th>
-                  <th className="py-3 px-3 text-center">Records</th>
+                  <th className="py-3 px-3">Records &amp; Diffs</th>
                   <th className="py-3 px-3 text-center">Status</th>
-                  <th className="py-3 px-4 text-center">Action</th>
+                  <th className="py-3 px-4 text-right">Audit Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {importHistory.map((h) => (
+                {systemIngestionBatches.map((h) => (
                   <tr key={h.id} className="hover:bg-slate-50">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-800">{h.id}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-slate-800">
+                      <div>{h.id}</div>
+                      {h.rolledBack && (
+                        <span className="text-[10px] text-slate-400 font-sans font-medium">(Rolled Back)</span>
+                      )}
+                    </td>
                     <td className="py-3 px-4">
                       <strong className="text-slate-900 block">{h.type}</strong>
-                      <span className="text-slate-500 text-[11px]">{h.fileName}</span>
+                      <span className="text-slate-500 text-[11px]">{h.academicYear || "AY 2025-2026"} • {h.quarter || "Q1"}</span>
                     </td>
-                    <td className="py-3 px-3 text-slate-700">{h.uploadedBy}</td>
-                    <td className="py-3 px-3 text-slate-500">{h.timestamp}</td>
-                    <td className="py-3 px-3 text-center font-bold text-slate-800">{h.successRows}/{h.totalRows}</td>
+                    <td className="py-3 px-3 text-slate-700">{h.importedBy}</td>
+                    <td className="py-3 px-3 text-slate-500">{h.date}</td>
+                    <td className="py-3 px-3 font-bold text-slate-800">
+                      <div>{h.count} students</div>
+                      {(h.diffSummary?.added !== undefined || h.diffSummary?.modified !== undefined) && (
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 mt-0.5">
+                          {h.diffSummary?.added ? <span className="text-emerald-700">+{h.diffSummary.added} added</span> : null}
+                          {h.diffSummary?.modified ? <span className="text-blue-700">Δ {h.diffSummary.modified} mod</span> : null}
+                        </div>
+                      )}
+                    </td>
                     <td className="py-3 px-3 text-center">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        h.status === "Success" ? "bg-emerald-100 text-emerald-800" :
-                        h.status === "Partial" ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"
+                        h.rolledBack ? "bg-slate-100 text-slate-600 border border-slate-200" :
+                        h.successRate === "100%" ? "bg-emerald-100 text-emerald-800" :
+                        "bg-amber-100 text-amber-800"
                       }`}>
-                        {h.status}
+                        {h.rolledBack ? "Reverted" : h.successRate ? `Success (${h.successRate})` : "Success"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-3 px-4 text-right">
                       <button
                         type="button"
-                        onClick={() => showToast(`Downloaded audit log report for ${h.id}.`)}
-                        className="min-h-[36px] px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px]"
+                        onClick={() => setInspectingBatch(h)}
+                        className="min-h-[32px] px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] border border-slate-300 transition shadow-2xs cursor-pointer inline-flex items-center gap-1"
+                        title="Inspect Granular Record Diffs"
                       >
-                        Download Log
+                        <FileSpreadsheet className="h-3.5 w-3.5 text-[#8B0014]" />
+                        <span>Inspect Diff</span>
                       </button>
                     </td>
                   </tr>
@@ -3319,6 +3357,13 @@ export const TeacherDashboard: React.FC = () => {
         isOpen={isBatchModalOpen}
         onClose={() => setIsBatchModalOpen(false)}
         onDispatched={() => showToast("Batch action dispatched successfully.")}
+      />
+
+      {/* Ingestion Batch Audit Diff Inspector Modal */}
+      <ImportDiffModal
+        isOpen={!!inspectingBatch}
+        onClose={() => setInspectingBatch(null)}
+        batch={inspectingBatch}
       />
     </div>
   );

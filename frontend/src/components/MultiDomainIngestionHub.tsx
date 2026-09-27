@@ -17,7 +17,8 @@ import {
   Minus,
   Shield,
   ArrowRight,
-  Database
+  Database,
+  FileSpreadsheet
 } from "lucide-react";
 import { INGESTION_DOMAINS, IngestionDomain, DomainMetadata } from "@/data/sample_templates";
 import { StudentRecord } from "@/data/students500";
@@ -30,8 +31,11 @@ import {
   recalculateAHPForDataset,
   getDomainIngestionCompleteness,
   recordIngestionBatch,
+  computeStudentDatasetDiff,
+  IngestionBatchRecord,
   DomainCompletenessStatus
 } from "@/lib/dataset-store";
+import { ImportDiffModal } from "@/components/ImportDiffModal";
 
 interface MultiDomainIngestionHubProps {
   onSuccess?: () => void;
@@ -58,6 +62,8 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
   const { user } = useAuth();
   const [activeDomain, setActiveDomain] = useState<IngestionDomain>(defaultDomain);
   const [mode, setMode] = useState<"batch_csv" | "manual_entry">("batch_csv");
+  const [lastRecordedBatch, setLastRecordedBatch] = useState<IngestionBatchRecord | null>(null);
+  const [isDiffModalOpen, setIsDiffModalOpen] = useState(false);
   
   // 5-Domain Completeness State
   const [completenessList, setCompletenessList] = useState<DomainCompletenessStatus[]>(() => getDomainIngestionCompleteness());
@@ -508,25 +514,17 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
 
       const finalCalculatedList = recalculateAHPForDataset(updatedStudentList);
       
-      // Compute summary diff statistics
-      let riskIncreased = 0;
-      let riskDecreased = 0;
-      let unchanged = 0;
-      finalCalculatedList.forEach((after) => {
-        const before = baseStudents.find(b => b.id === after.id);
-        if (before) {
-          if (after.latest_risk_score > before.latest_risk_score) riskIncreased++;
-          else if (after.latest_risk_score < before.latest_risk_score) riskDecreased++;
-          else unchanged++;
-        }
-      });
+      // Compute granular record-level and field-level diffs
+      const diffResult = computeStudentDatasetDiff(preImportSnapshot, finalCalculatedList);
+      const riskIncreased = diffResult.summary.riskIncreased;
+      const riskDecreased = diffResult.summary.riskDecreased;
 
       // Save locally & sync to Firebase Cloud Firestore
       saveStudentDataset(finalCalculatedList, true);
 
-      // Record Ingestion Batch for 1-Click Rollback Engine
+      // Record Ingestion Batch for 1-Click Rollback Engine & Audit Diff Inspector
       const batchId = `SAPC-${activeDomain.toUpperCase()}-${Date.now().toString().slice(-6)}`;
-      recordIngestionBatch({
+      const batchRecord = recordIngestionBatch({
         id: batchId,
         type: domainMeta.title,
         domain: activeDomain,
@@ -537,13 +535,11 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
         quarter,
         canRollback: true,
         snapshotData: preImportSnapshot,
-        diffSummary: {
-          studentsAffected: updatedCount || parsedRows.length,
-          riskIncreased,
-          riskDecreased,
-          unchanged
-        }
+        diffSummary: diffResult.summary,
+        changesList: diffResult.changesList
       });
+
+      setLastRecordedBatch(batchRecord);
 
       // Log RA 10173 Audit Record in Firestore & local audit trail (safely non-blocking)
       try {
@@ -552,7 +548,7 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
           actor_role: user?.role || "guidance_counselor",
           action: "BATCH_DATA_INGESTION_CSV",
           target_resource: `Domain: ${domainMeta.title}`,
-          details: `Processed ${parsedRows.length} records. Updated ${updatedCount || parsedRows.length} cohort student risk profiles (${riskIncreased} increased, ${riskDecreased} decreased). AY: ${academicYear}, Quarter: ${quarter}. Batch: ${batchId}.`,
+          details: `Processed ${parsedRows.length} records. Updated ${diffResult.summary.studentsAffected || parsedRows.length} cohort student risk profiles (${riskIncreased} increased, ${riskDecreased} decreased, ${diffResult.summary.added} added, ${diffResult.summary.modified} modified). AY: ${academicYear}, Quarter: ${quarter}. Batch: ${batchId}.`,
           ip_address: "127.0.0.1 (Campus LAN)"
         });
       } catch (auditErr) {
@@ -1386,7 +1382,32 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
               <strong className="text-emerald-950 block">Snapshot Saved</strong>
             </div>
           </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-emerald-200/80">
+            <p className="text-xs text-emerald-800">
+              Granular audit history &amp; field-level diffs are permanently captured under RA 10173 compliance.
+            </p>
+            {lastRecordedBatch && (
+              <button
+                type="button"
+                onClick={() => setIsDiffModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer shrink-0"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 text-amber-300" />
+                <span>Inspect What Changed (Diff Audit)</span>
+              </button>
+            )}
+          </div>
         </div>
+      )}
+
+      {/* Granular Diff Inspector Modal */}
+      {isDiffModalOpen && lastRecordedBatch && (
+        <ImportDiffModal
+          isOpen={isDiffModalOpen}
+          onClose={() => setIsDiffModalOpen(false)}
+          batch={lastRecordedBatch}
+        />
       )}
     </div>
   );

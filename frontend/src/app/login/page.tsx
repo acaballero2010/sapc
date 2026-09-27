@@ -15,7 +15,6 @@ import {
 import { SapcLogo } from "@/components/SapcLogo";
 import { useAuth, RoleType } from "@/lib/auth-context";
 import { GoogleRoleSelectionModal } from "@/components/GoogleRoleSelectionModal";
-import { getActiveFacultyRecords } from "@/lib/dataset-store";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,24 +40,23 @@ export default function LoginPage() {
     setErrorMessage(null);
     setIsSubmitting(true);
     try {
-      const cleanEmail = email.trim().toLowerCase();
-      const facultyList = getActiveFacultyRecords();
-      const matched = facultyList.find(f => f.email && f.email.toLowerCase() === cleanEmail);
+      const cleanInput = email.trim();
+      if (!cleanInput || !password) {
+        setErrorMessage("Please enter both your email/username and password.");
+        setIsSubmitting(false);
+        return;
+      }
 
-      const targetRole: RoleType = 
-        matched ? (matched.role === "guidance_counselor" || matched.role === "counselor" ? "guidance_counselor" : matched.role === "admin" ? "admin" : "teacher") :
-        cleanEmail.includes("admin") ? "admin" :
-        cleanEmail.includes("counselor") ? "guidance_counselor" :
-        cleanEmail.includes("teacher") ? "teacher" :
-        cleanEmail.includes("parent") ? "parent" : "student";
-
-      await login(cleanEmail, password, targetRole);
+      const authenticatedUser = await login(cleanInput, password);
+      const targetRole = authenticatedUser?.role || "student";
       router.push(ROLE_ROUTES[targetRole] || "/dashboard/student");
     } catch (err: any) {
       const msg = err?.message || "Authentication failed. Please check your credentials and try again.";
-      setErrorMessage(msg.includes("OfflineError") || msg.includes("offline") 
-        ? "Could not reach the authentication server. Please check your connection."
-        : "Invalid email or password. Please try again.");
+      if (msg.includes("OfflineError") || msg.includes("offline")) {
+        setErrorMessage("Could not reach the authentication server. Please check your connection.");
+      } else {
+        setErrorMessage(msg);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -103,10 +101,15 @@ export default function LoginPage() {
         targetRole === "teacher" ? "teacher@sapc.edu.ph" :
         targetRole === "parent" ? "parent@sapc.edu.ph" :
         targetRole === "admin" ? "admin@sapc.edu.ph" : "student@sapc.edu.ph";
-      await login(demoEmail, "demo123", targetRole);
-      router.push(ROLE_ROUTES[targetRole]);
-    } catch {
-      router.push(ROLE_ROUTES[targetRole]);
+      const demoPass = 
+        targetRole === "guidance_counselor" ? "counselor123" :
+        targetRole === "teacher" ? "teacher123" :
+        targetRole === "parent" ? "parent123" :
+        targetRole === "admin" ? "admin123" : "student123";
+      const authUser = await login(demoEmail, demoPass, targetRole);
+      router.push(ROLE_ROUTES[authUser?.role || targetRole]);
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Quick demo login failed.");
     } finally {
       setIsSubmitting(false);
     }

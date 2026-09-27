@@ -7,16 +7,13 @@ import {
   GraduationCap, 
   Users, 
   ArrowRight, 
-  KeyRound,
   School,
   Lock,
   Mail,
   CheckCircle2,
   Calendar,
   User,
-  Clock,
-  AlertCircle,
-  RotateCw
+  AlertCircle
 } from "lucide-react";
 import { SapcLogo } from "@/components/SapcLogo";
 import { useAuth } from "@/lib/auth-context";
@@ -24,6 +21,17 @@ import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { GoogleRoleSelectionModal } from "@/components/GoogleRoleSelectionModal";
+import { 
+  JHS_GRADE_LEVELS, 
+  getSectionsForGrade, 
+  addStudentRecord, 
+  getActivePendingRegistrations, 
+  saveActivePendingRegistrations, 
+  getActiveParentRecords, 
+  saveActiveParentRecords, 
+  PendingRegistrationRecord, 
+  ParentRecord 
+} from "@/lib/dataset-store";
 
 type RegistrationRole = "student" | "parent";
 
@@ -57,23 +65,17 @@ export default function RegisterPage() {
   const router = useRouter();
   const { switchRole, loginWithGoogle, updateUserProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<RegistrationRole>("student");
-  const [step, setStep] = useState<"form" | "otp" | "success">("form");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [step, setStep] = useState<"form" | "success">("form");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleRoleModalOpen, setIsGoogleRoleModalOpen] = useState(false);
   const [googleUserName, setGoogleUserName] = useState("SAPC Member");
-
-  // OTP Timer and State
-  const [expirySeconds, setExpirySeconds] = useState<number>(600);
-  const [resendCooldown, setResendCooldown] = useState<number>(60);
-  const [resendSuccessMsg, setResendSuccessMsg] = useState<string | null>(null);
-  const [isResending, setIsResending] = useState<boolean>(false);
-  const [otpError, setOtpError] = useState<string | null>(null);
-  const [otpSentTo, setOtpSentTo] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Student form state
   const [studentName, setStudentName] = useState("");
   const [lrn, setLrn] = useState("");
+  const [studentGradeLevel, setStudentGradeLevel] = useState<number>(7);
+  const [studentSection, setStudentSection] = useState<string>("Grade 7 - Love");
   const [studentEmail, setStudentEmail] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
   const [studentBirthDate, setStudentBirthDate] = useState("");
@@ -83,134 +85,25 @@ export default function RegisterPage() {
   const [parentEmail, setParentEmail] = useState("");
   const [parentPhone, setParentPhone] = useState("");
   const [childLrn, setChildLrn] = useState("");
+  const [childGradeLevel, setChildGradeLevel] = useState<number>(7);
+  const [childSection, setChildSection] = useState<string>("Grade 7 - Love");
   const [parentRelation, setParentRelation] = useState("Mother");
   const [parentPassword, setParentPassword] = useState("");
-
-  // OTP Timer decrementing
-  useEffect(() => {
-    if (step !== "otp") return;
-    const timer = setInterval(() => {
-      setExpirySeconds(prev => (prev > 0 ? prev - 1 : 0));
-      setResendCooldown(prev => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [step]);
-
-  const formatTimer = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) value = value[0];
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    setOtpError(null);
-
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`reg-page-otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
-  const sendOtpRequest = async (email: string, name: string) => {
-    try {
-      const res = await fetch("/api/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, role: activeTab })
-      });
-      const data = await res.json();
-      if (!data.success) {
-        setOtpError(data.error || "Failed to dispatch verification code.");
-        return false;
-      }
-      setOtpSentTo(email);
-      setExpirySeconds(600);
-      setResendCooldown(60);
-      setOtp(["", "", "", "", "", ""]);
-      setOtpError(null);
-      return true;
-    } catch (err: any) {
-      console.warn("OTP send error:", err);
-      setOtpSentTo(email);
-      return true;
-    }
-  };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setOtpError(null);
-
-    const emailToUse = activeTab === "student"
-      ? (studentEmail || `${lrn}@student.sapc.edu.ph`)
-      : (parentEmail || `${parentPhone.replace(/\D/g, "")}@parent.sapc.edu.ph`);
-    const nameToUse = activeTab === "student"
-      ? (studentName.trim() || `Student ${lrn}`)
-      : (parentName.trim() || "Parent / Guardian");
-
-    const sent = await sendOtpRequest(emailToUse, nameToUse);
-    setIsSubmitting(false);
-
-    if (sent) {
-      setStep("otp");
-    }
-  };
-
-  const handleResendOtp = async () => {
-    if (resendCooldown > 0 || isResending) return;
-    setIsResending(true);
-    setResendSuccessMsg(null);
-    setOtpError(null);
-
-    const emailToUse = otpSentTo || (activeTab === "student" ? studentEmail : parentEmail);
-    const nameToUse = activeTab === "student" ? studentName : parentName;
-
-    const sent = await sendOtpRequest(emailToUse, nameToUse);
-    setIsResending(false);
-
-    if (sent) {
-      setResendSuccessMsg("A fresh 6-digit verification code has been dispatched.");
-      setTimeout(() => setResendSuccessMsg(null), 5000);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    const allFilled = otp.every(d => d.length === 1);
-    if (!allFilled) {
-      setOtpError("Please enter all 6 digits of the verification code.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setOtpError(null);
+    setSubmitError(null);
 
     try {
-      const emailToUse = otpSentTo || (activeTab === "student"
-        ? (studentEmail || `student.${lrn}@sapc.edu.ph`)
-        : (parentEmail || "parent.new@sapc.edu.ph"));
-      const passToUse = activeTab === "student" ? (studentPassword || "student123") : (parentPassword || "parent123");
+      const emailToUse = activeTab === "student"
+        ? (studentEmail || `${lrn}@student.sapc.edu.ph`)
+        : (parentEmail || `${parentPhone.replace(/\D/g, "")}@parent.sapc.edu.ph`);
+      const passToUse = activeTab === "student" ? (studentPassword || "Student@SAPC2026!") : (parentPassword || "Parent@SAPC2026!");
       const nameToUse = activeTab === "student"
         ? (studentName.trim() || (lrn ? `Student ${lrn}` : "SAPC Student"))
         : (parentName.trim() || "Parent / Guardian");
       const roleToUse: RegistrationRole = activeTab;
-
-      // Verify OTP against server
-      const verifyRes = await fetch("/api/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailToUse, code: otp.join("") })
-      });
-      const verifyData = await verifyRes.json();
-
-      if (!verifyData.success) {
-        setOtpError(verifyData.error || "Incorrect verification code. Please check your inbox and try again.");
-        setIsSubmitting(false);
-        return;
-      }
 
       if (auth && db) {
         try {
@@ -242,10 +135,60 @@ export default function RegisterPage() {
         }
       }
 
+      if (activeTab === "student") {
+        await addStudentRecord({
+          full_name: nameToUse,
+          lrn: lrn,
+          email: emailToUse,
+          grade_level: studentGradeLevel,
+          section_name: studentSection,
+          strand: "JHS"
+        });
+      } else if (activeTab === "parent") {
+        const currentPending = getActivePendingRegistrations();
+        const pendingRec: PendingRegistrationRecord = {
+          id: `REG-${Date.now().toString().slice(-4)}`,
+          name: nameToUse,
+          email: emailToUse,
+          phone: parentPhone,
+          role: "parent",
+          relationship: parentRelation,
+          linkedStudent: childLrn ? `Learner ${childLrn}` : "Enrolled Learner",
+          linkedLRN: childLrn || "109238475001",
+          section: childSection,
+          verificationDoc: "Self-Registered via Portal (Online Registration)",
+          date: new Date().toISOString().split("T")[0],
+          status: "Approved",
+          notes: `Linked to Grade ${childGradeLevel} (${childSection})`
+        };
+        saveActivePendingRegistrations([pendingRec, ...currentPending], true);
+
+        const currentParents = getActiveParentRecords();
+        const newParent: ParentRecord = {
+          id: `PAR-${Date.now().toString().slice(-4)}`,
+          name: nameToUse,
+          email: emailToUse,
+          phone: parentPhone,
+          relationship: parentRelation,
+          linkedStudentName: childLrn ? `Learner ${childLrn}` : "Enrolled Learner",
+          linkedLRN: childLrn || "109238475001",
+          section: childSection,
+          gradeLevel: `Grade ${childGradeLevel}`,
+          status: "Active",
+          verifiedAt: new Date().toISOString().split("T")[0],
+          sf9Access: true,
+          attendanceAlerts: true,
+          riskAlerts: true,
+          initialPassword: passToUse
+        };
+        saveActiveParentRecords([newParent, ...currentParents], true);
+      }
+
       updateUserProfile({
         full_name: nameToUse,
         email: emailToUse,
-        role: roleToUse
+        role: roleToUse,
+        section: activeTab === "student" ? studentSection : childSection
       });
 
       if (typeof window !== "undefined") {
@@ -254,8 +197,30 @@ export default function RegisterPage() {
           email: emailToUse,
           full_name: nameToUse,
           role: roleToUse,
+          section: activeTab === "student" ? studentSection : childSection,
           student_id: activeTab === "student" ? 1 : null
         }));
+
+        try {
+          const raw = localStorage.getItem("sapc_registered_accounts");
+          const registeredList = raw ? JSON.parse(raw) : [];
+          const existingIdx = registeredList.findIndex((acc: any) => acc.email?.toLowerCase() === emailToUse.toLowerCase());
+          const newAcc = {
+            email: emailToUse.toLowerCase(),
+            password: passToUse,
+            name: nameToUse,
+            role: roleToUse,
+            section: activeTab === "student" ? studentSection : childSection,
+            lrn: activeTab === "student" ? lrn : childLrn,
+            student_id: activeTab === "student" ? 1 : null
+          };
+          if (existingIdx >= 0) {
+            registeredList[existingIdx] = newAcc;
+          } else {
+            registeredList.push(newAcc);
+          }
+          localStorage.setItem("sapc_registered_accounts", JSON.stringify(registeredList));
+        } catch {}
       }
 
       await switchRole(roleToUse);
@@ -263,7 +228,7 @@ export default function RegisterPage() {
       setStep("success");
     } catch (err: any) {
       console.error("Registration error:", err);
-      setOtpError(err?.message || "Registration verification failed. Please try again.");
+      setSubmitError(err?.message || "Registration failed. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -453,21 +418,22 @@ export default function RegisterPage() {
                         />
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        DepEd Learner Reference Number (LRN) *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={12}
-                        value={lrn}
-                        onChange={(e) => setLrn(e.target.value)}
-                        placeholder="e.g. 109238475612"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
-                      />
-                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          DepEd Learner Reference Number (LRN) *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          maxLength={12}
+                          value={lrn}
+                          onChange={(e) => setLrn(e.target.value.replace(/\D/g, ""))}
+                          placeholder="e.g. 109238475612"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                        />
+                      </div>
+
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                           Date of Birth (Identity Verification) *
@@ -483,6 +449,51 @@ export default function RegisterPage() {
                           />
                         </div>
                       </div>
+                    </div>
+
+                    {/* JHS Grade Level & Section Dropdowns for Student */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Junior High Grade Level *
+                        </label>
+                        <select
+                          value={studentGradeLevel}
+                          onChange={(e) => {
+                            const lvl = Number(e.target.value);
+                            setStudentGradeLevel(lvl);
+                            const available = getSectionsForGrade(lvl);
+                            if (available.length > 0) setStudentSection(available[0]);
+                          }}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                        >
+                          {JHS_GRADE_LEVELS.map((g) => (
+                            <option key={g.level} value={g.level}>
+                              {g.label} (Junior High)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Assigned Section *
+                        </label>
+                        <select
+                          value={studentSection}
+                          onChange={(e) => setStudentSection(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                        >
+                          {getSectionsForGrade(studentGradeLevel).map((sec) => (
+                            <option key={sec} value={sec}>
+                              {sec}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                           SAPC Institutional or Personal Email *
@@ -499,21 +510,22 @@ export default function RegisterPage() {
                           />
                         </div>
                       </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Create Password *
-                      </label>
-                      <div className="relative">
-                        <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
-                        <input
-                          type="password"
-                          required
-                          value={studentPassword}
-                          onChange={(e) => setStudentPassword(e.target.value)}
-                          placeholder="At least 8 characters"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        />
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Create Password *
+                        </label>
+                        <div className="relative">
+                          <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                          <input
+                            type="password"
+                            required
+                            value={studentPassword}
+                            onChange={(e) => setStudentPassword(e.target.value)}
+                            placeholder="At least 8 characters"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                          />
+                        </div>
                       </div>
                     </div>
                   </>
@@ -554,6 +566,49 @@ export default function RegisterPage() {
                         </select>
                       </div>
                     </div>
+
+                    {/* Linked Child Grade Level & Section */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Child&apos;s Grade Level *
+                        </label>
+                        <select
+                          value={childGradeLevel}
+                          onChange={(e) => {
+                            const lvl = Number(e.target.value);
+                            setChildGradeLevel(lvl);
+                            const available = getSectionsForGrade(lvl);
+                            if (available.length > 0) setChildSection(available[0]);
+                          }}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                        >
+                          {JHS_GRADE_LEVELS.map((g) => (
+                            <option key={g.level} value={g.level}>
+                              {g.label} (Junior High)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Child&apos;s Section *
+                        </label>
+                        <select
+                          value={childSection}
+                          onChange={(e) => setChildSection(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                        >
+                          {getSectionsForGrade(childGradeLevel).map((sec) => (
+                            <option key={sec} value={sec}>
+                              {sec}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -564,8 +619,8 @@ export default function RegisterPage() {
                           required
                           maxLength={12}
                           value={childLrn}
-                          onChange={(e) => setChildLrn(e.target.value)}
-                          placeholder="e.g. 109238475612"
+                          onChange={(e) => setChildLrn(e.target.value.replace(/\D/g, ""))}
+                          placeholder="e.g. 109238475001"
                           className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
                         />
                       </div>
@@ -620,120 +675,30 @@ export default function RegisterPage() {
                   </>
                 )}
 
+                {submitError && (
+                  <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full py-3.5 rounded-xl font-black text-sm bg-[#8B0014] hover:bg-[#700010] text-white shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 mt-4"
                 >
-                  <span>{isSubmitting ? "Processing Verification..." : "Proceed to 2-Factor OTP Verification"}</span>
+                  <span>
+                    {isSubmitting
+                      ? (activeTab === "student" ? "Enlisting Student Profile..." : "Registering Parent Account...")
+                      : (activeTab === "student" ? "Create Student Account →" : "Create Parent Account →")}
+                  </span>
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition" />
                 </button>
               </form>
             </div>
           )}
 
-          {step === "otp" && (
-            <div className="mt-6 text-center space-y-5">
-              <div className="mx-auto w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-[#8B0014] shadow-xs">
-                <KeyRound className="h-7 w-7 animate-pulse" />
-              </div>
-
-              <div>
-                <h2 className="text-xl font-black text-slate-900">Enter 6-Digit Verification PIN</h2>
-                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                  A verification code has been dispatched to{" "}
-                  <strong className="text-slate-800 font-mono bg-slate-100 px-2 py-0.5 rounded-md">
-                    {otpSentTo || "your address"}
-                  </strong>.
-                </p>
-
-                {/* Expiration Timer Status Pill */}
-                <div className="pt-2 flex items-center justify-center">
-                  {expirySeconds > 120 ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-                      <Clock className="h-3.5 w-3.5 text-emerald-600" />
-                      Code expires in <span className="font-mono font-bold">{formatTimer(expirySeconds)}</span>
-                    </span>
-                  ) : expirySeconds > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 animate-pulse shadow-2xs">
-                      <Clock className="h-3.5 w-3.5 text-amber-600" />
-                      Expiring soon: <span className="font-mono">{formatTimer(expirySeconds)}</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs">
-                      <AlertCircle className="h-3.5 w-3.5 text-rose-600" />
-                      Code Expired — Please request a new PIN
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {resendSuccessMsg && (
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold text-center flex items-center justify-center gap-2 animate-fadeIn">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>{resendSuccessMsg}</span>
-                </div>
-              )}
-
-              {otpError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium text-center flex items-center justify-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-[#8B0014] shrink-0" />
-                  <span>{otpError}</span>
-                </div>
-              )}
-
-              <div className="flex justify-center gap-2 sm:gap-3">
-                {otp.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    id={`reg-page-otp-${idx}`}
-                    type="text"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    className="w-11 h-13 sm:w-13 sm:h-14 text-center text-xl font-black bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#8B0014] focus:bg-white transition"
-                  />
-                ))}
-              </div>
-
-              <div className="pt-2 space-y-2.5">
-                <button
-                  type="button"
-                  disabled={isSubmitting || otp.some(d => !d)}
-                  onClick={handleVerifyOtp}
-                  className="w-full py-3.5 rounded-xl font-black text-sm bg-[#8B0014] hover:bg-[#700010] text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  <span>{isSubmitting ? "Verifying Credentials..." : "Complete Registration & Access Portal"}</span>
-                  <CheckCircle2 className="h-4 w-4" />
-                </button>
-
-                <div className="flex items-center justify-between text-xs pt-1 px-1">
-                  <button
-                    type="button"
-                    onClick={() => setStep("form")}
-                    className="font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer"
-                  >
-                    ← Edit details
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={resendCooldown > 0 || isResending}
-                    onClick={handleResendOtp}
-                    className="font-bold text-[#8B0014] hover:underline disabled:text-slate-400 disabled:no-underline flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
-                  >
-                    <RotateCw className={`h-3 w-3 ${isResending ? "animate-spin" : ""}`} />
-                    <span>
-                      {resendCooldown > 0
-                        ? `Resend in ${resendCooldown}s`
-                        : "Resend Code"}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
+          {/* STEP 2: SUCCESS */}
           {step === "success" && (
             <div className="mt-6 text-center space-y-6 py-4">
               <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 border-2 border-emerald-300 flex items-center justify-center text-emerald-600">

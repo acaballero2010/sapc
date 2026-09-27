@@ -44,10 +44,13 @@ import {
   FileCheck
 } from "lucide-react";
 import { SapcLogo } from "./SapcLogo";
+import { getActiveCustomLogo, saveCustomLogo, compressLogoImage, subscribeCustomLogo } from "@/lib/branding-store";
 import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
 import { FacultyImportModal } from "./FacultyImportModal";
+import { StudentDetailModal } from "./StudentDetailModal";
+import { ImportDiffModal } from "./ImportDiffModal";
 import { 
   getActiveStudentDataset, 
   computeCohortAggregates, 
@@ -95,7 +98,6 @@ export type AdminTabType =
   | "revert_import"
   | "students"
   | "create_student"
-  | "student_profile"
   | "teachers"
   | "create_user"
   | "parents"
@@ -187,24 +189,27 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Platform Settings & Institutional Branding (Campus Logo)
-  const [customLogo, setCustomLogo] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("sapc_custom_logo");
-    }
-    return null;
-  });
+  const [customLogo, setCustomLogo] = useState<string | null>(() => getActiveCustomLogo());
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [institutionName, setInstitutionName] = useState("San Antonio de Padua College");
   const [campusTagline, setCampusTagline] = useState("Foundation of Pila, Laguna, Inc. • IntellySys DSS");
   const [campusAddress, setCampusAddress] = useState("National Highway, Pila, Laguna 4010 Philippines");
   const [depEdSchoolId, setDepEdSchoolId] = useState("402681");
   const logoInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleInstitutionalLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const unsub = subscribeCustomLogo((logo) => {
+      setCustomLogo(logo);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleInstitutionalLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 4 * 1024 * 1024) {
-      showToast("Logo file size must be less than 4MB.");
+    if (file.size > 8 * 1024 * 1024) {
+      showToast("Logo file size must be less than 8MB.");
       return;
     }
 
@@ -213,25 +218,31 @@ export const AdminDashboard: React.FC = () => {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      if (result) {
-        localStorage.setItem("sapc_custom_logo", result);
-        setCustomLogo(result);
-        window.dispatchEvent(new Event("sapc_logo_updated"));
-        showToast("Campus institutional logo updated across all platform portals!");
-      }
-    };
-    reader.readAsDataURL(file);
+    setIsUploadingLogo(true);
+    try {
+      const compressedData = await compressLogoImage(file, 360);
+      await saveCustomLogo(compressedData);
+      setCustomLogo(compressedData);
+      showToast("Campus institutional logo updated and synchronized across all devices!");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to process logo upload.");
+    } finally {
+      setIsUploadingLogo(false);
+    }
   };
 
-  const handleResetInstitutionalLogo = () => {
-    localStorage.removeItem("sapc_custom_logo");
-    setCustomLogo(null);
-    window.dispatchEvent(new Event("sapc_logo_updated"));
-    if (logoInputRef.current) logoInputRef.current.value = "";
-    showToast("Campus logo reset to official SAPC 1979 crest.");
+  const handleResetInstitutionalLogo = async () => {
+    setIsUploadingLogo(true);
+    try {
+      await saveCustomLogo(null);
+      setCustomLogo(null);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+      showToast("Campus logo reset to official SAPC 1979 crest across all devices.");
+    } catch {
+      showToast("Failed to reset logo.");
+    } finally {
+      setIsUploadingLogo(false);
+    }
   };
 
   // 12. Quarter Calendar Config
@@ -761,6 +772,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
 
   // 3. Dynamic Ingestion History & 1-Click Rollback State
   const [importHistory, setImportHistory] = useState<IngestionBatchRecord[]>(() => getIngestionHistory());
+  const [inspectingBatch, setInspectingBatch] = useState<IngestionBatchRecord | null>(null);
 
   useEffect(() => {
     const refreshHistory = () => {
@@ -793,12 +805,12 @@ Issued Date     : ${new Date().toLocaleDateString()}
     }
   };
 
-  // Categories for 19 Tabs
+  // Categories for 18 Tabs
   const CATEGORIES = useMemo(() => [
-    { id: "all", label: "All Master Controls (19)" },
+    { id: "all", label: "All Master Controls (18)" },
     { id: "governance", label: "System & Platform Config (5)", tabIds: ["dashboard", "platform_settings", "quarter_management", "knowledge_base", "notifications"] },
     { id: "ingestion", label: "Master Ingestion & Rollback (5)", tabIds: ["import_wizard", "import_history", "revert_import", "verify_assessments", "export_import_history"] },
-    { id: "students", label: "Student Master Registry (3)", tabIds: ["students", "create_student", "student_profile"] },
+    { id: "students", label: "Student Master Registry (2)", tabIds: ["students", "create_student"] },
     { id: "users", label: "Campus Accounts & Security (5)", tabIds: ["teachers", "create_user", "parents", "pending_registrations", "export_credentials"] },
     { id: "compliance", label: "Institutional Compliance (1)", tabIds: ["reports"] }
   ], []);
@@ -812,7 +824,6 @@ Issued Date     : ${new Date().toLocaleDateString()}
     { id: "revert_import", label: "Rollback & Revert Engine", icon: RotateCcw, badge: "Emergency", category: "ingestion" },
     { id: "students", label: "Master Student Registry", icon: BookOpen, badge: `${cohortStats.total || 500}`, category: "students" },
     { id: "create_student", label: "Create Single Student", icon: UserPlus, category: "students" },
-    { id: "student_profile", label: "Student Override Editor", icon: Edit, category: "students" },
     { id: "teachers", label: "Faculty & Counselors Roster", icon: GraduationCap, badge: `${facultyList.length} Active`, category: "users" },
     { id: "create_user", label: "Create Campus Account", icon: Key, category: "users" },
     { id: "parents", label: "Parent Accounts & Links", icon: Users, badge: `${parentRecords.length} Active`, category: "users" },
@@ -882,6 +893,8 @@ Issued Date     : ${new Date().toLocaleDateString()}
   useEffect(() => {
     setStudentPage(1);
   }, [searchQuery, studentGradeFilter, studentSectionFilter, studentPageSize]);
+
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // ==========================================
   // 2. CREATE STUDENT FORM STATE
@@ -960,62 +973,6 @@ Issued Date     : ${new Date().toLocaleDateString()}
       showToast("Failed to enroll student. Please check input fields.");
     } finally {
       setNewStudentIsSubmitting(false);
-    }
-  };
-
-  // ==========================================
-  // 3. STUDENT OVERRIDE FORM STATE
-  // ==========================================
-  const [overrideGWA, setOverrideGWA] = useState<number>(85);
-  const [overrideAttendance, setOverrideAttendance] = useState<number>(95);
-  const [overrideFailedCount, setOverrideFailedCount] = useState<number>(0);
-  const [overridePHQ9, setOverridePHQ9] = useState<number>(3);
-  const [overrideFamilySupport, setOverrideFamilySupport] = useState<string>("Stable");
-  const [overrideIncome, setOverrideIncome] = useState<string>("10k-25k");
-
-  useEffect(() => {
-    if (selectedStudentObj && selectedStudentObj.id) {
-      setOverrideGWA(selectedStudentObj.sass_metrics?.gpa || 85);
-      setOverrideAttendance(selectedStudentObj.sass_metrics?.attendance_rate_pct || 95);
-      setOverrideFailedCount(selectedStudentObj.sass_metrics?.failing_subjects_count || 0);
-      setOverridePHQ9(Math.round((selectedStudentObj.domain_scores?.mental_health || 10) / 3.5));
-      setOverrideFamilySupport(selectedStudentObj.domain_scores?.family >= 25 ? "OFW Parents" : "Stable");
-      setOverrideIncome(selectedStudentObj.domain_scores?.financial >= 30 ? "<10k" : "10k-25k");
-    }
-  }, [selectedStudentObj]);
-
-  const handleSaveStudentOverride = async () => {
-    if (!selectedStudentObj || !selectedStudentObj.id) return;
-    try {
-      const gpa = Number(overrideGWA);
-      const att = Number(overrideAttendance);
-      const fails = Number(overrideFailedCount);
-      const abs = Math.max(0, Math.round((100 - att) / 5));
-      const phq = Number(overridePHQ9);
-      const famRisk = overrideFamilySupport === "OFW Parents" ? 30 : overrideFamilySupport === "Single Parent" ? 25 : 10;
-      const finRisk = overrideIncome === "<10k" ? 35 : overrideIncome === "10k-25k" ? 20 : 10;
-
-      const updated = await updateStudentRecord(selectedStudentObj.id, {
-        domain_scores: {
-          academic: Math.max(0, 100 - gpa),
-          mental_health: phq * 3.5,
-          family: famRisk,
-          financial: finRisk,
-          health: Math.max(0, 100 - att)
-        },
-        sass_metrics: {
-          ...selectedStudentObj.sass_metrics,
-          gpa,
-          failing_subjects_count: fails,
-          attendance_rate_pct: att,
-          days_absent: abs
-        }
-      });
-      setStudents(getActiveStudentDataset());
-      showToast(`Saved manual override for ${selectedStudentObj.first_name} ${selectedStudentObj.last_name}. New AHP Score: ${updated?.latest_risk_score}/100 (${updated?.latest_risk_tier?.toUpperCase()})`);
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to save student override.");
     }
   };
 
@@ -1944,7 +1901,13 @@ Issued Date     : ${new Date().toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4 text-slate-600 font-medium">{h.importedBy}</td>
                       <td className="py-3 px-4 font-bold text-slate-900">
-                        {h.count} students
+                        <div>{h.count} students</div>
+                        {(h.diffSummary?.added !== undefined || h.diffSummary?.modified !== undefined) && (
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 mt-0.5">
+                            {h.diffSummary?.added ? <span className="text-emerald-700">+{h.diffSummary.added} new</span> : null}
+                            {h.diffSummary?.modified ? <span className="text-blue-700">Δ {h.diffSummary.modified} mod</span> : null}
+                          </div>
+                        )}
                       </td>
                       <td className="py-3 px-4">
                         {h.diffSummary ? (
@@ -1959,23 +1922,35 @@ Issued Date     : ${new Date().toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">{h.date}</td>
                       <td className="py-3 px-4 text-right">
-                        {h.rolledBack ? (
-                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
-                            Reverted
-                          </span>
-                        ) : h.canRollback ? (
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             type="button"
-                            onClick={() => handleRollbackBatch(h.id)}
-                            className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#8B0014] border border-rose-200 font-bold text-xs transition shadow-2xs cursor-pointer"
+                            onClick={() => setInspectingBatch(h)}
+                            className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold text-xs transition shadow-2xs cursor-pointer flex items-center gap-1"
+                            title="Inspect Granular Record Diffs (Added/Modified)"
                           >
-                            1-Click Rollback
+                            <FileSpreadsheet className="h-3 w-3 text-[#8B0014]" />
+                            <span>Inspect Diff</span>
                           </button>
-                        ) : (
-                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-50 text-slate-400 border border-slate-100">
-                            Baseline Locked
-                          </span>
-                        )}
+
+                          {h.rolledBack ? (
+                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                              Reverted
+                            </span>
+                          ) : h.canRollback ? (
+                            <button
+                              type="button"
+                              onClick={() => handleRollbackBatch(h.id)}
+                              className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#8B0014] border border-rose-200 font-bold text-xs transition shadow-2xs cursor-pointer"
+                            >
+                              1-Click Rollback
+                            </button>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-50 text-slate-400 border border-slate-100">
+                              Baseline Locked
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -2279,13 +2254,13 @@ Issued Date     : ${new Date().toLocaleDateString()}
                                 type="button"
                                 onClick={() => {
                                   setSelectedStudentId(s.id);
-                                  handleTabChange("student_profile");
+                                  setIsDetailOpen(true);
                                 }}
                                 className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-[#8B0014] hover:text-white text-slate-800 font-bold text-xs transition shadow-2xs cursor-pointer flex items-center gap-1"
-                                title="Override / Edit Student Data"
+                                title="View Student Dossier"
                               >
-                                <Edit className="h-3 w-3" />
-                                <span>Edit Record</span>
+                                <Eye className="h-3 w-3" />
+                                <span>View Dossier</span>
                               </button>
 
                               <button
@@ -2582,155 +2557,6 @@ Issued Date     : ${new Date().toLocaleDateString()}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* 9. STUDENT OVERRIDE PROFILE (student_profile) */}
-      {/* ========================================================= */}
-      {activeTab === "student_profile" && (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <button
-                  onClick={() => handleTabChange("students")}
-                  className="text-xs font-bold text-slate-500 hover:text-[#8B0014] mb-2 flex items-center gap-1"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                  <span>Back to Student Registry</span>
-                </button>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-                  Admin Data Override: {selectedStudentObj.first_name} {selectedStudentObj.last_name}
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500">
-                  LRN: {selectedStudentObj.lrn} • {selectedStudentObj.section_name} • Grade {selectedStudentObj.grade_level}
-                </p>
-              </div>
-              <span className="px-3 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200 self-start sm:self-auto">
-                🟢 Enrolled &amp; Active
-              </span>
-            </div>
-
-            {/* Quick Student Selector */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <span className="font-bold text-slate-700">Select Student to Override:</span>
-              <select
-                value={selectedStudentId}
-                onChange={(e) => setSelectedStudentId(Number(e.target.value))}
-                className="px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900"
-              >
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.first_name} {s.last_name} ({s.section_name} - LRN: {s.lrn})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Comprehensive Multi-Domain Override Form */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-3">
-                <span className="font-black text-blue-950 block text-sm">1. Academic Domain</span>
-                <div className="space-y-1.5">
-                  <label className="font-bold text-blue-900">General Weighted Average (GWA)</label>
-                  <input
-                    type="number"
-                    min="65"
-                    max="100"
-                    value={overrideGWA}
-                    onChange={(e) => setOverrideGWA(Number(e.target.value))}
-                    className="w-full p-2.5 bg-white border border-blue-300 rounded-xl font-bold text-slate-900"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="font-bold text-blue-900">Failed Subjects Count</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="8"
-                    value={overrideFailedCount}
-                    onChange={(e) => setOverrideFailedCount(Number(e.target.value))}
-                    className="w-full p-2.5 bg-white border border-blue-300 rounded-xl font-bold text-slate-900"
-                  />
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
-                <span className="font-black text-emerald-950 block text-sm">2. Attendance &amp; Health</span>
-                <div className="space-y-1.5">
-                  <label className="font-bold text-emerald-900">Quarter Attendance Rate (%)</label>
-                  <input
-                    type="number"
-                    min="50"
-                    max="100"
-                    value={overrideAttendance}
-                    onChange={(e) => setOverrideAttendance(Number(e.target.value))}
-                    className="w-full p-2.5 bg-white border border-emerald-300 rounded-xl font-bold text-slate-900"
-                  />
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-3">
-                <span className="font-black text-purple-950 block text-sm">3. Mental Health Screener</span>
-                <div className="space-y-1.5">
-                  <label className="font-bold text-purple-900">PHQ-9 Depression Screener Score (0-27)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="27"
-                    value={overridePHQ9}
-                    onChange={(e) => setOverridePHQ9(Number(e.target.value))}
-                    className="w-full p-2.5 bg-white border border-purple-300 rounded-xl font-bold text-slate-900"
-                  />
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3">
-                <span className="font-black text-amber-950 block text-sm">4. Family Domain</span>
-                <div className="space-y-1.5">
-                  <label className="font-bold text-amber-900">Family Support Status</label>
-                  <select
-                    value={overrideFamilySupport}
-                    onChange={(e) => setOverrideFamilySupport(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-bold text-slate-900"
-                  >
-                    <option value="Stable">Two-Parent Stable Home</option>
-                    <option value="OFW Parents">OFW Parent(s) Working Abroad</option>
-                    <option value="Single Parent">Single Parent Household</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-3">
-                <span className="font-black text-rose-950 block text-sm">5. Financial Status</span>
-                <div className="space-y-1.5">
-                  <label className="font-bold text-rose-900">Household Income Level</label>
-                  <select
-                    value={overrideIncome}
-                    onChange={(e) => setOverrideIncome(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-rose-300 rounded-xl font-bold text-slate-900"
-                  >
-                    <option value="<10k">&lt; ₱10,000 (Low Income / Subsidy Priority)</option>
-                    <option value="10k-25k">₱10,000 - ₱25,000 (Lower Middle)</option>
-                    <option value="25k-50k">₱25,000 - ₱50,000 (Middle)</option>
-                    <option value=">50k">&gt; ₱50,000 (Upper Middle)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleSaveStudentOverride}
-                className="px-6 py-2.5 rounded-xl bg-[#8B0014] text-white font-extrabold text-xs hover:bg-[#6D0010] transition shadow-md flex items-center gap-2"
-              >
-                <Sliders className="h-4 w-4 text-amber-300" />
-                <span>Save Override &amp; Recalculate AHP Risk</span>
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -4837,6 +4663,19 @@ Issued Date     : ${new Date().toLocaleDateString()}
           setFacultyList(getActiveFacultyRecords());
           showToast(`Successfully imported and synchronized ${count} faculty and counselor accounts with Cloud Firestore.`);
         }}
+      />
+
+      <StudentDetailModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        studentId={selectedStudentId}
+      />
+
+      {/* Ingestion Batch Audit Diff Inspector Modal */}
+      <ImportDiffModal
+        isOpen={!!inspectingBatch}
+        onClose={() => setInspectingBatch(null)}
+        batch={inspectingBatch}
       />
     </div>
   );

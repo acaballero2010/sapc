@@ -315,8 +315,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         category: "Student Master Registry",
         items: [
           { name: "Master Student Registry", href: "/dashboard/admin?tab=students#roster", icon: BookOpen, badge: "500" },
-          { name: "Create Single Student", href: "/dashboard/admin?tab=create_student#create-student", icon: UserPlus },
-          { name: "Student Override Editor", href: "/dashboard/admin?tab=student_profile#student-editor", icon: Edit }
+          { name: "Create Single Student", href: "/dashboard/admin?tab=create_student#create-student", icon: UserPlus }
         ]
       },
       {

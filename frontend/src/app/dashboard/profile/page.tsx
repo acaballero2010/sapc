@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useSearchParams } from "next/navigation";
+import { JHS_GRADE_LEVELS, getSectionsForGrade } from "@/lib/dataset-store";
 
 const AVATAR_PRESETS = [
   { id: "stem", label: "STEM Scholar", emoji: "🔬", bg: "from-blue-600 to-indigo-800" },
@@ -44,9 +45,11 @@ function UserProfileContent() {
   const [email, setEmail] = useState(user?.email || "user@sapc.edu.ph");
   const [phone, setPhone] = useState("+63 (049) 559-0192");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
-  const [idNumber, setIdNumber] = useState("FAC-2026-STEM-04");
-  const [department, setDepartment] = useState("Senior High School STEM Faculty");
-  const [officeLocation, setOfficeLocation] = useState("Room 204, St. Augustine Building");
+  const [idNumber, setIdNumber] = useState("FAC-2026-JHS-01");
+  const [department, setDepartment] = useState("Junior High School Faculty");
+  const [officeLocation, setOfficeLocation] = useState("Faculty Room, St. Anthony Hall");
+  const [gradeLevel, setGradeLevel] = useState<string>(user?.grade_level || JHS_GRADE_LEVELS[0].label);
+  const [sectionName, setSectionName] = useState<string>(user?.section || getSectionsForGrade(JHS_GRADE_LEVELS[0].level)[0]);
   const [bio, setBio] = useState("Licensed educator and decision-support facilitator at San Antonio de Padua College.");
   
   // Student/Parent Specific
@@ -80,6 +83,8 @@ function UserProfileContent() {
       setFullName(user.full_name || "");
       setEmail(user.email || "user@sapc.edu.ph");
       setAvatarUrl(user.avatar_url || null);
+      if (user.grade_level) setGradeLevel(user.grade_level);
+      if (user.section) setSectionName(user.section);
 
       if (user.role === "guidance_counselor") {
         setIdNumber("PRC-RGC-094821");
@@ -87,29 +92,29 @@ function UserProfileContent() {
         setOfficeLocation("Central Guidance Consultation Room 204");
         setBio("Registered Guidance Counselor (RGC) specializing in student crisis intervention, AHP behavioral modeling, and academic retention casework.");
       } else if (user.role === "teacher") {
-        setIdNumber("FAC-2026-STEM-04");
-        setDepartment("Senior High School Science & Mathematics Faculty");
-        setOfficeLocation("Faculty Room 3B, Senior High Wing");
-        setBio("Senior High STEM Class Adviser and Chemistry Faculty focusing on student academic stabilization and early guidance referrals.");
+        setIdNumber("FAC-2026-JHS-01");
+        setDepartment("Junior High School Faculty");
+        setOfficeLocation(user.section ? `${user.section} (Advisory Class)` : "Faculty Room, St. Anthony Hall");
+        setBio("Junior High School Class Adviser and Faculty focusing on student academic stabilization and early guidance referrals.");
       } else if (user.role === "admin") {
         setIdNumber("ADM-2026-001");
         setDepartment("Institutional IT & Academic Administration");
         setOfficeLocation("Administration Building, 2nd Floor");
         setBio("System Administrator overseeing AHP decision support model weights, user provisioning, and RA 10173 data privacy compliance.");
       } else if (user.role === "student") {
-        setIdNumber("109482719283");
-        setDepartment("Grade 11 - STEM (St. Augustine)");
-        setOfficeLocation("Classroom 11-A");
+        setIdNumber(user.lrn || "109482719283");
+        setDepartment("Junior High School Department");
+        setOfficeLocation(user.section || "Grade 7 - Love");
         setGuardianName("Mrs. Elena Dimaculangan");
         setGuardianContact("+63 917 555 0192");
-        setBio("Grade 11 STEM Student passionate about Robotics, Applied Chemistry, and peer wellness advocacy.");
+        setBio("Junior High School Student dedicated to academic excellence, leadership, and school community values.");
       } else if (user.role === "parent") {
         setIdNumber("PRNT-10948271");
         setDepartment("Parent-Teacher Community Association (PTCA)");
-        setOfficeLocation("Parent Representative, Grade 11 STEM");
+        setOfficeLocation("Parent Representative, Junior High School");
         setGuardianName("Mrs. Elena Dimaculangan (Self)");
         setGuardianContact("+63 917 555 0192");
-        setBio("Guardian of Joshua Dimaculangan (Grade 11 STEM). Participating in student care plans and parent consultations.");
+        setBio("Guardian of Junior High School student. Participating in student care plans and parent consultations.");
       }
     }
   }, [user]);
@@ -178,6 +183,8 @@ function UserProfileContent() {
         updateUserProfile({
           full_name: fullName,
           avatar_url: avatarUrl || undefined,
+          grade_level: gradeLevel,
+          section: sectionName,
         });
       }
       setIsSaving(false);
@@ -441,25 +448,53 @@ function UserProfileContent() {
                   />
                 </div>
 
+                {/* Grade Level Dropdown */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Department / Division / Strand</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {user?.role === "teacher" ? "Advisory Grade Level" : user?.role === "parent" ? "Child's Grade Level" : "Grade Level"}
+                  </label>
+                  <select
+                    value={gradeLevel}
+                    onChange={(e) => {
+                      const newGrade = e.target.value;
+                      setGradeLevel(newGrade);
+                      const available = getSectionsForGrade(newGrade);
+                      if (available.length > 0) {
+                        setSectionName(available[0]);
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  >
+                    {JHS_GRADE_LEVELS.map((g) => (
+                      <option key={g.level} value={g.label}>{g.label} (Junior High)</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Section Dropdown */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {user?.role === "teacher" ? "Advisory Section Assignment" : user?.role === "parent" ? "Child's Section" : "Assigned Section"}
+                  </label>
+                  <select
+                    value={sectionName}
+                    onChange={(e) => setSectionName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                  >
+                    {getSectionsForGrade(gradeLevel).map((sec) => (
+                      <option key={sec} value={sec}>{sec}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Department / Division</label>
                   <input
                     type="text"
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
-                    placeholder="e.g. Guidance & Counseling Department"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Office / Section Assignment</label>
-                  <input
-                    type="text"
-                    value={officeLocation}
-                    onChange={(e) => setOfficeLocation(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
-                    placeholder="e.g. Room 204, Guidance Office"
+                    placeholder="e.g. Junior High School Department"
                   />
                 </div>
               </div>
