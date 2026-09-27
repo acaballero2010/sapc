@@ -496,14 +496,25 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
               {/* Text Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Full Name</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700">Full Name</label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> Official Record
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
                     required
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                   />
+                  {(user?.role === "student" || user?.role === "parent") && (
+                    <span className="text-[10px] text-slate-400 mt-1 block">To update official registered name, please coordinate with the SAPC Registrar.</span>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5">SAPC Institutional Email</label>
@@ -521,18 +532,26 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    {user?.role === "student" ? "DepEd LRN (12-Digit)"
-                      : user?.role === "guidance_counselor" ? "PRC License No."
-                      : user?.role === "teacher" ? "Faculty ID / DepEd No."
-                      : user?.role === "parent" ? "Parent ID / PTCA No."
-                      : "Admin Employee ID"}
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      {user?.role === "student" ? "DepEd LRN (12-Digit)"
+                        : user?.role === "guidance_counselor" ? "PRC License No."
+                        : user?.role === "teacher" ? "Faculty ID / DepEd No."
+                        : user?.role === "parent" ? "Parent ID / PTCA No."
+                        : "Admin Employee ID"}
+                    </label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> DepEd LIS
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={lrn}
                     onChange={(e) => setLrn(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-mono font-bold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-mono font-bold focus:outline-none focus:bg-white focus:border-[#8B0014] disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                   />
                 </div>
                 <div>
@@ -562,10 +581,18 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    {user?.role === "teacher" ? "Advisory Grade Level" : user?.role === "parent" ? "Child's Grade Level" : "Grade Level"}
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      {user?.role === "teacher" ? "Advisory Grade Level" : user?.role === "parent" ? "Child's Grade Level" : "Grade Level"}
+                    </label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> Enrolled
+                      </span>
+                    )}
+                  </div>
                   <select
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={gradeLevel}
                     onChange={(e) => {
                       const newGrade = e.target.value;
@@ -575,7 +602,7 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                         setSection(available[0]);
                       }
                     }}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                   >
                     {JHS_GRADE_LEVELS.map((g) => (
                       <option key={g.level} value={g.label}>{g.label} (Junior High)</option>
@@ -584,13 +611,21 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    {user?.role === "teacher" ? "Assigned Advisory Section" : user?.role === "parent" ? "Child's Section" : "Assigned Section"}
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      {user?.role === "teacher" ? "Assigned Advisory Section" : user?.role === "parent" ? "Child's Section" : "Assigned Section"}
+                    </label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> Enrolled
+                      </span>
+                    )}
+                  </div>
                   <select
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={section}
                     onChange={(e) => setSection(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                   >
                     {getSectionsForGrade(gradeLevel).map((sec) => (
                       <option key={sec} value={sec}>{sec}</option>
@@ -600,18 +635,26 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  {user?.role === "student" ? "Academic Track / Department"
-                    : user?.role === "teacher" ? "Subject / Department"
-                    : user?.role === "guidance_counselor" ? "Specialization / Department"
-                    : user?.role === "parent" ? "Linked Student Department"
-                    : "Administrative Role / Division"}
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700">
+                    {user?.role === "student" ? "Academic Track / Department"
+                      : user?.role === "teacher" ? "Subject / Department"
+                      : user?.role === "guidance_counselor" ? "Specialization / Department"
+                      : user?.role === "parent" ? "Linked Student Department"
+                      : "Administrative Role / Division"}
+                  </label>
+                  {(user?.role === "student" || user?.role === "parent") && (
+                    <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                      <Lock className="h-2.5 w-2.5" /> Official
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
+                  disabled={user?.role === "student" || user?.role === "parent"}
                   value={strand}
                   onChange={(e) => setStrand(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                 />
               </div>
 

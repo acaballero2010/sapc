@@ -407,24 +407,35 @@ function UserProfileContent() {
               {/* Form Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name</label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> Official Record
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014] disabled:bg-slate-100 dark:disabled:bg-slate-900/60 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                     placeholder="e.g. Maria Theresa Cruz, RGC"
                     required
                   />
+                  {(user?.role === "student" || user?.role === "parent") && (
+                    <span className="text-[10px] text-slate-400 block">Official institutional name is managed by the SAPC Registrar.</span>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Email Address (Institutional)</label>
                   <input
                     type="email"
+                    disabled
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-mono cursor-not-allowed"
                     placeholder="user@sapc.edu.ph"
                     required
                   />
@@ -442,24 +453,40 @@ function UserProfileContent() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {user?.role === "guidance_counselor" ? "PRC License No." : user?.role === "student" ? "DepEd LRN" : "Institutional ID No."}
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {user?.role === "guidance_counselor" ? "PRC License No." : user?.role === "student" ? "DepEd LRN (12-Digit)" : "Institutional ID No."}
+                    </label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> DepEd LIS
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={idNumber}
                     onChange={(e) => setIdNumber(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014] disabled:bg-slate-100 dark:disabled:bg-slate-900/60 disabled:text-slate-500 disabled:cursor-not-allowed transition font-mono"
                     placeholder="e.g. PRC-RGC-094821"
                   />
                 </div>
 
                 {/* Grade Level Dropdown */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {user?.role === "teacher" ? "Advisory Grade Level" : user?.role === "parent" ? "Child's Grade Level" : "Grade Level"}
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {user?.role === "teacher" ? "Advisory Grade Level" : user?.role === "parent" ? "Child's Grade Level" : "Grade Level"}
+                    </label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> Enrolled
+                      </span>
+                    )}
+                  </div>
                   <select
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={gradeLevel}
                     onChange={(e) => {
                       const newGrade = e.target.value;
@@ -469,7 +496,7 @@ function UserProfileContent() {
                         setSectionName(available[0]);
                       }
                     }}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014] disabled:bg-slate-100 dark:disabled:bg-slate-900/60 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                   >
                     {JHS_GRADE_LEVELS.map((g) => (
                       <option key={g.level} value={g.label}>{g.label} (Junior High)</option>
@@ -479,13 +506,21 @@ function UserProfileContent() {
 
                 {/* Section Dropdown */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {user?.role === "teacher" ? "Advisory Section Assignment" : user?.role === "parent" ? "Child's Section" : "Assigned Section"}
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {user?.role === "teacher" ? "Advisory Section Assignment" : user?.role === "parent" ? "Child's Section" : "Assigned Section"}
+                    </label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> Enrolled
+                      </span>
+                    )}
+                  </div>
                   <select
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={sectionName}
                     onChange={(e) => setSectionName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014] disabled:bg-slate-100 dark:disabled:bg-slate-900/60 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                   >
                     {getSectionsForGrade(gradeLevel).map((sec) => (
                       <option key={sec} value={sec}>{sec}</option>
@@ -494,12 +529,20 @@ function UserProfileContent() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Department / Division</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Department / Division</label>
+                    {(user?.role === "student" || user?.role === "parent") && (
+                      <span className="text-[10px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-1.5 py-0.2 rounded flex items-center gap-1 font-bold">
+                        <Lock className="h-2.5 w-2.5" /> Official
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014] disabled:bg-slate-100 dark:disabled:bg-slate-900/60 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                     placeholder="e.g. Junior High School Department"
                   />
                 </div>
@@ -508,9 +551,10 @@ function UserProfileContent() {
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Office / Station Location</label>
                   <input
                     type="text"
+                    disabled={user?.role === "student" || user?.role === "parent"}
                     value={officeLocation}
                     onChange={(e) => setOfficeLocation(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#8B0014] disabled:bg-slate-100 dark:disabled:bg-slate-900/60 disabled:text-slate-500 disabled:cursor-not-allowed transition"
                     placeholder="e.g. Faculty Room, St. Anthony Hall"
                   />
                 </div>
