@@ -29,9 +29,7 @@ export default function DashboardLayout({
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
-    return typeof window !== "undefined" ? getActiveNotifications(user?.role) : [];
-  });
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   useEffect(() => {
     const handleNotifUpdate = () => {

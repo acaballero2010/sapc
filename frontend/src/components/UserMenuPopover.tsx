@@ -42,7 +42,12 @@ export const UserMenuPopover: React.FC<UserMenuPopoverProps> = ({
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -68,7 +73,7 @@ export const UserMenuPopover: React.FC<UserMenuPopoverProps> = ({
         aria-label="Open notifications"
       >
         <Bell className="h-4 w-4" />
-        {notifCount > 0 && (
+        {mounted && notifCount > 0 && (
           <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-rose-600 text-white text-[9px] font-black flex items-center justify-center ring-2 ring-white dark:ring-slate-900 animate-pulse">
             {notifCount > 9 ? "9+" : notifCount}
           </span>
