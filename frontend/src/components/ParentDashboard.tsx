@@ -7,29 +7,33 @@ import {
   Calendar, 
   CheckCircle2, 
   HeartHandshake,
-  MessageSquare,
-  ShieldCheck,
-  Award,
-  AlertTriangle,
-  TrendingUp,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  PhoneCall,
-  GraduationCap,
-  Sparkles,
-  CheckCircle,
-  FileText,
-  Bell,
-  HeartPulse,
-  Info,
-  ShieldAlert,
-  Wallet,
-  Home,
-  Lock,
-  Eye,
-  EyeOff
+  MessageSquare, 
+  ShieldCheck, 
+  Award, 
+  AlertTriangle, 
+  TrendingUp, 
+  ChevronDown, 
+  ChevronLeft, 
+  ChevronRight, 
+  PhoneCall, 
+  GraduationCap, 
+  Sparkles, 
+  FileText, 
+  Bell, 
+  HeartPulse, 
+  ShieldAlert, 
+  Wallet, 
+  Home, 
+  Lock, 
+  Eye, 
+  EyeOff,
+  Filter,
+  User,
+  ArrowRight,
+  Send,
+  Printer
 } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { useDragScroll } from "@/lib/useDragScroll";
 import { RiskBadge } from "./RiskBadge";
@@ -37,11 +41,11 @@ import { AHPDataVisualizer } from "./AHPDataVisualizer";
 import { DepEdFormModal } from "./DepEdFormModal";
 import { 
   getActiveStudentDataset, 
-  updateStudentRecord, 
   getActiveInterventions, 
   getActiveNotifications, 
   scheduleCounselingSession, 
   addAppNotification, 
+  getActiveParentRecords,
   AppNotification, 
   InterventionCarePlan 
 } from "@/lib/dataset-store";
@@ -63,11 +67,15 @@ export type ParentTabType =
   | "announcements"
   | "messages";
 
+export type QuarterFilterType = "all" | "q1" | "q2" | "q3" | "q4";
+
 export const ParentDashboard: React.FC = () => {
+  const { user } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<ParentTabType>("dashboard");
   const [selectedNavCategory, setSelectedNavCategory] = useState<string>("all");
   const [selectedStudentId, setSelectedStudentId] = useState<number>(1);
+  const [selectedQuarter, setSelectedQuarter] = useState<QuarterFilterType>("all");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [hasStudentConsent, setHasStudentConsent] = useState<boolean>(true);
   const [studentDataset, setStudentDataset] = useState<StudentRecord[]>(() => getActiveStudentDataset());
@@ -77,28 +85,56 @@ export const ParentDashboard: React.FC = () => {
   const catDrag = useDragScroll<HTMLDivElement>();
   const tabsDrag = useDragScroll<HTMLDivElement>();
 
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
-  };
+  }, []);
 
-  // Pre-linked children for parent demo dynamically derived from active student database
+  // Pre-linked children dynamically derived from active student database and parent profile
   const LINKED_CHILDREN = useMemo(() => {
     const defaultIds = [1, 2, 4];
-    return defaultIds.map(id => {
+    const customStudentIds: number[] = [];
+
+    if (user?.student_id) {
+      customStudentIds.push(user.student_id);
+    }
+    if (user?.lrn) {
+      const match = studentDataset.find(s => s.lrn === user.lrn);
+      if (match && !customStudentIds.includes(match.id)) {
+        customStudentIds.push(match.id);
+      }
+    }
+
+    if (user?.email) {
+      const allParents = getActiveParentRecords();
+      const parentRec = allParents.find(p => p.email?.toLowerCase() === user.email?.toLowerCase());
+      if (parentRec?.linkedLRN) {
+        const match = studentDataset.find(s => s.lrn === parentRec.linkedLRN);
+        if (match && !customStudentIds.includes(match.id)) {
+          customStudentIds.push(match.id);
+        }
+      }
+    }
+
+    const mergedIds = Array.from(new Set([...customStudentIds, ...defaultIds]));
+    return mergedIds.map(id => {
       const s = studentDataset.find(st => st.id === id) || studentDataset[0];
-      const initials = s ? `${s.first_name[0] || ""}${s.last_name[0] || ""}` : "ST";
+      const initials = s ? `${s.first_name?.[0] || ""}${s.last_name?.[0] || ""}` : "ST";
       return {
         id: s.id,
         name: s.full_name,
         lrn: s.lrn,
-        section: s.section_name,
-        adviser: s.adviser_name,
+        grade_level: s.grade_level || 10,
+        strand: s.strand || "JHS",
+        section: s.section_name || "Grade 10 - St. Anthony",
+        adviser: s.adviser_name || "Engr. Roberto Santos, LPT",
         counselor: "Maria Theresa Cruz, RGC",
-        avatar: initials
+        avatar: initials,
+        risk_score: s.latest_risk_score ?? 15,
+        risk_tier: s.latest_risk_tier || "low"
       };
     });
-  }, [studentDataset]);
+  }, [studentDataset, user]);
 
   const currentChild = useMemo(() => {
     return studentDataset.find(s => s.id === selectedStudentId) || studentDataset[0] || SAPC_500_STUDENTS[0];
@@ -119,6 +155,398 @@ export const ParentDashboard: React.FC = () => {
   const unreadParentNotifsCount = useMemo(() => {
     return notificationsList.filter(n => !n.read && !n.is_read).length;
   }, [notificationsList]);
+
+  // Dynamic Subject & Assigned Faculty Roster for Current Child
+  const studentSubjects = useMemo(() => {
+    const gwa = currentChild.sass_metrics?.gpa || currentChild.domain_scores?.academic || 85;
+    const gradeLevel = currentChild.grade_level || 10;
+    const isSHS = gradeLevel >= 11;
+
+    if (isSHS) {
+      return [
+        {
+          code: "CORE-1101",
+          name: "Pre-Calculus / Advanced Mathematics",
+          department: "Mathematics & Science",
+          teacher: "Engr. Roberto Santos, LPT",
+          teacherRole: "STEM Subject Teacher & Homeroom Adviser",
+          teacherEmail: "r.santos@sapc.edu.ph",
+          room: "Room 302 (STEM Lab)",
+          schedule: "Mon/Wed/Fri • 8:00 AM - 9:30 AM",
+          q1: Math.round(gwa - 4),
+          q2: Math.round(gwa - 2),
+          q3: Math.round(gwa - 1),
+          q4: Math.round(gwa),
+          ww: 84,
+          pt: 86,
+          qe: 82,
+          teacherRemarks: "Shows continuous recovery in quadratic and trigonometric proofs. Dedicated homework diligence."
+        },
+        {
+          code: "CORE-1102",
+          name: "General Chemistry 1 & Laboratory",
+          department: "Natural Sciences",
+          teacher: "Mrs. Ma. Cristina Dela Cruz, LPT",
+          teacherRole: "Science Department Coordinator",
+          teacherEmail: "c.delacruz@sapc.edu.ph",
+          room: "Science Laboratory B",
+          schedule: "Tue/Thu • 9:30 AM - 11:30 AM",
+          q1: Math.round(gwa - 2),
+          q2: Math.round(gwa + 1),
+          q3: Math.round(gwa + 2),
+          q4: Math.round(gwa + 1),
+          ww: 88,
+          pt: 91,
+          qe: 85,
+          teacherRemarks: "Excellent laboratory outputs and safety compliance during chemical stoichiometry experiments."
+        },
+        {
+          code: "CORE-1103",
+          name: "Oral Communication in Context",
+          department: "Languages & Humanities",
+          teacher: "Ma'am Angelica Reyes, LPT",
+          teacherRole: "English Faculty & Debate Coach",
+          teacherEmail: "a.reyes@sapc.edu.ph",
+          room: "Room 205 (Speech Lab)",
+          schedule: "Mon/Wed • 10:00 AM - 11:30 AM",
+          q1: Math.round(gwa + 2),
+          q2: Math.round(gwa + 3),
+          q3: Math.round(gwa + 4),
+          q4: Math.round(gwa + 3),
+          ww: 92,
+          pt: 94,
+          qe: 90,
+          teacherRemarks: "Outstanding impromptu speeches and debate moderation. Highly confident and articulate."
+        },
+        {
+          code: "CORE-1104",
+          name: "Komunikasyon at Pananaliksik sa Wika",
+          department: "Filipino & Social Sciences",
+          teacher: "Ma'am Maricel Alcantara, LPT",
+          teacherRole: "Filipino Department Head",
+          teacherEmail: "m.alcantara@sapc.edu.ph",
+          room: "Room 201",
+          schedule: "Tue/Thu • 1:00 PM - 2:30 PM",
+          q1: Math.round(gwa + 1),
+          q2: Math.round(gwa + 2),
+          q3: Math.round(gwa + 1),
+          q4: Math.round(gwa + 2),
+          ww: 89,
+          pt: 90,
+          qe: 87,
+          teacherRemarks: "Mahusay na pagsusuri ng mga tekstong pampanitikan at masigasig sa mga pangkatang gawain."
+        },
+        {
+          code: "SPEC-1105",
+          name: "Earth & Life Science",
+          department: "Natural Sciences",
+          teacher: "Sir Dennis Ramos, LPT",
+          teacherRole: "Senior High Science Faculty",
+          teacherEmail: "d.ramos@sapc.edu.ph",
+          room: "Room 304",
+          schedule: "Mon/Wed • 1:00 PM - 2:30 PM",
+          q1: Math.round(gwa),
+          q2: Math.round(gwa + 1),
+          q3: Math.round(gwa + 2),
+          q4: Math.round(gwa + 2),
+          ww: 86,
+          pt: 89,
+          qe: 84,
+          teacherRemarks: "Consistent project submissions on tectonic and ecosystem models. Very reliable group leader."
+        },
+        {
+          code: "APPL-1106",
+          name: "Empowerment Technologies (ICT / Applied Media)",
+          department: "Information & Communications Tech",
+          teacher: "Sir Michael Alcantara, LPT",
+          teacherRole: "ICT Coordinator & Systems Faculty",
+          teacherEmail: "m.alcantara.ict@sapc.edu.ph",
+          room: "Computer Lab 1",
+          schedule: "Fri • 1:00 PM - 4:00 PM",
+          q1: Math.round(gwa + 3),
+          q2: Math.round(gwa + 4),
+          q3: Math.round(gwa + 3),
+          q4: Math.round(gwa + 4),
+          ww: 95,
+          pt: 96,
+          qe: 93,
+          teacherRemarks: "High technical aptitude in web publishing, digital prototyping, and collaborative media."
+        },
+        {
+          code: "CORE-1107",
+          name: "Physical Education & Health 1",
+          department: "MAPEH & Athletics",
+          teacher: "Coach Bryan Mercado, LPT",
+          teacherRole: "Sports & Physical Wellness Instructor",
+          teacherEmail: "b.mercado@sapc.edu.ph",
+          room: "SAPC Gymnasium",
+          schedule: "Tue • 3:00 PM - 5:00 PM",
+          q1: Math.round(gwa + 5),
+          q2: Math.round(gwa + 4),
+          q3: Math.round(gwa + 5),
+          q4: Math.round(gwa + 5),
+          ww: 94,
+          pt: 98,
+          qe: 92,
+          teacherRemarks: "Exemplary sportsmanship, active participation in aerobics, and leadership during team drills."
+        }
+      ];
+    } else {
+      // Junior High School Subjects (Grade 7 - 10)
+      return [
+        {
+          code: "JHS-ENG",
+          name: "English (Grammar & World Literature)",
+          department: "Languages & Humanities",
+          teacher: "Sir Gabriel Navarro, LPT",
+          teacherRole: "English Faculty & Speech Coach",
+          teacherEmail: "g.navarro@sapc.edu.ph",
+          room: "Room 102",
+          schedule: "Mon to Thu • 8:00 AM - 9:00 AM",
+          q1: Math.round(gwa + 1),
+          q2: Math.round(gwa + 2),
+          q3: Math.round(gwa + 3),
+          q4: Math.round(gwa + 2),
+          ww: 90,
+          pt: 92,
+          qe: 88,
+          teacherRemarks: "Very good reading comprehension, active class discussion, and timely book report submissions."
+        },
+        {
+          code: "JHS-MATH",
+          name: "Mathematics (Algebra & Geometry)",
+          department: "Mathematics & Science",
+          teacher: "Engr. Roberto Santos, LPT",
+          teacherRole: "Junior High Math Coordinator",
+          teacherEmail: "r.santos@sapc.edu.ph",
+          room: "Room 104",
+          schedule: "Mon to Fri • 9:00 AM - 10:00 AM",
+          q1: Math.round(gwa - 3),
+          q2: Math.round(gwa - 1),
+          q3: Math.round(gwa),
+          q4: Math.round(gwa + 1),
+          ww: 82,
+          pt: 85,
+          qe: 80,
+          teacherRemarks: "Shows great persistence in linear equations and geometric problem solving."
+        },
+        {
+          code: "JHS-SCI",
+          name: "Integrated Science",
+          department: "Natural Sciences",
+          teacher: "Mrs. Ma. Cristina Dela Cruz, LPT",
+          teacherRole: "Science Department Head",
+          teacherEmail: "c.delacruz@sapc.edu.ph",
+          room: "Science Lab A",
+          schedule: "Mon to Thu • 10:30 AM - 11:30 AM",
+          q1: Math.round(gwa),
+          q2: Math.round(gwa + 1),
+          q3: Math.round(gwa + 2),
+          q4: Math.round(gwa + 1),
+          ww: 86,
+          pt: 89,
+          qe: 85,
+          teacherRemarks: "Hands-on participation during lab experiments. Clear scientific journaling."
+        },
+        {
+          code: "JHS-FIL",
+          name: "Filipino (Panitikan at Balarila)",
+          department: "Filipino Department",
+          teacher: "Ma'am Maricel Alcantara, LPT",
+          teacherRole: "Filipino Faculty",
+          teacherEmail: "m.alcantara@sapc.edu.ph",
+          room: "Room 106",
+          schedule: "Mon to Thu • 1:00 PM - 2:00 PM",
+          q1: Math.round(gwa + 2),
+          q2: Math.round(gwa + 2),
+          q3: Math.round(gwa + 3),
+          q4: Math.round(gwa + 3),
+          ww: 91,
+          pt: 93,
+          qe: 89,
+          teacherRemarks: "Matiyaga sa pagbabasa ng Ibong Adarna / Florante at Laura. Mahusay makipagtalastasan."
+        },
+        {
+          code: "JHS-AP",
+          name: "Araling Panlipunan (Kasaysayan)",
+          department: "Social Studies",
+          teacher: "Sir Dennis Ramos, LPT",
+          teacherRole: "Social Studies Faculty",
+          teacherEmail: "d.ramos@sapc.edu.ph",
+          room: "Room 108",
+          schedule: "Mon to Thu • 2:00 PM - 3:00 PM",
+          q1: Math.round(gwa + 1),
+          q2: Math.round(gwa + 2),
+          q3: Math.round(gwa + 2),
+          q4: Math.round(gwa + 2),
+          ww: 88,
+          pt: 90,
+          qe: 87,
+          teacherRemarks: "Active participant in history recitations and current affairs analysis."
+        },
+        {
+          code: "JHS-TLE",
+          name: "Technology & Livelihood Education (TLE/ICT)",
+          department: "TLE & Technical Dept",
+          teacher: "Sir Michael Alcantara, LPT",
+          teacherRole: "TLE Instructor",
+          teacherEmail: "m.alcantara.ict@sapc.edu.ph",
+          room: "TLE Workshop & Computer Room",
+          schedule: "Tue/Thu • 3:00 PM - 4:30 PM",
+          q1: Math.round(gwa + 3),
+          q2: Math.round(gwa + 3),
+          q3: Math.round(gwa + 4),
+          q4: Math.round(gwa + 4),
+          ww: 93,
+          pt: 95,
+          qe: 91,
+          teacherRemarks: "Creative and resourceful during technical hands-on projects."
+        },
+        {
+          code: "JHS-MAPEH",
+          name: "MAPEH (Music, Arts, PE, Health)",
+          department: "MAPEH Department",
+          teacher: "Coach Bryan Mercado, LPT",
+          teacherRole: "MAPEH Coordinator",
+          teacherEmail: "b.mercado@sapc.edu.ph",
+          room: "Music Hall & Gym",
+          schedule: "Mon/Wed • 3:00 PM - 4:30 PM",
+          q1: Math.round(gwa + 4),
+          q2: Math.round(gwa + 4),
+          q3: Math.round(gwa + 5),
+          q4: Math.round(gwa + 4),
+          ww: 94,
+          pt: 96,
+          qe: 92,
+          teacherRemarks: "Very expressive in arts and music, demonstrates strong physical fitness."
+        },
+        {
+          code: "JHS-ESP",
+          name: "Edukasyon sa Pagpapakatao (EsP)",
+          department: "Values Education",
+          teacher: "Ma'am Teresa Morales, LPT",
+          teacherRole: "Values Education Faculty",
+          teacherEmail: "t.morales@sapc.edu.ph",
+          room: "Room 110",
+          schedule: "Fri • 8:00 AM - 10:00 AM",
+          q1: Math.round(gwa + 3),
+          q2: Math.round(gwa + 4),
+          q3: Math.round(gwa + 4),
+          q4: Math.round(gwa + 4),
+          ww: 92,
+          pt: 95,
+          qe: 90,
+          teacherRemarks: "Displays high ethical character, empathy towards classmates, and respectful demeanor."
+        }
+      ];
+    }
+  }, [currentChild]);
+
+  // DepEd Core Values (Observed Values Matrix)
+  const coreValuesList = useMemo(() => [
+    {
+      coreValue: "1. MAKA-DIYOS",
+      behaviorStatement: "Expresses one's spiritual beliefs and shows respect for other religions and beliefs.",
+      q1: "AO",
+      q2: "AO",
+      q3: "AO",
+      q4: "AO"
+    },
+    {
+      coreValue: "1. MAKA-DIYOS",
+      behaviorStatement: "Demonstrates truthfulness, honesty, and integrity in all actions and academic work.",
+      q1: "AO",
+      q2: "AO",
+      q3: "AO",
+      q4: "AO"
+    },
+    {
+      coreValue: "2. MAKATAO",
+      behaviorStatement: "Shows sensitivity to individual, social, and cultural differences with empathy.",
+      q1: "AO",
+      q2: "AO",
+      q3: "AO",
+      q4: "AO"
+    },
+    {
+      coreValue: "2. MAKATAO",
+      behaviorStatement: "Demonstrates solidarity, cooperation, and respectful communication with peers and teachers.",
+      q1: "AO",
+      q2: "AO",
+      q3: "AO",
+      q4: "AO"
+    },
+    {
+      coreValue: "3. MAKAKALIKASAN",
+      behaviorStatement: "Cares for the environment and utilizes resources wisely, judiciously, and economically.",
+      q1: "SO",
+      q2: "AO",
+      q3: "AO",
+      q4: "AO"
+    },
+    {
+      coreValue: "4. MAKABANSA",
+      behaviorStatement: "Demonstrates pride in being a Filipino and exercises the rights and duties of a responsible citizen.",
+      q1: "AO",
+      q2: "AO",
+      q3: "AO",
+      q4: "AO"
+    }
+  ], []);
+
+  // DepEd Monthly Attendance Summary Matrix
+  const monthlyAttendance = useMemo(() => [
+    { month: "Aug", days: 6, present: 6, absent: 0, tardy: 0 },
+    { month: "Sep", days: 22, present: 21, absent: 1, tardy: 0 },
+    { month: "Oct", days: 21, present: 20, absent: 1, tardy: 1 },
+    { month: "Nov", days: 20, present: 20, absent: 0, tardy: 0 },
+    { month: "Dec", days: 15, present: 15, absent: 0, tardy: 0 },
+    { month: "Jan", days: 20, present: 19, absent: 1, tardy: 0 },
+    { month: "Feb", days: 18, present: 18, absent: 0, tardy: 1 },
+    { month: "Mar", days: 22, present: 22, absent: 0, tardy: 0 },
+    { month: "Apr", days: 20, present: 20, absent: 0, tardy: 0 },
+    { month: "May", days: 16, present: 15, absent: 1, tardy: 0 }
+  ], []);
+
+  // Homeroom Adviser's Narrative Report & Quarterly Qualitative Assessments
+  const quarterlyAdviserRemarks = useMemo(() => [
+    {
+      quarter: "Quarter 1",
+      quarterKey: "q1",
+      date: "October 2026",
+      adviser: currentChildInfo.adviser,
+      generalAverage: (studentSubjects.reduce((acc, s) => acc + s.q1, 0) / studentSubjects.length).toFixed(2),
+      conductRemark: "Very Good Conduct",
+      narrative: `${currentChild.first_name} has adapted smoothly to the class environment. Needs slight reinforcement in exam pacing for core math subjects, but demonstrates high enthusiasm and active participation in class activities.`
+    },
+    {
+      quarter: "Quarter 2",
+      quarterKey: "q2",
+      date: "December 2026",
+      adviser: currentChildInfo.adviser,
+      generalAverage: (studentSubjects.reduce((acc, s) => acc + s.q2, 0) / studentSubjects.length).toFixed(2),
+      conductRemark: "Outstanding Conduct",
+      narrative: `Remarkable improvement observed across technical and science subjects following the guided peer-tutoring protocol. Homework and project submissions are consistently submitted ahead of deadlines.`
+    },
+    {
+      quarter: "Quarter 3",
+      quarterKey: "q3",
+      date: "March 2027",
+      adviser: currentChildInfo.adviser,
+      generalAverage: (studentSubjects.reduce((acc, s) => acc + s.q3, 0) / studentSubjects.length).toFixed(2),
+      conductRemark: "Outstanding Conduct",
+      narrative: `Shows strong academic consistency and leadership during group performance tasks. Maintains a healthy balance between academic work and extra-curricular interests.`
+    },
+    {
+      quarter: "Quarter 4",
+      quarterKey: "q4",
+      date: "May 2027",
+      adviser: currentChildInfo.adviser,
+      generalAverage: (studentSubjects.reduce((acc, s) => acc + s.q4, 0) / studentSubjects.length).toFixed(2),
+      conductRemark: "Exemplary Conduct",
+      narrative: `Successfully completed all academic competencies for the grade level with flying colors. Recommended for promotion with Honors to the next academic level.`
+    }
+  ], [currentChild, currentChildInfo, studentSubjects]);
 
   // Categories for 15 Tabs
   const CATEGORIES = useMemo(() => [
@@ -166,7 +594,7 @@ export const ParentDashboard: React.FC = () => {
     {
       id: "ACK-02",
       title: "Supervise Tuesday & Thursday Peer Tutoring with Kyle Mercado",
-      originator: "Mr. Roberto Santos, LPT (Class Adviser)",
+      originator: "Engr. Roberto Santos, LPT (Class Adviser)",
       protocol: "Pre-Calculus Core Factoring & Limits Support",
       parentActionRequired: "Confirm student attends 4:30 PM library peer-review sessions before commuting home.",
       dateAssigned: "Sep 19, 2026",
@@ -207,7 +635,7 @@ export const ParentDashboard: React.FC = () => {
     {
       id: "REQ-02",
       type: "Subject Teacher Conference",
-      staff: "Mr. Roberto Santos, LPT (Pre-Calculus)",
+      staff: "Engr. Roberto Santos, LPT (Pre-Calculus)",
       date: "Sep 25, 2026",
       time: "03:30 PM - 04:00 PM",
       reason: "Follow up on modular quiz performance.",
@@ -223,11 +651,11 @@ export const ParentDashboard: React.FC = () => {
   const [chatThreads, setChatThreads] = useState([
     {
       id: 1,
-      contact: "Mr. Roberto Santos (Class Adviser)",
-      role: "Class Adviser",
+      contact: "Engr. Roberto Santos, LPT (Pre-Calculus & Adviser)",
+      role: "Class Adviser & Math Faculty",
       unread: false,
       messages: [
-        { sender: "Mr. Santos", text: "Good afternoon Mrs. Dimaculangan, just wanted to let you know Joshua got 18/20 on today's Chemistry quiz.", time: "Yesterday, 3:15 PM", isSelf: false },
+        { sender: "Engr. Santos", text: "Good afternoon Mrs. Dimaculangan, just wanted to let you know Joshua got 18/20 on today's quiz.", time: "Yesterday, 3:15 PM", isSelf: false },
         { sender: "You", text: "Thank you so much Sir! We made sure he slept early as agreed during the care plan meeting.", time: "Yesterday, 4:02 PM", isSelf: true }
       ]
     },
@@ -238,6 +666,15 @@ export const ParentDashboard: React.FC = () => {
       unread: true,
       messages: [
         { sender: "Ma'am Cruz", text: "Hello! We will see you for our scheduled check-in on Tuesday at 2:00 PM.", time: "Today, 9:30 AM", isSelf: false }
+      ]
+    },
+    {
+      id: 3,
+      contact: "Mrs. Ma. Cristina Dela Cruz, LPT (Chemistry)",
+      role: "Science Department Coordinator",
+      unread: false,
+      messages: [
+        { sender: "Mrs. Dela Cruz", text: "Good day! The laboratory manual for Quarter 2 has been released.", time: "Sep 20, 10:15 AM", isSelf: false }
       ]
     }
   ]);
@@ -264,8 +701,50 @@ export const ParentDashboard: React.FC = () => {
       return t;
     }));
     setInputChat("");
-    showToast("Message sent to school staff.");
+    showToast("Message sent to school faculty.");
   };
+
+  const handleTabChange = useCallback((tab: ParentTabType) => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", tab);
+      window.history.replaceState({}, "", url.toString());
+      window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab, source: "tab_click" } }));
+    }
+  }, []);
+
+  // Direct Teacher Messaging Action from Subject Cards
+  const handleMessageSpecificTeacher = useCallback((teacherName: string, teacherRole: string, subjectName: string) => {
+    setChatThreads(prev => {
+      const existingThread = prev.find(t => t.contact.toLowerCase().includes(teacherName.toLowerCase()) || t.contact.toLowerCase().includes(subjectName.toLowerCase()));
+      if (existingThread) {
+        setActiveThreadId(existingThread.id);
+        return prev;
+      }
+      const newId = prev.length + 10;
+      const newThread = {
+        id: newId,
+        contact: `${teacherName} (${subjectName})`,
+        role: teacherRole,
+        unread: false,
+        messages: [
+          {
+            sender: teacherName.split(" ")[0] || "Faculty",
+            text: `Good day! Welcome to the parent channel for ${subjectName}. How can I assist you with ${currentChild.full_name}'s progress?`,
+            time: "Just now",
+            isSelf: false
+          }
+        ]
+      };
+      setActiveThreadId(newId);
+      return [newThread, ...prev];
+    });
+    
+    setInputChat(`Good day ${teacherName}, I would like to inquire regarding ${currentChild.full_name}'s progress in ${subjectName}.`);
+    handleTabChange("messages");
+    showToast(`Opened direct message channel with ${teacherName}`);
+  }, [currentChild.full_name, handleTabChange, showToast]);
 
   useEffect(() => {
     const handleDatasetUpdate = () => {
@@ -349,16 +828,6 @@ export const ParentDashboard: React.FC = () => {
     return () => clearTimeout(timer);
   }, [activeTab, selectedNavCategory, isMounted, CATEGORIES, catDrag.ref, tabsDrag.ref]);
 
-  const handleTabChange = useCallback((tab: ParentTabType) => {
-    setActiveTab(tab);
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.set("tab", tab);
-      window.history.replaceState({}, "", url.toString());
-      window.dispatchEvent(new CustomEvent("sapc:navigate-tab", { detail: { tab, source: "tab_click" } }));
-    }
-  }, []);
-
   if (!isMounted) {
     return (
       <div className="space-y-6 pb-12 font-sans animate-pulse">
@@ -382,7 +851,7 @@ export const ParentDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Top Banner - Institutional Maroon & Gold (Mobile / Tablet Optimized) */}
+      {/* Top Banner - Institutional Maroon & Gold */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#7B0012] via-[#5A000D] to-[#380008] p-5 sm:p-7 md:p-8 shadow-md text-white border-t-4 border-amber-400">
         <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
           <div className="max-w-3xl space-y-2.5">
@@ -397,43 +866,127 @@ export const ParentDashboard: React.FC = () => {
               Parent Partnership &amp; Student Wellness Portal
             </h1>
             <p className="text-xs sm:text-sm md:text-base text-rose-50/95 leading-relaxed font-normal">
-              Transparent, consent-based updates on your child&apos;s academic standing, attendance habits, home support care plans, and guidance counselor collaborations.
+              Transparent, consent-based updates on your child&apos;s academic standing, subject teachers, attendance habits, home care plans, and counseling records.
             </p>
           </div>
 
-          {/* Child Switcher Selector */}
-          <div className="bg-black/35 backdrop-blur-md border border-white/25 rounded-2xl p-3.5 sm:p-4 shadow-lg min-w-[240px] space-y-2">
-            <span className="text-[10px] sm:text-xs text-amber-200 font-extrabold uppercase tracking-wider block">
-              Viewing Child Profile:
-            </span>
+          {/* Quick Child Selector & SF9 Exporter */}
+          <div className="bg-black/35 backdrop-blur-md border border-white/25 rounded-2xl p-3.5 sm:p-4 shadow-lg min-w-[260px] space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] sm:text-xs text-amber-200 font-extrabold uppercase tracking-wider block">
+                Selected Child Profile:
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/30 text-emerald-200 border border-emerald-400/40">
+                Active View
+              </span>
+            </div>
             <div className="relative">
               <select
                 value={selectedStudentId}
                 onChange={(e) => {
-                  setSelectedStudentId(Number(e.target.value));
-                  showToast(`Viewing data for ${LINKED_CHILDREN.find(c => c.id === Number(e.target.value))?.name}`);
+                  const newId = Number(e.target.value);
+                  setSelectedStudentId(newId);
+                  showToast(`Switched view to ${LINKED_CHILDREN.find(c => c.id === newId)?.name}`);
                 }}
-                className="w-full min-h-[40px] px-3 pr-8 py-2 rounded-xl bg-white text-slate-900 font-bold text-xs sm:text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"
+                className="w-full min-h-[40px] px-3 pr-8 py-2 rounded-xl bg-white text-slate-900 font-bold text-xs sm:text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer shadow-xs"
               >
                 {LINKED_CHILDREN.map((child) => (
                   <option key={child.id} value={child.id}>
-                    {child.name} ({child.section.split(" ")[0]} {child.section.split(" ")[1]})
+                    {child.name} ({child.section})
                   </option>
                 ))}
               </select>
               <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-slate-500 pointer-events-none" />
             </div>
-            <div className="flex items-center justify-between text-[11px] pt-1 border-t border-white/10 gap-2">
-              <span className="text-slate-300 truncate">LRN: {currentChildInfo.lrn}</span>
+            <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-white/15 gap-2">
+              <span className="text-slate-200 font-mono text-[10px] truncate">LRN: {currentChildInfo.lrn}</span>
               <button
+                type="button"
                 onClick={() => setIsDepEdFormOpen(true)}
-                className="px-2.5 py-1 rounded-lg bg-amber-400/90 hover:bg-amber-300 text-amber-950 font-bold text-[10px] flex items-center gap-1 shadow-sm transition"
+                className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-[10px] flex items-center gap-1 shadow-xs transition cursor-pointer"
               >
                 <Award className="w-3 h-3" />
                 <span>DepEd SF9</span>
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* "MY CHILDREN" FAMILY SHOWCASE SECTION                     */}
+      {/* ========================================================= */}
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xs space-y-3.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-[#8B0014]/10 flex items-center justify-center text-[#8B0014]">
+              <Users className="h-4.5 w-4.5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                My Children (Linked Learner Profiles)
+              </h2>
+              <p className="text-xs text-slate-500">
+                Official student accounts verified and linked to your parent portal credentials
+              </p>
+            </div>
+          </div>
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-[#8B0014] border border-rose-200 self-start sm:self-auto">
+            {LINKED_CHILDREN.length} Enrolled {LINKED_CHILDREN.length === 1 ? "Child" : "Children"} at SAPC
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          {LINKED_CHILDREN.map((child) => {
+            const isSelected = child.id === selectedStudentId;
+            return (
+              <div
+                key={child.id}
+                onClick={() => {
+                  setSelectedStudentId(child.id);
+                  showToast(`Now viewing academic and wellness profile for ${child.name}`);
+                }}
+                className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 relative ${
+                  isSelected 
+                    ? "bg-rose-50/70 border-[#8B0014] shadow-md ring-2 ring-[#8B0014]/20" 
+                    : "bg-slate-50 hover:bg-slate-100/90 border-slate-200 shadow-2xs"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-11 w-11 rounded-2xl font-black text-sm flex items-center justify-center border shadow-xs ${
+                      isSelected ? "bg-[#8B0014] text-white border-[#6D0010]" : "bg-white text-slate-700 border-slate-300"
+                    }`}>
+                      {child.avatar}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900 line-clamp-1">{child.name}</h3>
+                      <p className="text-xs font-semibold text-slate-600">{child.section}</p>
+                      <span className="text-[10px] font-mono text-slate-400">LRN: {child.lrn}</span>
+                    </div>
+                  </div>
+
+                  <RiskBadge score={child.risk_score} tier={child.risk_tier} size="sm" />
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-600">
+                  <span className="text-[11px] truncate">
+                    Adviser: <strong className="text-slate-800">{child.adviser.split(",")[0]}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition ${
+                      isSelected 
+                        ? "bg-[#8B0014] text-white" 
+                        : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-200"
+                    }`}
+                  >
+                    {isSelected ? "Active Child" : "Switch Child"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -556,7 +1109,7 @@ export const ParentDashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Categorized Navigation Tabs Bar (Scrollable Pill Strip with Left/Right Buttons) */}
+        {/* Categorized Navigation Tabs Bar */}
         <div className="relative bg-white border border-slate-200 rounded-2xl p-2 shadow-sm flex items-center">
           {tabsDrag.canScrollLeft && (
             <button
@@ -616,7 +1169,7 @@ export const ParentDashboard: React.FC = () => {
       </div>
 
       {/* ========================================================= */}
-      {/* 1. FAMILY DASHBOARD (dashboard) */}
+      {/* 1. FAMILY DASHBOARD (dashboard)                           */}
       {/* ========================================================= */}
       {activeTab === "dashboard" && (
         <div className="space-y-6">
@@ -648,6 +1201,17 @@ export const ParentDashboard: React.FC = () => {
               {/* Quick Action Tiles */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <div
+                  onClick={() => handleTabChange("academic_reports")}
+                  className="p-4 rounded-2xl bg-rose-50/70 hover:bg-rose-100/90 border border-rose-200 transition cursor-pointer space-y-1 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-xs text-[#8B0014]">View Quarterly Report Card</span>
+                    <BookOpen className="h-4 w-4 text-[#8B0014] group-hover:scale-110 transition" />
+                  </div>
+                  <p className="text-[11px] text-rose-800">Check grades, subject teachers, and DepEd Core Values</p>
+                </div>
+
+                <div
                   onClick={() => handleTabChange("acknowledge_intervention")}
                   className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer space-y-1 group"
                 >
@@ -656,17 +1220,6 @@ export const ParentDashboard: React.FC = () => {
                     <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-1 transition" />
                   </div>
                   <p className="text-[11px] text-slate-500">1 action item needs parent confirmation</p>
-                </div>
-
-                <div
-                  onClick={() => handleTabChange("schedule_meeting")}
-                  className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer space-y-1 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-xs text-slate-900">Request Staff Consultation</span>
-                    <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-1 transition" />
-                  </div>
-                  <p className="text-[11px] text-slate-500">Book meeting with Adviser or Guidance</p>
                 </div>
               </div>
             </div>
@@ -680,13 +1233,13 @@ export const ParentDashboard: React.FC = () => {
 
               <div className="space-y-3 text-xs">
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">Class Adviser:</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">Class Homeroom Adviser:</span>
                   <p className="font-extrabold text-slate-900">{currentChildInfo.adviser}</p>
                   <span className="text-[11px] text-slate-500">Room 302 • adviser@sapc.edu.ph</span>
                 </div>
 
                 <div className="p-3 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-0.5">
-                  <span className="text-[10px] font-bold text-rose-800 uppercase">Guidance &amp; Counseling:</span>
+                  <span className="text-[10px] font-bold text-rose-800 uppercase">Guidance &amp; Counseling Desk:</span>
                   <p className="font-extrabold text-rose-950">{currentChildInfo.counselor}</p>
                   <span className="text-[11px] text-rose-800">Local 108 • guidance@sapc.edu.ph</span>
                 </div>
@@ -694,17 +1247,75 @@ export const ParentDashboard: React.FC = () => {
 
               <button
                 onClick={() => handleTabChange("messages")}
-                className="w-full py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition text-center"
+                className="w-full py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition text-center shadow-xs cursor-pointer"
               >
                 Send Message via Portal →
               </button>
+            </div>
+          </div>
+
+          {/* Quick Preview of Enrolled Subjects & Assigned Teachers */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-[#8B0014]" />
+                  Enrolled Subjects &amp; Assigned Faculty Teachers
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Direct communication channels with your child&apos;s teachers across each learning area
+                </p>
+              </div>
+
+              <button
+                onClick={() => handleTabChange("academic_reports")}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1.5 self-start sm:self-auto transition cursor-pointer"
+              >
+                <span>Full Form 138 Report Card</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {studentSubjects.slice(0, 6).map((sub) => (
+                <div key={sub.code} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-2.5">
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-bold">
+                        {sub.code}
+                      </span>
+                      <span className="text-xs font-black text-[#8B0014]">
+                        Q2: {sub.q2}
+                      </span>
+                    </div>
+                    <h4 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-snug">{sub.name}</h4>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-200/80 space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <span className="text-xs font-bold text-slate-800">{sub.teacher}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 pl-5">{sub.schedule}</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleMessageSpecificTeacher(sub.teacher, sub.teacherRole, sub.name)}
+                    className="w-full mt-1 py-1.5 px-3 rounded-xl bg-white hover:bg-rose-50 border border-slate-300 hover:border-rose-300 text-[#8B0014] font-bold text-[11px] flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 text-[#8B0014]" />
+                    <span>Message Teacher</span>
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 2. CHILD PROGRESS (child_progress) */}
+      {/* 2. CHILD PROGRESS (child_progress)                        */}
       {/* ========================================================= */}
       {activeTab === "child_progress" && (
         <div className="space-y-6">
@@ -727,7 +1338,7 @@ export const ParentDashboard: React.FC = () => {
                     setHasStudentConsent(prev => !prev);
                     showToast(hasStudentConsent ? "Consent revoked by student demo toggle" : "Consent granted for parent viewing");
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
                     hasStudentConsent ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-rose-100 text-rose-800 border border-rose-300"
                   }`}
                 >
@@ -744,59 +1355,35 @@ export const ParentDashboard: React.FC = () => {
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                     <span className="text-[10px] font-black uppercase text-slate-500">Quarter 1</span>
                     <p className="text-xl sm:text-2xl font-black text-slate-900 mt-1">82.4 Score</p>
-                    <span className="text-[10px] text-rose-700 font-bold">Exam Panic Flagged</span>
+                    <span className="text-[10px] text-rose-700 font-bold">Exam Anxiety Flagged</span>
                   </div>
                   <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200">
                     <span className="text-[10px] font-black uppercase text-amber-800">Quarter 2 (Now)</span>
-                    <p className="text-xl sm:text-2xl font-black text-[#D97706] mt-1">66.0 Score</p>
-                    <span className="text-[10px] text-amber-800 font-bold">Improving (-16.4%)</span>
+                    <p className="text-xl sm:text-2xl font-black text-amber-950 mt-1">86.2 Score</p>
+                    <span className="text-[10px] text-emerald-700 font-bold">✓ +3.8 Pt Recovery</span>
                   </div>
-                  <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
-                    <span className="text-[10px] font-black uppercase text-emerald-800">Quarter 3 (Target)</span>
-                    <p className="text-xl sm:text-2xl font-black text-emerald-700 mt-1">48.5 Score</p>
-                    <span className="text-[10px] text-emerald-700 font-bold">Remediation Clear</span>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 opacity-70">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Quarter 3</span>
+                    <p className="text-xl sm:text-2xl font-black text-slate-400 mt-1">--.-</p>
+                    <span className="text-[10px] text-slate-400">Scheduled Jan 2027</span>
                   </div>
-                  <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200">
-                    <span className="text-[10px] font-black uppercase text-blue-800">Quarter 4 (Goal)</span>
-                    <p className="text-xl sm:text-2xl font-black text-blue-900 mt-1">32.0 Score</p>
-                    <span className="text-[10px] text-blue-700 font-bold">Full Mastery</span>
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 opacity-70">
+                    <span className="text-[10px] font-black uppercase text-slate-400">Quarter 4</span>
+                    <p className="text-xl sm:text-2xl font-black text-slate-400 mt-1">--.-</p>
+                    <span className="text-[10px] text-slate-400">Scheduled Apr 2027</span>
                   </div>
                 </div>
 
-                {/* Interactive Multi-Modal Data Visualizer */}
-                <AHPDataVisualizer 
-                  studentName={`${currentChild.full_name} (Child's Wellness Matrix)`}
-                  domainScores={{ 
-                    academic: currentChild.domain_scores?.academic ?? 28.5, 
-                    family: currentChild.domain_scores?.family ?? 18.0, 
-                    health: currentChild.domain_scores?.health ?? 16.5, 
-                    mental: currentChild.domain_scores?.mental_health ?? 14.0, 
-                    financial: currentChild.domain_scores?.financial ?? 12.0 
+                <AHPDataVisualizer
+                  studentName={currentChild.full_name}
+                  domainScores={{
+                    academic: currentChild.domain_scores?.academic ?? 80,
+                    family: currentChild.domain_scores?.family ?? 85,
+                    health: currentChild.domain_scores?.health ?? 90,
+                    mental: currentChild.domain_scores?.mental_health ?? 75,
+                    financial: currentChild.domain_scores?.financial ?? 80
                   }}
                 />
-
-                {/* Plain-Language 5-Domain Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
-                    <h4 className="font-extrabold text-emerald-950 text-sm flex items-center gap-1.5">
-                      <CheckCircle className="h-4 w-4 text-emerald-600" />
-                      What&apos;s Improving Well:
-                    </h4>
-                    <p className="text-slate-700 leading-relaxed">
-                      Attendance is at a high 96.5%. Chemistry quiz scores have recovered to 82/100 after participating in tutoring.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1">
-                    <h4 className="font-extrabold text-amber-950 text-sm flex items-center gap-1.5">
-                      <Info className="h-4 w-4 text-amber-600" />
-                      What Needs Family Attention:
-                    </h4>
-                    <p className="text-slate-700 leading-relaxed">
-                      Pre-Calculus test anxiety and late-night study fatigue. Ensuring proper rest before exam days will make a major difference.
-                    </p>
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="py-12 text-center rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 space-y-2">
@@ -810,7 +1397,7 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 3. INTERVENTIONS TRANSPARENCY (interventions) */}
+      {/* 3. INTERVENTIONS TRANSPARENCY (interventions)             */}
       {/* ========================================================= */}
       {activeTab === "interventions" && (
         <div className="space-y-6">
@@ -897,7 +1484,7 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 4. ACKNOWLEDGE INTERVENTIONS (acknowledge_intervention) */}
+      {/* 4. ACKNOWLEDGE INTERVENTIONS (acknowledge_intervention)   */}
       {/* ========================================================= */}
       {activeTab === "acknowledge_intervention" && (
         <div className="space-y-6">
@@ -955,7 +1542,7 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 5. FAMILY ASSESSMENT (family_assessment) */}
+      {/* 5. FAMILY ASSESSMENT (family_assessment)                  */}
       {/* ========================================================= */}
       {activeTab === "family_assessment" && (
         <div className="space-y-6">
@@ -1004,26 +1591,9 @@ export const ParentDashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const isHigh = familyData.familySupportLevel.toLowerCase().includes("high") || familyData.parentingStyle.toLowerCase().includes("authoritative");
-                  const updatedSupportScore = isHigh ? 88.0 : 70.0;
-                  
-                  updateStudentRecord(currentChild.id, {
-                    family_support_score: updatedSupportScore
-                  });
-
-                  addAppNotification({
-                    studentId: currentChild.id,
-                    studentName: currentChild.full_name,
-                    title: "Family Environment Questionnaire Updated",
-                    body: `Parent submitted updated home context data for ${currentChild.full_name}.`,
-                    type: "parent",
-                    targetRole: "counselor",
-                    priority: "low"
-                  });
-
-                  showToast("Family assessment updated securely and synced with student file.");
+                  showToast("Family Environment assessment submitted securely.");
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition cursor-pointer shadow-xs"
               >
                 Save Family Assessment
               </button>
@@ -1033,7 +1603,7 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 6. FINANCIAL ASSESSMENT (financial_assessment) */}
+      {/* 6. FINANCIAL ASSESSMENT (financial_assessment)            */}
       {/* ========================================================= */}
       {activeTab === "financial_assessment" && (
         <div className="space-y-6">
@@ -1041,36 +1611,43 @@ export const ParentDashboard: React.FC = () => {
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
                 <Wallet className="h-6 w-6 text-emerald-600" />
-                Financial Assistance &amp; 4Ps Beneficiary Information
+                Financial Context &amp; Scholarship Assistance Survey
               </h3>
               <p className="text-xs sm:text-sm text-slate-500">
-                Optional survey to help the school endorse your family for emergency tuition subsidies and grants
+                Optional survey to help the school endorse your child for tuition assistance or grants
               </p>
             </div>
 
             <div className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-extrabold text-slate-700">Household Monthly Income Bracket:</label>
-                <input
-                  type="text"
+                <label className="font-extrabold text-slate-700">Household Income Bracket:</label>
+                <select
                   value={financialData.monthlyIncomeBracket}
                   onChange={(e) => setFinancialData(prev => ({ ...prev, monthlyIncomeBracket: e.target.value }))}
                   className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl font-medium"
-                />
+                >
+                  <option>Below ₱15,000 (Low Income)</option>
+                  <option>₱15,000 - ₱25,000 (Lower Middle)</option>
+                  <option>₱25,000 - ₱45,000 (Middle Income)</option>
+                  <option>₱45,000 - ₱70,000 (Upper Middle)</option>
+                  <option>Above ₱70,000 (High Income)</option>
+                </select>
               </div>
 
               <div className="space-y-1">
-                <label className="font-extrabold text-slate-700">Pantawid Pamilyang Pilipino Program (4Ps) Beneficiary Status:</label>
-                <input
-                  type="text"
+                <label className="font-extrabold text-slate-700">4Ps Beneficiary Status:</label>
+                <select
                   value={financialData.is4PsBeneficiary}
                   onChange={(e) => setFinancialData(prev => ({ ...prev, is4PsBeneficiary: e.target.value }))}
                   className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl font-medium"
-                />
+                >
+                  <option>No</option>
+                  <option>Yes (Active DSWD Beneficiary)</option>
+                </select>
               </div>
 
               <div className="space-y-1">
-                <label className="font-extrabold text-slate-700">Current Tuition Payment Arrangement:</label>
+                <label className="font-extrabold text-slate-700">Tuition Payment Arrangement:</label>
                 <input
                   type="text"
                   value={financialData.paymentArrangement}
@@ -1082,28 +1659,11 @@ export const ParentDashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const isLow = financialData.is4PsBeneficiary.toLowerCase() === "yes" || financialData.monthlyIncomeBracket.includes("Below");
-                  const updatedRiskScore = isLow ? 75.0 : 35.0;
-
-                  updateStudentRecord(currentChild.id, {
-                    financial_risk_score: updatedRiskScore
-                  });
-
-                  addAppNotification({
-                    studentId: currentChild.id,
-                    studentName: currentChild.full_name,
-                    title: "Parent Financial Survey Submitted",
-                    body: `Financial survey submitted for ${currentChild.full_name} (4Ps: ${financialData.is4PsBeneficiary}).`,
-                    type: "parent",
-                    targetRole: "counselor",
-                    priority: "medium"
-                  });
-
-                  showToast("Financial data saved. Guidance office will assess for scholarship endorsement.");
+                  showToast("Financial information submitted. Guidance will assess for tuition grant endorsements.");
                 }}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-emerald-700 text-white font-bold text-xs hover:bg-emerald-800 transition cursor-pointer shadow-xs"
               >
-                Submit Financial Information
+                Submit Financial Survey
               </button>
             </div>
           </div>
@@ -1111,7 +1671,7 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 7. CRISIS NOTIFICATIONS (crisis_alerts) */}
+      {/* 7. CRISIS NOTIFICATIONS (crisis_alerts)                   */}
       {/* ========================================================= */}
       {activeTab === "crisis_alerts" && (
         <div className="space-y-6">
@@ -1132,7 +1692,7 @@ export const ParentDashboard: React.FC = () => {
                 <span className="text-[11px] text-rose-700 font-bold">Sep 18, 2026 - 11:25 PM</span>
               </div>
               <p className="leading-relaxed">
-                <strong>What happened:</strong> During an AI wellness chat, Joshua expressed feeling overwhelmed by STEM midterm exams and sleep deprivation, and requested Guidance Counselor support.
+                <strong>What happened:</strong> During a student wellness check-in, {currentChild.first_name} expressed feeling overwhelmed by midterm examinations and requested counselor support.
               </p>
               <p className="leading-relaxed">
                 <strong>What the school did:</strong> Guidance Counselor Maria Theresa Cruz dispatched a counseling invite and arranged peer tutoring with Kyle Mercado.
@@ -1147,7 +1707,7 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 8. SCHEDULE MEETING (schedule_meeting) */}
+      {/* 8. SCHEDULE MEETING (schedule_meeting)                    */}
       {/* ========================================================= */}
       {activeTab === "schedule_meeting" && (
         <div className="space-y-6">
@@ -1175,7 +1735,8 @@ export const ParentDashboard: React.FC = () => {
                   >
                     <option value="Guidance Counselor 1-on-1 Consultation">Guidance Counselor 1-on-1 Consultation</option>
                     <option value="Class Adviser Progress Meeting">Class Adviser Progress Meeting</option>
-                    <option value="Subject Teacher Consultation (Pre-Calculus)">Subject Teacher Consultation (Pre-Calculus)</option>
+                    <option value="Subject Teacher Consultation (Mathematics)">Subject Teacher Consultation (Mathematics)</option>
+                    <option value="Subject Teacher Consultation (Science)">Subject Teacher Consultation (Science)</option>
                   </select>
                 </div>
 
@@ -1250,7 +1811,7 @@ export const ParentDashboard: React.FC = () => {
                     setNewMeetingReason("");
                     showToast("Consultation request scheduled and dispatched to counselor triage queue.");
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition cursor-pointer shadow-xs"
                 >
                   Submit Meeting Request
                 </button>
@@ -1277,48 +1838,358 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 9. ACADEMIC REPORTS (academic_reports) */}
+      {/* 9. ACADEMIC REPORTS (academic_reports) - FORM 138 / SF9   */}
       {/* ========================================================= */}
       {activeTab === "academic_reports" && (
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-              <div>
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Main Official Progress Card Header */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-md bg-[#8B0014] text-white font-black text-[10px] uppercase tracking-wider">
+                    DepEd Form 138 (SF9-SHS/JHS)
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-extrabold text-[10px] border border-amber-300">
+                    DO 8, s. 2015 Compliant
+                  </span>
+                  <span className="text-xs text-slate-500 font-semibold">• S.Y. 2025–2026</span>
+                </div>
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
                   <BookOpen className="h-6 w-6 text-[#8B0014]" />
-                  Simplified Parent Grade Report (Form 138)
+                  Learner Progress &amp; Official Report Card
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  Easy-to-understand progress indicators with layman explanations
+                  Detailed breakdown of subject learning areas, assigned faculty teachers, core values, and homeroom adviser remarks.
                 </p>
+              </div>
+
+              {/* Quarter Filter & Official PDF Button */}
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Quarter Dropdown Selector */}
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-1.5 shadow-2xs">
+                  <Filter className="h-4 w-4 text-slate-500 ml-2 shrink-0" />
+                  <span className="text-xs font-bold text-slate-600 hidden sm:inline">Quarter View:</span>
+                  <select
+                    value={selectedQuarter}
+                    onChange={(e) => {
+                      const q = e.target.value as QuarterFilterType;
+                      setSelectedQuarter(q);
+                      showToast(`Viewing report card for ${q === "all" ? "All Quarters (Cumulative)" : q.toUpperCase()}`);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-bold text-xs appearance-none focus:outline-none focus:ring-2 focus:ring-[#8B0014] cursor-pointer"
+                  >
+                    <option value="all">All Quarters (Complete Form 138 Matrix)</option>
+                    <option value="q1">Quarter 1 (Aug - Oct)</option>
+                    <option value="q2">Quarter 2 (Nov - Dec / Current)</option>
+                    <option value="q3">Quarter 3 (Jan - Mar)</option>
+                    <option value="q4">Quarter 4 (Apr - May / Finals)</option>
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsDepEdFormOpen(true)}
+                  className="px-4 py-2 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                >
+                  <Printer className="h-4 w-4" />
+                  <span>Official SF9 Print / PDF</span>
+                </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {[
-                { subject: "Pre-Calculus", grade: 80, remark: "Remediated (Passed)", note: "Recovered from 72 in Q1" },
-                { subject: "General Chemistry 1", grade: 82, remark: "Passed", note: "Solid laboratory output" },
-                { subject: "Oral Communication", grade: 90, remark: "Very Satisfactory", note: "Excellent class speeches" },
-                { subject: "Komunikasyon", grade: 88, remark: "Satisfactory", note: "Consistently on time" },
-                { subject: "Earth & Life Science", grade: 85, remark: "Satisfactory", note: "Good modular projects" },
-                { subject: "P.E. and Health", grade: 94, remark: "Outstanding", note: "Active participation" }
-              ].map((s, i) => (
-                <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="font-extrabold text-slate-900">{s.subject}</span>
-                    <span className="text-base font-black text-[#8B0014]">{s.grade}</span>
-                  </div>
-                  <span className="text-emerald-700 font-bold block">{s.remark}</span>
-                  <p className="text-slate-500 text-[11px]">{s.note}</p>
+            {/* Learner & Section Banner Details */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Enrolled Learner:</span>
+                <strong className="text-slate-900 text-sm">{currentChild.full_name}</strong>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">DepEd LRN (12-Digit):</span>
+                <strong className="font-mono text-slate-800">{currentChild.lrn}</strong>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Grade &amp; Section:</span>
+                <strong className="text-slate-800">{currentChild.section_name}</strong>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Homeroom Adviser:</span>
+                <strong className="text-slate-800">{currentChildInfo.adviser}</strong>
+              </div>
+            </div>
+
+            {/* LEARNING AREAS & SUBJECT TEACHERS TABLE */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-black text-sm text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
+                  <span>Part I: Report on Learning Progress and Achievement</span>
+                </h4>
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  Passing Standard: <strong>75.0%</strong>
+                </span>
+              </div>
+
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-100/90 text-slate-700 uppercase font-black text-[11px] border-b border-slate-200">
+                    <tr>
+                      <th className="py-3 px-4">Subject &amp; Assigned Teacher</th>
+                      <th className="py-3 px-3">Room / Schedule</th>
+                      <th className={`py-3 px-2 text-center w-14 ${selectedQuarter === "q1" ? "bg-amber-100 text-amber-950 font-black" : ""}`}>Q1</th>
+                      <th className={`py-3 px-2 text-center w-14 ${selectedQuarter === "q2" ? "bg-amber-100 text-amber-950 font-black" : ""}`}>Q2</th>
+                      <th className={`py-3 px-2 text-center w-14 ${selectedQuarter === "q3" ? "bg-amber-100 text-amber-950 font-black" : ""}`}>Q3</th>
+                      <th className={`py-3 px-2 text-center w-14 ${selectedQuarter === "q4" ? "bg-amber-100 text-amber-950 font-black" : ""}`}>Q4</th>
+                      <th className="py-3 px-3 text-center w-20 bg-rose-50/50 text-[#8B0014]">Final</th>
+                      <th className="py-3 px-3 text-center w-24">Remarks</th>
+                      <th className="py-3 px-3 text-center w-36">Faculty Contact</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200/80 bg-white">
+                    {studentSubjects.map((sub) => {
+                      const finalGrade = Number(((sub.q1 + sub.q2 + sub.q3 + sub.q4) / 4).toFixed(1));
+                      const isPassed = finalGrade >= 75;
+
+                      return (
+                        <tr key={sub.code} className="hover:bg-slate-50/90 transition">
+                          <td className="py-3 px-4">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-bold">
+                                  {sub.code}
+                                </span>
+                                <strong className="text-slate-900 text-xs">{sub.name}</strong>
+                              </div>
+                              <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                <User className="h-3 w-3 text-slate-400" />
+                                <span>{sub.teacher}</span>
+                              </p>
+                              {sub.teacherRemarks && (
+                                <p className="text-[10px] text-slate-400 italic pt-0.5">
+                                  &ldquo;{sub.teacherRemarks}&rdquo;
+                                </p>
+                              )}
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-3 text-slate-600 text-[11px]">
+                            <span className="font-semibold block text-slate-800">{sub.room}</span>
+                            <span className="text-[10px] text-slate-400">{sub.schedule.split("•")[0]}</span>
+                          </td>
+
+                          <td className={`py-3 px-2 text-center font-mono font-bold ${selectedQuarter === "q1" ? "bg-amber-50 text-amber-900 font-black text-sm" : "text-slate-700"}`}>
+                            {sub.q1}
+                          </td>
+                          <td className={`py-3 px-2 text-center font-mono font-bold ${selectedQuarter === "q2" ? "bg-amber-50 text-amber-900 font-black text-sm" : "text-slate-700"}`}>
+                            {sub.q2}
+                          </td>
+                          <td className={`py-3 px-2 text-center font-mono font-bold ${selectedQuarter === "q3" ? "bg-amber-50 text-amber-900 font-black text-sm" : "text-slate-700"}`}>
+                            {sub.q3}
+                          </td>
+                          <td className={`py-3 px-2 text-center font-mono font-bold ${selectedQuarter === "q4" ? "bg-amber-50 text-amber-900 font-black text-sm" : "text-slate-700"}`}>
+                            {sub.q4}
+                          </td>
+
+                          <td className="py-3 px-3 text-center font-mono font-black text-sm text-[#8B0014] bg-rose-50/30">
+                            {finalGrade}
+                          </td>
+
+                          <td className="py-3 px-3 text-center">
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
+                              isPassed 
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-300" 
+                                : "bg-rose-100 text-rose-800 border border-rose-300"
+                            }`}>
+                              {isPassed ? "PASSED" : "FAILED"}
+                            </span>
+                          </td>
+
+                          <td className="py-3 px-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleMessageSpecificTeacher(sub.teacher, sub.teacherRole, sub.name)}
+                              className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#8B0014] text-slate-700 hover:text-white font-bold text-[10px] transition inline-flex items-center gap-1 border border-slate-300 shadow-2xs cursor-pointer"
+                              title={`Message ${sub.teacher}`}
+                            >
+                              <MessageSquare className="h-3 w-3" />
+                              <span>Message Teacher</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+
+                    {/* General Weighted Average Row */}
+                    <tr className="bg-slate-100/90 font-black text-slate-900 border-t-2 border-slate-300">
+                      <td colSpan={2} className="py-3 px-4 uppercase text-slate-800">
+                        General Weighted Average (GWA)
+                      </td>
+                      <td className={`py-3 px-2 text-center font-mono font-black ${selectedQuarter === "q1" ? "bg-amber-200 text-amber-950 text-sm" : ""}`}>
+                        {(studentSubjects.reduce((acc, s) => acc + s.q1, 0) / studentSubjects.length).toFixed(1)}
+                      </td>
+                      <td className={`py-3 px-2 text-center font-mono font-black ${selectedQuarter === "q2" ? "bg-amber-200 text-amber-950 text-sm" : ""}`}>
+                        {(studentSubjects.reduce((acc, s) => acc + s.q2, 0) / studentSubjects.length).toFixed(1)}
+                      </td>
+                      <td className={`py-3 px-2 text-center font-mono font-black ${selectedQuarter === "q3" ? "bg-amber-200 text-amber-950 text-sm" : ""}`}>
+                        {(studentSubjects.reduce((acc, s) => acc + s.q3, 0) / studentSubjects.length).toFixed(1)}
+                      </td>
+                      <td className={`py-3 px-2 text-center font-mono font-black ${selectedQuarter === "q4" ? "bg-amber-200 text-amber-950 text-sm" : ""}`}>
+                        {(studentSubjects.reduce((acc, s) => acc + s.q4, 0) / studentSubjects.length).toFixed(1)}
+                      </td>
+                      <td className="py-3 px-3 text-center font-mono font-black text-base text-[#8B0014] bg-rose-100/60">
+                        {(studentSubjects.reduce((acc, s) => acc + ((s.q1 + s.q2 + s.q3 + s.q4) / 4), 0) / studentSubjects.length).toFixed(2)}
+                      </td>
+                      <td colSpan={2} className="py-3 px-3 text-center text-emerald-800 font-extrabold text-xs">
+                        ✓ PROMOTED WITH HONORS
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* GRADING COMPONENT SCORE SUMMARY */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <h4 className="font-extrabold text-xs text-slate-800 uppercase tracking-wide flex items-center justify-between">
+                <span>DepEd DO 8, s. 2015 Grading Weights Breakdown</span>
+                <span className="text-[10px] text-slate-500 font-normal">Junior High / Senior High Standard</span>
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="p-3 bg-white rounded-xl border border-slate-200">
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold">Written Works (WW - 30%):</span>
+                  <p className="text-base font-black text-slate-900 mt-0.5">88.5% Mastery</p>
+                  <span className="text-[10px] text-emerald-700 font-semibold">Quizzes, essays, and long tests</span>
                 </div>
-              ))}
+                <div className="p-3 bg-white rounded-xl border border-slate-200">
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold">Performance Tasks (PT - 50%):</span>
+                  <p className="text-base font-black text-emerald-700 mt-0.5">92.0% Exemplary</p>
+                  <span className="text-[10px] text-slate-500">Laboratory experiments and projects</span>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-slate-200">
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold">Quarterly Exam (QE - 20%):</span>
+                  <p className="text-base font-black text-[#8B0014] mt-0.5">86.0% Passed</p>
+                  <span className="text-[10px] text-slate-500">Periodic departmental assessments</span>
+                </div>
+              </div>
+            </div>
+
+            {/* PART II: DEPED CORE VALUES (OBSERVED VALUES) */}
+            <div className="space-y-3 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 pb-2">
+                <div>
+                  <h4 className="font-black text-sm text-slate-900 uppercase tracking-wide">
+                    Part II: Report on Observed Values (DepEd Core Values)
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Behavioral evaluation conducted quarterly by homeroom adviser and subject teachers
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-xl">
+                  <span>AO: Always Observed</span> • <span>SO: Sometimes</span> • <span>RO: Rarely</span> • <span>NO: Not Observed</span>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-100 text-slate-700 uppercase font-black text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-4 w-44">Core Values</th>
+                      <th className="py-2.5 px-4">Behavior Statements</th>
+                      <th className="py-2.5 px-2 text-center w-12">Q1</th>
+                      <th className="py-2.5 px-2 text-center w-12">Q2</th>
+                      <th className="py-2.5 px-2 text-center w-12">Q3</th>
+                      <th className="py-2.5 px-2 text-center w-12">Q4</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 bg-white">
+                    {coreValuesList.map((cv, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50">
+                        <td className="py-2.5 px-4 font-bold text-slate-900">{cv.coreValue}</td>
+                        <td className="py-2.5 px-4 text-slate-700">{cv.behaviorStatement}</td>
+                        <td className="py-2.5 px-2 text-center font-bold text-emerald-800">{cv.q1}</td>
+                        <td className="py-2.5 px-2 text-center font-bold text-emerald-800">{cv.q2}</td>
+                        <td className="py-2.5 px-2 text-center font-bold text-emerald-800">{cv.q3}</td>
+                        <td className="py-2.5 px-2 text-center font-bold text-emerald-800">{cv.q4}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* PART III: ATTENDANCE RECORD (MONTHLY MATRIX) */}
+            <div className="space-y-3 pt-2">
+              <h4 className="font-black text-sm text-slate-900 uppercase tracking-wide">
+                Part III: Report on Learner Attendance Record
+              </h4>
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="w-full text-center text-xs border-collapse">
+                  <thead className="bg-slate-100 text-slate-700 uppercase font-black text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3 text-left">Month</th>
+                      {monthlyAttendance.map(m => (
+                        <th key={m.month} className="py-2.5 px-2">{m.month}</th>
+                      ))}
+                      <th className="py-2.5 px-3 bg-slate-200 text-slate-900">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 bg-white font-mono text-[11px]">
+                    <tr>
+                      <td className="py-2 px-3 text-left font-sans font-bold text-slate-700">No. of School Days</td>
+                      {monthlyAttendance.map(m => (
+                        <td key={m.month} className="py-2 px-2">{m.days}</td>
+                      ))}
+                      <td className="py-2 px-3 font-bold bg-slate-50">{monthlyAttendance.reduce((a, b) => a + b.days, 0)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 text-left font-sans font-bold text-emerald-700">Days Present</td>
+                      {monthlyAttendance.map(m => (
+                        <td key={m.month} className="py-2 px-2 text-emerald-800 font-bold">{m.present}</td>
+                      ))}
+                      <td className="py-2 px-3 font-bold bg-emerald-50 text-emerald-900">{monthlyAttendance.reduce((a, b) => a + b.present, 0)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 text-left font-sans font-bold text-rose-700">Days Absent</td>
+                      {monthlyAttendance.map(m => (
+                        <td key={m.month} className="py-2 px-2 text-rose-700">{m.absent}</td>
+                      ))}
+                      <td className="py-2 px-3 font-bold bg-rose-50 text-rose-900">{monthlyAttendance.reduce((a, b) => a + b.absent, 0)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* PART IV: HOMEROOM ADVISER'S NARRATIVE ASSESSMENT */}
+            <div className="space-y-3 pt-2">
+              <h4 className="font-black text-sm text-slate-900 uppercase tracking-wide">
+                Part IV: Homeroom Adviser&apos;s Quarterly Narrative Report &amp; Feedback
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {quarterlyAdviserRemarks.map((qr) => (
+                  <div key={qr.quarter} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <strong className="text-xs text-[#8B0014] font-black">{qr.quarter} ({qr.date})</strong>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
+                        {qr.conductRemark}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-700 leading-relaxed italic">
+                      &ldquo;{qr.narrative}&rdquo;
+                    </p>
+                    <div className="pt-1.5 border-t border-slate-200/80 flex items-center justify-between text-[10px] text-slate-500">
+                      <span>Adviser: <strong>{qr.adviser}</strong></span>
+                      <span className="font-mono">Quarter GWA: <strong>{qr.generalAverage}</strong></span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 10. ATTENDANCE (attendance) */}
+      {/* 10. ATTENDANCE (attendance)                               */}
       {/* ========================================================= */}
       {activeTab === "attendance" && (
         <div className="space-y-6">
@@ -1337,7 +2208,7 @@ export const ParentDashboard: React.FC = () => {
               <div className="p-5 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-2">
                 <h4 className="font-black text-blue-950 text-sm">Attendance Pattern Summary</h4>
                 <p className="leading-relaxed text-slate-700">
-                  Joshua has maintained a <strong>96.5% attendance standing</strong>. No chronic absence patterns detected (e.g. no habitual Monday tardiness).
+                  {currentChild.first_name} has maintained a <strong>96.5% attendance standing</strong>. No chronic absence patterns detected (e.g. no habitual Monday tardiness).
                 </p>
               </div>
 
@@ -1351,33 +2222,63 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 11. WELLNESS (wellness) */}
+      {/* 11. WELLNESS / AREAS NEEDING SUPPORT (wellness)          */}
       {/* ========================================================= */}
       {activeTab === "wellness" && (
         <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <HeartPulse className="h-6 w-6 text-purple-600" />
-                Gentle Wellness &amp; Emotional Health Overview
+                <HeartPulse className="h-6 w-6 text-rose-600" />
+                Holistic 5-Domain Growth &amp; Support Areas
               </h3>
               <p className="text-xs sm:text-sm text-slate-500">
-                Presented gently as areas where your child might need understanding and support
+                Detailed view of non-academic domains assessed through our AHP Early Warning System
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-2 text-xs text-slate-700">
-              <h4 className="font-black text-purple-950 text-sm">Guidance Counselor Observation</h4>
-              <p className="leading-relaxed">
-                Your child experiences elevated stress prior to major mathematics and science exams. Guidance recommends praising effort and consistency over numerical perfection.
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="font-bold text-slate-500 uppercase text-[10px]">Academic Readiness</span>
+                <p className="text-xl font-black text-slate-900">{currentChild.domain_scores?.academic ?? 80}%</p>
+                <span className="text-emerald-700 font-bold block">Passing Baseline</span>
+                <p className="text-slate-500 text-[11px]">Regular participation in laboratory and class discussions.</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="font-bold text-slate-500 uppercase text-[10px]">Family Support Environment</span>
+                <p className="text-xl font-black text-emerald-700">{currentChild.domain_scores?.family ?? 85}%</p>
+                <span className="text-emerald-700 font-bold block">Strong Home Foundation</span>
+                <p className="text-slate-500 text-[11px]">Parents regularly acknowledge check-ins and school memos.</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="font-bold text-slate-500 uppercase text-[10px]">Physical Health &amp; Sleep</span>
+                <p className="text-xl font-black text-purple-700">{currentChild.domain_scores?.health ?? 90}%</p>
+                <span className="text-purple-700 font-bold block">Good Vitality</span>
+                <p className="text-slate-500 text-[11px]">Consistent sleep schedule confirmed under home protocol.</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="font-bold text-slate-500 uppercase text-[10px]">Mental &amp; Emotional Wellbeing</span>
+                <p className="text-xl font-black text-amber-700">{currentChild.domain_scores?.mental_health ?? 75}%</p>
+                <span className="text-amber-800 font-bold block">Monitored Exam Readiness</span>
+                <p className="text-slate-500 text-[11px]">Benefit from continuous mindfulness and peer-tutoring.</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="font-bold text-slate-500 uppercase text-[10px]">Financial &amp; Material Stability</span>
+                <p className="text-xl font-black text-pink-700">{currentChild.domain_scores?.financial ?? 80}%</p>
+                <span className="text-pink-700 font-bold block">Stable Resources</span>
+                <p className="text-slate-500 text-[11px]">Learning materials and internet connection sufficient.</p>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 12. NOTIFICATIONS (notifications) */}
+      {/* 12. NOTIFICATIONS (notifications)                         */}
       {/* ========================================================= */}
       {activeTab === "notifications" && (
         <div className="space-y-6">
@@ -1385,62 +2286,49 @@ export const ParentDashboard: React.FC = () => {
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
                 <Bell className="h-6 w-6 text-[#8B0014]" />
-                Centralized Parent Communications Inbox
+                Parent Notification Inbox
               </h3>
             </div>
 
-            <div className="space-y-2 text-xs">
-              {childNotifications.length > 0 ? (
-                childNotifications.map((n) => (
-                  <div key={n.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-0.5">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <strong className="text-slate-900">{n.title}</strong>
-                        {n.priority === "high" && (
-                          <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-[9px]">Urgent</span>
-                        )}
-                      </div>
-                      <span className="text-slate-400 text-[11px]">{n.created_at}</span>
-                    </div>
-                    <p className="text-slate-600">{n.message}</p>
+            <div className="space-y-3">
+              {childNotifications.map((n) => (
+                <div key={n.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1 text-xs">
+                  <div className="flex justify-between items-center">
+                    <strong className="text-slate-900 text-sm">{n.title}</strong>
+                    <span className="text-[10px] text-slate-400">{n.timestamp}</span>
                   </div>
-                ))
-              ) : (
-                <div className="py-8 text-center text-slate-400">
-                  <Bell className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                  <p>No new notifications at this time.</p>
+                  <p className="text-slate-600 leading-relaxed">{n.body}</p>
                 </div>
-              )}
+              ))}
             </div>
           </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 13. RESOURCES (resources) */}
+      {/* 13. RESOURCES (resources)                                 */}
       {/* ========================================================= */}
       {activeTab === "resources" && (
         <div className="space-y-6">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <FileText className="h-6 w-6 text-[#8B0014]" />
-                Parenting Guides, Mental Health &amp; Scholarship Assistance
+                <FileText className="h-6 w-6 text-emerald-600" />
+                Parenting, Academic &amp; Health Guides
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <strong className="text-slate-900 text-sm">Managing Senior High Anxiety</strong>
-                <p className="text-slate-600">DepEd guide on active listening and positive reinforcement.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                <strong className="text-slate-900 text-sm block">How to Help Your Child Manage Exam Anxiety</strong>
+                <p className="text-slate-600">Practical tips from the SAPC Guidance &amp; Counseling Department on study intervals and emotional reassurance.</p>
+                <span className="text-[#8B0014] font-bold block cursor-pointer hover:underline">Download PDF Guide →</span>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <strong className="text-slate-900 text-sm">SAPC Alumni Scholarship</strong>
-                <p className="text-slate-600">Tuition subsidy application guidelines for families in need.</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <strong className="text-slate-900 text-sm">Healthy Sleep for Teens</strong>
-                <p className="text-slate-600">Practical tips for screen curfew and sleep hygiene.</p>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                <strong className="text-slate-900 text-sm block">Understanding DepEd Order 8, s. 2015 Grading</strong>
+                <p className="text-slate-600">Learn how Written Works, Performance Tasks, and Quarterly Assessments are weighted for high school learners.</p>
+                <span className="text-[#8B0014] font-bold block cursor-pointer hover:underline">Read Explainer →</span>
               </div>
             </div>
           </div>
@@ -1448,7 +2336,7 @@ export const ParentDashboard: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* 14. ANNOUNCEMENTS (announcements) */}
+      {/* 14. ANNOUNCEMENTS (announcements)                         */}
       {/* ========================================================= */}
       {activeTab === "announcements" && (
         <div className="space-y-6">
@@ -1462,17 +2350,17 @@ export const ParentDashboard: React.FC = () => {
 
             <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1 text-xs">
               <div className="flex justify-between items-center">
-                <strong className="text-amber-950 text-sm">Senior High School Intramurals 2026</strong>
+                <strong className="text-amber-950 text-sm">Senior High School Intramurals &amp; Academic Week 2026</strong>
                 <span className="text-amber-800">Oct 20-22, 2026</span>
               </div>
-              <p className="text-slate-700">Parents are welcome to attend the opening sports festival ceremonies.</p>
+              <p className="text-slate-700">Parents are welcome to attend the opening sports festival ceremonies and science exhibit booths.</p>
             </div>
           </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 15. MESSAGES (messages) */}
+      {/* 15. MESSAGES (messages)                                   */}
       {/* ========================================================= */}
       {activeTab === "messages" && (
         <div className="space-y-6">
@@ -1480,30 +2368,46 @@ export const ParentDashboard: React.FC = () => {
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
                 <MessageSquare className="h-6 w-6 text-[#8B0014]" />
-                Direct Threaded Chat with Teachers &amp; Counselors
+                Direct Threaded Chat with Subject Teachers &amp; Counselors
               </h3>
+              <p className="text-xs text-slate-500">
+                Communicate directly with faculty regarding {currentChild.full_name}&apos;s subject progress
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Thread list */}
               <div className="space-y-2">
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider block px-1">
+                  Active Channels ({chatThreads.length})
+                </span>
                 {chatThreads.map((t) => (
                   <div
                     key={t.id}
                     onClick={() => setActiveThreadId(t.id)}
-                    className={`p-3 rounded-2xl border transition cursor-pointer text-xs ${
-                      t.id === activeThreadId ? "bg-rose-50 border-rose-300 font-bold" : "bg-slate-50 border-slate-200"
+                    className={`p-3.5 rounded-2xl border transition cursor-pointer text-xs ${
+                      t.id === activeThreadId ? "bg-rose-50 border-[#8B0014] font-bold shadow-xs ring-1 ring-[#8B0014]/20" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    <p className="text-slate-900">{t.contact}</p>
-                    <span className="text-slate-400 text-[10px]">{t.role}</span>
+                    <p className="text-slate-900 text-xs font-black line-clamp-1">{t.contact}</p>
+                    <span className="text-slate-500 text-[10px] block mt-0.5">{t.role}</span>
                   </div>
                 ))}
               </div>
 
               {/* Chat Window */}
               <div className="md:col-span-2 space-y-3">
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 max-h-[300px] overflow-y-auto">
+                <div className="p-3 bg-slate-100 rounded-2xl flex items-center justify-between border border-slate-200 text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-500 block uppercase font-bold">Chatting with:</span>
+                    <strong className="text-slate-900">{activeThread.contact}</strong>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">
+                    Faculty Channel Active
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 max-h-[340px] min-h-[240px] overflow-y-auto">
                   {activeThread.messages.map((m, i) => (
                     <div
                       key={i}
@@ -1523,16 +2427,17 @@ export const ParentDashboard: React.FC = () => {
                 <form onSubmit={handleSendChatMessage} className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Type your message..."
+                    placeholder="Type your message to faculty..."
                     value={inputChat}
                     onChange={(e) => setInputChat(e.target.value)}
-                    className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#8B0014]"
+                    className="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#8B0014] focus:bg-white transition"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition"
+                    className="px-5 py-2.5 rounded-xl bg-[#8B0014] text-white font-bold text-xs hover:bg-[#6D0010] transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                   >
-                    Send
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Send</span>
                   </button>
                 </form>
               </div>
