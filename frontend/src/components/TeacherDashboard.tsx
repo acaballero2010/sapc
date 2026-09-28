@@ -114,23 +114,39 @@ export const TeacherDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TeacherTabType>("dashboard");
 
   // Resolve Teacher's Assigned Advisory Section
+  const [selectedSectionFilter, setSelectedSectionFilter] = useState<string>("all");
+
   const teacherSection = useMemo(() => {
+    if (selectedSectionFilter !== "all") return selectedSectionFilter;
     if (user?.section) return user.section;
-    const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
-    if (user?.full_name) {
-      const match = all.find(s => s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()));
-      if (match) return match.section_name;
-    }
     return "Grade 7 - Love";
+  }, [user, selectedSectionFilter]);
+
+  const availableAdvisorySections = useMemo(() => {
+    const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
+    const sSet = new Set<string>();
+    sSet.add("Grade 7 - Love");
+    if (user?.section) sSet.add(user.section);
+    all.forEach(s => {
+      if (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase())) {
+        if (s.section_name) sSet.add(s.section_name);
+      }
+    });
+    return Array.from(sSet);
   }, [user]);
 
   const filterAdvisory = React.useCallback((all: StudentRecord[]) => {
+    if (selectedSectionFilter !== "all") {
+      return all.filter(s => s.section_name === selectedSectionFilter);
+    }
     const advisory = all.filter(s => 
-      s.section_name === teacherSection || 
+      s.section_name === "Grade 7 - Love" || 
+      s.section_name === "Grade 7 - St. Anthony" ||
+      s.section_name === (user?.section || "Grade 7 - Love") ||
       (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))
     );
-    return advisory.length > 0 ? advisory : all.filter(s => s.section_name === "Grade 7 - Love");
-  }, [teacherSection, user]);
+    return advisory.length > 0 ? advisory : all.slice(0, 37);
+  }, [selectedSectionFilter, user]);
 
   // Advisory Class Dataset Scoped strictly to teacher's section
   const [students, setStudents] = useState<StudentRecord[]>(() => {
@@ -2239,7 +2255,22 @@ export const TeacherDashboard: React.FC = () => {
               <p className="text-xs text-slate-500">Advisory class monitoring, student profiling, and student login credential distribution</p>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Section Filter Dropdown */}
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1 text-xs">
+                <span className="text-[11px] font-bold text-slate-500">Section:</span>
+                <select
+                  value={selectedSectionFilter}
+                  onChange={(e) => setSelectedSectionFilter(e.target.value)}
+                  className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">All Assigned Students ({students.length})</option>
+                  {availableAdvisorySections.map((sec) => (
+                    <option key={sec} value={sec}>{sec}</option>
+                  ))}
+                </select>
+              </div>
+
               {/* Sub-view switcher: Risk vs Credentials */}
               <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
                 <button

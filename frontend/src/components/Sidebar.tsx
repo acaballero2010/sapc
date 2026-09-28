@@ -114,17 +114,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Dynamic Teacher Advisory Student Count
   const teacherAdvisoryCount = React.useMemo(() => {
-    if (typeof window === "undefined") return 34;
+    if (typeof window === "undefined") return 37;
     try {
       const all = getActiveStudentDataset();
-      const teacherSection = user?.section || "Grade 10 - St. Augustine";
       const advisory = all.filter(s => 
-        s.section_name === teacherSection || 
+        s.section_name === "Grade 7 - Love" || 
+        s.section_name === "Grade 7 - St. Anthony" ||
+        s.section_name === (user?.section || "Grade 7 - Love") ||
         (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))
       );
-      return advisory.length > 0 ? advisory.length : 34;
+      return advisory.length > 0 ? advisory.length : 37;
     } catch {
-      return 34;
+      return 37;
     }
   }, [user]);
 
