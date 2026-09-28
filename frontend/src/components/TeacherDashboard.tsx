@@ -182,12 +182,16 @@ export const TeacherDashboard: React.FC = () => {
 
   // Filtered students
   const filteredStudents = useMemo(() => {
-    return students.filter(s => {
+    return (students || []).filter(s => {
+      if (!s) return false;
+      const name = s.full_name || `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Student";
+      const lrn = String(s.lrn || "");
+      const driver = s.primary_risk_driver || "Academic";
       const matchesSearch = 
-        s.full_name.toLowerCase().includes(search.toLowerCase()) ||
-        s.lrn.includes(search) ||
-        s.primary_risk_driver.toLowerCase().includes(search.toLowerCase());
-      const matchesRisk = riskFilter === "all" || s.latest_risk_tier === riskFilter;
+        name.toLowerCase().includes(search.toLowerCase()) ||
+        lrn.includes(search) ||
+        driver.toLowerCase().includes(search.toLowerCase());
+      const matchesRisk = riskFilter === "all" || (s.latest_risk_tier || "low") === riskFilter;
       return matchesSearch && matchesRisk;
     });
   }, [students, search, riskFilter]);
@@ -2346,18 +2350,18 @@ export const TeacherDashboard: React.FC = () => {
             <>
               {/* Mobile Stacked Student Cards (<md) */}
               <div className="grid grid-cols-1 md:hidden gap-3.5">
-                {filteredStudents.map((s) => (
-                  <div key={s.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                {filteredStudents.map((s, idx) => (
+                  <div key={`card-${s.id || s.lrn || idx}`} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h4 className="font-black text-slate-900 text-sm">{s.full_name}</h4>
-                        <span className="text-xs text-slate-500 font-mono">LRN: {s.lrn}</span>
+                        <h4 className="font-black text-slate-900 text-sm">{s.full_name || `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Student"}</h4>
+                        <span className="text-xs text-slate-500 font-mono">LRN: {s.lrn || "N/A"}</span>
                       </div>
-                      <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" />
+                      <RiskBadge score={s.latest_risk_score ?? 15} tier={s.latest_risk_tier || "low"} size="sm" />
                     </div>
                     <div className="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200/80">
                       <strong className="text-slate-800 font-bold block">Primary Bottleneck:</strong>
-                      <span>{s.primary_risk_driver}</span>
+                      <span>{s.primary_risk_driver || "Academic"}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <button
@@ -2399,11 +2403,11 @@ export const TeacherDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {filteredStudents.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                    {filteredStudents.map((s, idx) => (
+                      <tr key={`row-${s.id || s.lrn || idx}`} className="hover:bg-slate-50/80 transition">
                         <td className="py-3.5 px-4">
-                          <strong className="text-slate-900 font-extrabold block">{s.full_name}</strong>
-                          <span className="font-mono text-xs text-slate-500">{s.lrn}</span>
+                          <strong className="text-slate-900 font-extrabold block">{s.full_name || `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Student"}</strong>
+                          <span className="font-mono text-xs text-slate-500">{s.lrn || "N/A"}</span>
                         </td>
                         <td className="py-3.5 px-3 text-center font-bold text-[#8B0014]">
                           {s.sass_metrics?.gpa ? s.sass_metrics.gpa.toFixed(1) : "88.5"}
@@ -2412,10 +2416,10 @@ export const TeacherDashboard: React.FC = () => {
                           {s.sass_metrics?.attendance_rate_pct ? `${s.sass_metrics.attendance_rate_pct}%` : "96.5%"}
                         </td>
                         <td className="py-3.5 px-3 text-center">
-                          <RiskBadge score={s.latest_risk_score} tier={s.latest_risk_tier} size="sm" />
+                          <RiskBadge score={s.latest_risk_score ?? 15} tier={s.latest_risk_tier || "low"} size="sm" />
                         </td>
                         <td className="py-3.5 px-4 text-xs text-slate-600 max-w-xs">
-                          {s.primary_risk_driver}
+                          {s.primary_risk_driver || "Academic"}
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           <div className="flex items-center justify-center gap-1.5">
@@ -2476,14 +2480,14 @@ export const TeacherDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {filteredStudents.map((s) => {
-                      const studentEmail = `${s.lrn}@sapc.edu.ph`;
+                    {filteredStudents.map((s, idx) => {
+                      const studentEmail = `${s.lrn || s.id}@sapc.edu.ph`;
                       const defaultPass = "student123";
                       return (
-                        <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                        <tr key={`cred-${s.id || s.lrn || idx}`} className="hover:bg-slate-50/80 transition">
                           <td className="py-3.5 px-4">
-                            <strong className="text-slate-900 font-extrabold block">{s.full_name}</strong>
-                            <span className="font-mono text-xs text-slate-500">LRN: {s.lrn}</span>
+                            <strong className="text-slate-900 font-extrabold block">{s.full_name || `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Student"}</strong>
+                            <span className="font-mono text-xs text-slate-500">LRN: {s.lrn || "N/A"}</span>
                           </td>
                           <td className="py-3.5 px-4 font-mono text-xs text-slate-700">
                             {studentEmail}
