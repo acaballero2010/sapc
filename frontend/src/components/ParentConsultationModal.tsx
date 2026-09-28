@@ -171,8 +171,8 @@ export const ParentConsultationModal: React.FC<ParentConsultationModalProps> = (
                   onChange={(e) => setStudentId(Number(e.target.value))}
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium"
                 >
-                  {allStudents.slice(0, 50).map((s) => (
-                    <option key={s.id} value={s.id}>
+                  {allStudents.slice(0, 50).map((s, idx) => (
+                    <option key={`parent-consult-student-${s.lrn || s.id || idx}`} value={s.id}>
                       {s.full_name} ({s.section_name} • LRN: {s.lrn})
                     </option>
                   ))}

@@ -108,6 +108,33 @@ interface MessageThread {
   history: Array<{ sender: string; text: string; time: string; isTeacher: boolean }>;
 }
 
+// Helper to match section names including virtue/saint aliases
+function matchSection(studentSection?: string, filterSection?: string): boolean {
+  if (!studentSection || !filterSection) return false;
+  if (filterSection === "all") return true;
+  const s = studentSection.toLowerCase().trim();
+  const f = filterSection.toLowerCase().trim();
+  if (s === f) return true;
+
+  const aliases: [string, string][] = [
+    ["grade 7 - love", "grade 7 - st. anthony"],
+    ["grade 7 - integrity", "grade 7 - st. bernadette"],
+    ["grade 8 - hope", "grade 8 - st. francis"],
+    ["grade 8 - faith", "grade 8 - st. benedict"],
+    ["grade 9 - chastity", "grade 9 - st. pedro calungsod"],
+    ["grade 9 - prudence", "grade 9 - st. dominic"],
+    ["grade 10 - charity", "grade 10 - st. thomas"],
+    ["grade 10 - humility", "grade 10 - st. augustine"]
+  ];
+
+  for (const [virtue, saint] of aliases) {
+    if ((s.includes(virtue) || s.includes(saint)) && (f.includes(virtue) || f.includes(saint))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export const TeacherDashboard: React.FC = () => {
   const { user } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
@@ -129,7 +156,9 @@ export const TeacherDashboard: React.FC = () => {
     if (user?.section) sSet.add(user.section);
     all.forEach(s => {
       if (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase())) {
-        if (s.section_name) sSet.add(s.section_name);
+        if (s.section_name && !matchSection(s.section_name, "Grade 7 - Love")) {
+          sSet.add(s.section_name);
+        }
       }
     });
     return Array.from(sSet);
@@ -137,12 +166,11 @@ export const TeacherDashboard: React.FC = () => {
 
   const filterAdvisory = React.useCallback((all: StudentRecord[]) => {
     if (selectedSectionFilter !== "all") {
-      return all.filter(s => s.section_name === selectedSectionFilter);
+      return all.filter(s => matchSection(s.section_name, selectedSectionFilter));
     }
     const advisory = all.filter(s => 
-      s.section_name === "Grade 7 - Love" || 
-      s.section_name === "Grade 7 - St. Anthony" ||
-      s.section_name === (user?.section || "Grade 7 - Love") ||
+      matchSection(s.section_name, "Grade 7 - Love") ||
+      (user?.section && matchSection(s.section_name, user.section)) ||
       (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))
     );
     return advisory.length > 0 ? advisory : all.slice(0, 37);
@@ -2255,7 +2283,9 @@ export const TeacherDashboard: React.FC = () => {
         <div id="roster" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 shadow-sm space-y-6 animate-in fade-in duration-200 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
-              <h3 className="text-lg sm:text-xl font-black text-slate-900">{teacherSection} Advisory Hub</h3>
+              <h3 className="text-lg sm:text-xl font-black text-slate-900">
+                {selectedSectionFilter === "all" ? "All Assigned Students" : selectedSectionFilter} Advisory Hub
+              </h3>
               <p className="text-xs text-slate-500">Advisory class monitoring, student profiling, and student login credential distribution</p>
             </div>
             
@@ -2268,10 +2298,17 @@ export const TeacherDashboard: React.FC = () => {
                   onChange={(e) => setSelectedSectionFilter(e.target.value)}
                   className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer"
                 >
-                  <option value="all">All Assigned Students ({students.length})</option>
-                  {availableAdvisorySections.map((sec) => (
-                    <option key={sec} value={sec}>{sec}</option>
-                  ))}
+                  <option value="all">
+                    All Assigned Students ({typeof window !== "undefined" ? getActiveStudentDataset().filter(s => matchSection(s.section_name, "Grade 7 - Love") || (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))).length : 37})
+                  </option>
+                  {availableAdvisorySections.map((sec) => {
+                    const secCount = typeof window !== "undefined" ? getActiveStudentDataset().filter(s => matchSection(s.section_name, sec)).length : 34;
+                    return (
+                      <option key={sec} value={sec}>
+                        {sec} ({secCount})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -2351,7 +2388,7 @@ export const TeacherDashboard: React.FC = () => {
               {/* Mobile Stacked Student Cards (<md) */}
               <div className="grid grid-cols-1 md:hidden gap-3.5">
                 {filteredStudents.map((s, idx) => (
-                  <div key={`card-${s.id || s.lrn || idx}`} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                  <div key={`card-${s.lrn || s.id || 'st'}-${idx}`} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <h4 className="font-black text-slate-900 text-sm">{s.full_name || `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Student"}</h4>
@@ -2404,7 +2441,7 @@ export const TeacherDashboard: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
                     {filteredStudents.map((s, idx) => (
-                      <tr key={`row-${s.id || s.lrn || idx}`} className="hover:bg-slate-50/80 transition">
+                      <tr key={`row-${s.lrn || s.id || 'st'}-${idx}`} className="hover:bg-slate-50/80 transition">
                         <td className="py-3.5 px-4">
                           <strong className="text-slate-900 font-extrabold block">{s.full_name || `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Student"}</strong>
                           <span className="font-mono text-xs text-slate-500">{s.lrn || "N/A"}</span>
@@ -2484,7 +2521,7 @@ export const TeacherDashboard: React.FC = () => {
                       const studentEmail = `${s.lrn || s.id}@sapc.edu.ph`;
                       const defaultPass = "student123";
                       return (
-                        <tr key={`cred-${s.id || s.lrn || idx}`} className="hover:bg-slate-50/80 transition">
+                        <tr key={`cred-${s.lrn || s.id || 'st'}-${idx}`} className="hover:bg-slate-50/80 transition">
                           <td className="py-3.5 px-4">
                             <strong className="text-slate-900 font-extrabold block">{s.full_name || `${s.first_name || ""} ${s.last_name || ""}`.trim() || "Student"}</strong>
                             <span className="font-mono text-xs text-slate-500">LRN: {s.lrn || "N/A"}</span>
@@ -2539,8 +2576,8 @@ export const TeacherDashboard: React.FC = () => {
               onChange={(e) => setSelectedStudentId(Number(e.target.value))}
               className="min-h-[44px] px-3.5 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs"
             >
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>{s.full_name} ({s.latest_risk_tier.toUpperCase()})</option>
+              {students.map((s, idx) => (
+                <option key={`profile-opt-${s.lrn || s.id || idx}`} value={s.id}>{s.full_name} ({s.latest_risk_tier.toUpperCase()})</option>
               ))}
             </select>
           </div>
@@ -2585,8 +2622,8 @@ export const TeacherDashboard: React.FC = () => {
               onChange={(e) => setSelectedStudentId(Number(e.target.value))}
               className="min-h-[44px] px-3.5 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs"
             >
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>{s.full_name}</option>
+              {students.map((s, idx) => (
+                <option key={`progress-opt-${s.lrn || s.id || idx}`} value={s.id}>{s.full_name}</option>
               ))}
             </select>
           </div>
@@ -2632,8 +2669,8 @@ export const TeacherDashboard: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            {students.filter(s => s.latest_risk_tier !== "low").map((s) => (
-              <div key={s.id} className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {students.filter(s => s.latest_risk_tier !== "low").map((s, idx) => (
+              <div key={`at-risk-${s.lrn || s.id || idx}`} className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h4 className="text-base font-black text-slate-900">{s.full_name}</h4>
@@ -2715,8 +2752,8 @@ export const TeacherDashboard: React.FC = () => {
                   onChange={(e) => setNewInterventionProposal({ ...newInterventionProposal, studentId: Number(e.target.value) })}
                   className="w-full min-h-[44px] p-2.5 rounded-xl border border-slate-300 bg-white font-bold"
                 >
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>{s.full_name}</option>
+                  {students.map((s, idx) => (
+                    <option key={`interv-opt-${s.lrn || s.id || idx}`} value={s.id}>{s.full_name}</option>
                   ))}
                 </select>
               </div>
@@ -2774,8 +2811,8 @@ export const TeacherDashboard: React.FC = () => {
               onChange={(e) => setSelectedStudentId(Number(e.target.value))}
               className="min-h-[44px] px-3.5 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs"
             >
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>{s.full_name}</option>
+              {students.map((s, idx) => (
+                <option key={`sugg-opt-${s.lrn || s.id || idx}`} value={s.id}>{s.full_name}</option>
               ))}
             </select>
           </div>
@@ -2974,7 +3011,7 @@ export const TeacherDashboard: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
                 {students.slice(0, 15).map((s, idx) => (
-                  <tr key={s.id} className="hover:bg-slate-50">
+                  <tr key={`gradebook-row-${s.lrn || s.id || idx}`} className="hover:bg-slate-50">
                     <td className="py-3 px-4 font-mono font-bold text-slate-800">{s.lrn}</td>
                     <td className="py-3 px-4 font-bold text-slate-900">{s.full_name}</td>
                     <td className="py-3 px-3 text-center">{88 + (idx % 5)}</td>
@@ -3123,14 +3160,14 @@ export const TeacherDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {filteredAttendanceStudents.slice(0, 15).map(s => {
+                {filteredAttendanceStudents.slice(0, 15).map((s, idx) => {
                   let pCount = 0;
                   let aCount = 0;
                   let eCount = 0;
                   let lCount = 0;
 
                   return (
-                    <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={`attendance-row-${s.lrn || s.id || idx}`} className="hover:bg-slate-50/80 transition-colors">
                       {/* Student Info Sticky Column */}
                       <td className="py-2.5 px-3 text-left sticky left-0 bg-white hover:bg-slate-50 z-10 border-r border-slate-200">
                         <div className="font-bold text-slate-900 truncate max-w-[170px]">{s.full_name}</div>
@@ -3280,8 +3317,8 @@ export const TeacherDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium font-mono">
-                {students.slice(0, 10).map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50">
+                {students.slice(0, 10).map((s, idx) => (
+                  <tr key={`credential-row-${s.lrn || s.id || idx}`} className="hover:bg-slate-50">
                     <td className="py-2.5 px-3 font-bold text-slate-800">{s.lrn}</td>
                     <td className="py-2.5 px-3 font-sans font-bold text-slate-900">{s.full_name}</td>
                     <td className="py-2.5 px-3 text-slate-600">{s.email}</td>

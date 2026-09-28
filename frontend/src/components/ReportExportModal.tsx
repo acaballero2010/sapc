@@ -263,8 +263,8 @@ export const ReportExportModal: React.FC<ReportExportModalProps> = ({
                 onChange={(e) => setSelectedStudentId(Number(e.target.value))}
                 className="w-full sm:w-80 px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white"
               >
-                {dataset.slice(0, 50).map((s) => (
-                  <option key={s.id} value={s.id}>
+                {dataset.slice(0, 50).map((s, idx) => (
+                  <option key={`report-student-${s.lrn || s.id || idx}`} value={s.id}>
                     {s.full_name} ({s.section_name} • LRN: {s.lrn})
                   </option>
                 ))}

@@ -112,15 +112,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const currentRole: RoleType = user?.role || "guidance_counselor";
 
+function matchSection(studentSection?: string, filterSection?: string): boolean {
+  if (!studentSection || !filterSection) return false;
+  if (filterSection === "all") return true;
+  const s = studentSection.toLowerCase().trim();
+  const f = filterSection.toLowerCase().trim();
+  if (s === f) return true;
+
+  const aliases: [string, string][] = [
+    ["grade 7 - love", "grade 7 - st. anthony"],
+    ["grade 7 - integrity", "grade 7 - st. bernadette"],
+    ["grade 8 - hope", "grade 8 - st. francis"],
+    ["grade 8 - faith", "grade 8 - st. benedict"],
+    ["grade 9 - chastity", "grade 9 - st. pedro calungsod"],
+    ["grade 9 - prudence", "grade 9 - st. dominic"],
+    ["grade 10 - charity", "grade 10 - st. thomas"],
+    ["grade 10 - humility", "grade 10 - st. augustine"]
+  ];
+
+  for (const [virtue, saint] of aliases) {
+    if ((s.includes(virtue) || s.includes(saint)) && (f.includes(virtue) || f.includes(saint))) {
+      return true;
+    }
+  }
+  return false;
+}
+
   // Dynamic Teacher Advisory Student Count
   const teacherAdvisoryCount = React.useMemo(() => {
     if (typeof window === "undefined") return 37;
     try {
       const all = getActiveStudentDataset();
       const advisory = all.filter(s => 
-        s.section_name === "Grade 7 - Love" || 
-        s.section_name === "Grade 7 - St. Anthony" ||
-        s.section_name === (user?.section || "Grade 7 - Love") ||
+        matchSection(s.section_name, "Grade 7 - Love") ||
+        (user?.section && matchSection(s.section_name, user.section)) ||
         (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))
       );
       return advisory.length > 0 ? advisory.length : 37;

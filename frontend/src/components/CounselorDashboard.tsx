@@ -1068,8 +1068,8 @@ export const CounselorDashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {students.slice(0, 5).map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                  {students.slice(0, 5).map((s, idx) => (
+                    <tr key={`recent-counselor-student-${s.lrn || s.id || idx}`} className="hover:bg-slate-50/80 transition">
                       <td className="py-3 px-4 font-bold text-slate-900">{s.first_name} {s.last_name}</td>
                       <td className="py-3 px-4 font-mono text-xs text-slate-600">{s.lrn}</td>
                       <td className="py-3 px-4 text-xs text-slate-700">{s.section_name}</td>
@@ -1452,8 +1452,8 @@ export const CounselorDashboard: React.FC = () => {
                       </td>
                     </tr>
                   ) : (
-                    paginatedStudents.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                    paginatedStudents.map((s, idx) => (
+                      <tr key={`counselor-roster-student-${s.lrn || s.id || idx}`} className="hover:bg-slate-50/80 transition">
                         <td className="py-3.5 px-4 font-bold text-slate-900">{s.first_name} {s.last_name}</td>
                         <td className="py-3.5 px-4 font-mono text-xs text-slate-600">{s.lrn}</td>
                         <td className="py-3.5 px-4 text-xs">
@@ -2294,8 +2294,8 @@ export const CounselorDashboard: React.FC = () => {
                   onChange={(e) => setNewSessionStudentId(Number(e.target.value))}
                   className="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none"
                 >
-                  {students.slice(0, 20).map(s => (
-                    <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+                  {students.slice(0, 20).map((s, idx) => (
+                    <option key={`counselor-session-student-${s.lrn || s.id || idx}`} value={s.id}>{s.first_name} {s.last_name}</option>
                   ))}
                 </select>
                 <select

@@ -12,7 +12,8 @@
     "lint": "npm --prefix frontend run lint",
     "typescript": "npm --prefix frontend run typecheck",
     "typecheck": "npm --prefix frontend run typecheck",
-    "test:backend": "cd backend && .\\venv\\Scripts\\python -m pytest -v"
+    "test:backend": "cd backend && .\\venv\\Scripts\\python -m pytest -v",
+    "set-claims": "node scripts/set-custom-claims.mjs"
   },
   "workspaces": [
     "frontend"
@@ -27,6 +28,7 @@
   "author": "San Antonio de Padua College",
   "license": "UNLICENSED",
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "firebase-admin": "^14.5.0"
   }
 }

@@ -1,81 +1,170 @@
-rules_version = '2';
+// ============================================================================
+// SAPC IntellySys — Firestore Security Rules (RISK-01 Fix)
+// Enforces role-based data access at the database layer.
+//
+// Role custom claims set on Firebase Auth tokens:
+//   - admin
+//   - guidance_counselor
+//   - teacher
+//   - student
+//   - parent
+//
+// Deploy with: firebase deploy --only firestore:rules
+// Test with:   firebase emulators:start --only firestore
+// ============================================================================
 
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // -------------------------------------------------------------------------
     // Helper functions
+    // -------------------------------------------------------------------------
+
+    /** Returns true if the request comes from an authenticated user */
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+
+    /** Returns the custom role claim from the Firebase Auth token */
+    function userRole() {
+      return request.auth.token.role;
     }
 
-    // Public / System Config & Institutional Branding
-    match /system_config/{configId} {
-      allow read, write: if true;
+    /** Returns true if the user has any of the listed roles */
+    function hasRole(roles) {
+      return isAuthenticated() && userRole() in roles;
     }
 
-    match /system_settings/{settingId} {
-      allow read, write: if true;
+    function isAdmin() {
+      return hasRole(["admin"]);
     }
 
-    // Users Collection (RA 10173 Protected)
-    match /users/{userId} {
-      allow read, write: if true;
+    function isGuidanceCounselor() {
+      return hasRole(["guidance_counselor"]);
     }
 
-    // Students Cohort Records (Enables seamless multi-user CSV import & live dashboard sync)
-    match /students/{studentId} {
-      allow read, write: if true;
+    function isTeacher() {
+      return hasRole(["teacher"]);
     }
 
-    // Academic & AHP Assessment Records
-    match /assessments/{assessmentId} {
-      allow read, write: if true;
+    function isParent() {
+      return hasRole(["parent"]);
     }
 
-    // Daily Mood Check-ins
-    match /mood_checkins/{checkinId} {
-      allow read, write: if true;
+    function isStudent() {
+      return hasRole(["student"]);
     }
 
-    // Guidance Intervention Plans
-    match /interventions/{planId} {
-      allow read, write: if true;
+    function isStaff() {
+      return hasRole(["admin", "guidance_counselor", "teacher"]);
     }
 
-    // Parent Notifications & SMS Logs
-    match /notifications/{notificationId} {
-      allow read, write: if true;
+    // -------------------------------------------------------------------------
+    // /users/{uid} — User profile documents
+    // -------------------------------------------------------------------------
+    match /users/{uid} {
+      // Users can only read/write their own profile
+      allow read: if isAuthenticated() && request.auth.uid == uid;
+      allow write: if isAuthenticated() && request.auth.uid == uid;
+      // Admins can read all profiles
+      allow read: if isAdmin();
     }
 
-    // Counselor Knowledge Base & AI Training Rules
-    match /counselor_knowledge_base/{itemId} {
-      allow read, write: if true;
+    // -------------------------------------------------------------------------
+    // /students/{lrn} — Student records
+    // -------------------------------------------------------------------------
+    match /students/{lrn} {
+      // Staff can read all student records
+      allow read: if isStaff();
+
+      // Parents can only read their own linked children
+      allow read: if isParent() &&
+        (lrn in request.auth.token.linked_lrns ||
+         request.auth.token.primary_lrn == lrn);
+
+      // Students can only read their own record
+      allow read: if isStudent() && request.auth.token.lrn == lrn;
+
+      // Only admin can create new student records
+      allow create: if isAdmin();
+
+      // Admin and teachers can update student records
+      allow update: if isAdmin() || isTeacher() || isGuidanceCounselor();
+
+      // Only admin can delete student records
+      allow delete: if isAdmin();
     }
 
-    // Faculty & Guidance Counselor Records
-    match /faculty_records/{recordId} {
-      allow read, write: if true;
+    // -------------------------------------------------------------------------
+    // /faculty_records/{id} — Faculty records
+    // -------------------------------------------------------------------------
+    match /faculty_records/{id} {
+      // All staff can read faculty records
+      allow read: if isStaff();
+
+      // Only admin can create, update or delete faculty records
+      allow write: if isAdmin();
     }
 
-    // Pending Registrations & Parent Linkages
-    match /pending_registrations/{regId} {
-      allow read, write: if true;
+    // -------------------------------------------------------------------------
+    // /parent_records/{id} — Parent account records
+    // -------------------------------------------------------------------------
+    match /parent_records/{id} {
+      // Parents can only read their own record
+      allow read: if isParent() && request.auth.uid == resource.data.uid;
+
+      // Admin and guidance counselors can read all parent records
+      allow read: if isAdmin() || isGuidanceCounselor();
+
+      // Only admin can create, update or delete parent records
+      allow write: if isAdmin();
     }
 
-    // Parent Accounts & Student Linkages
-    match /parent_records/{parentId} {
-      allow read, write: if true;
-    }
+    // -------------------------------------------------------------------------
+    // /audit_logs/{id} — RA 10173 compliance audit trail
+    // -------------------------------------------------------------------------
+    match /audit_logs/{id} {
+      // Anyone authenticated can write (append-only via addDoc)
+      allow create: if isAuthenticated();
 
-    // RA 10173 Immutable Audit Logs (Append-only audit integrity)
-    match /audit_logs/{logId} {
-      allow read: if true;
-      allow create: if true;
+      // Only admin and guidance counselors can read audit logs
+      allow read: if isAdmin() || isGuidanceCounselor();
+
+      // No one can update or delete audit logs (immutable trail)
       allow update, delete: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // /pending_registrations/{id} — Account creation requests
+    // -------------------------------------------------------------------------
+    match /pending_registrations/{id} {
+      // Anyone can create a registration request (unauthenticated too, for self-registration)
+      allow create: if true;
+
+      // Only admin and guidance counselors can read/approve/deny
+      allow read, update, delete: if isAdmin() || isGuidanceCounselor();
+    }
+
+    // -------------------------------------------------------------------------
+    // /notifications/{id} — System notifications
+    // -------------------------------------------------------------------------
+    match /notifications/{id} {
+      // All authenticated users can read notifications targeted to their role
+      allow read: if isAuthenticated() &&
+        (resource.data.target_role == userRole() ||
+         resource.data.target_role == "all" ||
+         isAdmin());
+
+      // Only admin and counselors can create/update/delete notifications
+      allow write: if isAdmin() || isGuidanceCounselor();
+    }
+
+    // -------------------------------------------------------------------------
+    // Default deny — reject all other paths
+    // -------------------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

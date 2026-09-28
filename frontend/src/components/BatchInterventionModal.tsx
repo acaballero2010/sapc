@@ -306,11 +306,11 @@ export function BatchInterventionModal({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {filteredStudents.map((s) => {
+                    {filteredStudents.map((s, idx) => {
                       const isChecked = selectedIds.has(s.id);
                       return (
                         <tr
-                          key={s.id}
+                          key={`batch-interv-student-${s.lrn || s.id || idx}`}
                           onClick={() => handleToggleStudent(s.id)}
                           className={`cursor-pointer transition-colors ${isChecked ? "bg-red-50/50 dark:bg-red-950/20" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/40"}`}
                         >

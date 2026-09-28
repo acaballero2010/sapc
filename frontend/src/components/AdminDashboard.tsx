@@ -2299,7 +2299,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
                     paginatedStudents.map((s, idx) => {
                       const rowNum = (studentPage - 1) * studentPageSize + idx + 1;
                       return (
-                        <tr key={s.id} className="hover:bg-slate-50/80 transition">
+                        <tr key={`admin-student-row-${s.lrn || s.id || idx}`} className="hover:bg-slate-50/80 transition">
                           <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
                             {rowNum}
                           </td>

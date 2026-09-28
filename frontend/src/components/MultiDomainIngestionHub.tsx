@@ -1127,9 +1127,9 @@ export const MultiDomainIngestionHub: React.FC<MultiDomainIngestionHubProps> = (
                 {getActiveStudentDataset().filter(s => 
                   s.full_name.toLowerCase().includes(searchStudent.toLowerCase()) || 
                   s.lrn.includes(searchStudent)
-                ).slice(0, 6).map(s => (
+                ).slice(0, 6).map((s, idx) => (
                   <button
-                    key={s.id}
+                    key={`ingest-search-student-${s.lrn || s.id || idx}`}
                     type="button"
                     onClick={() => {
                       setSelectedStudent(s);

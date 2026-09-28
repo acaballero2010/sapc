@@ -181,8 +181,8 @@ export const TeacherReferralModal: React.FC<TeacherReferralModalProps> = ({
                       onChange={(e) => setSelectedStudentId(Number(e.target.value))}
                       className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-semibold focus:outline-none focus:border-[#8B0014]"
                     >
-                      {students.map((s) => (
-                        <option key={s.id} value={s.id}>
+                      {students.map((s, idx) => (
+                        <option key={`referral-student-${s.lrn || s.id || idx}`} value={s.id}>
                           {s.first_name} {s.last_name} ({s.latest_risk_tier?.toUpperCase()} Risk — Score: {s.latest_risk_score})
                         </option>
                       ))}

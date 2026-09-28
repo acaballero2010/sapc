@@ -99,8 +99,8 @@ export function DepEdFormModal({
               onChange={(e) => setStudentId(e.target.value)}
               className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
             >
-              {dataset.map((s) => (
-                <option key={s.id} value={s.id}>
+              {dataset.map((s, idx) => (
+                <option key={`deped-form-student-${s.lrn || s.id || idx}`} value={s.id}>
                   {s.full_name} (LRN: {s.lrn})
                 </option>
               ))}

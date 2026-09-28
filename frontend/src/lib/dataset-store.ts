@@ -99,21 +99,49 @@ export const JHS_GRADE_LEVELS: JHSGradeOption[] = [
 ];
 
 export const JHS_SECTIONS_BY_GRADE: Record<number, string[]> = {
-  7: ["Grade 7 - Love", "Grade 7 - Integrity"],
-  8: ["Grade 8 - Hope", "Grade 8 - Faith"],
-  9: ["Grade 9 - Chastity", "Grade 9 - Prudence"],
-  10: ["Grade 10 - Charity", "Grade 10 - Humility"],
+  7: [
+    "Grade 7 - St. Anthony",
+    "Grade 7 - St. Bernadette",
+    "Grade 7 - St. Francis",
+    "Grade 7 - St. Therese",
+  ],
+  8: [
+    "Grade 8 - St. Dominic",
+    "Grade 8 - St. Benedict",
+    "Grade 8 - St. Rita",
+    "Grade 8 - St. Clare",
+  ],
+  9: [
+    "Grade 9 - St. Lorenzo Ruiz",
+    "Grade 9 - St. Martin de Porres",
+    "Grade 9 - St. Pedro Calungsod",
+    "Grade 9 - St. Cecilia",
+  ],
+  10: [
+    "Grade 10 - St. Vincent de Paul",
+    "Grade 10 - St. Thomas Aquinas",
+    "Grade 10 - St. Augustine",
+    "Grade 10 - St. Ignatius",
+  ],
 };
 
 export const ALL_JHS_SECTIONS: string[] = [
-  "Grade 7 - Love",
-  "Grade 7 - Integrity",
-  "Grade 8 - Hope",
-  "Grade 8 - Faith",
-  "Grade 9 - Chastity",
-  "Grade 9 - Prudence",
-  "Grade 10 - Charity",
-  "Grade 10 - Humility",
+  "Grade 7 - St. Anthony",
+  "Grade 7 - St. Bernadette",
+  "Grade 7 - St. Francis",
+  "Grade 7 - St. Therese",
+  "Grade 8 - St. Dominic",
+  "Grade 8 - St. Benedict",
+  "Grade 8 - St. Rita",
+  "Grade 8 - St. Clare",
+  "Grade 9 - St. Lorenzo Ruiz",
+  "Grade 9 - St. Martin de Porres",
+  "Grade 9 - St. Pedro Calungsod",
+  "Grade 9 - St. Cecilia",
+  "Grade 10 - St. Vincent de Paul",
+  "Grade 10 - St. Thomas Aquinas",
+  "Grade 10 - St. Augustine",
+  "Grade 10 - St. Ignatius",
 ];
 
 export function getSectionsForGrade(gradeLevel: number | string): string[] {
@@ -184,7 +212,10 @@ export function recalculateAHPForDataset(
       { name: "Financial", val: fin }
     ].sort((a, b) => b.val - a.val);
 
-    const primaryDriver = drivers[0].val >= 40 ? drivers[0].name : "Academic";
+    // Always use the actual highest domain as the primary driver.
+    // If all domains are low (< 20), label the student as "On-Track" instead.
+    const allLow = drivers.every(d => d.val < 20);
+    const primaryDriver = allLow ? "On-Track / Active Student Engagement" : drivers[0].name;
 
     return {
       ...student,
@@ -196,6 +227,7 @@ export function recalculateAHPForDataset(
 }
 
 export function getActiveStudentDataset(): StudentRecord[] {
+  let dataset = SAPC_500_STUDENTS;
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -217,16 +249,17 @@ export function getActiveStudentDataset(): StudentRecord[] {
             try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(fullRestored));
             } catch {}
-            return fullRestored;
+            dataset = fullRestored;
+          } else {
+            dataset = parsed;
           }
-          return parsed;
         }
       }
     } catch (e) {
       console.warn("Could not load custom student dataset from local storage, falling back to baseline:", e);
     }
   }
-  return SAPC_500_STUDENTS;
+  return recalculateAHPForDataset(dataset, getActiveRiskWeights());
 }
 
 /**
@@ -292,9 +325,24 @@ export async function syncStudentDatasetToFirestore(students: StudentRecord[]): 
 }
 
 /**
- * CRUD (Create): Adds a new student record to both local state and Firebase Cloud Firestore.
+ * GAP-03 Fix: Actor type for audit log attribution.
+ * Pass the authenticated user's identity to all mutating CRUD functions
+ * so audit logs reflect who actually performed the action.
  */
-export async function addStudentRecord(newStudent: Partial<StudentRecord>): Promise<StudentRecord> {
+export interface AuditActor {
+  name: string;
+  role: string;
+  email?: string;
+}
+
+const SYSTEM_ACTOR: AuditActor = { name: "System", role: "system" };
+
+/**
+ * CRUD (Create): Adds a new student record to both local state and Firebase Cloud Firestore.
+ * @param newStudent Partial student data to create
+ * @param actor GAP-03: The authenticated user performing this action (for audit log)
+ */
+export async function addStudentRecord(newStudent: Partial<StudentRecord>, actor: AuditActor = SYSTEM_ACTOR): Promise<StudentRecord> {
   const current = getActiveStudentDataset();
   const nextId = current.length > 0 ? Math.max(...current.map(s => Number(s.id) || 0)) + 1 : 1;
   
@@ -351,8 +399,8 @@ export async function addStudentRecord(newStudent: Partial<StudentRecord>): Prom
   }
 
   await logCloudAuditEvent({
-    actor_name: "Authorized Staff",
-    actor_role: "admin",
+    actor_name: actor.name,
+    actor_role: actor.role,
     action: "STUDENT_RECORD_CREATED",
     target_resource: `Student: ${fullRecord.full_name} (LRN: ${fullRecord.lrn})`,
     details: `Created new student record in ${fullRecord.section_name}.`,
@@ -373,6 +421,9 @@ export function getStudentRecord(idOrLrn: string | number): StudentRecord | unde
 
 /**
  * CRUD (Update): Updates an existing student record in local state and Firestore.
+ * @param idOrLrn Student ID or LRN to update
+ * @param updates Partial field updates
+ * @param actor GAP-03: The authenticated user performing this action (for audit log)
  */
 export async function updateStudentRecord(
   idOrLrn: string | number,
@@ -382,7 +433,8 @@ export async function updateStudentRecord(
     mental_health_score?: number;
     health_physical_score?: number;
     academic_gwa_score?: number;
-  }
+  },
+  actor: AuditActor = SYSTEM_ACTOR
 ): Promise<StudentRecord | null> {
   const current = getActiveStudentDataset();
   const searchStr = String(idOrLrn).trim();
@@ -428,8 +480,8 @@ export async function updateStudentRecord(
   }
 
   await logCloudAuditEvent({
-    actor_name: "Authorized Staff",
-    actor_role: "teacher",
+    actor_name: actor.name,
+    actor_role: actor.role,
     action: "STUDENT_RECORD_UPDATED",
     target_resource: `Student: ${updated.full_name} (LRN: ${updated.lrn})`,
     details: `Updated student attributes and recalculated AHP risk score.`,
@@ -441,8 +493,10 @@ export async function updateStudentRecord(
 
 /**
  * CRUD (Delete): Removes a student record from both local state and Firebase Cloud Firestore.
+ * @param idOrLrn Student ID or LRN to delete
+ * @param actor GAP-03: The authenticated user performing this action (for audit log)
  */
-export async function deleteStudentRecord(idOrLrn: string | number): Promise<boolean> {
+export async function deleteStudentRecord(idOrLrn: string | number, actor: AuditActor = SYSTEM_ACTOR): Promise<boolean> {
   const current = getActiveStudentDataset();
   const searchStr = String(idOrLrn).trim();
   const target = current.find(s => String(s.id) === searchStr || String(s.lrn).trim() === searchStr);
@@ -464,8 +518,8 @@ export async function deleteStudentRecord(idOrLrn: string | number): Promise<boo
   }
 
   await logCloudAuditEvent({
-    actor_name: "Authorized Administrator",
-    actor_role: "admin",
+    actor_name: actor.name,
+    actor_role: actor.role,
     action: "STUDENT_RECORD_DELETED",
     target_resource: `Student: ${target.full_name} (LRN: ${target.lrn})`,
     details: `Removed student record from active registry.`,
@@ -509,13 +563,35 @@ export async function loadStudentDatasetFromFirestore(): Promise<StudentRecord[]
 
 /**
  * Subscribes to real-time updates from Firebase Cloud Firestore for all connected dashboards.
+ * RISK-02 Fix: Pass roleFilter/linkedLRNs to scope the data delivered to the callback.
+ * - Admins/counselors/teachers receive all records.
+ * - Parents receive only their linked student(s).
+ * - Students receive only their own record.
  */
 export function subscribeToStudentDataset(
-  onUpdate: (students: StudentRecord[]) => void
+  onUpdate: (students: StudentRecord[]) => void,
+  scopeOptions?: {
+    role?: string;
+    linkedLRNs?: string[];
+    studentLRN?: string;
+  }
 ): Unsubscribe | (() => void) {
   if (!db || typeof window === "undefined") {
     return () => {};
   }
+
+  const applyRoleScope = (all: StudentRecord[]): StudentRecord[] => {
+    if (!scopeOptions) return all;
+    const { role, linkedLRNs, studentLRN } = scopeOptions;
+    if (role === "parent" && linkedLRNs && linkedLRNs.length > 0) {
+      return all.filter(s => linkedLRNs.includes(String(s.lrn)));
+    }
+    if (role === "student" && studentLRN) {
+      return all.filter(s => String(s.lrn) === studentLRN || String(s.id) === studentLRN);
+    }
+    // admin / teacher / guidance_counselor get all records
+    return all;
+  };
 
   try {
     const studentsCol = collection(db, "students");
@@ -530,13 +606,14 @@ export function subscribeToStudentDataset(
           updated.sort((a, b) => Number(a.id) - Number(b.id));
           
           if (updated.length > 0) {
-            // Update local cache silently
+            // Update local cache silently (always full dataset)
             try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
             } catch {
               // Ignore
             }
-            onUpdate(updated);
+            // Deliver role-scoped slice to the callback
+            onUpdate(applyRoleScope(updated));
           }
         }
       },
@@ -2250,12 +2327,20 @@ export function updateSessionStatus(id: string, status: CounselingSession["statu
 // ============================================================================
 // FACULTY & GUIDANCE COUNSELOR REPOSITORY WITH CLOUD FIRESTORE SYNC
 // ============================================================================
+export interface SubjectAssignment {
+  subject_name: string;
+  section: string;
+  grade_level: string;
+  quarter?: "Q1" | "Q2" | "Q3" | "Q4" | "All";
+}
+
 export interface FacultyRecord {
   id: string;
   name: string;
   email: string;
   role: "teacher" | "guidance_counselor" | "counselor" | "admin";
   department: string;
+  /** Primary/legacy advisory section (single). Use advisory_sections[] for multiple. */
   section?: string;
   grade_level?: string;
   employee_id?: string;
@@ -2264,6 +2349,10 @@ export interface FacultyRecord {
   status: "Active" | "Pending Activation" | "Suspended";
   phone?: string;
   created_at: string;
+  /** MODEL-01: All advisory class sections this teacher handles */
+  advisory_sections?: string[];
+  /** MODEL-01: Subjects this teacher is assigned to teach across sections */
+  subject_assignments?: SubjectAssignment[];
 }
 
 export const FACULTY_STORAGE_KEY = "sapc_campus_faculty_records";
@@ -2808,7 +2897,12 @@ export interface ParentRecord {
   phone: string;
   relationship: string;
   linkedStudentName: string;
+  /** @deprecated Use linkedLRNs[] instead. Kept for backward-compatibility. */
   linkedLRN: string;
+  /** MODEL-02: All children this parent is linked to (supports multiple children) */
+  linkedLRNs?: string[];
+  /** MODEL-02: Names of all linked children */
+  linkedStudentNames?: string[];
   section: string;
   gradeLevel: string;
   status: "Active" | "Pending Activation" | "Suspended";

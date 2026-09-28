@@ -16,7 +16,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { SapcLogo } from "@/components/SapcLogo";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth, syncCustomClaims } from "@/lib/auth-context";
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
@@ -130,6 +130,7 @@ export default function RegisterPage() {
               phone: activeTab === "parent" ? parentPhone : null
             }
           });
+          await syncCustomClaims(user, roleToUse);
         } catch (fbErr: any) {
           console.warn("Firebase registration fallback:", fbErr.message);
         }

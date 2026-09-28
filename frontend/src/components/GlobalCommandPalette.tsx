@@ -469,9 +469,9 @@ export const GlobalCommandPalette: React.FC<GlobalCommandPaletteProps> = ({
                 Student Profiles &amp; LRN Registry ({filteredStudents.length} matches):
               </span>
               <div className="space-y-1.5">
-                {filteredStudents.map((s) => (
+                {filteredStudents.map((s, idx) => (
                   <div
-                    key={s.id}
+                    key={`cmd-student-${s.lrn || s.id || idx}`}
                     onClick={() => {
                       if (onSelectStudent) onSelectStudent(s);
                       if (onNavigateTab) onNavigateTab(user?.role === "guidance_counselor" ? "student_profile" : "students");

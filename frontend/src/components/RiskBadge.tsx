@@ -7,11 +7,12 @@ interface RiskBadgeProps {
 }
 
 export const RiskBadge: React.FC<RiskBadgeProps> = ({ score, tier, size = "md" }) => {
+  const numScore = (score !== undefined && score !== null && !isNaN(Number(score))) ? Number(score) : null;
   const normalizedTier = tier?.toLowerCase() || (
-    score !== undefined && score !== null
-      ? score >= 70
+    numScore !== null
+      ? numScore >= 70
         ? "high"
-        : score >= 40
+        : numScore >= 40
         ? "medium"
         : "low"
       : "unknown"
@@ -44,8 +45,8 @@ export const RiskBadge: React.FC<RiskBadgeProps> = ({ score, tier, size = "md" }
   return (
     <span className={`inline-flex items-center gap-2 rounded-full border whitespace-nowrap shrink-0 ${badgeColor} ${sizeClasses[size]}`}>
       <span className={`w-2 h-2 rounded-full ${dotColor} shrink-0`} />
-      <span className="tracking-tight">{score !== undefined && score !== null ? `${score.toFixed(1)} / 100` : label}</span>
-      {score !== undefined && score !== null && (
+      <span className="tracking-tight">{numScore !== null ? `${numScore.toFixed(1)} / 100` : label}</span>
+      {numScore !== null && (
         <span className="font-extrabold uppercase tracking-wider text-[10px] pl-1.5 border-l border-slate-300">
           {normalizedTier}
         </span>

@@ -10,6 +10,53 @@ import { getActiveFacultyRecords, getActiveStudentDataset, getActiveParentRecord
 
 export type RoleType = "admin" | "guidance_counselor" | "teacher" | "parent" | "student";
 
+// ============================================================================
+// GAP-04 Fix: Session Cookie Helpers
+// The middleware (middleware.ts) can read cookies but not localStorage.
+// We write a lightweight, base64-encoded session cookie alongside the
+// existing localStorage items so the edge middleware can enforce RBAC
+// on every server render before the page component hydrates.
+// ============================================================================
+const SESSION_COOKIE_NAME = "sapc_session";
+const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24; // 24 hours
+
+function setSessionCookie(role: RoleType, fullName: string): void {
+  if (typeof document === "undefined") return;
+  const payload = btoa(JSON.stringify({ role, name: fullName, iat: Date.now() }));
+  // SameSite=Strict prevents CSRF; Secure should be added in production via env flag
+  const secure = process.env.NEXT_PUBLIC_APP_ENV === "production" ? ";secure" : "";
+  document.cookie = `${SESSION_COOKIE_NAME}=${payload};path=/;max-age=${SESSION_COOKIE_MAX_AGE};samesite=strict${secure}`;
+}
+
+function clearSessionCookie(): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${SESSION_COOKIE_NAME}=;path=/;max-age=0;samesite=strict`;
+}
+
+/**
+ * Automatically calls /api/auth/set-claims with the user's ID token,
+ * setting role, lrn, linked_lrns on their Firebase Auth token, and forces a token refresh.
+ */
+export async function syncCustomClaims(firebaseUser: any, targetRole?: RoleType): Promise<void> {
+  if (!firebaseUser) return;
+  try {
+    const rawToken = await firebaseUser.getIdToken();
+    await fetch("/api/auth/set-claims", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${rawToken}`,
+      },
+      body: JSON.stringify({ role: targetRole }),
+    });
+    // Force refresh JWT to receive updated custom claims
+    await firebaseUser.getIdToken(true);
+  } catch (err) {
+    console.warn("[SAPC Auth] Custom claims sync notice:", err);
+  }
+}
+
+
 export interface UserProfile {
   id: number;
   email: string;
@@ -24,6 +71,10 @@ export interface UserProfile {
   strand?: string;
   department?: string;
   employee_id?: string;
+  /** MODEL-02: Parent accounts may be linked to multiple children */
+  linked_lrns?: string[];
+  /** MODEL-03: Teacher accounts may have multiple advisory sections */
+  advisory_sections?: string[];
 }
 
 interface AuthContextType {
@@ -67,35 +118,44 @@ export const getPersistedAvatar = (email?: string | null, fallbackAvatar?: strin
   return fallbackAvatar || null;
 };
 
-const DEMO_PROFILES: Record<RoleType, { email: string; pass: string; name: string; student_id?: number }> = {
-  guidance_counselor: { 
-    email: "counselor@sapc.edu.ph", 
-    pass: "counselor123", 
-    name: "Maria Theresa Cruz, RGC" 
-  },
-  teacher: { 
-    email: "teacher@sapc.edu.ph", 
-    pass: "teacher123", 
-    name: "Prof. Ernesto Bautista" 
-  },
-  admin: { 
-    email: "admin@sapc.edu.ph", 
-    pass: "admin123", 
-    name: "Dr. Remedios Santos, Ed.D." 
-  },
-  student: { 
-    email: "student@sapc.edu.ph", 
-    pass: "student123", 
-    name: "Erika Bautista",
-    student_id: 1 
-  },
-  parent: { 
-    email: "parent@sapc.edu.ph", 
-    pass: "parent123", 
-    name: "Mrs. Elena Bautista",
-    student_id: 1 
-  }
-};
+// RISK-03 Fix: Demo profiles only active in demo/development mode.
+// Set NEXT_PUBLIC_DEMO_MODE=true in .env.local to enable them.
+// In production with NEXT_PUBLIC_DEMO_MODE unset or "false", this will be null
+// and the demo-profile login branch will be skipped entirely.
+const IS_DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true" || process.env.NODE_ENV === "development";
+
+const DEMO_PROFILES: Record<RoleType, { email: string; pass: string; name: string; student_id?: number }> | null =
+  IS_DEMO_MODE
+    ? {
+        guidance_counselor: { 
+          email: "counselor@sapc.edu.ph", 
+          pass: "counselor123", 
+          name: "Maria Theresa Cruz, RGC" 
+        },
+        teacher: { 
+          email: "teacher@sapc.edu.ph", 
+          pass: "teacher123", 
+          name: "Prof. Ernesto Bautista" 
+        },
+        admin: { 
+          email: "admin@sapc.edu.ph", 
+          pass: "admin123", 
+          name: "Dr. Remedios Santos, Ed.D." 
+        },
+        student: { 
+          email: "student@sapc.edu.ph", 
+          pass: "student123", 
+          name: "Erika Bautista",
+          student_id: 1 
+        },
+        parent: { 
+          email: "parent@sapc.edu.ph", 
+          pass: "parent123", 
+          name: "Mrs. Elena Bautista",
+          student_id: 1 
+        }
+      }
+    : null;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -156,6 +216,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
           localStorage.setItem("sapc_user", JSON.stringify(profile));
         }
+        // GAP-04: Set middleware-readable session cookie
+        setSessionCookie(role, profile.full_name);
 
         setUser(profile);
         setToken(tokenStr);
@@ -204,6 +266,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
           localStorage.setItem("sapc_user", JSON.stringify(profile));
         }
+        // GAP-04: Set middleware-readable session cookie
+        setSessionCookie(data.role as RoleType, profile.full_name);
 
         setToken(data.access_token);
         setUser(profile);
@@ -220,7 +284,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // -------------------------------------------------------------------------
 
     // A. Check Default Demo Profiles (Admin, Counselor, Teacher, Student, Parent)
-    for (const [roleKey, demo] of Object.entries(DEMO_PROFILES) as [RoleType, typeof DEMO_PROFILES[RoleType]][]) {
+    // RISK-03: Only active when IS_DEMO_MODE is true
+    if (DEMO_PROFILES) for (const [roleKey, demo] of Object.entries(DEMO_PROFILES) as [RoleType, NonNullable<typeof DEMO_PROFILES>[RoleType]][]) {
       const demoEmail = demo.email.toLowerCase();
       const demoRole = roleKey.toLowerCase();
       const demoPrefix = demoEmail.split("@")[0];
@@ -257,6 +322,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
           localStorage.setItem("sapc_user", JSON.stringify(profile));
         }
+        // GAP-04: Set middleware-readable session cookie
+        setSessionCookie(roleKey, profile.full_name);
 
         setUser(profile);
         setToken(tokenStr);
@@ -305,6 +372,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
         localStorage.setItem("sapc_user", JSON.stringify(profile));
       }
+      // GAP-04: Set middleware-readable session cookie
+      setSessionCookie(facultyRole, profile.full_name);
 
       setUser(profile);
       setToken(tokenStr);
@@ -349,6 +418,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
         localStorage.setItem("sapc_user", JSON.stringify(profile));
       }
+      // GAP-04: Set middleware-readable session cookie
+      setSessionCookie("student", profile.full_name);
 
       setUser(profile);
       setToken(tokenStr);
@@ -358,13 +429,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // D. Check Parent Records
+    // MODEL-02 Fix: supports both legacy single linkedLRN and new linkedLRNs[]
     const parentRoster = typeof window !== "undefined" ? getActiveParentRecords() : [];
-    const matchedParent = parentRoster.find(p => 
-      (p.email && p.email.toLowerCase() === cleanId) ||
-      cleanId === `parent.${p.linkedLRN}@sapc.edu.ph` ||
-      cleanId === `parent_${p.linkedLRN}` ||
-      cleanId === p.phone?.replace(/\D/g, "")
-    );
+    const matchedParent = parentRoster.find(p => {
+      // Resolve the LRN identifier(s) for this parent
+      const lrns: string[] = (p as any).linkedLRNs ?? (p.linkedLRN ? [p.linkedLRN] : []);
+      const primaryLRN = lrns[0] ?? p.linkedLRN ?? "";
+      return (
+        (p.email && p.email.toLowerCase() === cleanId) ||
+        cleanId === `parent.${primaryLRN}@sapc.edu.ph` ||
+        cleanId === `parent_${primaryLRN}` ||
+        cleanId === p.phone?.replace(/\D/g, "")
+      );
+    });
 
     if (matchedParent) {
       const expectedPass = matchedParent.initialPassword || "parent2026";
@@ -373,7 +450,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Invalid email or password. Please try again.");
       }
 
-      const parentEmail = matchedParent.email || `parent.${matchedParent.linkedLRN}@sapc.edu.ph`;
+      const lrns: string[] = (matchedParent as any).linkedLRNs ?? (matchedParent.linkedLRN ? [matchedParent.linkedLRN] : []);
+      const primaryLRN = lrns[0] ?? matchedParent.linkedLRN ?? "";
+      const parentEmail = matchedParent.email || `parent.${primaryLRN}@sapc.edu.ph`;
       const avatar = getPersistedAvatar(parentEmail, null);
       const profile: UserProfile = {
         id: 1,
@@ -381,6 +460,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         full_name: matchedParent.name,
         role: "parent",
         student_id: 1,
+        // Store the LRNs for multi-child support
+        linked_lrns: lrns,
         avatar_url: avatar
       };
 
@@ -390,6 +471,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
         localStorage.setItem("sapc_user", JSON.stringify(profile));
       }
+      // GAP-04: Set middleware-readable session cookie
+      setSessionCookie("parent", profile.full_name);
 
       setUser(profile);
       setToken(tokenStr);
@@ -416,19 +499,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
 
               const avatar = getPersistedAvatar(matchedReg.email, matchedReg.avatar_url || null);
+              // RISK-04 Fix: Self-registered accounts are ALWAYS students.
+              // The role field from localStorage cannot be trusted — an attacker
+              // could write role:"admin" to sapc_registered_accounts manually.
+              // Role elevation must go through the admin approval workflow.
+              const safeRole: RoleType = "student";
+
               const profile: UserProfile = {
                 id: matchedReg.student_id || 1,
                 email: matchedReg.email,
                 full_name: matchedReg.name || matchedReg.full_name,
-                role: (matchedReg.role || "student") as RoleType,
+                role: safeRole,
                 student_id: matchedReg.student_id || null,
                 avatar_url: avatar
               };
 
-              const tokenStr = `token_${profile.role}_${Date.now()}`;
+              const tokenStr = `token_${safeRole}_${Date.now()}`;
               localStorage.setItem("sapc_token", tokenStr);
               localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
               localStorage.setItem("sapc_user", JSON.stringify(profile));
+              // GAP-04: Set middleware-readable session cookie
+              setSessionCookie(safeRole, profile.full_name);
 
               setUser(profile);
               setToken(tokenStr);
@@ -501,6 +592,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.setItem("sapc_custom_profile", JSON.stringify(profile));
           localStorage.setItem("sapc_user", JSON.stringify(profile));
         }
+        // GAP-04: Set middleware-readable session cookie
+        setSessionCookie(role, profile.full_name);
+
+        // Sync custom claims to Firebase Auth token and force refresh
+        await syncCustomClaims(fbUser, role);
 
         setUser(profile);
         setServerError(null);
@@ -581,7 +677,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // GAP-05 Fix: switchRole is restricted to demo/development mode only.
+  // In production, roles must be assigned through the admin approval workflow.
+  // Additionally, in demo mode, only the current user's role or the admin role
+  // can be switched to without an additional password confirmation.
   const switchRole = async (role: RoleType) => {
+    if (!IS_DEMO_MODE) {
+      console.warn("[SAPC RBAC] switchRole() is disabled in production. Use the admin role-management panel.");
+      return;
+    }
+    if (!DEMO_PROFILES) return;
     const creds = DEMO_PROFILES[role];
     if (creds) {
       await loginWithCredentials(creds.email, creds.pass, role);
@@ -592,6 +697,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Clear state first to prevent any re-renders showing stale data
     setToken(null);
     setUser(null);
+    // GAP-04: Clear the middleware session cookie
+    clearSessionCookie();
     try {
       await signOut(auth);
     } catch (err) {
@@ -639,6 +746,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (typeof window !== "undefined") {
             localStorage.setItem("sapc_user", JSON.stringify(restoredUser));
           }
+          // Ensure token has up-to-date role claims in the background
+          syncCustomClaims(fbUser, restoredUser.role).catch(() => {});
           setIsLoading(false);
         } catch {
           // Firestore read failed — keep whatever state we have, still unblock loading

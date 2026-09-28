@@ -14,7 +14,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth, syncCustomClaims } from "@/lib/auth-context";
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
@@ -150,6 +150,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
             createdAt: serverTimestamp(),
             isVerified: true
           });
+          await syncCustomClaims(userCred.user, "student");
         } catch (e: any) {
           console.warn("Firebase user create note:", e);
         }
@@ -222,6 +223,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
             verification_status: "pending_school_approval",
             linkageStatus: "pending_adviser_validation"
           });
+          await syncCustomClaims(userCred.user, "parent");
         } catch (e: any) {
           console.warn("Firebase parent create note:", e);
         }

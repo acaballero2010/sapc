@@ -139,8 +139,8 @@ export const SectionRiskHeatmap: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {filteredStudents.map((s) => (
-              <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+            {filteredStudents.map((s, idx) => (
+              <tr key={`heatmap-student-${s.lrn || s.id || idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
                 <td className="p-3">
                   <div className="font-bold text-slate-900 dark:text-white">{s.name}</div>
                   <div className="text-[10px] text-slate-400">LRN: {s.lrn}</div>

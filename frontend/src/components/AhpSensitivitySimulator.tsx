@@ -378,8 +378,8 @@ export function AhpSensitivitySimulator({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {simulationResults.shiftedStudents.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                    {simulationResults.shiftedStudents.map((s, idx) => (
+                      <tr key={`sim-shifted-student-${s.lrn || s.id || idx}`} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                         <td className="py-2 px-3 font-semibold text-slate-800 dark:text-slate-200">
                           {s.name}
                         </td>

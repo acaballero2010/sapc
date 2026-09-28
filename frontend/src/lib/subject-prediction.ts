@@ -107,6 +107,7 @@ export function calculateSubjectFailurePrediction(
       gpa: number;
       failing_subjects_count: number;
       days_absent: number;
+      attendance_rate_pct?: number;
       incomplete_requirements_count: number;
     };
     domain_scores: {
@@ -116,29 +117,51 @@ export function calculateSubjectFailurePrediction(
       family: number;
       health: number;
     };
+    subject_grades?: Record<string, {
+      written_work_avg?: number;
+      performance_task_avg?: number;
+      quarterly_assessment_score?: number;
+      missing_tasks_count?: number;
+      subject_absences_count?: number;
+    }>;
   },
   subjectCode: string
 ): StudentSubjectPrediction {
   const subj = SUBJECT_REGISTRY.find(s => s.code === subjectCode) || SUBJECT_REGISTRY[0];
 
-  // Pseudo-random deterministic seed for realistic formative breakdowns per student
+  // Check if real per-subject formative records exist for this student
+  const realSubjectRecord = student.subject_grades?.[subjectCode];
+
+  // Pseudo-random deterministic seed for realistic formative breakdowns per student (if real scores not present)
   const hash = (student.id * 17 + subjectCode.length * 31) % 100;
   const gpa = student.sass_metrics.gpa || 78;
   const isHighRisk = student.sass_metrics.failing_subjects_count > 0 || gpa < 75.0;
 
-  // Synthesize realistic current standings
-  const baseWW = isHighRisk ? Math.max(52, gpa - 6 + (hash % 10)) : Math.min(96, gpa + 2 - (hash % 8));
-  const basePT = isHighRisk ? Math.max(55, gpa - 4 + (hash % 8)) : Math.min(98, gpa + 4 - (hash % 6));
-  const baseQA = isHighRisk ? Math.max(50, gpa - 8 + (hash % 12)) : Math.min(95, gpa - (hash % 7));
+  // Formative standings: Use real data if provided, otherwise calibrated synthetic standings
+  const baseWW = realSubjectRecord?.written_work_avg ?? (
+    isHighRisk ? Math.max(52, gpa - 6 + (hash % 10)) : Math.min(96, gpa + 2 - (hash % 8))
+  );
+  const basePT = realSubjectRecord?.performance_task_avg ?? (
+    isHighRisk ? Math.max(55, gpa - 4 + (hash % 8)) : Math.min(98, gpa + 4 - (hash % 6))
+  );
+  const baseQA = realSubjectRecord?.quarterly_assessment_score ?? (
+    isHighRisk ? Math.max(50, gpa - 8 + (hash % 12)) : Math.min(95, gpa - (hash % 7))
+  );
 
   // Determine missing tasks and subject-specific absences
-  const missingTasks = student.sass_metrics.incomplete_requirements_count > 0
-    ? Math.max(1, Math.min(4, Math.round(student.sass_metrics.incomplete_requirements_count * (0.8 + (hash % 50) / 100))))
-    : (hash % 7 === 0 ? 1 : 0);
+  const missingTasks = realSubjectRecord?.missing_tasks_count ?? (
+    student.sass_metrics.incomplete_requirements_count > 0
+      ? Math.max(1, Math.min(4, Math.round(student.sass_metrics.incomplete_requirements_count * (0.8 + (hash % 50) / 100))))
+      : (hash % 7 === 0 ? 1 : 0)
+  );
 
-  const subjectAbsences = student.sass_metrics.days_absent > 0
-    ? Math.max(0, Math.min(8, Math.round(student.sass_metrics.days_absent * 0.4)))
-    : 0;
+  const subjectAbsences = realSubjectRecord?.subject_absences_count ?? (
+    student.sass_metrics.days_absent > 0
+      ? Math.max(0, Math.min(8, Math.round(student.sass_metrics.days_absent * 0.4)))
+      : (student.sass_metrics.attendance_rate_pct && student.sass_metrics.attendance_rate_pct < 90
+          ? Math.max(1, Math.round((100 - student.sass_metrics.attendance_rate_pct) / 2.5))
+          : 0)
+  );
 
   // Weighted Academic standing
   const rawWeighted = (baseWW * subj.weight_ww) + (basePT * subj.weight_pt) + (baseQA * subj.weight_qa);
@@ -147,12 +170,14 @@ export function calculateSubjectFailurePrediction(
   const taskPenalty = Math.min(25.0, missingTasks * 8.0);
   const attendancePenalty = Math.min(15.0, Math.max(0, subjectAbsences - 2) * 2.5);
   // Cross-Domain Multipliers (All 4 Non-Academic Domains Factored)
-  const crossDomainPenalty = (
-    (student.domain_scores.family * 0.03) +
-    (student.domain_scores.mental_health * 0.03) +
-    (student.domain_scores.health * 0.02) +
-    (student.domain_scores.financial * 0.02)
-  );
+  // Scaled proportionally to AHP weights (family=20%, health=20%, mental=15%, financial=15%)
+  // Each domain contributes up to its proportional share of a 15-point maximum total penalty.
+  const crossDomainPenalty = Math.min(15.0, (
+    (student.domain_scores.family      / 100) * 6.0 +   // 20% weight → up to 6 pts
+    (student.domain_scores.health      / 100) * 6.0 +   // 20% weight → up to 6 pts
+    (student.domain_scores.mental_health / 100) * 4.5 + // 15% weight → up to 4.5 pts
+    (student.domain_scores.financial   / 100) * 4.5     // 15% weight → up to 4.5 pts
+  ));
 
   const projectedGrade = Math.max(50.0, Math.min(100.0, rawWeighted - taskPenalty - attendancePenalty - crossDomainPenalty));
   const roundedProjected = Math.round(projectedGrade * 10) / 10;
@@ -183,7 +208,6 @@ export function calculateSubjectFailurePrediction(
   if (student.domain_scores.mental_health >= 60.0) riskDrivers.push(`Psychological Distress Impact (MH: ${student.domain_scores.mental_health.toFixed(0)})`);
   if (student.domain_scores.health >= 60.0) riskDrivers.push(`Physical Fatigue / Health Strain (Health: ${student.domain_scores.health.toFixed(0)})`);
   if (student.domain_scores.financial >= 60.0) riskDrivers.push(`Working Student / Socioeconomic Fatigue (Financial: ${student.domain_scores.financial.toFixed(0)})`);
-  if (student.domain_scores.financial >= 60.0) riskDrivers.push(`Working Student Fatigue / Economic Strain`);
   if (riskDrivers.length === 0) riskDrivers.push("Satisfactory Task Submissions & Quiz Averages");
 
   // Prescribed Actions
@@ -215,7 +239,19 @@ export function calculateSubjectFailurePrediction(
     missing_tasks_count: missingTasks,
     subject_absences_count: subjectAbsences,
     projected_final_grade: roundedProjected,
-    confidence_interval_95: [Math.round(Math.max(50, roundedProjected - 3.2) * 10) / 10, Math.round(Math.min(100, roundedProjected + 3.2) * 10) / 10],
+    // Dynamic CI: widens with missing tasks, high absences, and non-academic domain stress
+    confidence_interval_95: (() => {
+      const ciMargin = Math.min(10.0,
+        3.2 +
+        (missingTasks * 1.2) +
+        (subjectAbsences > 3 ? 2.5 : 0) +
+        (crossDomainPenalty > 5 ? 1.5 : 0)
+      );
+      return [
+        Math.round(Math.max(50, roundedProjected - ciMargin) * 10) / 10,
+        Math.round(Math.min(100, roundedProjected + ciMargin) * 10) / 10
+      ] as [number, number];
+    })(),
     failure_probability_pct: failureProbPct,
     passing_probability_pct: Math.round((100.0 - failureProbPct) * 10) / 10,
     risk_tier: riskTier,
