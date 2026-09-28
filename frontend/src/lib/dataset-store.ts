@@ -202,6 +202,23 @@ export function getActiveStudentDataset(): StudentRecord[] {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          // If stored dataset has fewer records than baseline (e.g., partial slice was saved),
+          // preserve any new/modified students and merge with full SAPC_500_STUDENTS baseline.
+          if (parsed.length < SAPC_500_STUDENTS.length) {
+            const parsedLrnMap = new Map(parsed.map(s => [String(s.lrn).trim(), s]));
+            const merged = SAPC_500_STUDENTS.map(baselineStudent => {
+              const match = parsedLrnMap.get(String(baselineStudent.lrn).trim());
+              return match || baselineStudent;
+            });
+            // Also include any completely new students created by the user (not in baseline)
+            const baselineLrnSet = new Set(SAPC_500_STUDENTS.map(s => String(s.lrn).trim()));
+            const newStudents = parsed.filter(s => !baselineLrnSet.has(String(s.lrn).trim()));
+            const fullRestored = [...newStudents, ...merged];
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(fullRestored));
+            } catch {}
+            return fullRestored;
+          }
           return parsed;
         }
       }

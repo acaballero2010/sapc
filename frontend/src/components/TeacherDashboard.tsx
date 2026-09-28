@@ -792,14 +792,12 @@ export const TeacherDashboard: React.FC = () => {
   // Action Handlers
   // ---------------------------------------------------------------------------
   const handleWizardCommit = () => {
-    // Merge wizardRawRows into active student dataset
-    const updated = students.map((st) => {
+    // Merge wizardRawRows into active global student dataset
+    const all = getActiveStudentDataset();
+    const updated = all.map((st) => {
       const match = wizardRawRows.find((r) => r[0] === st.lrn || r[1]?.toLowerCase() === st.full_name?.toLowerCase());
       if (match) {
         const computedGrade = parseFloat(match[5]) || st.sass_metrics.gpa;
-        const _ww = parseFloat(match[2]) || 80;
-        const _pt = parseFloat(match[3]) || 80;
-        const _qe = parseFloat(match[4]) || 80;
         const acadScore = Math.max(5, Math.min(100, Math.round((85 - computedGrade) * 3 + (computedGrade < 75 ? 25 : 0))));
 
         return {
@@ -819,7 +817,7 @@ export const TeacherDashboard: React.FC = () => {
 
     const recalculated = recalculateAHPForDataset(updated);
     saveStudentDataset(recalculated);
-    setStudents(recalculated);
+    setStudents(filterAdvisory(recalculated));
 
     showToast(`Successfully processed, stored, and recalculated ${wizardRawRows.length} student records from ${wizardFileName}.`);
     const newHistory: ImportHistoryItem = {
@@ -842,17 +840,18 @@ export const TeacherDashboard: React.FC = () => {
     const lines = newStudentEnrollText.split("\n").filter(l => l.trim().length > 0);
     if (lines.length === 0) return;
 
+    const all = getActiveStudentDataset();
     const newEnrolled: StudentRecord[] = lines.map((line, idx) => {
       const parts = line.split(",").map(p => p.trim());
-      const lrn = parts[0] || `1092384750${String(students.length + idx + 1).padStart(2, "0")}`;
+      const lrn = parts[0] || `1092384750${String(all.length + idx + 1).padStart(2, "0")}`;
       const lastName = parts[1] || "Student";
       const firstName = parts[2] || "New";
       const grade = parseInt(parts[3], 10) || 7;
-      const section = parts[4] || "Grade 7 - St. Francis";
+      const section = parts[4] || teacherSection || "Grade 7 - Love";
       const email = parts[6] || `student.${lrn.slice(-4)}@sapc.edu.ph`;
 
       return {
-        id: students.length + idx + 1,
+        id: all.length + idx + 1,
         lrn,
         full_name: `${firstName} ${lastName}`,
         first_name: firstName,
@@ -879,9 +878,9 @@ export const TeacherDashboard: React.FC = () => {
       };
     });
 
-    const combined = recalculateAHPForDataset([...students, ...newEnrolled]);
+    const combined = recalculateAHPForDataset([...all, ...newEnrolled]);
     saveStudentDataset(combined);
-    setStudents(combined);
+    setStudents(filterAdvisory(combined));
 
     showToast(`Successfully enrolled and stored ${lines.length} new student records into the database.`);
     setNewStudentEnrollText("");
@@ -889,7 +888,8 @@ export const TeacherDashboard: React.FC = () => {
   };
 
   const handleSaveGradesBatch = () => {
-    const updated = students.map((st) => {
+    const all = getActiveStudentDataset();
+    const updated = all.map((st) => {
       const match = gradeImportRows.find((r) => r.lrn === st.lrn || r.name?.toLowerCase() === st.full_name?.toLowerCase());
       if (match) {
         const computedGrade = parseFloat((match.ww * 0.25 + match.pt * 0.50 + match.qe * 0.25).toFixed(1));
@@ -912,13 +912,14 @@ export const TeacherDashboard: React.FC = () => {
 
     const recalculated = recalculateAHPForDataset(updated);
     saveStudentDataset(recalculated);
-    setStudents(recalculated);
+    setStudents(filterAdvisory(recalculated));
 
     showToast(`Saved and stored quarterly grades for ${gradeImportRows.length} students in ${gradeImportSubject} (${gradeImportQuarter}).`);
   };
 
   const handleSaveAttendanceBatch = () => {
-    const updated = students.map((st) => {
+    const all = getActiveStudentDataset();
+    const updated = all.map((st) => {
       const match = attendanceImportRows.find((r) => r.lrn === st.lrn || r.name?.toLowerCase() === st.full_name?.toLowerCase());
       if (match) {
         const absent = Math.max(0, match.total - match.present);
@@ -938,7 +939,7 @@ export const TeacherDashboard: React.FC = () => {
 
     const recalculated = recalculateAHPForDataset(updated);
     saveStudentDataset(recalculated);
-    setStudents(recalculated);
+    setStudents(filterAdvisory(recalculated));
 
     showToast(`Saved and stored ${attendanceImportQuarter} attendance records for ${attendanceImportRows.length} students.`);
   };
@@ -950,7 +951,8 @@ export const TeacherDashboard: React.FC = () => {
   };
 
   const handleSaveCsvEditor = () => {
-    const updated = students.map((st) => {
+    const all = getActiveStudentDataset();
+    const updated = all.map((st) => {
       const match = csvEditorRows.find((r) => r.lrn === st.lrn || r.name?.toLowerCase() === st.full_name?.toLowerCase());
       if (match) {
         return {
@@ -967,7 +969,7 @@ export const TeacherDashboard: React.FC = () => {
 
     const recalculated = recalculateAHPForDataset(updated);
     saveStudentDataset(recalculated);
-    setStudents(recalculated);
+    setStudents(filterAdvisory(recalculated));
 
     showToast(`Saved and stored changes to ${csvEditorRows.length} CSV records directly in student database.`);
   };
