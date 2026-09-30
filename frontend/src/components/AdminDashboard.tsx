@@ -2825,10 +2825,10 @@ Issued Date     : ${new Date().toLocaleDateString()}
                         </td>
                       </tr>
                     ) : (
-                      filteredFaculty.map((f) => {
+                      filteredFaculty.map((f, idx) => {
                         const isCounselor = f.role === "guidance_counselor" || f.role === "counselor";
                         return (
-                          <tr key={f.id} className="hover:bg-slate-50/70 transition">
+                          <tr key={`${f.id || "fac"}_${f.email || idx}`} className="hover:bg-slate-50/70 transition">
                             {/* Profile */}
                             <td className="p-3">
                               <div className="flex items-center gap-2.5">

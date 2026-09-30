@@ -2685,6 +2685,36 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
 ];
 
 /**
+ * Deduplicates faculty records by normalized email and ensures each record has a unique ID.
+ */
+export function deduplicateFacultyRecords(records: FacultyRecord[]): FacultyRecord[] {
+  const seenEmails = new Set<string>();
+  const seenIds = new Set<string>();
+  const cleanList: FacultyRecord[] = [];
+
+  for (const rec of records) {
+    const emailKey = (rec.email || "").trim().toLowerCase();
+    if (emailKey && seenEmails.has(emailKey)) {
+      continue;
+    }
+    if (emailKey) seenEmails.add(emailKey);
+
+    let finalId = rec.id || `FAC-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    if (seenIds.has(finalId)) {
+      finalId = `${finalId}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    }
+    seenIds.add(finalId);
+
+    cleanList.push({
+      ...rec,
+      id: finalId,
+      email: emailKey || rec.email
+    });
+  }
+  return cleanList;
+}
+
+/**
  * Retrieves the active faculty & counselor roster from localStorage or falls back to standard defaults.
  */
 export function getActiveFacultyRecords(): FacultyRecord[] {
@@ -2694,31 +2724,32 @@ export function getActiveFacultyRecords(): FacultyRecord[] {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          return deduplicateFacultyRecords(parsed);
         }
       }
     } catch {
       // fallback
     }
   }
-  return DEFAULT_FACULTY_ROSTER;
+  return deduplicateFacultyRecords(DEFAULT_FACULTY_ROSTER);
 }
 
 /**
  * Persists the faculty & counselor roster locally and broadcasts update event.
  */
 export function saveActiveFacultyRecords(records: FacultyRecord[], syncToCloud = true): void {
+  const cleanRecords = deduplicateFacultyRecords(records);
   if (typeof window !== "undefined") {
     try {
-      localStorage.setItem(FACULTY_STORAGE_KEY, JSON.stringify(records));
-      window.dispatchEvent(new CustomEvent("sapc:faculty-updated", { detail: records }));
+      localStorage.setItem(FACULTY_STORAGE_KEY, JSON.stringify(cleanRecords));
+      window.dispatchEvent(new CustomEvent("sapc:faculty-updated", { detail: cleanRecords }));
     } catch (e) {
       console.error("Failed to save faculty records locally:", e);
     }
   }
 
   if (syncToCloud && typeof window !== "undefined") {
-    syncFacultyRecordsToFirestore(records).catch(err => {
+    syncFacultyRecordsToFirestore(cleanRecords).catch(err => {
       console.warn("Cloud sync for faculty records encountered an issue:", err);
     });
   }
@@ -2816,18 +2847,33 @@ export function subscribeToFacultyRecords(callback: (records: FacultyRecord[]) =
  */
 export async function addFacultyRecord(newRecord: Partial<FacultyRecord> & { name: string; email: string; role: FacultyRecord["role"] }): Promise<FacultyRecord> {
   const current = getActiveFacultyRecords();
-  const nextNum = current.length + 1;
   const isCounselor = newRecord.role === "guidance_counselor" || newRecord.role === "counselor";
   
+  const existingIds = new Set(current.map(r => r.id));
+  let candidateNum = current.length + 1;
+  let generatedId = isCounselor ? `COUN-${String(candidateNum).padStart(3, "0")}` : `FAC-${String(candidateNum).padStart(3, "0")}`;
+  while (existingIds.has(generatedId)) {
+    candidateNum++;
+    generatedId = isCounselor ? `COUN-${String(candidateNum).padStart(3, "0")}` : `FAC-${String(candidateNum).padStart(3, "0")}`;
+  }
+
+  const existingEmpIds = new Set(current.map(r => r.employee_id).filter(Boolean));
+  let empNum = candidateNum;
+  let generatedEmpId = isCounselor ? `SAPC-COUN-2026-${String(empNum).padStart(3, "0")}` : `SAPC-FAC-2026-${String(empNum).padStart(3, "0")}`;
+  while (existingEmpIds.has(generatedEmpId)) {
+    empNum++;
+    generatedEmpId = isCounselor ? `SAPC-COUN-2026-${String(empNum).padStart(3, "0")}` : `SAPC-FAC-2026-${String(empNum).padStart(3, "0")}`;
+  }
+
   const record: FacultyRecord = {
-    id: newRecord.id || (isCounselor ? `COUN-${String(nextNum).padStart(3, "0")}` : `FAC-${String(nextNum).padStart(3, "0")}`),
+    id: newRecord.id || generatedId,
     name: newRecord.name.trim(),
     email: newRecord.email.trim().toLowerCase(),
     role: newRecord.role,
     department: newRecord.department || (isCounselor ? "Guidance & Counseling Center" : "Academic Department"),
     section: newRecord.section || (isCounselor ? "Guidance Office" : "General Faculty"),
     grade_level: newRecord.grade_level || (isCounselor ? "All Levels" : "Grade 11"),
-    employee_id: newRecord.employee_id || (isCounselor ? `SAPC-COUN-2026-${String(nextNum).padStart(3, "0")}` : `SAPC-FAC-2026-${String(nextNum).padStart(3, "0")}`),
+    employee_id: newRecord.employee_id || generatedEmpId,
     prc_license_no: newRecord.prc_license_no || (isCounselor ? `PRC-RGC-${Math.floor(100000 + Math.random() * 900000)}` : ""),
     initial_password: newRecord.initial_password || (isCounselor ? "counselor123" : "teacher123"),
     status: newRecord.status || "Active",
@@ -2835,7 +2881,7 @@ export async function addFacultyRecord(newRecord: Partial<FacultyRecord> & { nam
     created_at: newRecord.created_at || new Date().toISOString()
   };
 
-  const updated = [record, ...current.filter(r => r.email !== record.email)];
+  const updated = [record, ...current.filter(r => r.email.toLowerCase() !== record.email.toLowerCase() && r.id !== record.id)];
   saveActiveFacultyRecords(updated, true);
 
   if (db) {
