@@ -1,6 +1,6 @@
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 export type { StudentRecord };
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { 
   collection, 
   doc, 
@@ -533,7 +533,7 @@ export async function deleteStudentRecord(idOrLrn: string | number, actor: Audit
  * Fetches the latest student dataset from Firebase Cloud Firestore, updating local cache.
  */
 export async function loadStudentDatasetFromFirestore(): Promise<StudentRecord[]> {
-  if (!db) return getActiveStudentDataset();
+  if (!db || !auth?.currentUser) return getActiveStudentDataset();
 
   try {
     const studentsCol = collection(db, "students");
@@ -554,8 +554,10 @@ export async function loadStudentDatasetFromFirestore(): Promise<StudentRecord[]
         return cloudStudents;
       }
     }
-  } catch (err) {
-    console.warn("Could not load students from Firestore, using local baseline:", err);
+  } catch (err: any) {
+    if (err?.code !== "permission-denied" && err?.code !== "unavailable") {
+      console.warn("Could not load students from Firestore, using local baseline:", err?.message || err);
+    }
   }
 
   return getActiveStudentDataset();
@@ -593,6 +595,11 @@ export function subscribeToStudentDataset(
     return all;
   };
 
+  if (!auth?.currentUser) {
+    onUpdate(applyRoleScope(getActiveStudentDataset()));
+    return () => {};
+  }
+
   try {
     const studentsCol = collection(db, "students");
     const unsubscribe = onSnapshot(
@@ -618,13 +625,16 @@ export function subscribeToStudentDataset(
         }
       },
       (error) => {
-        console.warn("Firestore real-time subscription error:", error);
+        if (error?.code !== "permission-denied" && error?.code !== "unavailable") {
+          console.warn("Firestore real-time subscription notice:", error?.message || error);
+        }
+        onUpdate(applyRoleScope(getActiveStudentDataset()));
       }
     );
 
     return unsubscribe;
-  } catch (e) {
-    console.warn("Could not initiate Firestore subscription:", e);
+  } catch (e: any) {
+    onUpdate(applyRoleScope(getActiveStudentDataset()));
     return () => {};
   }
 }
@@ -2359,6 +2369,49 @@ export const FACULTY_STORAGE_KEY = "sapc_campus_faculty_records";
 
 export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
   {
+    id: "ADM-001",
+    name: "Dr. Remedios Santos, Ed.D.",
+    email: "admin@sapc.edu.ph",
+    role: "admin",
+    department: "Office of the School President & Administration",
+    section: "Executive Administration",
+    grade_level: "Institution-Wide",
+    employee_id: "SAPC-ADM-2020-001",
+    initial_password: "admin123",
+    status: "Active",
+    phone: "+63 917 100 2000",
+    created_at: "2026-08-01T08:00:00.000Z"
+  },
+  {
+    id: "FAC-000",
+    name: "Maria Theresa Cruz, RGC",
+    email: "counselor@sapc.edu.ph",
+    role: "guidance_counselor",
+    department: "Guidance & Counseling Center",
+    section: "Main Guidance Center - Room 101",
+    grade_level: "All Levels (RGC Head)",
+    employee_id: "SAPC-COUN-2020-001",
+    prc_license_no: "PRC-RGC-007812",
+    initial_password: "counselor123",
+    status: "Active",
+    phone: "+63 917 333 4455",
+    created_at: "2026-08-01T08:00:00.000Z"
+  },
+  {
+    id: "FAC-000B",
+    name: "Prof. Ernesto Bautista, LPT",
+    email: "teacher@sapc.edu.ph",
+    role: "teacher",
+    department: "Senior High School",
+    section: "Grade 10 - St. Augustine",
+    grade_level: "Grade 10",
+    employee_id: "SAPC-FAC-2020-005",
+    initial_password: "teacher123",
+    status: "Active",
+    phone: "+63 918 555 6677",
+    created_at: "2026-08-01T08:00:00.000Z"
+  },
+  {
     id: "FAC-001",
     name: "Mr. Roberto Santos, LPT",
     email: "roberto.santos@sapc.edu.ph",
@@ -2575,7 +2628,7 @@ export async function syncFacultyRecordsToFirestore(records: FacultyRecord[]): P
  * Fetches all faculty and counselor records from Cloud Firestore collection `faculty_records`.
  */
 export async function loadFacultyRecordsFromFirestore(): Promise<FacultyRecord[]> {
-  if (!db) return getActiveFacultyRecords();
+  if (!db || !auth?.currentUser) return getActiveFacultyRecords();
   try {
     const colRef = collection(db, "faculty_records");
     const snapshot = await getDocs(colRef);
@@ -2587,8 +2640,10 @@ export async function loadFacultyRecordsFromFirestore(): Promise<FacultyRecord[]
       saveActiveFacultyRecords(cloudRecords, false);
       return cloudRecords;
     }
-  } catch (err) {
-    console.warn("Could not fetch faculty records from Firestore, using local fallback:", err);
+  } catch (err: any) {
+    if (err?.code !== "permission-denied" && err?.code !== "unavailable") {
+      console.warn("Could not fetch faculty records from Firestore, using local fallback:", err?.message || err);
+    }
   }
   return getActiveFacultyRecords();
 }
@@ -2597,7 +2652,11 @@ export async function loadFacultyRecordsFromFirestore(): Promise<FacultyRecord[]
  * Sets up a real-time listener for Cloud Firestore `faculty_records`.
  */
 export function subscribeToFacultyRecords(callback: (records: FacultyRecord[]) => void): Unsubscribe | (() => void) {
-  if (!db) {
+  if (!db || typeof window === "undefined") {
+    return () => {};
+  }
+  if (!auth?.currentUser) {
+    callback(getActiveFacultyRecords());
     return () => {};
   }
   try {
@@ -2612,10 +2671,13 @@ export function subscribeToFacultyRecords(callback: (records: FacultyRecord[]) =
         callback(records);
       }
     }, (err) => {
-      console.warn("Faculty real-time listener notice:", err);
+      if (err?.code !== "permission-denied" && err?.code !== "unavailable") {
+        console.warn("Faculty real-time listener notice:", err?.message || err);
+      }
+      callback(getActiveFacultyRecords());
     });
   } catch (err) {
-    console.warn("Failed to attach faculty Firestore listener:", err);
+    callback(getActiveFacultyRecords());
     return () => {};
   }
 }
@@ -2966,6 +3028,24 @@ export const DEFAULT_PENDING_REGISTRATIONS: PendingRegistrationRecord[] = [
 
 export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
   {
+    id: "PAR-000",
+    name: "Mrs. Teresa Dimaculangan",
+    email: "parent@sapc.edu.ph",
+    phone: "+63 917 555 0192",
+    relationship: "Mother",
+    linkedStudentName: "Joshua Dimaculangan",
+    linkedLRN: "108543120001",
+    linkedLRNs: ["108543120001", "109238475612", "109238475001", "109238470001"],
+    section: "Grade 10 - St. Augustine",
+    gradeLevel: "Grade 10",
+    status: "Active",
+    verifiedAt: "2026-08-15",
+    sf9Access: true,
+    attendanceAlerts: true,
+    riskAlerts: true,
+    initialPassword: "parent123"
+  },
+  {
     id: "PAR-001",
     name: "Mrs. Corazon D. Santos",
     email: "parent.santos@gmail.com",
@@ -3206,6 +3286,7 @@ export async function loadPendingRegistrationsFromFirestore(): Promise<PendingRe
 }
 
 export async function loadParentRecordsFromFirestore(): Promise<ParentRecord[] | null> {
+  if (!db || !auth?.currentUser) return getActiveParentRecords();
   try {
     const colRef = collection(db, "parent_records");
     const snapshot = await getDocs(colRef);
@@ -3219,13 +3300,19 @@ export async function loadParentRecordsFromFirestore(): Promise<ParentRecord[] |
         return all;
       }
     }
-  } catch (err) {
-    console.warn("Could not fetch parent records from Firestore, using local:", err);
+  } catch (err: any) {
+    if (err?.code !== "permission-denied" && err?.code !== "unavailable") {
+      console.warn("Could not fetch parent records from Firestore, using local:", err?.message || err);
+    }
   }
-  return null;
+  return getActiveParentRecords();
 }
 
 export function subscribeToPendingRegistrations(callback: (records: PendingRegistrationRecord[]) => void): Unsubscribe | null {
+  if (!db || !auth?.currentUser) {
+    callback(getActivePendingRegistrations());
+    return null;
+  }
   try {
     const colRef = collection(db, "pending_registrations");
     return onSnapshot(colRef, (snapshot) => {
@@ -3237,7 +3324,10 @@ export function subscribeToPendingRegistrations(callback: (records: PendingRegis
         callback(records);
       }
     }, (error) => {
-      console.warn("Real-time pending registrations listener error:", error);
+      if (error?.code !== "permission-denied" && error?.code !== "unavailable") {
+        console.warn("Real-time pending registrations listener notice:", error?.message || error);
+      }
+      callback(getActivePendingRegistrations());
     });
   } catch {
     return null;
@@ -3245,6 +3335,10 @@ export function subscribeToPendingRegistrations(callback: (records: PendingRegis
 }
 
 export function subscribeToParentRecords(callback: (records: ParentRecord[]) => void): Unsubscribe | null {
+  if (!db || !auth?.currentUser) {
+    callback(getActiveParentRecords());
+    return null;
+  }
   try {
     const colRef = collection(db, "parent_records");
     return onSnapshot(colRef, (snapshot) => {
@@ -3256,7 +3350,10 @@ export function subscribeToParentRecords(callback: (records: ParentRecord[]) => 
         callback(records);
       }
     }, (error) => {
-      console.warn("Real-time parent records listener error:", error);
+      if (error?.code !== "permission-denied" && error?.code !== "unavailable") {
+        console.warn("Real-time parent records listener notice:", error?.message || error);
+      }
+      callback(getActiveParentRecords());
     });
   } catch {
     return null;

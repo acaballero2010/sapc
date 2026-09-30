@@ -68,7 +68,7 @@ def test_gemini_guidance_successful_response(monkeypatch):
     monkeypatch.setattr(
         nlp_service, 
         "call_gemini_guidance", 
-        lambda message, analysis, conversation_history=None, student_context=None: (
+        lambda message, analysis, conversation_history=None, student_context=None, **kwargs: (
             "Kumusta Juan! Normal lang ang kaba sa Math exam. Narito ang ilang hakbang para mag-review nang maayos.",
             "gemini-2.5-flash"
         )

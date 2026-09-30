@@ -13,7 +13,7 @@ import {
   onSnapshot, 
   Unsubscribe 
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 
 export type KnowledgeCategory = 
   | "academic_policy"
@@ -230,7 +230,14 @@ export async function loadKnowledgeBaseFromFirestore(): Promise<CounselorKnowled
  */
 export function subscribeToKnowledgeBase(
   onUpdate: (items: CounselorKnowledgeItem[]) => void
-): Unsubscribe {
+): Unsubscribe | (() => void) {
+  if (!db || typeof window === "undefined") {
+    return () => {};
+  }
+  if (!auth?.currentUser) {
+    onUpdate(getStoredKnowledgeBase());
+    return () => {};
+  }
   try {
     const colRef = collection(db, "counselor_knowledge_base");
     return onSnapshot(colRef, (snapshot) => {
@@ -243,12 +250,14 @@ export function subscribeToKnowledgeBase(
         saveKnowledgeBaseLocally(cloudItems);
         onUpdate(cloudItems);
       }
-    }, (error) => {
-      console.warn("[Counselor KB] Snapshot listener error:", error);
+    }, (error: any) => {
+      if (error?.code !== "permission-denied" && error?.code !== "unavailable") {
+        console.warn("[Counselor KB] Snapshot listener notice:", error?.message || error);
+      }
       onUpdate(getStoredKnowledgeBase());
     });
   } catch (err) {
-    console.warn("[Counselor KB] Failed creating onSnapshot listener:", err);
+    onUpdate(getStoredKnowledgeBase());
     return () => {};
   }
 }
