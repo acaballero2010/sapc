@@ -36,7 +36,8 @@ import {
   Percent,
   FileText,
   Copy,
-  KeyRound
+  KeyRound,
+  X
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
@@ -308,6 +309,17 @@ export const TeacherDashboard: React.FC = () => {
   } | null>(null);
   const [detailActiveQuarter, setDetailActiveQuarter] = useState<"Q1" | "Q2" | "Q3" | "Q4">("Q1");
   const [isEditingModalScores, setIsEditingModalScores] = useState<boolean>(false);
+
+  // Close modal on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selectedHistoricalScoreDetail) {
+        setSelectedHistoricalScoreDetail(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedHistoricalScoreDetail]);
 
   // Derive Grade Level & Strand for Historical Ingestion
   const histGradeLevel = useMemo(() => {
@@ -5080,8 +5092,14 @@ export const TeacherDashboard: React.FC = () => {
         const initialGrade = (parseFloat(wwWeighted) + parseFloat(ptWeighted) + parseFloat(qeWeighted)).toFixed(2);
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto space-y-5 p-5 sm:p-8">
+          <div 
+            onClick={() => setSelectedHistoricalScoreDetail(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200 cursor-pointer"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto space-y-5 p-5 sm:p-8 cursor-default"
+            >
               {/* Top Banner Header */}
               <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
                 <div className="space-y-1">
@@ -5109,9 +5127,10 @@ export const TeacherDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedHistoricalScoreDetail(null)}
-                  className="p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer shrink-0"
+                  className="p-2.5 rounded-2xl bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-[#8B0014] transition cursor-pointer shrink-0 border border-slate-200 active:scale-95"
+                  title="Close dialog (Esc)"
                 >
-                  <ChevronRight className="h-5 w-5 rotate-90 sm:rotate-0" />
+                  <X className="h-5 w-5" />
                   <span className="sr-only">Close</span>
                 </button>
               </div>
