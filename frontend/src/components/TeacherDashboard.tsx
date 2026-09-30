@@ -60,7 +60,7 @@ import { DepEdFormModal } from "./DepEdFormModal";
 import { BatchInterventionModal } from "./BatchInterventionModal";
 import { ImportDiffModal } from "./ImportDiffModal";
 import { CurriculumManagementHub } from "./CurriculumManagementHub";
-import { getCurriculumForGrade, getActiveCurriculum } from "@/lib/curriculum-store";
+import { getCurriculumForGrade, getActiveCurriculum, AcademicQuarter, CurriculumSubject } from "@/lib/curriculum-store";
 
 export type TeacherTabType = 
   | "dashboard"
@@ -287,16 +287,20 @@ export const TeacherDashboard: React.FC = () => {
   };
 
   // ---------------------------------------------------------------------------
-  // 1. IMPORT WIZARD (3-Step Process)
+  // ---------------------------------------------------------------------------
+  // 1. IMPORT WIZARD (3-Step Process with Section, Quarter, and Subject Linking)
   // ---------------------------------------------------------------------------
   const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
-  const [wizardFileName, setWizardFileName] = useState("DepEd_Grade11_STEM_Q2_SASS.csv");
-  const [wizardRawRows] = useState<string[][]>([
-    ["109238475001", "Santos, Jerome M.", "88", "90", "86", "88.0", "Passed", "44", "45"],
-    ["109238475002", "Dela Cruz, Angelica R.", "74", "76", "72", "74.5", "Borderline", "42", "45"],
-    ["109238475003", "Bautista, Mark Kenneth T.", "92", "95", "90", "93.0", "Passed", "45", "45"],
-    ["109238475007", "Villanueva, Christian Dave G.", "76", "78", "75", "76.5", "Passed", "41", "45"],
-    ["109238475008", "Alcantara, Princess Mae C.", "94", "96", "92", "94.5", "Passed", "45", "45"]
+  const [wizardTargetSection, setWizardTargetSection] = useState<string>("Grade 7 - Love");
+  const [wizardTargetQuarter, setWizardTargetQuarter] = useState<AcademicQuarter>("Q2");
+  const [wizardTargetSubjectCode, setWizardTargetSubjectCode] = useState<string>("JHS-MATH7");
+  const [wizardFileName, setWizardFileName] = useState("Grade7_Love_Q2_Mathematics7_Scores.csv");
+  const [wizardRawRows, setWizardRawRows] = useState<string[][]>([
+    ["109238470001", "Erika Bautista", "88", "90", "86", "88.4", "Passed", "44", "45"],
+    ["109238470004", "Angelica Salazar", "74", "76", "72", "74.4", "Borderline", "42", "45"],
+    ["109238470005", "Chloe De Leon", "92", "95", "90", "92.8", "Passed", "45", "45"],
+    ["109238470008", "Mariel Mercado", "76", "78", "75", "76.6", "Passed", "41", "45"],
+    ["109238470014", "Camille Castro", "94", "96", "92", "94.4", "Passed", "45", "45"]
   ]);
   const [wizardColumnMap, setWizardColumnMap] = useState({
     lrn: 0,
@@ -310,6 +314,152 @@ export const TeacherDashboard: React.FC = () => {
     total: 8
   });
 
+  const wizardGradeLevel = useMemo(() => {
+    const sec = (wizardTargetSection || "").toLowerCase();
+    if (sec.includes("12")) return 12;
+    if (sec.includes("11")) return 11;
+    if (sec.includes("10")) return 10;
+    if (sec.includes("9")) return 9;
+    if (sec.includes("8")) return 8;
+    return 7;
+  }, [wizardTargetSection]);
+
+  const wizardStrand = useMemo(() => {
+    const sec = (wizardTargetSection || "").toLowerCase();
+    if (sec.includes("stem")) return "STEM";
+    if (sec.includes("abm")) return "ABM";
+    if (sec.includes("humss")) return "HUMSS";
+    if (sec.includes("tvl")) return "TVL";
+    if (sec.includes("gas")) return "GAS";
+    return wizardGradeLevel <= 10 ? "JHS" : "STEM";
+  }, [wizardTargetSection, wizardGradeLevel]);
+
+  const wizardAvailableSubjects = useMemo(() => {
+    const list = getCurriculumForGrade(wizardGradeLevel as any, wizardStrand, undefined, true);
+    return list.length > 0 ? list : getActiveCurriculum().filter(s => s.grade_level === wizardGradeLevel && s.is_active);
+  }, [wizardGradeLevel, wizardStrand]);
+
+  const wizardCurrentSubject = useMemo(() => {
+    const match = wizardAvailableSubjects.find(s => s.code === wizardTargetSubjectCode || s.id === wizardTargetSubjectCode);
+    return match || wizardAvailableSubjects[0] || {
+      id: "JHS-MATH7",
+      code: "JHS-MATH7",
+      name: "Mathematics 7",
+      category: "Core" as const,
+      weight_ww: 0.40,
+      weight_pt: 0.40,
+      weight_qa: 0.20,
+      passing_threshold: 75.0
+    };
+  }, [wizardAvailableSubjects, wizardTargetSubjectCode]);
+
+  // Synchronize wizardTargetSubjectCode when section changes
+  useEffect(() => {
+    if (wizardAvailableSubjects.length > 0) {
+      if (!wizardAvailableSubjects.some(s => s.code === wizardTargetSubjectCode || s.id === wizardTargetSubjectCode)) {
+        setWizardTargetSubjectCode(wizardAvailableSubjects[0].code);
+      }
+    }
+  }, [wizardAvailableSubjects, wizardTargetSubjectCode]);
+
+  // Load sample advisory scores for the chosen section and subject
+  const loadAdvisorySampleForWizard = () => {
+    const all = getActiveStudentDataset();
+    const sectionStudents = all.filter(s => matchSection(s.section_name, wizardTargetSection));
+    const targetList = sectionStudents.length > 0 ? sectionStudents : all.slice(0, 36);
+
+    const rows = targetList.map((s, idx) => {
+      const seed = ((s.id || 1) * 7 + idx * 13) % 15;
+      const baseWW = Math.min(100, Math.max(68, Math.round(84 + seed - 5)));
+      const basePT = Math.min(100, Math.max(70, Math.round(86 + seed - 4)));
+      const baseQE = Math.min(100, Math.max(65, Math.round(82 + seed - 6)));
+      const comp = (baseWW * wizardCurrentSubject.weight_ww + basePT * wizardCurrentSubject.weight_pt + baseQE * wizardCurrentSubject.weight_qa).toFixed(1);
+      const stat = Number(comp) >= (wizardCurrentSubject.passing_threshold || 75.0) ? "Passed" : "Borderline";
+      return [
+        s.lrn,
+        s.full_name,
+        String(baseWW),
+        String(basePT),
+        String(baseQE),
+        comp,
+        stat,
+        "44",
+        "45"
+      ];
+    });
+
+    const safeSubjName = wizardCurrentSubject.name.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 20);
+    const safeSec = wizardTargetSection.replace(/[^a-zA-Z0-9]/g, "_");
+    setWizardFileName(`${safeSec}_${wizardTargetQuarter}_${safeSubjName}_Scores.csv`);
+    setWizardRawRows(rows);
+    setWizardStep(2);
+    showToast(`Loaded ${rows.length} student grade records for ${wizardCurrentSubject.name} (${wizardTargetQuarter}) - ${wizardTargetSection}.`);
+  };
+
+  // Download pre-formatted template with all student LRNs and Names
+  const downloadWizardTemplateCSV = () => {
+    const all = getActiveStudentDataset();
+    const sectionStudents = all.filter(s => matchSection(s.section_name, wizardTargetSection));
+    const targetList = sectionStudents.length > 0 ? sectionStudents : all.slice(0, 36);
+
+    const headers = `LRN,Student Name,Written Work (WW ${Math.round(wizardCurrentSubject.weight_ww * 100)}%),Performance Task (PT ${Math.round(wizardCurrentSubject.weight_pt * 100)}%),Quarterly Exam (QE ${Math.round(wizardCurrentSubject.weight_qa * 100)}%)\n`;
+    const rows = targetList.map(s => `"${s.lrn}","${s.full_name}",85,88,84`).join("\n");
+
+    const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const safeSubjName = wizardCurrentSubject.name.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 20);
+    const safeSec = wizardTargetSection.replace(/[^a-zA-Z0-9]/g, "_");
+    link.setAttribute("download", `TEMPLATE_${safeSec}_${wizardTargetQuarter}_${safeSubjName}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Downloaded CSV Template for ${wizardCurrentSubject.name} (${wizardTargetSection})!`);
+  };
+
+  // Handle CSV upload directly from file picker
+  const handleWizardFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setWizardFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lines.length <= 1) {
+        showToast("CSV file appears to be empty or has only a header row.");
+        return;
+      }
+
+      const dataRows: string[][] = [];
+      const dataLines = lines.slice(1);
+      for (const line of dataLines) {
+        const parts = line.split(",").map(p => p.trim().replace(/^["']|["']$/g, ""));
+        if (parts.length >= 2) {
+          const lrn = parts[0];
+          const name = parts[1];
+          const ww = parts[2] || "82";
+          const pt = parts[3] || "85";
+          const qe = parts[4] || "80";
+          const comp = (Number(ww) * wizardCurrentSubject.weight_ww + Number(pt) * wizardCurrentSubject.weight_pt + Number(qe) * wizardCurrentSubject.weight_qa).toFixed(1);
+          const stat = Number(comp) >= (wizardCurrentSubject.passing_threshold || 75.0) ? "Passed" : "Borderline";
+          dataRows.push([lrn, name, ww, pt, qe, comp, stat, "44", "45"]);
+        }
+      }
+
+      if (dataRows.length > 0) {
+        setWizardRawRows(dataRows);
+        setWizardStep(2);
+        showToast(`Parsed ${dataRows.length} records from ${file.name}. Match your columns below.`);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   // ---------------------------------------------------------------------------
   // 2. BULK ENROLLMENT (Import Students)
   // ---------------------------------------------------------------------------
@@ -321,14 +471,15 @@ export const TeacherDashboard: React.FC = () => {
   // ---------------------------------------------------------------------------
   // 3. BULK GRADES (Import Grades)
   // ---------------------------------------------------------------------------
-  const [gradeImportSubject, setGradeImportSubject] = useState("General Mathematics");
-  const [gradeImportQuarter, setGradeImportQuarter] = useState("Q2");
+  const [gradeImportSection, setGradeImportSection] = useState<string>("Grade 7 - Love");
+  const [gradeImportQuarter, setGradeImportQuarter] = useState<AcademicQuarter>("Q2");
+  const [gradeImportSubject, setGradeImportSubject] = useState("Mathematics 7");
   const [gradeImportRows, setGradeImportRows] = useState([
-    { lrn: "109238475001", name: "Jerome Santos", ww: 88, pt: 92, qe: 86, valid: true },
-    { lrn: "109238475002", name: "Angelica Dela Cruz", ww: 72, pt: 74, qe: 70, valid: true },
-    { lrn: "109238475003", name: "Mark Kenneth Bautista", ww: 94, pt: 96, qe: 92, valid: true },
-    { lrn: "109238475007", name: "Christian Dave Villanueva", ww: 76, pt: 78, qe: 73, valid: true },
-    { lrn: "109238475008", name: "Princess Mae Alcantara", ww: 95, pt: 98, qe: 94, valid: true }
+    { lrn: "109238470001", name: "Erika Bautista", ww: 88, pt: 92, qe: 86, valid: true },
+    { lrn: "109238470004", name: "Angelica Salazar", ww: 72, pt: 74, qe: 70, valid: true },
+    { lrn: "109238470005", name: "Chloe De Leon", ww: 94, pt: 96, qe: 92, valid: true },
+    { lrn: "109238470008", name: "Mariel Mercado", ww: 76, pt: 78, qe: 73, valid: true },
+    { lrn: "109238470014", name: "Camille Castro", ww: 95, pt: 98, qe: 94, valid: true }
   ]);
 
   // ---------------------------------------------------------------------------
@@ -336,11 +487,11 @@ export const TeacherDashboard: React.FC = () => {
   // ---------------------------------------------------------------------------
   const [attendanceImportQuarter, setAttendanceImportQuarter] = useState("Q2");
   const [attendanceImportRows, setAttendanceImportRows] = useState([
-    { lrn: "109238475001", name: "Jerome Santos", present: 44, total: 45 },
-    { lrn: "109238475002", name: "Angelica Dela Cruz", present: 40, total: 45 },
-    { lrn: "109238475003", name: "Mark Kenneth Bautista", present: 45, total: 45 },
-    { lrn: "109238475007", name: "Christian Dave Villanueva", present: 42, total: 45 },
-    { lrn: "109238475008", name: "Princess Mae Alcantara", present: 45, total: 45 }
+    { lrn: "109238470001", name: "Erika Bautista", present: 44, total: 45 },
+    { lrn: "109238470004", name: "Angelica Salazar", present: 40, total: 45 },
+    { lrn: "109238470005", name: "Chloe De Leon", present: 45, total: 45 },
+    { lrn: "109238470008", name: "Mariel Mercado", present: 42, total: 45 },
+    { lrn: "109238470014", name: "Camille Castro", present: 45, total: 45 }
   ]);
 
   // ---------------------------------------------------------------------------
@@ -886,12 +1037,12 @@ export const TeacherDashboard: React.FC = () => {
     saveStudentDataset(recalculated);
     setStudents(filterAdvisory(recalculated));
 
-    showToast(`Successfully processed, stored, and recalculated ${wizardRawRows.length} student records from ${wizardFileName}.`);
+    showToast(`Successfully processed, stored, and recalculated ${wizardRawRows.length} student scores in ${wizardCurrentSubject.name} (${wizardTargetQuarter}) for ${wizardTargetSection}.`);
     const newHistory: ImportHistoryItem = {
       id: `BATCH-2026-0920-${String(importHistory.length + 1).padStart(2, "0")}`,
-      type: "DepEd SASS Import Wizard",
+      type: `DepEd SASS: ${wizardCurrentSubject.name} (${wizardTargetQuarter})`,
       fileName: wizardFileName,
-      uploadedBy: user?.full_name || "Mr. Roberto Santos, LPT",
+      uploadedBy: user?.full_name || "Prof. Ernesto Bautista, LPT",
       timestamp: new Date().toISOString().replace("T", " ").substring(0, 16),
       totalRows: wizardRawRows.length,
       successRows: wizardRawRows.length,
@@ -1600,41 +1751,155 @@ export const TeacherDashboard: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* 2. IMPORT WIZARD: 3-Step CSV Ingestion */}
+      {/* 2. IMPORT WIZARD: 3-Step CSV Ingestion with Section, Quarter & Subject Linking */}
       {/* ========================================================================= */}
       {activeTab === "import_wizard" && (
         <div id="uploader" className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 shadow-sm space-y-6 animate-in fade-in duration-200 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
               <h3 className="text-lg sm:text-xl font-black text-slate-900">3-Step Flexible CSV Ingestion Wizard</h3>
-              <p className="text-xs text-slate-500">Flexible column mapping supporting arbitrary CSV order with pre-import validation</p>
+              <p className="text-xs text-slate-500">
+                DepEd K to 12 compliant gradebook importer with automatic section, quarter, and subject linking
+              </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${wizardStep === 1 ? "bg-[#8B0014] text-white" : "bg-slate-100 text-slate-600"}`}>1. Upload</span>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${wizardStep === 2 ? "bg-[#8B0014] text-white" : "bg-slate-100 text-slate-600"}`}>2. Match Columns</span>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${wizardStep === 3 ? "bg-[#8B0014] text-white" : "bg-slate-100 text-slate-600"}`}>3. Preview &amp; Confirm</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${wizardStep === 1 ? "bg-[#8B0014] text-white shadow-xs" : "bg-slate-100 text-slate-600"}`}>1. Configure &amp; Upload</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${wizardStep === 2 ? "bg-[#8B0014] text-white shadow-xs" : "bg-slate-100 text-slate-600"}`}>2. Match Columns</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${wizardStep === 3 ? "bg-[#8B0014] text-white shadow-xs" : "bg-slate-100 text-slate-600"}`}>3. Preview &amp; Ingest</span>
             </div>
           </div>
 
-          {/* STEP 1: UPLOAD */}
+          {/* STEP 1: CONFIGURE METADATA & UPLOAD */}
           {wizardStep === 1 && (
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-slate-300 rounded-3xl p-8 sm:p-12 text-center space-y-3 bg-slate-50/60 hover:bg-slate-50 transition">
+            <div className="space-y-6">
+              {/* Target Metadata Configuration Strip */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-50 via-rose-50/30 to-amber-50/40 border border-slate-200 space-y-4">
+                <div className="flex items-center justify-between gap-2 border-b border-slate-200/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-[#8B0014]" />
+                    <span className="text-xs font-black text-slate-900 uppercase tracking-wide">Target Ingestion Metadata</span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#8B0014]/10 text-[#8B0014] border border-[#8B0014]/20">
+                    DepEd DO 8, s. 2015
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
+                  {/* Target Section */}
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">Target Section</label>
+                    <select
+                      value={wizardTargetSection}
+                      onChange={(e) => setWizardTargetSection(e.target.value)}
+                      className="w-full min-h-[42px] px-3 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#8B0014]/20 cursor-pointer"
+                    >
+                      {availableAdvisorySections.map((sec) => (
+                        <option key={sec} value={sec}>
+                          {sec}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Target Quarter */}
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">Grading Quarter</label>
+                    <select
+                      value={wizardTargetQuarter}
+                      onChange={(e) => setWizardTargetQuarter(e.target.value as AcademicQuarter)}
+                      className="w-full min-h-[42px] px-3 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#8B0014]/20 cursor-pointer"
+                    >
+                      <option value="Q1">Quarter 1 (Q1)</option>
+                      <option value="Q2">Quarter 2 (Q2 - Active)</option>
+                      <option value="Q3">Quarter 3 (Q3)</option>
+                      <option value="Q4">Quarter 4 (Q4)</option>
+                    </select>
+                  </div>
+
+                  {/* Target Subject */}
+                  <div>
+                    <label className="font-bold text-slate-800 block mb-1">DepEd Curriculum Subject</label>
+                    <select
+                      value={wizardTargetSubjectCode}
+                      onChange={(e) => setWizardTargetSubjectCode(e.target.value)}
+                      className="w-full min-h-[42px] px-3 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#8B0014]/20 cursor-pointer"
+                    >
+                      {wizardAvailableSubjects.map((s) => (
+                        <option key={s.code} value={s.code}>
+                          {s.name} ({s.category})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* DepEd Component Weights Live Summary Card */}
+                <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-white border border-rose-200/80 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-bold text-slate-800">
+                      Active Grading Formula for <u>{wizardCurrentSubject.name}</u>:
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 font-bold text-[11px]">
+                    <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200">
+                      Written Work: {Math.round(wizardCurrentSubject.weight_ww * 100)}%
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
+                      Performance Task: {Math.round(wizardCurrentSubject.weight_pt * 100)}%
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-800 border border-purple-200">
+                      Quarterly Assessment: {Math.round(wizardCurrentSubject.weight_qa * 100)}%
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      Passing Threshold: {wizardCurrentSubject.passing_threshold || 75.0}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Upload Dropzone & Actions */}
+              <div className="border-2 border-dashed border-slate-300 rounded-3xl p-6 sm:p-10 text-center space-y-4 bg-slate-50/60 hover:bg-slate-50 transition">
                 <FileSpreadsheet className="h-12 w-12 text-[#8B0014] mx-auto" />
-                <h4 className="text-base sm:text-lg font-bold text-slate-900">Upload DepEd SASS or Class Record CSV</h4>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Drag and drop your spreadsheet here or browse your computer. Supports Written Work, Performance Tasks, Quarterly Exams, and Attendance.
-                </p>
-                <div className="pt-2">
+                <div className="space-y-1">
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900">
+                    Upload SASS Class Record for {wizardCurrentSubject.name}
+                  </h4>
+                  <p className="text-xs text-slate-500 max-w-lg mx-auto">
+                    Upload standard CSV spreadsheet with WW, PT, and QE scores for <strong>{wizardTargetSection}</strong> in <strong>{wizardTargetQuarter}</strong>.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <label className="min-h-[44px] px-6 py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer active:scale-95">
+                    <Upload className="h-4 w-4" />
+                    <span>Upload CSV from Computer</span>
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      onChange={handleWizardFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+
                   <button
                     type="button"
-                    onClick={() => {
-                      setWizardFileName("Grade11_STEM_Q2_Calculus_Scores.csv");
-                      setWizardStep(2);
-                    }}
-                    className="min-h-[44px] px-6 py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition"
+                    onClick={loadAdvisorySampleForWizard}
+                    className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-xs sm:text-sm shadow-xs transition flex items-center gap-2 cursor-pointer active:scale-95"
+                    title="Load realistic score data for this section and subject"
                   >
-                    Select CSV File
+                    <Sparkles className="h-4 w-4" />
+                    <span>Load {wizardTargetSection} Sample Scores</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={downloadWizardTemplateCSV}
+                    className="min-h-[44px] px-4 py-2.5 rounded-2xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center gap-2 cursor-pointer"
+                    title="Download empty CSV template pre-filled with section students"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Download Blank CSV Template</span>
                   </button>
                 </div>
               </div>
@@ -1644,10 +1909,20 @@ export const TeacherDashboard: React.FC = () => {
           {/* STEP 2: FLEXIBLE COLUMN MATCHING */}
           {wizardStep === 2 && (
             <div className="space-y-5">
-              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex items-center gap-2.5">
-                <Info className="h-5 w-5 text-amber-700 shrink-0" />
-                <span>
-                  Match the columns from <strong>{wizardFileName}</strong> to SAPC IntellySys database fields below.
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <Info className="h-5 w-5 text-amber-700 shrink-0" />
+                  <div>
+                    <span className="font-extrabold text-amber-900 block">
+                      Target: {wizardTargetSection} • {wizardTargetQuarter} • {wizardCurrentSubject.name}
+                    </span>
+                    <span className="text-[11px] text-amber-800">
+                      Match columns from <strong>{wizardFileName}</strong> to SAPC IntellySys database fields. Formula: WW {Math.round(wizardCurrentSubject.weight_ww * 100)}% + PT {Math.round(wizardCurrentSubject.weight_pt * 100)}% + QE {Math.round(wizardCurrentSubject.weight_qa * 100)}%.
+                    </span>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-amber-200 text-amber-900 font-extrabold text-[11px] shrink-0 self-start sm:self-auto">
+                  {wizardRawRows.length} Rows Loaded
                 </span>
               </div>
 
@@ -1659,7 +1934,7 @@ export const TeacherDashboard: React.FC = () => {
                     onChange={(e) => setWizardColumnMap({ ...wizardColumnMap, lrn: Number(e.target.value) })}
                     className="w-full min-h-[44px] p-2.5 rounded-xl border border-slate-300 bg-slate-50 font-bold"
                   >
-                    <option value={0}>Column A: LRN (109238475001)</option>
+                    <option value={0}>Column A: LRN ({wizardRawRows[0]?.[0] || "109238470001"})</option>
                     <option value={1}>Column B: Student Name</option>
                   </select>
                 </div>
@@ -1671,32 +1946,38 @@ export const TeacherDashboard: React.FC = () => {
                     onChange={(e) => setWizardColumnMap({ ...wizardColumnMap, name: Number(e.target.value) })}
                     className="w-full min-h-[44px] p-2.5 rounded-xl border border-slate-300 bg-slate-50 font-bold"
                   >
-                    <option value={1}>Column B: Full Name (Santos, Jerome)</option>
+                    <option value={1}>Column B: Full Name ({wizardRawRows[0]?.[1] || "Student Name"})</option>
                     <option value={0}>Column A: LRN</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-800 block mb-1">Written Work (WW 25%)</label>
+                  <label className="font-bold text-slate-800 block mb-1">
+                    Written Work (WW {Math.round(wizardCurrentSubject.weight_ww * 100)}%)
+                  </label>
                   <select
                     value={wizardColumnMap.ww}
                     onChange={(e) => setWizardColumnMap({ ...wizardColumnMap, ww: Number(e.target.value) })}
                     className="w-full min-h-[44px] p-2.5 rounded-xl border border-slate-300 bg-slate-50 font-bold"
                   >
-                    <option value={2}>Column C: Written Work Score</option>
+                    <option value={2}>Column C: Written Work Raw/Transmuted</option>
                     <option value={3}>Column D: Performance Task</option>
+                    <option value={4}>Column E: Quarterly Exam</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-800 block mb-1">Performance Task (PT 50%)</label>
+                  <label className="font-bold text-slate-800 block mb-1">
+                    Performance Task (PT {Math.round(wizardCurrentSubject.weight_pt * 100)}%)
+                  </label>
                   <select
                     value={wizardColumnMap.pt}
                     onChange={(e) => setWizardColumnMap({ ...wizardColumnMap, pt: Number(e.target.value) })}
                     className="w-full min-h-[44px] p-2.5 rounded-xl border border-slate-300 bg-slate-50 font-bold"
                   >
-                    <option value={3}>Column D: Performance Task</option>
-                    <option value={2}>Column C: Written Work</option>
+                    <option value={3}>Column D: Performance Task Score</option>
+                    <option value={2}>Column C: Written Work Score</option>
+                    <option value={4}>Column E: Quarterly Exam</option>
                   </select>
                 </div>
               </div>
@@ -1705,16 +1986,16 @@ export const TeacherDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setWizardStep(1)}
-                  className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
+                  className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
                 >
-                  Back to Upload
+                  Back to Configuration &amp; Upload
                 </button>
                 <button
                   type="button"
                   onClick={() => setWizardStep(3)}
-                  className="min-h-[44px] px-6 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs shadow-md"
+                  className="min-h-[44px] px-6 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs shadow-md cursor-pointer"
                 >
-                  Proceed to Validation &amp; Preview
+                  Proceed to Validation &amp; Ingest ({wizardRawRows.length} Rows)
                 </button>
               </div>
             </div>
@@ -1723,12 +2004,21 @@ export const TeacherDashboard: React.FC = () => {
           {/* STEP 3: PREVIEW & CONFIRM */}
           {wizardStep === 3 && (
             <div className="space-y-4">
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 flex items-center justify-between">
-                <span className="flex items-center gap-2 font-bold">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                  Validation Passed: {wizardRawRows.length} valid rows ready for ingestion. 0 errors detected.
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <div>
+                    <strong className="block text-emerald-900">
+                      Validation Passed: Ready to Ingest {wizardRawRows.length} Student Records
+                    </strong>
+                    <span className="text-[11px] text-emerald-800">
+                      Target: {wizardTargetSection} • {wizardTargetQuarter} • {wizardCurrentSubject.name} (Formula: WW {Math.round(wizardCurrentSubject.weight_ww * 100)}% + PT {Math.round(wizardCurrentSubject.weight_pt * 100)}% + QE {Math.round(wizardCurrentSubject.weight_qa * 100)}%)
+                    </span>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-200 text-emerald-900 self-start sm:self-auto shrink-0">
+                  0 Validation Errors
                 </span>
-                <span className="text-[11px] font-mono text-emerald-800">Target: Grade 11 STEM</span>
               </div>
 
               <div className="overflow-x-auto rounded-2xl border border-slate-200">
@@ -1737,29 +2027,39 @@ export const TeacherDashboard: React.FC = () => {
                     <tr>
                       <th className="py-2.5 px-3">LRN</th>
                       <th className="py-2.5 px-3">Student Name</th>
-                      <th className="py-2.5 px-3 text-center">WW (25%)</th>
-                      <th className="py-2.5 px-3 text-center">PT (50%)</th>
-                      <th className="py-2.5 px-3 text-center">QE (25%)</th>
-                      <th className="py-2.5 px-3 text-center">Computed Final</th>
+                      <th className="py-2.5 px-3 text-center">WW ({Math.round(wizardCurrentSubject.weight_ww * 100)}%)</th>
+                      <th className="py-2.5 px-3 text-center">PT ({Math.round(wizardCurrentSubject.weight_pt * 100)}%)</th>
+                      <th className="py-2.5 px-3 text-center">QE ({Math.round(wizardCurrentSubject.weight_qa * 100)}%)</th>
+                      <th className="py-2.5 px-3 text-center">Computed Final ({wizardTargetQuarter})</th>
                       <th className="py-2.5 px-3 text-center">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {wizardRawRows.map((r, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/80">
-                        <td className="py-2.5 px-3 font-mono font-bold text-slate-800">{r[0]}</td>
-                        <td className="py-2.5 px-3 font-bold text-slate-900">{r[1]}</td>
-                        <td className="py-2.5 px-3 text-center">{r[2]}</td>
-                        <td className="py-2.5 px-3 text-center">{r[3]}</td>
-                        <td className="py-2.5 px-3 text-center">{r[4]}</td>
-                        <td className="py-2.5 px-3 text-center font-black text-[#8B0014]">{r[5]}</td>
-                        <td className="py-2.5 px-3 text-center">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                            {r[6]}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {wizardRawRows.map((r, idx) => {
+                      const ww = parseFloat(r[2]) || 80;
+                      const pt = parseFloat(r[3]) || 80;
+                      const qe = parseFloat(r[4]) || 80;
+                      const finalGrade = (ww * wizardCurrentSubject.weight_ww + pt * wizardCurrentSubject.weight_pt + qe * wizardCurrentSubject.weight_qa).toFixed(1);
+                      const isPass = parseFloat(finalGrade) >= (wizardCurrentSubject.passing_threshold || 75.0);
+
+                      return (
+                        <tr key={idx} className="hover:bg-slate-50/80">
+                          <td className="py-2.5 px-3 font-mono font-bold text-slate-800">{r[0]}</td>
+                          <td className="py-2.5 px-3 font-bold text-slate-900">{r[1]}</td>
+                          <td className="py-2.5 px-3 text-center">{r[2]}</td>
+                          <td className="py-2.5 px-3 text-center">{r[3]}</td>
+                          <td className="py-2.5 px-3 text-center">{r[4]}</td>
+                          <td className="py-2.5 px-3 text-center font-black text-[#8B0014] text-sm">{finalGrade}</td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              isPass ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+                            }`}>
+                              {isPass ? "Passed" : "Remedial"}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -1768,16 +2068,16 @@ export const TeacherDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setWizardStep(2)}
-                  className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
+                  className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
                 >
                   Back to Mapping
                 </button>
                 <button
                   type="button"
                   onClick={handleWizardCommit}
-                  className="min-h-[44px] px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md transition"
+                  className="min-h-[44px] px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md transition cursor-pointer"
                 >
-                  Commit &amp; Ingest Batch Records
+                  Commit &amp; Ingest Batch Records ({wizardCurrentSubject.name} - {wizardTargetQuarter})
                 </button>
               </div>
             </div>
@@ -1833,6 +2133,7 @@ export const TeacherDashboard: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
       {/* 4. IMPORT GRADES: Bulk Quarterly Input */}
       {/* ========================================================================= */}
       {activeTab === "import_grades" && (
@@ -1840,28 +2141,57 @@ export const TeacherDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
               <h3 className="text-lg sm:text-xl font-black text-slate-900">Bulk Quarterly Grade Ingestion</h3>
-              <p className="text-xs text-slate-500">Component weights (WW 25%, PT 50%, QE 25%) with 75-100 range validation</p>
+              <p className="text-xs text-slate-500">
+                Direct score encoding with DepEd DO 8, s. 2015 component weights for {gradeImportSubject} ({gradeImportQuarter})
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Section Selector */}
+              <select
+                value={gradeImportSection}
+                onChange={(e) => {
+                  const sec = e.target.value;
+                  setGradeImportSection(sec);
+                  const all = getActiveStudentDataset();
+                  const secStudents = all.filter(s => matchSection(s.section_name, sec));
+                  const targetList = secStudents.length > 0 ? secStudents : all.slice(0, 36);
+                  setGradeImportRows(targetList.slice(0, 10).map((s, idx) => ({
+                    lrn: s.lrn,
+                    name: s.full_name,
+                    ww: 85 + (idx % 8),
+                    pt: 88 + (idx % 7),
+                    qe: 84 + (idx % 6),
+                    valid: true
+                  })));
+                }}
+                className="min-h-[40px] px-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs cursor-pointer"
+              >
+                {availableAdvisorySections.map(sec => (
+                  <option key={sec} value={sec}>{sec}</option>
+                ))}
+              </select>
+
+              {/* Subject Selector */}
               <select
                 value={gradeImportSubject}
                 onChange={(e) => setGradeImportSubject(e.target.value)}
-                className="min-h-[40px] px-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs"
+                className="min-h-[40px] px-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs cursor-pointer"
               >
-                <option>General Mathematics</option>
-                <option>Pre-Calculus</option>
-                <option>General Chemistry 1</option>
-                <option>Oral Communication</option>
+                {wizardAvailableSubjects.map(s => (
+                  <option key={s.code} value={s.name}>{s.name}</option>
+                ))}
               </select>
+
+              {/* Quarter Selector */}
               <select
                 value={gradeImportQuarter}
-                onChange={(e) => setGradeImportQuarter(e.target.value)}
-                className="min-h-[40px] px-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs"
+                onChange={(e) => setGradeImportQuarter(e.target.value as AcademicQuarter)}
+                className="min-h-[40px] px-3 rounded-xl border border-slate-300 bg-slate-50 font-bold text-xs cursor-pointer"
               >
-                <option>Q1</option>
-                <option>Q2</option>
-                <option>Q3</option>
-                <option>Q4</option>
+                <option value="Q1">Q1</option>
+                <option value="Q2">Q2</option>
+                <option value="Q3">Q3</option>
+                <option value="Q4">Q4</option>
               </select>
             </div>
           </div>
@@ -1872,16 +2202,16 @@ export const TeacherDashboard: React.FC = () => {
                 <tr>
                   <th className="py-3 px-4">LRN</th>
                   <th className="py-3 px-4">Student Name</th>
-                  <th className="py-3 px-3 text-center">WW (25%)</th>
-                  <th className="py-3 px-3 text-center">PT (50%)</th>
-                  <th className="py-3 px-3 text-center">QE (25%)</th>
+                  <th className="py-3 px-3 text-center">WW ({Math.round(wizardCurrentSubject.weight_ww * 100)}%)</th>
+                  <th className="py-3 px-3 text-center">PT ({Math.round(wizardCurrentSubject.weight_pt * 100)}%)</th>
+                  <th className="py-3 px-3 text-center">QE ({Math.round(wizardCurrentSubject.weight_qa * 100)}%)</th>
                   <th className="py-3 px-3 text-center">Quarter Grade</th>
                   <th className="py-3 px-4 text-center">Validation</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
                 {gradeImportRows.map((r, i) => {
-                  const finalComputed = (r.ww * 0.25 + r.pt * 0.50 + r.qe * 0.25).toFixed(1);
+                  const finalComputed = (r.ww * wizardCurrentSubject.weight_ww + r.pt * wizardCurrentSubject.weight_pt + r.qe * wizardCurrentSubject.weight_qa).toFixed(1);
                   return (
                     <tr key={i} className="hover:bg-slate-50">
                       <td className="py-3 px-4 font-mono font-bold text-slate-800">{r.lrn}</td>
@@ -1944,9 +2274,9 @@ export const TeacherDashboard: React.FC = () => {
             <button
               type="button"
               onClick={handleSaveGradesBatch}
-              className="min-h-[44px] px-6 py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition"
+              className="min-h-[44px] px-6 py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-sm shadow-md transition cursor-pointer"
             >
-              Save &amp; Ingest Grades Batch
+              Save &amp; Ingest Grades for {gradeImportSubject} ({gradeImportQuarter})
             </button>
           </div>
         </div>
