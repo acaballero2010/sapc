@@ -11,7 +11,7 @@ import {
   HeartHandshake, 
   ShieldCheck,
   RefreshCw,
-  Sparkles
+  BookOpen
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { searchKnowledgeBase } from "@/lib/counselor-kb-store";
@@ -67,8 +67,8 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
     }
 
     const greetingText = previousTopic
-      ? `${timeOfDay}, ${studentName}! I remember in our previous session we touched on ${previousTopic}. Kumusta ang pakiramdam mo ngayon sa iyong mga klase at wellness? Nandito ako para makinig.`
-      : `${timeOfDay}, ${studentName}! I am your SAPC Student Guidance Companion powered by Gemini AI. Kumusta ang mga klase, kalusugan, o nararamdaman mo ngayong linggo? Everything you share is safe and confidential.`;
+      ? `${timeOfDay}, ${studentName}! Naaalala ko na napag-usapan natin noon ang tungkol sa ${previousTopic}. Kumusta ang iyong mga klase, aralin, at pakiramdam ngayon? Nandito ako para makinig at sumuporta sa iyo.`
+      : `${timeOfDay}, ${studentName}! Ako ang iyong SAPC Guidance Companion. Kumusta ang mga klase, kalusugan, o nararamdaman mo ngayong linggo? Ligtas at kumpidensyal ang bawat pag-uusapan natin dito.`;
 
     setMessages((prev) => {
       if (prev.length === 0) {
@@ -76,8 +76,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           {
             sender: "bot",
             text: greetingText,
-            isGeminiPowered: true,
-            modelUsed: "gemini-2.5-flash",
+            isGeminiPowered: false,
             time: "Just now"
           }
         ];
@@ -183,7 +182,27 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           "Philippine Red Cross 24/7 Helpline: 143"
         ];
       }
-      // 2. Loneliness / Need someone to talk to
+      // 2. Overwhelmed by requirements / How to start / Study planning
+      else if (
+        cleanLower.includes("requirements") || 
+        cleanLower.includes("requirement") || 
+        cleanLower.includes("daming") || 
+        cleanLower.includes("dami") || 
+        cleanLower.includes("paano magsimula") || 
+        cleanLower.includes("paano simulan") || 
+        cleanLower.includes("saan magsisimula") || 
+        cleanLower.includes("tambak") ||
+        cleanLower.includes("unahin") ||
+        cleanLower.includes("prioritize")
+      ) {
+        fallbackText = "Naiintindihan ko kung gaano kabigat sa pakiramdam kapag sabay-sabay ang requirements at hindi mo na alam kung saan magsisimula. Normal lang na ma-overwhelm kapag tambak ang gawain, pero tandaan mo: hindi mo kailangang tapusin ang lahat nang sabay-sabay.\n\nSubukan natin itong simpleng 3-Step Action Plan:\n\n1. 📝 5-Minute Brain Dump\nIlapag sa isang papel o notebook ang lahat ng iniisip mong kailangang gawin. Mas madaling kontrolin ang mga gawain kapag nakikita mo sa papel kaysa kapag umiikot lang sa isip.\n\n2. 🎯 The Rule of 1 (Pumili ng 1 Quick Win)\nPumili ng isa (1) lang muna na pinakamadaling tapusin o may pinakamalapit na deadline bukas. Ang matapos ang kahit 1 maliit na gawain ay magbibigay sa iyo ng lakas ng loob at momentum.\n\n3. ⏳ 25/5 Pomodoro Pacing\nMag-focus sa napili mong gawain sa loob ng 25 minutes (i-off muna ang social media notifications), tapos magpahinga nang buong 5 minutes para makahinga ang isip mo.\n\nGusto mo bang ilista natin dito ang 2 hanggang 3 gawain na pinaka-nagpapabigat sa iyo ngayon para matulungan kitang pumili kung alin ang pinakamagandang unahin?";
+        fallbackResources = [
+          "SAPC Time Management & Priority Matrix Guide",
+          "Learning Commons Study Pods & Quiet Space (Room 104)",
+          "5-Minute Guided Focus & Hydration Planner"
+        ];
+      }
+      // 3. Loneliness / Need someone to talk to
       else if (
         cleanLower.includes("kausap") || 
         cleanLower.includes("makausap") || 
@@ -199,7 +218,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           "Student Lounge & Reflection Space"
         ];
       }
-      // 3. Academic difficulties & Failing grades
+      // 4. Academic difficulties & Failing grades
       else if (
         cleanLower.includes("bagsak") || 
         cleanLower.includes("nahihirapan") || 
@@ -216,7 +235,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           "Form 137 / Grade Recovery Roadmap"
         ];
       }
-      // 4. Anxiety, Panic, Overthinking
+      // 5. Anxiety, Panic, Overthinking
       else if (
         cleanLower.includes("kaba") || 
         cleanLower.includes("kinakabahan") || 
@@ -232,7 +251,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           "Guidance Relaxation & Mindfulness Corner (Room 204)"
         ];
       }
-      // 5. Stress, Burnout & Heavy workload
+      // 6. Stress, Burnout & Heavy workload
       else if (
         cleanLower.includes("stress") || 
         cleanLower.includes("pagod") || 
@@ -247,7 +266,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           "Guidance Peer Study Support"
         ];
       }
-      // 6. Financial difficulties
+      // 7. Financial difficulties
       else if (
         cleanLower.includes("pera") || 
         cleanLower.includes("tuition") || 
@@ -262,7 +281,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           "Accounting Office Promissory Support"
         ];
       }
-      // 7. Matched Knowledge Base Context (Weaved naturally into counseling response)
+      // 8. Matched Knowledge Base Context (Weaved naturally into counseling response)
       else if (matchedKB.length > 0) {
         const top = matchedKB[0];
         fallbackText = `Salamat sa pagtitiwala na magtanong tungkol dito. Bilang iyong Guidance Companion, naririnig ko ang iyong alalahanin.\n\n${top.content}\n\nNandito ako para samahan ka sa bawat hakbang. May partikular ka bang tanong o nais linawin tungkol dito?`;
@@ -320,10 +339,10 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900">SAPC Guidance Companion</h3>
                 <span className="px-2.5 py-0.5 text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-full flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Online • Safe &amp; Confidential
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Safe &amp; Confidential
                 </span>
-                <span className="px-2.5 py-0.5 text-[11px] font-medium bg-purple-50 text-purple-800 border border-purple-200 rounded-full flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-purple-600" /> Gemini AI
+                <span className="px-2.5 py-0.5 text-[11px] font-medium bg-amber-50 text-amber-900 border border-amber-200 rounded-full flex items-center gap-1">
+                  <ShieldCheck className="h-3 w-3 text-amber-700" /> Guidance Support
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">San Antonio de Padua College • Safe, Caring, &amp; Confidential Space</p>
@@ -369,10 +388,10 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                     : "bg-white text-slate-900 border border-slate-200 rounded-tl-none shadow-xs"
                 }`}
               >
-                {/* Subtle Gemini Counselor Tag on Bot Messages */}
+                {/* Counselor Companion Tag on Bot Messages */}
                 {m.sender === "bot" && (
-                  <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 w-fit">
-                    <Sparkles className="h-3 w-3 text-purple-600" />
+                  <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold text-[#8B0014] bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100 w-fit">
+                    <HeartHandshake className="h-3 w-3 text-[#8B0014]" />
                     <span>Guidance Companion</span>
                   </div>
                 )}
@@ -385,7 +404,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                 {m.resources && m.resources.length > 0 && (
                   <div className="mt-3.5 pt-3 border-t border-slate-200 text-xs sm:text-sm">
                     <p className="font-bold text-[#8B0014] mb-1.5 flex items-center gap-1.5">
-                      <HeartHandshake className="h-4 w-4" />
+                      <BookOpen className="h-4 w-4" />
                       Recommended Support Resources:
                     </p>
                     <ul className="space-y-1.5 text-slate-700">
@@ -417,8 +436,8 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                 <RefreshCw className="h-5 w-5 text-[#8B0014] animate-spin" />
               </div>
               <div className="bg-white text-slate-600 border border-slate-200 rounded-2xl rounded-tl-none px-5 py-3.5 text-sm shadow-xs flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-600 animate-pulse" />
-                <span className="italic">Listening &amp; preparing a supportive response...</span>
+                <HeartHandshake className="h-4 w-4 text-[#8B0014] animate-pulse" />
+                <span className="italic">Listening &amp; preparing thoughtful guidance...</span>
               </div>
             </div>
           )}
@@ -440,14 +459,14 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                 <button
                   type="button"
                   onClick={() => handleConsentDecision(true)}
-                  className="w-full py-3 px-4 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm shadow-md transition"
+                  className="w-full py-3 px-4 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-sm shadow-md transition cursor-pointer"
                 >
                   Oo, Ipaalam sa Guidance Counselor
                 </button>
                 <button
                   type="button"
                   onClick={() => handleConsentDecision(false)}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition cursor-pointer"
                 >
                   Ako na lamang ang pupunta sa Guidance Office (Room 204)
                 </button>
@@ -462,11 +481,11 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           {/* Quick Prompts */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {[
-              "Gusto ko ng kausap",
-              "Nahihirapan po ako sa Math / Science",
               "Sobrang daming requirements, paano magsimula?",
-              "Kinakabahan ako sa periodic exams",
-              "Nahihiya akong magsabi sa magulang ko",
+              "Nahihirapan po ako sa Math / Science",
+              "Kinakabahan ako sa exam bukas",
+              "Gusto ko lang ng makakausap",
+              "Nahihiya akong magtanong sa klase",
               "Saan ang Guidance Office Room 204?"
             ].map((suggestion, sIdx) => (
               <button
@@ -492,7 +511,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message (e.g. 'Nahihirapan po ako sa subjects ko...')"
+              placeholder="Type your message (e.g. 'Sobrang daming requirements, paano magsimula?')"
               className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
             />
             <button

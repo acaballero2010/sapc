@@ -98,6 +98,17 @@ def test_student_intent_accuracy():
     # 2. Companionship query
     analysis_comp = nlp_service.analyze_message("Gusto ko ng kausap")
     assert analysis_comp["intent"] == "companionship"
+
+    # 3. Requirement Overload / How to start test
+    analysis_req = nlp_service.analyze_message("Sobrang daming requirements, paano magsimula?")
+    assert analysis_req["inferred_domain"] == "academic"
+    assert analysis_req["intent"] == "advice"
+    reply_req, resources_req, _, _ = nlp_service.generate_supportive_response(
+        analysis=analysis_req,
+        message="Sobrang daming requirements, paano magsimula?"
+    )
+    assert "Brain Dump" in reply_req or "Pomodoro" in reply_req or "Action Plan" in reply_req
+    assert len(resources_req) > 0
     reply_comp, resources_comp, _, _ = nlp_service.generate_supportive_response(
         analysis=analysis_comp,
         message="Gusto ko ng kausap"

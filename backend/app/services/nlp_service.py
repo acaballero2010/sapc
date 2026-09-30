@@ -58,10 +58,12 @@ DOMAIN_KEYWORD_MAP = {
         "home", "siblings", "magulang", "tatay", "nanay", "away", "kapatid", "ofw", "panganay", "bahay", "family"
     ],
     "academic": [
-        "exam", "exams", "grades", "grade", "failed", "homework", "project", "deadline", "prof", 
+        "exam", "exams", "grades", "grade", "failed", "homework", "project", "deadline", "deadlines", "prof", 
         "teacher", "subject", "subjects", "studying", "study", "bagsak", "aral", "pasa", "guro", 
         "recitation", "quiz", "quizzes", "math", "science", "chemistry", "physics", "calculus", 
-        "research", "thesis", "nahihirapan", "hirap", "lesson", "lessons", "mababa", "module", "modules"
+        "research", "thesis", "nahihirapan", "hirap", "lesson", "lessons", "mababa", "module", "modules",
+        "requirement", "requirements", "daming requirements", "dami requirements", "tambak", "gawain", 
+        "simula", "magsimula", "unahin", "prioritize", "study plan"
     ],
     "health": [
         "sick", "hospital", "illness", "fever", "headache", "pain", "doctor", 
@@ -114,8 +116,13 @@ class NLPService:
         if has_keyword_match(clean, ["kausap", "makausap", "talk to someone", "lonely", "mag-isa", "wala akong kaibigan", "samahan", "kwentuhan"]):
             return "companionship"
 
-        # 2. Academic difficulty & study advice
-        if domain == "academic" or has_keyword_match(clean, ["nahihirapan", "hirap", "bagsak", "failed", "grades", "subject", "subjects", "exam", "exams", "lesson", "lessons", "homework"]):
+        # 2. Academic difficulty, requirements overload & study advice
+        if domain == "academic" or has_keyword_match(clean, [
+            "nahihirapan", "hirap", "bagsak", "failed", "grades", "subject", "subjects", 
+            "exam", "exams", "lesson", "lessons", "homework", "requirement", "requirements", 
+            "daming requirements", "dami requirements", "paano magsimula", "paano simulan", 
+            "tambak", "unahin", "prioritize", "study tips"
+        ]):
             return "advice"
 
         # 3. General advice / help
@@ -349,12 +356,12 @@ class NLPService:
             "Your first duty is to BE THERE FOR THEM: listen attentively, hold space, and genuinely converse with empathy.\n"
             "2. EMOTIONAL VALIDATION FIRST: Acknowledge what the student is feeling with genuine compassion (e.g. 'Ramdam ko ang bigat...', 'Naiintindihan ko kung bakit ka nabibigatan...', 'Valid at normal ang nararamdaman mo...'). "
             "Never minimize their struggles.\n"
-            "3. ACTIVE EXPLORATION: Ask gentle, open-ended, non-threatening questions to help them reflect and unpack what is on their mind (e.g., 'Gusto mo bang pag-usapan kung ano ang partikular na nangyari?', 'Ano ang pinakamabigat na iniisip mo ngayon?').\n"
+            "3. ACTIONABLE GUIDANCE FOR PRACTICAL QUESTIONS: When a student asks a practical question (e.g., 'Sobrang daming requirements, paano magsimula?', 'Paano mag-aral?', 'Paano unahin?'), DO NOT reply only with another question. Provide clear, structured, bite-sized steps (e.g., 1. 5-Minute Brain Dump on paper, 2. Rule of 1 Quick Win / nearest deadline, 3. 25/5 Pomodoro Pacing). After providing the steps, gently invite them to pick their first step.\n"
             "4. WARM & NATURAL TONE: Speak in comforting, conversational Taglish, Filipino, or English (matching the student's language style). Use gentle, reassuring, and affirming language ('Nandito ako para sa iyo', 'Hindi ka nag-iisa', 'Huwag kang matakot').\n"
             "5. COGNITIVE REFRAMING & COPING: Gently reframe academic setbacks (grades do not define your worth as a person) and suggest calming techniques (4-4-6 breathing, sensory grounding, or breaking tasks into 1 small manageable step).\n"
             "6. CAMPUS TOUCHPOINTS (Subtle & Gentle): Only mention campus resources (like Room 104 Peer Tutoring, Financial Aid Desk, or Ms. Maria Theresa Cruz in Room 204) naturally at the end of the conversation as optional, gentle invitations—never as an abrupt handoff.\n"
             "7. SAFETY: Never give psychiatric clinical diagnoses or prescribe medication. If extreme self-harm is expressed, reassure them of their safety and activate immediate care.\n\n"
-            "Format Rule: Keep your message conversational, digestible, and empathetic (2-3 short, soothing paragraphs). Talk like a caring counselor sitting right across from them in a quiet, safe room.\n\n"
+            "Format Rule: Keep your message conversational, digestible, and empathetic (2-3 short, soothing paragraphs or numbered steps). Talk like a caring counselor sitting right across from them in a quiet, safe room.\n\n"
             f"Student Profile: {student_desc}\n"
             f"Affective Analysis: Detected Emotion={emotion} ({int(confidence*100)}% confidence), Domain={domain}, Intent={intent}, Subject Focus={subject or 'General'}."
             f"{kb_prompt_section}"
@@ -485,7 +492,33 @@ class NLPService:
                             resources.append(r)
             return gemini_text, resources, True, model_used
 
-        # 3. ACADEMIC SPECIFIC CONCERNS (e.g. failing grades, subject difficulties, study strategies)
+        # 3. REQUIREMENT OVERLOAD & HOW TO START / STUDY PLANNING (Gerard Egan Stage 3 & Pomodoro Scaffolding)
+        if has_keyword_match(clean, [
+            "daming requirements", "dami requirements", "requirements", "requirement",
+            "paano magsimula", "paano simulan", "saan magsisimula", "tambak", 
+            "paano unahin", "unahin", "prioritize", "tambak na gawain", "daming gawain",
+            "study plan", "paano mag-aral", "paano mag aral"
+        ]):
+            reply = (
+                "Naiintindihan ko kung gaano kabigat sa pakiramdam kapag sabay-sabay ang requirements at hindi mo na alam kung saan magsisimula. "
+                "Normal lang na ma-overwhelm kapag tambak ang gawain, pero tandaan mo: hindi mo kailangang tapusin ang lahat nang sabay-sabay.\n\n"
+                "Subukan natin itong simpleng 3-Step Action Plan:\n\n"
+                "1. 📝 5-Minute Brain Dump\n"
+                "Ilapag sa isang papel o notebook ang lahat ng iniisip mong kailangang gawin. Mas madaling kontrolin ang mga gawain kapag nakikita mo sa papel kaysa kapag umiikot lang sa isip.\n\n"
+                "2. 🎯 The Rule of 1 (Pumili ng 1 Quick Win)\n"
+                "Pumili ng isa (1) lang muna na pinakamadaling tapusin o may pinakamalapit na deadline bukas. Ang matapos ang kahit 1 maliit na gawain ay magbibigay sa iyo ng lakas ng loob at momentum.\n\n"
+                "3. ⏳ 25/5 Pomodoro Pacing\n"
+                "Mag-focus sa napili mong gawain sa loob ng 25 minutes (i-off muna ang social media notifications), tapos magpahinga nang buong 5 minutes para makahinga ang isip mo.\n\n"
+                "Gusto mo bang ilista natin dito ang 2 hanggang 3 gawain na pinaka-nagpapabigat sa iyo ngayon para matulungan kitang pumili kung alin ang pinakamagandang unahin?"
+            )
+            resources = [
+                "SAPC Time Management & Priority Matrix Guide",
+                "SAPC Learning Commons Study Pods (Room 104)",
+                "5-Minute Focus & Hydration Break Reminder"
+            ]
+            return reply, resources, False, None
+
+        # 4. ACADEMIC SPECIFIC CONCERNS (e.g. failing grades, subject difficulties, study strategies)
         if domain == "academic" or has_keyword_match(clean, ["bagsak", "mababa", "grades", "grade", "exam", "exams", "quiz", "subject", "subjects", "prof", "teacher", "nahihirapan", "hirap", "failed", "homework", "project", "lesson", "lessons", "math", "science", "chemistry", "physics"]):
             subject_mention = f" sa {detected_subject}" if detected_subject else " sa iyong mga aralin"
             reply = (
@@ -501,7 +534,7 @@ class NLPService:
             ]
             return reply, resources, False, None
 
-        # 4. DIRECT COMPANIONSHIP / NEED SOMEONE TO TALK TO ("Gusto ko ng kausap", "I feel lonely", "Mag-isa ako")
+        # 5. DIRECT COMPANIONSHIP / NEED SOMEONE TO TALK TO ("Gusto ko ng kausap", "I feel lonely", "Mag-isa ako")
         if intent == "companionship" or has_keyword_match(clean, ["kausap", "makausap", "lonely", "mag-isa", "makikipag-usap", "kwentuhan", "samahan", "wala akong kaibigan", "nalulungkot"]):
             companionship_replies = [
                 "Nandito ako at buong puso akong handang makinig sa iyo. Minsan, nakakagaan talaga sa pakiramdam kapag may napagsasabihan tayo ng ating mga naiisip at nararamdaman nang walang takot na husgahan. Ano ang mga bagay na tumatakbo sa isip mo ngayon? Malaya mong maibabahagi sa akin ang lahat.",

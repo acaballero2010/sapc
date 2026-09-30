@@ -210,8 +210,8 @@ export const CounselorKnowledgeHubModal: React.FC<CounselorKnowledgeHubModalProp
     const matches = searchKnowledgeBase(simQuery, 3);
     setSimResults(matches);
 
-    // Generate preview response simulating Gemini's in-context prompt
-    let simulated = `[Simulated Gemini AI Response using ${matches.length} matched institutional knowledge items]:\n\n`;
+    // Generate preview response simulating Guidance AI's in-context prompt
+    let simulated = `[Simulated Guidance AI Response using ${matches.length} matched institutional knowledge items]:\n\n`;
     
     if (matches.length > 0) {
       const topMatch = matches[0];
@@ -574,7 +574,7 @@ export const CounselorKnowledgeHubModal: React.FC<CounselorKnowledgeHubModalProp
                   rows={5}
                   value={formContent}
                   onChange={(e) => setFormContent(e.target.value)}
-                  placeholder="Write the exact guidance, school policy details, room numbers, steps, or psychological reframing instructions you want Gemini AI to convey to students..."
+                  placeholder="Write the exact guidance, school policy details, room numbers, steps, or psychological reframing instructions you want Guidance AI to convey to students..."
                   className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none"
                   required
                 />

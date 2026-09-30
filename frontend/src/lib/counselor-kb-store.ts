@@ -275,6 +275,28 @@ export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
     priority_weight: 5,
     created_at: "2026-03-25T08:00:00.000Z",
     updated_at: "2026-09-30T10:00:00.000Z"
+  },
+  {
+    id: "kb-timemgmt-001",
+    category: "study_tip",
+    title: "Overcoming Requirement Overload & Study Planning: The 3-Step Action Plan",
+    keywords: [
+      "requirements", "daming requirements", "dami requirements", "paano magsimula", 
+      "paano simulan", "tambak", "gawain", "deadline", "deadlines", "unahin", 
+      "prioritize", "time management", "pomodoro", "study plan", "saan magsisimula"
+    ],
+    content: "When students are overwhelmed by heavy requirements, projects, and looming deadlines: Counselors validate their cognitive fatigue and provide structured, bite-sized scaffolding using Egan's Action Stage and the Pomodoro method: 1. 5-Minute Brain Dump (write all pending tasks on paper to empty mental anxiety), 2. Rule of 1 Quick Win (pick either the easiest 10-minute task to build momentum or the most urgent deadline), and 3. 25/5 Pomodoro Pacing (work for 25 minutes uninterrupted, followed by a mandatory 5-minute breather). Reassure them that completing 1 small step creates relief and unlocks progress.",
+    suggested_resources: [
+      "SAPC Time Management & Priority Matrix Guide",
+      "Learning Commons Study Pods & Quiet Space (Room 104)",
+      "5-Minute Guided Focus & Hydration Planner"
+    ],
+    author_name: "Ms. Maria Theresa Cruz, RGC",
+    author_role: "Head Guidance Counselor (Source: Gerard Egan & Pomodoro)",
+    is_active: true,
+    priority_weight: 5,
+    created_at: "2026-03-28T08:00:00.000Z",
+    updated_at: "2026-09-30T17:00:00.000Z"
   }
 ];
 
@@ -469,30 +491,47 @@ export function searchKnowledgeBase(
   if (!query || items.length === 0) return [];
 
   const cleanQuery = query.toLowerCase();
-  const queryTokens = cleanQuery.split(/\s+/).filter(t => t.length > 2);
+  // Tokenize and extract roots
+  const rawTokens = cleanQuery.split(/[\s,?.!]+/).filter(t => t.length > 2);
+  const queryTokens = new Set<string>(rawTokens);
+
+  // Add common morphological variants for Taglish/Filipino student queries
+  rawTokens.forEach(t => {
+    if (t.endsWith("ing") && t.length > 4) queryTokens.add(t.replace(/ing$/, ""));
+    if (t.startsWith("mag") && t.length > 5) queryTokens.add(t.replace(/^mag/, ""));
+    if (t.startsWith("naka") && t.length > 6) queryTokens.add(t.replace(/^naka/, ""));
+    if (t.startsWith("nahi") && t.length > 6) queryTokens.add(t.replace(/^nahi/, ""));
+    if (t.endsWith("s") && t.length > 3) queryTokens.add(t.slice(0, -1));
+  });
 
   const scored = items.map(item => {
     let score = 0;
+    const titleLower = item.title.toLowerCase();
+    const contentLower = item.content.toLowerCase();
 
     // 1. Direct title match
-    if (cleanQuery.includes(item.title.toLowerCase()) || item.title.toLowerCase().includes(cleanQuery)) {
-      score += 10;
+    if (cleanQuery.includes(titleLower) || titleLower.includes(cleanQuery)) {
+      score += 15;
     }
 
-    // 2. Keyword trigger matches
+    // 2. Keyword trigger matches (phrase or individual keyword)
     for (const kw of item.keywords) {
       const cleanKw = kw.toLowerCase().trim();
       if (cleanQuery.includes(cleanKw)) {
-        score += 8;
+        score += 12;
+      } else {
+        const kwParts = cleanKw.split(/\s+/);
+        if (kwParts.every(part => cleanQuery.includes(part) || queryTokens.has(part))) {
+          score += 8;
+        }
       }
     }
 
     // 3. Token overlaps in content
-    for (const token of queryTokens) {
-      if (item.content.toLowerCase().includes(token)) {
-        score += 2;
-      }
-    }
+    queryTokens.forEach(token => {
+      if (titleLower.includes(token)) score += 4;
+      if (contentLower.includes(token)) score += 2;
+    });
 
     // Priority multiplier
     score *= (item.priority_weight || 1);
