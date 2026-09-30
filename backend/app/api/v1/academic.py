@@ -76,9 +76,10 @@ def get_student_academic_records(
         raise HTTPException(status_code=404, detail="Student not found")
 
     # RBAC Access control
-    if current_user.role == UserRole.STUDENT and student.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-    if current_user.role == UserRole.TEACHER and student.section and student.section.adviser_id != current_user.id:
+    if current_user.role == UserRole.STUDENT:
+        if student.user_id and student.user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+    if current_user.role == UserRole.TEACHER and student.section and student.section.adviser_id and student.section.adviser_id != current_user.id:
         raise HTTPException(status_code=403, detail="Unauthorized - student not in your advisory class")
 
     records = db.query(AcademicRecord).filter(
