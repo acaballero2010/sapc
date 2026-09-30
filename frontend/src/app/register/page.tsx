@@ -25,6 +25,8 @@ import {
   JHS_GRADE_LEVELS, 
   getSectionsForGrade, 
   addStudentRecord, 
+  isLrnAlreadyRegistered,
+  isEmailAlreadyRegistered,
   getActivePendingRegistrations, 
   saveActivePendingRegistrations, 
   getActiveParentRecords, 
@@ -34,6 +36,9 @@ import {
 } from "@/lib/dataset-store";
 
 type RegistrationRole = "student" | "parent";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const LRN_REGEX = /^\d{12}$/;
 
 const TABS: Array<{
   id: RegistrationRole;
@@ -90,19 +95,109 @@ export default function RegisterPage() {
   const [parentRelation, setParentRelation] = useState("Mother");
   const [parentPassword, setParentPassword] = useState("");
 
+  // Field error messages
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const validateStudentForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!studentName.trim() || studentName.trim().length < 2) {
+      errors.studentName = "Please enter student's full name (at least 2 characters).";
+    }
+
+    const cleanLrn = lrn.trim();
+    if (!cleanLrn) {
+      errors.lrn = "DepEd Learner Reference Number (LRN) is required.";
+    } else if (!LRN_REGEX.test(cleanLrn)) {
+      errors.lrn = `LRN must be exactly 12 digits (entered ${cleanLrn.length} digits).`;
+    } else {
+      const lrnCheck = isLrnAlreadyRegistered(cleanLrn);
+      if (lrnCheck.exists) {
+        errors.lrn = `LRN "${cleanLrn}" is already registered (${lrnCheck.student?.full_name || "Existing Student"}). Please sign in instead.`;
+      }
+    }
+
+    if (!studentBirthDate) {
+      errors.studentBirthDate = "Date of birth is required for identity verification.";
+    }
+
+    const cleanEmail = studentEmail.trim();
+    if (!cleanEmail) {
+      errors.studentEmail = "Institutional or personal email address is required.";
+    } else if (!EMAIL_REGEX.test(cleanEmail)) {
+      errors.studentEmail = "Please enter a valid email format (e.g. name@student.sapc.edu.ph or user@gmail.com).";
+    } else if (isEmailAlreadyRegistered(cleanEmail)) {
+      errors.studentEmail = `Email "${cleanEmail}" is already registered. Please sign in instead.`;
+    }
+
+    if (!studentPassword || studentPassword.length < 6) {
+      errors.studentPassword = "Password must be at least 6 characters long.";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateParentForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!parentName.trim() || parentName.trim().length < 2) {
+      errors.parentName = "Please enter parent/guardian full name.";
+    }
+
+    const cleanChildLrn = childLrn.trim();
+    if (!cleanChildLrn) {
+      errors.childLrn = "Child's 12-digit LRN is required to link records.";
+    } else if (!LRN_REGEX.test(cleanChildLrn)) {
+      errors.childLrn = `Child's LRN must be exactly 12 digits (entered ${cleanChildLrn.length} digits).`;
+    }
+
+    const cleanPhone = parentPhone.trim();
+    if (!cleanPhone || cleanPhone.replace(/\D/g, "").length < 7) {
+      errors.parentPhone = "Please enter a valid contact phone number.";
+    }
+
+    const cleanEmail = parentEmail.trim();
+    if (!cleanEmail) {
+      errors.parentEmail = "Parent email address is required.";
+    } else if (!EMAIL_REGEX.test(cleanEmail)) {
+      errors.parentEmail = "Please enter a valid email format (e.g. parent@gmail.com).";
+    } else if (isEmailAlreadyRegistered(cleanEmail)) {
+      errors.parentEmail = `Email "${cleanEmail}" is already registered. Please sign in instead.`;
+    }
+
+    if (!parentPassword || parentPassword.length < 6) {
+      errors.parentPassword = "Password must be at least 6 characters long.";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setSubmitError(null);
+
+    if (activeTab === "student") {
+      if (!validateStudentForm()) {
+        setSubmitError("Please correct the errors in the form before submitting.");
+        return;
+      }
+    } else {
+      if (!validateParentForm()) {
+        setSubmitError("Please correct the errors in the form before submitting.");
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
 
     try {
       const emailToUse = activeTab === "student"
-        ? (studentEmail || `${lrn}@student.sapc.edu.ph`)
-        : (parentEmail || `${parentPhone.replace(/\D/g, "")}@parent.sapc.edu.ph`);
-      const passToUse = activeTab === "student" ? (studentPassword || "Student@SAPC2026!") : (parentPassword || "Parent@SAPC2026!");
-      const nameToUse = activeTab === "student"
-        ? (studentName.trim() || (lrn ? `Student ${lrn}` : "SAPC Student"))
-        : (parentName.trim() || "Parent / Guardian");
+        ? studentEmail.trim()
+        : parentEmail.trim();
+      const passToUse = activeTab === "student" ? studentPassword : parentPassword;
+      const nameToUse = activeTab === "student" ? studentName.trim() : parentName.trim();
       const roleToUse: RegistrationRole = activeTab;
 
       if (auth && db) {
@@ -123,23 +218,28 @@ export default function RegisterPage() {
             verification_status: roleToUse === "parent" ? "pending_school_approval" : "active",
             linkageStatus: roleToUse === "parent" ? "pending_adviser_validation" : "verified",
             metadata: {
-              lrn: activeTab === "student" ? lrn : null,
+              lrn: activeTab === "student" ? lrn.trim() : null,
               birthDate: activeTab === "student" ? studentBirthDate : null,
-              childLrn: activeTab === "parent" ? childLrn : null,
+              childLrn: activeTab === "parent" ? childLrn.trim() : null,
               relationship: activeTab === "parent" ? parentRelation : null,
-              phone: activeTab === "parent" ? parentPhone : null
+              phone: activeTab === "parent" ? parentPhone.trim() : null
             }
           });
           await syncCustomClaims(user, roleToUse);
         } catch (fbErr: any) {
-          console.warn("Firebase registration fallback:", fbErr.message);
+          console.warn("Firebase registration note:", fbErr.message);
+          if (fbErr?.code === "auth/email-already-in-use") {
+            setSubmitError(`Email "${emailToUse}" is already registered in Firebase Auth. Please sign in instead.`);
+            setIsSubmitting(false);
+            return;
+          }
         }
       }
 
       if (activeTab === "student") {
         await addStudentRecord({
           full_name: nameToUse,
-          lrn: lrn,
+          lrn: lrn.trim(),
           email: emailToUse,
           grade_level: studentGradeLevel,
           section_name: studentSection,
@@ -151,11 +251,11 @@ export default function RegisterPage() {
           id: `REG-${Date.now().toString().slice(-4)}`,
           name: nameToUse,
           email: emailToUse,
-          phone: parentPhone,
+          phone: parentPhone.trim(),
           role: "parent",
           relationship: parentRelation,
-          linkedStudent: childLrn ? `Learner ${childLrn}` : "Enrolled Learner",
-          linkedLRN: childLrn || "109238475001",
+          linkedStudent: childLrn.trim() ? `Learner ${childLrn.trim()}` : "Enrolled Learner",
+          linkedLRN: childLrn.trim() || "109238475001",
           section: childSection,
           verificationDoc: "Self-Registered via Portal (Online Registration)",
           date: new Date().toISOString().split("T")[0],
@@ -169,10 +269,10 @@ export default function RegisterPage() {
           id: `PAR-${Date.now().toString().slice(-4)}`,
           name: nameToUse,
           email: emailToUse,
-          phone: parentPhone,
+          phone: parentPhone.trim(),
           relationship: parentRelation,
-          linkedStudentName: childLrn ? `Learner ${childLrn}` : "Enrolled Learner",
-          linkedLRN: childLrn || "109238475001",
+          linkedStudentName: childLrn.trim() ? `Learner ${childLrn.trim()}` : "Enrolled Learner",
+          linkedLRN: childLrn.trim() || "109238475001",
           section: childSection,
           gradeLevel: `Grade ${childGradeLevel}`,
           status: "Active",
@@ -400,7 +500,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Dynamic Registration Form */}
-              <form onSubmit={handleFormSubmit} className="space-y-4">
+              <form onSubmit={handleFormSubmit} className="space-y-4" noValidate>
                 {activeTab === "student" && (
                   <>
                     <div>
@@ -408,31 +508,81 @@ export default function RegisterPage() {
                         Student Full Name *
                       </label>
                       <div className="relative">
-                        <User className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <User className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.studentName ? "text-rose-500" : "text-slate-400"}`} />
                         <input
                           type="text"
                           required
                           value={studentName}
-                          onChange={(e) => setStudentName(e.target.value)}
+                          onChange={(e) => {
+                            setStudentName(e.target.value);
+                            if (fieldErrors.studentName) {
+                              setFieldErrors(prev => { const n = { ...prev }; delete n.studentName; return n; });
+                            }
+                          }}
                           placeholder="e.g. Juan Carlos Dela Cruz"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                          className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition font-medium ${
+                            fieldErrors.studentName
+                              ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                              : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                          }`}
                         />
                       </div>
+                      {fieldErrors.studentName && (
+                        <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                          {fieldErrors.studentName}
+                        </p>
+                      )}
                     </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          DepEd Learner Reference Number (LRN) *
-                        </label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                            DepEd Learner Reference Number (LRN) *
+                          </label>
+                          <span className="text-[11px] font-mono font-bold text-slate-400">
+                            {lrn.length}/12
+                          </span>
+                        </div>
                         <input
                           type="text"
                           required
                           maxLength={12}
                           value={lrn}
-                          onChange={(e) => setLrn(e.target.value.replace(/\D/g, ""))}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            setLrn(val);
+                            if (fieldErrors.lrn) {
+                              setFieldErrors(prev => { const n = { ...prev }; delete n.lrn; return n; });
+                            }
+                          }}
+                          onBlur={() => {
+                            if (lrn.trim().length === 12) {
+                              const check = isLrnAlreadyRegistered(lrn.trim());
+                              if (check.exists) {
+                                setFieldErrors(prev => ({
+                                  ...prev,
+                                  lrn: `LRN "${lrn.trim()}" is already registered (${check.student?.full_name || "Existing Student"}).`
+                                }));
+                              }
+                            }
+                          }}
                           placeholder="e.g. 109238475612"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                          className={`w-full rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none transition font-medium ${
+                            fieldErrors.lrn
+                              ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                              : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                          }`}
                         />
+                        {fieldErrors.lrn ? (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.lrn}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-slate-500 mt-1">Must be exactly 12 digits issued by DepEd.</p>
+                        )}
                       </div>
 
                       <div>
@@ -440,15 +590,30 @@ export default function RegisterPage() {
                           Date of Birth (Identity Verification) *
                         </label>
                         <div className="relative">
-                          <Calendar className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                          <Calendar className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.studentBirthDate ? "text-rose-500" : "text-slate-400"}`} />
                           <input
                             type="date"
                             required
                             value={studentBirthDate}
-                            onChange={(e) => setStudentBirthDate(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                            onChange={(e) => {
+                              setStudentBirthDate(e.target.value);
+                              if (fieldErrors.studentBirthDate) {
+                                setFieldErrors(prev => { const n = { ...prev }; delete n.studentBirthDate; return n; });
+                              }
+                            }}
+                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
+                              fieldErrors.studentBirthDate
+                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                            }`}
                           />
                         </div>
+                        {fieldErrors.studentBirthDate && (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.studentBirthDate}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -500,16 +665,47 @@ export default function RegisterPage() {
                           SAPC Institutional or Personal Email *
                         </label>
                         <div className="relative">
-                          <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                          <Mail className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.studentEmail ? "text-rose-500" : "text-slate-400"}`} />
                           <input
                             type="email"
                             required
                             value={studentEmail}
-                            onChange={(e) => setStudentEmail(e.target.value)}
-                            placeholder="student@sapc.edu.ph"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                            onChange={(e) => {
+                              setStudentEmail(e.target.value);
+                              if (fieldErrors.studentEmail) {
+                                setFieldErrors(prev => { const n = { ...prev }; delete n.studentEmail; return n; });
+                              }
+                            }}
+                            onBlur={() => {
+                              const cleanEmail = studentEmail.trim();
+                              if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
+                                setFieldErrors(prev => ({
+                                  ...prev,
+                                  studentEmail: "Invalid format. Email must include '@' and domain (e.g. student@sapc.edu.ph)."
+                                }));
+                              } else if (cleanEmail && isEmailAlreadyRegistered(cleanEmail)) {
+                                setFieldErrors(prev => ({
+                                  ...prev,
+                                  studentEmail: `Email "${cleanEmail}" is already registered. Please sign in instead.`
+                                }));
+                              }
+                            }}
+                            placeholder="e.g. student@sapc.edu.ph"
+                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
+                              fieldErrors.studentEmail
+                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                            }`}
                           />
                         </div>
+                        {fieldErrors.studentEmail ? (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.studentEmail}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-slate-500 mt-1">Provide your @sapc.edu.ph or personal email.</p>
+                        )}
                       </div>
 
                       <div>
@@ -517,16 +713,31 @@ export default function RegisterPage() {
                           Create Password *
                         </label>
                         <div className="relative">
-                          <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                          <Lock className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.studentPassword ? "text-rose-500" : "text-slate-400"}`} />
                           <input
                             type="password"
                             required
                             value={studentPassword}
-                            onChange={(e) => setStudentPassword(e.target.value)}
-                            placeholder="At least 8 characters"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                            onChange={(e) => {
+                              setStudentPassword(e.target.value);
+                              if (fieldErrors.studentPassword) {
+                                setFieldErrors(prev => { const n = { ...prev }; delete n.studentPassword; return n; });
+                              }
+                            }}
+                            placeholder="At least 6 characters"
+                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
+                              fieldErrors.studentPassword
+                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                            }`}
                           />
                         </div>
+                        {fieldErrors.studentPassword && (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.studentPassword}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </>
@@ -540,16 +751,31 @@ export default function RegisterPage() {
                           Parent / Guardian Full Name *
                         </label>
                         <div className="relative">
-                          <User className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                          <User className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.parentName ? "text-rose-500" : "text-slate-400"}`} />
                           <input
                             type="text"
                             required
                             value={parentName}
-                            onChange={(e) => setParentName(e.target.value)}
+                            onChange={(e) => {
+                              setParentName(e.target.value);
+                              if (fieldErrors.parentName) {
+                                setFieldErrors(prev => { const n = { ...prev }; delete n.parentName; return n; });
+                              }
+                            }}
                             placeholder="Mrs. Elena Dimaculangan"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition font-medium ${
+                              fieldErrors.parentName
+                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                            }`}
                           />
                         </div>
+                        {fieldErrors.parentName && (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.parentName}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -612,18 +838,41 @@ export default function RegisterPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Child&apos;s 12-Digit LRN to Link *
-                        </label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                            Child&apos;s 12-Digit LRN to Link *
+                          </label>
+                          <span className="text-[11px] font-mono font-bold text-slate-400">
+                            {childLrn.length}/12
+                          </span>
+                        </div>
                         <input
                           type="text"
                           required
                           maxLength={12}
                           value={childLrn}
-                          onChange={(e) => setChildLrn(e.target.value.replace(/\D/g, ""))}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            setChildLrn(val);
+                            if (fieldErrors.childLrn) {
+                              setFieldErrors(prev => { const n = { ...prev }; delete n.childLrn; return n; });
+                            }
+                          }}
                           placeholder="e.g. 109238475001"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                          className={`w-full rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none transition font-medium ${
+                            fieldErrors.childLrn
+                              ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                              : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                          }`}
                         />
+                        {fieldErrors.childLrn ? (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.childLrn}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-slate-500 mt-1">Must be student&apos;s exact 12-digit DepEd LRN.</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -633,10 +882,25 @@ export default function RegisterPage() {
                           type="tel"
                           required
                           value={parentPhone}
-                          onChange={(e) => setParentPhone(e.target.value)}
+                          onChange={(e) => {
+                            setParentPhone(e.target.value);
+                            if (fieldErrors.parentPhone) {
+                              setFieldErrors(prev => { const n = { ...prev }; delete n.parentPhone; return n; });
+                            }
+                          }}
                           placeholder="+63 9XX XXX XXXX"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                          className={`w-full rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none transition font-medium ${
+                            fieldErrors.parentPhone
+                              ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                              : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                          }`}
                         />
+                        {fieldErrors.parentPhone && (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.parentPhone}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -645,32 +909,76 @@ export default function RegisterPage() {
                           Parent Email Address *
                         </label>
                         <div className="relative">
-                          <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                          <Mail className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.parentEmail ? "text-rose-500" : "text-slate-400"}`} />
                           <input
                             type="email"
                             required
                             value={parentEmail}
-                            onChange={(e) => setParentEmail(e.target.value)}
+                            onChange={(e) => {
+                              setParentEmail(e.target.value);
+                              if (fieldErrors.parentEmail) {
+                                setFieldErrors(prev => { const n = { ...prev }; delete n.parentEmail; return n; });
+                              }
+                            }}
+                            onBlur={() => {
+                              const cleanEmail = parentEmail.trim();
+                              if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
+                                setFieldErrors(prev => ({
+                                  ...prev,
+                                  parentEmail: "Invalid format. Enter a valid email address (e.g. parent@gmail.com)."
+                                }));
+                              } else if (cleanEmail && isEmailAlreadyRegistered(cleanEmail)) {
+                                setFieldErrors(prev => ({
+                                  ...prev,
+                                  parentEmail: `Email "${cleanEmail}" is already registered. Please sign in instead.`
+                                }));
+                              }
+                            }}
                             placeholder="elena.dimaculangan@gmail.com"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
+                              fieldErrors.parentEmail
+                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                            }`}
                           />
                         </div>
+                        {fieldErrors.parentEmail && (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.parentEmail}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                           Create Password *
                         </label>
                         <div className="relative">
-                          <Lock className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                          <Lock className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.parentPassword ? "text-rose-500" : "text-slate-400"}`} />
                           <input
                             type="password"
                             required
                             value={parentPassword}
-                            onChange={(e) => setParentPassword(e.target.value)}
-                            placeholder="At least 8 characters"
-                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
+                            onChange={(e) => {
+                              setParentPassword(e.target.value);
+                              if (fieldErrors.parentPassword) {
+                                setFieldErrors(prev => { const n = { ...prev }; delete n.parentPassword; return n; });
+                              }
+                            }}
+                            placeholder="At least 6 characters"
+                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
+                              fieldErrors.parentPassword
+                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
+                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
+                            }`}
                           />
                         </div>
+                        {fieldErrors.parentPassword && (
+                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            {fieldErrors.parentPassword}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </>

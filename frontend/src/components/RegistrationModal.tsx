@@ -22,6 +22,8 @@ import {
   JHS_GRADE_LEVELS, 
   getSectionsForGrade, 
   addStudentRecord,
+  isLrnAlreadyRegistered,
+  isEmailAlreadyRegistered,
   getActivePendingRegistrations,
   saveActivePendingRegistrations,
   getActiveParentRecords,
@@ -36,6 +38,9 @@ interface RegistrationModalProps {
 }
 
 type RegistrationRole = "student" | "parent";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const LRN_REGEX = /^\d{12}$/;
 
 const TABS: Array<{
   id: RegistrationRole;
@@ -87,13 +92,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const [parentPassword, setParentPassword] = useState("");
 
   // Helper: translate Firebase error codes to user-friendly messages
-  const getFirebaseErrorMsg = (err: any): string | null => {
+  const getFirebaseErrorMsg = (err: any): string => {
     const code = err?.code || "";
     if (code === "auth/email-already-in-use") return "This email is already registered. Please sign in instead.";
-    if (code === "auth/weak-password") return "Password is too weak. Use at least 8 characters with mixed case and numbers.";
+    if (code === "auth/weak-password") return "Password is too weak. Use at least 6 characters.";
     if (code === "auth/invalid-email") return "Please enter a valid email address.";
     if (code === "auth/network-request-failed") return "Network error. Please check your connection and try again.";
-    return null;
+    return err?.message || "Registration failed. Please try again.";
   };
 
   if (!isOpen) return null;
@@ -114,18 +119,65 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
+
+    const cleanName = studentFullName.trim();
+    if (!cleanName || cleanName.length < 2) {
+      setSubmitError("Please enter student's full name (at least 2 characters).");
+      return;
+    }
+
+    const cleanLrn = lrn.trim();
+    if (!cleanLrn) {
+      setSubmitError("Learner Reference Number (LRN) is required.");
+      return;
+    }
+    if (!LRN_REGEX.test(cleanLrn)) {
+      setSubmitError(`DepEd LRN must be exactly 12 digits (entered ${cleanLrn.length} digits).`);
+      return;
+    }
+
+    const lrnCheck = isLrnAlreadyRegistered(cleanLrn);
+    if (lrnCheck.exists) {
+      setSubmitError(`LRN "${cleanLrn}" is already registered (${lrnCheck.student?.full_name || "Existing Student"}). Please sign in instead.`);
+      return;
+    }
+
+    if (!studentBirthDate) {
+      setSubmitError("Date of birth is required for student verification.");
+      return;
+    }
+
+    const cleanEmail = studentEmail.trim();
+    if (!cleanEmail) {
+      setSubmitError("Email address is required.");
+      return;
+    }
+    if (!EMAIL_REGEX.test(cleanEmail)) {
+      setSubmitError("Please enter a valid email address (e.g. name@student.sapc.edu.ph or name@gmail.com).");
+      return;
+    }
+    if (isEmailAlreadyRegistered(cleanEmail)) {
+      setSubmitError(`Email "${cleanEmail}" is already registered. Please sign in instead.`);
+      return;
+    }
+
+    if (!studentPassword || studentPassword.length < 6) {
+      setSubmitError("Password must be at least 6 characters long.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const finalEmail = studentEmail || `${lrn}@student.sapc.edu.ph`;
-      const finalPass = studentPassword || "Student@SAPC2026!";
-      const displayName = studentFullName.trim() || `Student ${lrn}`;
+      const finalEmail = cleanEmail;
+      const finalPass = studentPassword;
+      const displayName = cleanName;
       const gradeNum = parseInt(studentGradeLevel.replace(/\D/g, ""), 10) || 7;
 
       // 1. Auto-enlist student into dataset roster
       await addStudentRecord({
         full_name: displayName,
-        lrn: lrn,
+        lrn: cleanLrn,
         email: finalEmail,
         grade_level: gradeNum,
         section_name: studentSection,
@@ -138,7 +190,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           const userCred = await createUserWithEmailAndPassword(auth, finalEmail, finalPass);
           await updateProfile(userCred.user, { displayName: displayName });
           await setDoc(doc(db, "users", userCred.user.uid), {
-            lrn: lrn,
+            lrn: cleanLrn,
             email: finalEmail,
             birthDate: studentBirthDate,
             role: "student",
@@ -153,6 +205,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           await syncCustomClaims(userCred.user, "student");
         } catch (e: any) {
           console.warn("Firebase user create note:", e);
+          if (e?.code === "auth/email-already-in-use") {
+            setSubmitError(`Email "${finalEmail}" is already registered in Firebase. Please sign in instead.`);
+            setIsSubmitting(false);
+            return;
+          }
         }
       }
 
@@ -167,7 +224,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
             password: finalPass,
             name: displayName,
             role: "student",
-            lrn: lrn,
+            lrn: cleanLrn,
             grade_level: studentGradeLevel,
             section: studentSection,
             student_id: 1
@@ -184,7 +241,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       setStep("success");
     } catch (err: any) {
       const msg = getFirebaseErrorMsg(err);
-      setSubmitError(msg || "Student registration failed. Please try again.");
+      setSubmitError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -193,13 +250,41 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
   const handleParentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
+
+    const cleanName = parentName.trim();
+    if (!cleanName || cleanName.length < 2) {
+      setSubmitError("Please enter parent/guardian full name.");
+      return;
+    }
+
+    const cleanLrn = parentLrn.trim();
+    if (!cleanLrn) {
+      setSubmitError("Child's 12-digit LRN is required to link records.");
+      return;
+    }
+    if (!LRN_REGEX.test(cleanLrn)) {
+      setSubmitError(`Child's LRN must be exactly 12 digits (entered ${cleanLrn.length} digits).`);
+      return;
+    }
+
+    const cleanPhone = parentPhone.trim();
+    if (!cleanPhone || cleanPhone.replace(/\D/g, "").length < 7) {
+      setSubmitError("Please enter a valid contact phone number.");
+      return;
+    }
+
+    if (!parentPassword || parentPassword.length < 6) {
+      setSubmitError("Password must be at least 6 characters long.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const sanitizedPhone = parentPhone.replace(/\D/g, "") || "09170000000";
+      const sanitizedPhone = cleanPhone.replace(/\D/g, "") || "09170000000";
       const parentEmail = `${sanitizedPhone}@parent.sapc.edu.ph`;
-      const finalPass = parentPassword || "Parent@SAPC2026!";
-      const displayName = parentName.trim() || "Parent / Guardian";
+      const finalPass = parentPassword;
+      const displayName = cleanName;
       const childGradeNum = parseInt(parentStudentGradeLevel.replace(/\D/g, ""), 10) || 7;
 
       // 1. Create Firebase Auth & Firestore record

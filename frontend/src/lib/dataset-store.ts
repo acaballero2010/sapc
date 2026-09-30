@@ -342,21 +342,119 @@ const SYSTEM_ACTOR: AuditActor = { name: "System", role: "system" };
  * @param newStudent Partial student data to create
  * @param actor GAP-03: The authenticated user performing this action (for audit log)
  */
+/**
+ * Helper: Checks if an LRN is already registered in the active dataset or local registered accounts.
+ */
+export function isLrnAlreadyRegistered(lrn: string): { exists: boolean; student?: StudentRecord } {
+  const clean = String(lrn || "").trim();
+  if (!clean) return { exists: false };
+  const current = getActiveStudentDataset();
+  const found = current.find(s => String(s.lrn).trim() === clean);
+  if (found) return { exists: true, student: found };
+
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("sapc_registered_accounts");
+      if (raw) {
+        const registeredList = JSON.parse(raw);
+        if (Array.isArray(registeredList)) {
+          const matchedAcc = registeredList.find((acc: any) => String(acc.lrn || "").trim() === clean);
+          if (matchedAcc) {
+            return {
+              exists: true,
+              student: {
+                id: matchedAcc.student_id || 0,
+                full_name: matchedAcc.name || "Registered Student",
+                lrn: clean,
+                section_name: matchedAcc.section || "Grade 7",
+                grade_level: 7,
+                strand: "JHS",
+                adviser_name: "Adviser",
+                email: matchedAcc.email || `${clean}@student.sapc.edu.ph`,
+                first_name: (matchedAcc.name || "Student").split(" ")[0],
+                last_name: (matchedAcc.name || "Student").split(" ").slice(1).join(" ") || "Student",
+                latest_risk_score: 25.0,
+                latest_risk_tier: "low",
+                primary_risk_driver: "Academic",
+                domain_scores: { academic: 20, family: 15, health: 15, mental_health: 15, financial: 15 },
+                sass_metrics: { gpa: 85.0, failing_subjects_count: 0, days_absent: 0, attendance_rate_pct: 100, incomplete_requirements_count: 0, extracurricular_club: "Club", club_participation_level: "Moderate", hobbies_interests: "STEM" }
+              }
+            };
+          }
+        }
+      }
+    } catch {}
+  }
+  return { exists: false };
+}
+
+/**
+ * Helper: Checks if an email is already registered in student, faculty, or parent datasets.
+ */
+export function isEmailAlreadyRegistered(email: string): boolean {
+  const clean = String(email || "").trim().toLowerCase();
+  if (!clean) return false;
+  const current = getActiveStudentDataset();
+  const inStudents = current.some(s => (s.email || "").toLowerCase() === clean);
+  const inFaculty = getActiveFacultyRecords().some(f => (f.email || "").toLowerCase() === clean);
+  const inParents = getActiveParentRecords().some(p => (p.email || "").toLowerCase() === clean);
+  if (inStudents || inFaculty || inParents) return true;
+
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("sapc_registered_accounts");
+      if (raw) {
+        const registeredList = JSON.parse(raw);
+        if (Array.isArray(registeredList)) {
+          return registeredList.some((acc: any) => (acc.email || "").toLowerCase() === clean);
+        }
+      }
+    } catch {}
+  }
+  return false;
+}
+
+/**
+ * CRUD (Create): Adds a new student record to both local state and Firebase Cloud Firestore.
+ * Enforces strictly formatted, unique DepEd 12-digit LRNs.
+ * @param newStudent Partial student data to create
+ * @param actor GAP-03: The authenticated user performing this action (for audit log)
+ */
 export async function addStudentRecord(newStudent: Partial<StudentRecord>, actor: AuditActor = SYSTEM_ACTOR): Promise<StudentRecord> {
   const current = getActiveStudentDataset();
+  const cleanLrn = newStudent.lrn ? String(newStudent.lrn).trim() : null;
+
+  if (cleanLrn) {
+    if (!/^\d{12}$/.test(cleanLrn)) {
+      throw new Error(`Invalid Learner Reference Number (LRN). DepEd LRN must be exactly 12 digits.`);
+    }
+    const existing = current.find(s => String(s.lrn).trim() === cleanLrn);
+    if (existing) {
+      throw new Error(`A student record with LRN "${cleanLrn}" already exists in the institutional database (${existing.full_name} - ${existing.section_name}). Duplicate LRNs are not permitted.`);
+    }
+  }
+
+  const cleanEmail = newStudent.email ? newStudent.email.trim().toLowerCase() : null;
+  if (cleanEmail) {
+    const existingEmail = current.find(s => (s.email || "").toLowerCase() === cleanEmail);
+    if (existingEmail) {
+      throw new Error(`A student record with email "${cleanEmail}" already exists in the institutional database (${existingEmail.full_name}).`);
+    }
+  }
+
   const nextId = current.length > 0 ? Math.max(...current.map(s => Number(s.id) || 0)) + 1 : 1;
   
   const fullRecord: StudentRecord = {
     id: nextId,
-    lrn: newStudent.lrn || `1092384${String(nextId).padStart(5, "0")}`,
+    lrn: cleanLrn || `1092384${String(nextId).padStart(5, "0")}`,
     full_name: newStudent.full_name || `${newStudent.last_name || "Student"}, ${newStudent.first_name || "New"}`,
-    first_name: newStudent.first_name || "New",
-    last_name: newStudent.last_name || "Student",
+    first_name: newStudent.first_name || (newStudent.full_name ? newStudent.full_name.split(" ")[0] : "New"),
+    last_name: newStudent.last_name || (newStudent.full_name ? newStudent.full_name.split(" ").slice(1).join(" ") : "Student"),
     grade_level: newStudent.grade_level || 7,
     strand: "JHS",
     section_name: newStudent.section_name || "Grade 7 - Love",
     adviser_name: newStudent.adviser_name || "Adviser",
-    email: newStudent.email || `student${nextId}@sapc.edu.ph`,
+    email: cleanEmail || `student${nextId}@sapc.edu.ph`,
     latest_risk_score: newStudent.latest_risk_score || 25.0,
     latest_risk_tier: newStudent.latest_risk_tier || "low",
     primary_risk_driver: newStudent.primary_risk_driver || "Academic",

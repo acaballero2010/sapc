@@ -61,6 +61,7 @@ import {
   rollbackIngestionBatch,
   IngestionBatchRecord,
   addStudentRecord,
+  isLrnAlreadyRegistered,
   deleteStudentRecord,
   addAppNotification,
   getActiveNotifications,
@@ -968,8 +969,14 @@ Issued Date     : ${new Date().toLocaleDateString()}
       showToast("Please fill in First Name, Last Name, and 12-digit LRN.");
       return;
     }
-    if (newStudentLRN.trim().length !== 12) {
+    const cleanLrn = newStudentLRN.trim();
+    if (cleanLrn.length !== 12 || !/^\d{12}$/.test(cleanLrn)) {
       showToast("LRN must be exactly 12 digits (DepEd Standard).");
+      return;
+    }
+    const lrnCheck = isLrnAlreadyRegistered(cleanLrn);
+    if (lrnCheck.exists) {
+      showToast(`LRN "${cleanLrn}" is already registered (${lrnCheck.student?.full_name || "Existing Student"}). Duplicate LRNs are not permitted.`);
       return;
     }
 
@@ -986,7 +993,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
         first_name: newStudentFirstName.trim(),
         last_name: newStudentLastName.trim(),
         full_name: `${newStudentFirstName.trim()} ${newStudentLastName.trim()}`,
-        lrn: newStudentLRN.trim(),
+        lrn: cleanLrn,
         grade_level: Number(newStudentGradeLevel),
         strand: newStudentStrand,
         section_name: newStudentSection,
@@ -1019,9 +1026,9 @@ Issued Date     : ${new Date().toLocaleDateString()}
       setNewStudentLRN("");
       // Navigate to students registry
       handleTabChange("students");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showToast("Failed to enroll student. Please check input fields.");
+      showToast(err?.message || "Failed to enroll student. Please check input fields.");
     } finally {
       setNewStudentIsSubmitting(false);
     }
