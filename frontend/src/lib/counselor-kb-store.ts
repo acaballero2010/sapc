@@ -14,6 +14,7 @@ import {
   Unsubscribe 
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
+import { sanitizeFirestorePayload } from "@/lib/dataset-store";
 
 export type KnowledgeCategory = 
   | "academic_policy"
@@ -473,7 +474,7 @@ export async function deleteKnowledgeItem(id: string): Promise<boolean> {
 export async function syncKnowledgeItemToFirestore(item: CounselorKnowledgeItem): Promise<void> {
   try {
     const docRef = doc(db, "counselor_knowledge_base", item.id);
-    await setDoc(docRef, item, { merge: true });
+    await setDoc(docRef, sanitizeFirestorePayload(item), { merge: true });
   } catch (e) {
     console.warn(`[Counselor KB] Failed syncing doc ${item.id} to Firestore:`, e);
   }

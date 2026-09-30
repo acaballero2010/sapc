@@ -79,6 +79,37 @@ export const DEFAULT_AHP_WEIGHTS = {
   financial: 0.15
 };
 
+/**
+ * Strips all `undefined` values recursively so Firestore never throws
+ * "Function WriteBatch.set() called with invalid data. Unsupported field value: undefined"
+ */
+export function sanitizeFirestorePayload<T extends Record<string, any>>(obj: T): Record<string, any> {
+  if (!obj || typeof obj !== "object") return obj;
+  const clean: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      if (
+        value !== null &&
+        typeof value === "object" &&
+        !(value instanceof Date) &&
+        typeof (value as any).toMillis !== "function" &&
+        (value as any)._methodName !== "serverTimestamp"
+      ) {
+        if (Array.isArray(value)) {
+          clean[key] = value
+            .filter((item) => item !== undefined)
+            .map((item) => (item !== null && typeof item === "object" ? sanitizeFirestorePayload(item) : item));
+        } else {
+          clean[key] = sanitizeFirestorePayload(value);
+        }
+      } else {
+        clean[key] = value;
+      }
+    }
+  }
+  return clean;
+}
+
 // ============================================================================
 // SAPC Junior High School (JHS) Academic Structure Constants
 // Grade 7: Love, Integrity
@@ -304,7 +335,7 @@ export async function syncStudentDatasetToFirestore(students: StudentRecord[]): 
         const docId = student.lrn ? String(student.lrn).trim() : `student_${student.id}`;
         const studentRef = doc(studentsCol, docId);
         batch.set(studentRef, {
-          ...student,
+          ...sanitizeFirestorePayload(student),
           updatedAt: serverTimestamp()
         }, { merge: true });
       }
@@ -487,7 +518,7 @@ export async function addStudentRecord(newStudent: Partial<StudentRecord>, actor
       const studentRef = doc(collection(db, "students"), docId);
       const { setDoc } = await import("firebase/firestore");
       await setDoc(studentRef, {
-        ...fullRecord,
+        ...sanitizeFirestorePayload(fullRecord),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -569,7 +600,7 @@ export async function updateStudentRecord(
       const studentRef = doc(collection(db, "students"), docId);
       const { setDoc } = await import("firebase/firestore");
       await setDoc(studentRef, {
-        ...updated,
+        ...sanitizeFirestorePayload(updated),
         updatedAt: serverTimestamp()
       }, { merge: true });
     } catch (err) {
@@ -773,7 +804,7 @@ export async function logCloudAuditEvent(entry: {
     try {
       const auditCol = collection(db, "audit_logs");
       await addDoc(auditCol, {
-        ...fullEntry,
+        ...sanitizeFirestorePayload(fullEntry),
         createdAt: serverTimestamp()
       });
       console.log(`[Audit Log] RA 10173 Audit Record logged to Firestore: ${entry.action}`);
@@ -2708,7 +2739,7 @@ export async function syncFacultyRecordsToFirestore(records: FacultyRecord[]): P
       const docId = rec.email ? rec.email.replace(/[@.]/g, "_") : `fac_${rec.id}`;
       const docRef = doc(colRef, docId);
       batch.set(docRef, {
-        ...rec,
+        ...sanitizeFirestorePayload(rec),
         updatedAt: serverTimestamp()
       }, { merge: true });
     }
@@ -2797,7 +2828,7 @@ export async function addFacultyRecord(newRecord: Partial<FacultyRecord> & { nam
     section: newRecord.section || (isCounselor ? "Guidance Office" : "General Faculty"),
     grade_level: newRecord.grade_level || (isCounselor ? "All Levels" : "Grade 11"),
     employee_id: newRecord.employee_id || (isCounselor ? `SAPC-COUN-2026-${String(nextNum).padStart(3, "0")}` : `SAPC-FAC-2026-${String(nextNum).padStart(3, "0")}`),
-    prc_license_no: newRecord.prc_license_no || (isCounselor ? `PRC-RGC-${Math.floor(100000 + Math.random() * 900000)}` : undefined),
+    prc_license_no: newRecord.prc_license_no || (isCounselor ? `PRC-RGC-${Math.floor(100000 + Math.random() * 900000)}` : ""),
     initial_password: newRecord.initial_password || (isCounselor ? "counselor123" : "teacher123"),
     status: newRecord.status || "Active",
     phone: newRecord.phone || "+63 900 000 0000",
@@ -2811,7 +2842,7 @@ export async function addFacultyRecord(newRecord: Partial<FacultyRecord> & { nam
     try {
       const docId = record.email.replace(/[@.]/g, "_");
       await setDoc(doc(collection(db, "faculty_records"), docId), {
-        ...record,
+        ...sanitizeFirestorePayload(record),
         updatedAt: serverTimestamp()
       }, { merge: true });
     } catch (e) {
@@ -2851,7 +2882,7 @@ export async function updateFacultyRecord(id: string, updates: Partial<FacultyRe
       try {
         const docId = (updatedRecord as FacultyRecord).email.replace(/[@.]/g, "_");
         await setDoc(doc(collection(db, "faculty_records"), docId), {
-          ...(updatedRecord as FacultyRecord),
+          ...sanitizeFirestorePayload(updatedRecord as FacultyRecord),
           updatedAt: serverTimestamp()
         }, { merge: true });
       } catch (e) {
@@ -3312,7 +3343,7 @@ export function saveActivePendingRegistrations(records: PendingRegistrationRecor
         const batch = writeBatch(db);
         records.forEach((rec) => {
           const docRef = doc(db, "pending_registrations", rec.id);
-          batch.set(docRef, { ...rec, updatedAt: serverTimestamp() }, { merge: true });
+          batch.set(docRef, { ...sanitizeFirestorePayload(rec), updatedAt: serverTimestamp() }, { merge: true });
         });
         await batch.commit();
       } catch (err) {
@@ -3353,7 +3384,7 @@ export function saveActiveParentRecords(records: ParentRecord[], syncToFirestore
         const batch = writeBatch(db);
         records.forEach((rec) => {
           const docRef = doc(db, "parent_records", rec.id);
-          batch.set(docRef, { ...rec, updatedAt: serverTimestamp() }, { merge: true });
+          batch.set(docRef, { ...sanitizeFirestorePayload(rec), updatedAt: serverTimestamp() }, { merge: true });
         });
         await batch.commit();
       } catch (err) {
@@ -3536,7 +3567,7 @@ export function saveActiveCommendations(commendations: StudentCommendation[], sy
     commendations.forEach(async (c) => {
       try {
         const docRef = doc(db, "student_commendations", c.id);
-        await setDoc(docRef, c, { merge: true });
+        await setDoc(docRef, sanitizeFirestorePayload(c), { merge: true });
       } catch (err) {
         console.warn("Failed syncing commendation to Firestore:", err);
       }
