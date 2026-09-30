@@ -7,6 +7,7 @@ import {
   FileText,
 } from "lucide-react";
 import { StudentRecord, getActiveStudentDataset } from "@/lib/dataset-store";
+import { getCurriculumForGrade, getActiveCurriculum } from "@/lib/curriculum-store";
 import { useToast } from "@/lib/toast-context";
 
 interface DepEdFormModalProps {
@@ -41,18 +42,28 @@ export function DepEdFormModal({
 
   const gwa = student.sass_metrics?.gpa || student.domain_scores?.academic || 85;
   const gradeLevel = student.grade_level || 11;
-  const trackStrand = student.strand ? `Academic - ${student.strand.toUpperCase()}` : "Academic - STEM";
+  const trackStrand = student.strand ? `Academic - ${student.strand.toUpperCase()}` : (gradeLevel <= 10 ? "Junior High School Core" : "Academic - STEM");
 
-  // Synthesize subject grades according to DepEd SHS curriculum
-  const subjects = [
-    { code: "CORE-01", name: "Oral Communication in Context", q1: Math.round(gwa - 1), q2: Math.round(gwa + 1), final: Math.round(gwa), status: gwa >= 75 ? "PASSED" : "FAILED" },
-    { code: "CORE-02", name: "General Mathematics", q1: Math.round(gwa - 3), q2: Math.round(gwa - 2), final: Math.round(gwa - 2.5), status: gwa - 2.5 >= 75 ? "PASSED" : "FAILED" },
-    { code: "CORE-03", name: "Earth and Life Science", q1: Math.round(gwa + 2), q2: Math.round(gwa), final: Math.round(gwa + 1), status: "PASSED" },
-    { code: "CORE-04", name: "Personal Development", q1: Math.round(gwa + 1), q2: Math.round(gwa + 2), final: Math.round(gwa + 1.5), status: "PASSED" },
-    { code: "APPL-01", name: "Empowerment Technologies (ICT)", q1: Math.round(gwa + 3), q2: Math.round(gwa + 2), final: Math.round(gwa + 2.5), status: "PASSED" },
-    { code: "SPEC-01", name: "Pre-Calculus / Specialized Subject", q1: Math.round(gwa - 4), q2: Math.round(gwa - 3), final: Math.round(gwa - 3.5), status: gwa - 3.5 >= 75 ? "PASSED" : "FAILED" },
-    { code: "SPEC-02", name: "Basic Calculus / Strand Elective", q1: Math.round(gwa - 2), q2: Math.round(gwa - 1), final: Math.round(gwa - 1.5), status: gwa - 1.5 >= 75 ? "PASSED" : "FAILED" },
-  ];
+  // Dynamically pull subjects from the active defined curriculum
+  const curriculumSubjects = getCurriculumForGrade(gradeLevel, student.strand, undefined, true);
+  const activeList = curriculumSubjects.length > 0 
+    ? curriculumSubjects 
+    : getActiveCurriculum().filter(s => s.grade_level === gradeLevel || s.is_active).slice(0, 8);
+
+  const subjects = activeList.map((s, idx) => {
+    const seed = ((student.id || 1) * 7 + idx * 13) % 7;
+    const q1 = Math.max(65, Math.min(99, Math.round(gwa - 2 + seed)));
+    const q2 = Math.max(65, Math.min(99, Math.round(gwa + (idx % 3) - 1)));
+    const finalGrade = Math.round((q1 + q2) / 2);
+    return {
+      code: s.code,
+      name: s.name,
+      q1,
+      q2,
+      final: finalGrade,
+      status: finalGrade >= (s.passing_threshold || 75) ? "PASSED" : "FAILED"
+    };
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-sm animate-in fade-in duration-200">

@@ -60,6 +60,7 @@ import { DepEdFormModal } from "./DepEdFormModal";
 import { BatchInterventionModal } from "./BatchInterventionModal";
 import { ImportDiffModal } from "./ImportDiffModal";
 import { CurriculumManagementHub } from "./CurriculumManagementHub";
+import { getCurriculumForGrade, getActiveCurriculum } from "@/lib/curriculum-store";
 
 export type TeacherTabType = 
   | "dashboard"
@@ -3011,44 +3012,68 @@ export const TeacherDashboard: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-slate-200">
-            <table className="min-w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
-                <tr>
-                  <th className="py-3 px-4">LRN</th>
-                  <th className="py-3 px-4">Student Name</th>
-                  <th className="py-3 px-3 text-center">Gen. Math</th>
-                  <th className="py-3 px-3 text-center">Pre-Calculus</th>
-                  <th className="py-3 px-3 text-center">Gen. Chem</th>
-                  <th className="py-3 px-3 text-center">Oral Comm</th>
-                  <th className="py-3 px-3 text-center">Q2 GPA</th>
-                  <th className="py-3 px-3 text-center">Attendance %</th>
-                  <th className="py-3 px-4 text-center">Remark</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
-                {students.slice(0, 15).map((s, idx) => (
-                  <tr key={`gradebook-row-${s.lrn || s.id || idx}`} className="hover:bg-slate-50">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-800">{s.lrn}</td>
-                    <td className="py-3 px-4 font-bold text-slate-900">{s.full_name}</td>
-                    <td className="py-3 px-3 text-center">{88 + (idx % 5)}</td>
-                    <td className="py-3 px-3 text-center">{74 + (idx % 7)}</td>
-                    <td className="py-3 px-3 text-center">{85 + (idx % 4)}</td>
-                    <td className="py-3 px-3 text-center">{90 + (idx % 3)}</td>
-                    <td className="py-3 px-3 text-center font-black text-[#8B0014]">
-                      {s.sass_metrics?.gpa ? s.sass_metrics.gpa.toFixed(1) : "88.5"}
-                    </td>
-                    <td className="py-3 px-3 text-center font-semibold text-emerald-600">
-                      {s.sass_metrics?.attendance_rate_pct ? `${s.sass_metrics.attendance_rate_pct}%` : "96.5%"}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                        Passed
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {(() => {
+              const firstStudent = students[0];
+              const gradeNum = firstStudent?.grade_level || (teacherSection.includes("12") ? 12 : teacherSection.includes("11") ? 11 : teacherSection.includes("10") ? 10 : teacherSection.includes("9") ? 9 : teacherSection.includes("8") ? 8 : 7);
+              const strandVal = firstStudent?.strand || (gradeNum <= 10 ? "JHS" : "STEM");
+              const activeCurriculumList = getCurriculumForGrade(gradeNum as any, strandVal, undefined, true);
+              const displaySubjects = activeCurriculumList.length > 0 
+                ? activeCurriculumList.slice(0, 6) 
+                : getActiveCurriculum().filter(s => s.grade_level === gradeNum && s.is_active).slice(0, 6);
+
+              return (
+                <table className="min-w-full text-left text-xs">
+                  <thead className="bg-slate-50 border-b border-slate-200 uppercase font-extrabold text-slate-600 text-[11px]">
+                    <tr>
+                      <th className="py-3 px-4">LRN</th>
+                      <th className="py-3 px-4">Student Name</th>
+                      {displaySubjects.map(subj => (
+                        <th key={subj.code} className="py-3 px-3 text-center" title={subj.name}>
+                          {subj.name.length > 16 ? `${subj.name.slice(0, 14)}...` : subj.name}
+                        </th>
+                      ))}
+                      <th className="py-3 px-3 text-center">Q2 GPA</th>
+                      <th className="py-3 px-3 text-center">Attendance %</th>
+                      <th className="py-3 px-4 text-center">Remark</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {students.map((s, idx) => {
+                      const gpa = s.sass_metrics?.gpa || 85.0;
+                      return (
+                        <tr key={`gradebook-row-${s.lrn || s.id || idx}`} className="hover:bg-slate-50">
+                          <td className="py-3 px-4 font-mono font-bold text-slate-800">{s.lrn}</td>
+                          <td className="py-3 px-4 font-bold text-slate-900">{s.full_name}</td>
+                          {displaySubjects.map((subj, sIdx) => {
+                            const seed = ((s.id || 1) * 11 + sIdx * 7) % 9;
+                            const mark = Math.max(68, Math.min(98, Math.round(gpa - 4 + seed)));
+                            const isFail = mark < (subj.passing_threshold || 75.0);
+                            return (
+                              <td key={subj.code} className={`py-3 px-3 text-center font-bold ${isFail ? "text-red-600 bg-red-50/50" : "text-slate-700"}`}>
+                                {mark}
+                              </td>
+                            );
+                          })}
+                          <td className="py-3 px-3 text-center font-black text-[#8B0014]">
+                            {gpa.toFixed(1)}
+                          </td>
+                          <td className="py-3 px-3 text-center font-semibold text-emerald-600">
+                            {s.sass_metrics?.attendance_rate_pct ? `${s.sass_metrics.attendance_rate_pct}%` : "96.5%"}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              gpa >= 75.0 ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+                            }`}>
+                              {gpa >= 75.0 ? "Passed" : "Remedial"}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              );
+            })()}
           </div>
         </div>
       )}
