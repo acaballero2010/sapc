@@ -167,6 +167,114 @@ export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
     priority_weight: 4,
     created_at: "2026-02-10T10:00:00.000Z",
     updated_at: "2026-09-30T09:00:00.000Z"
+  },
+  {
+    id: "kb-egan-001",
+    category: "counseling_faq",
+    title: "Gerard Egan's 3-Stage Skilled Helper Counseling Framework",
+    keywords: ["paano mag-decide", "ano dapat kong gawin", "gulong-gulo", "nalilito", "confused", "lost", "step by step", "advice", "guidance step"],
+    content: "When students feel confused or stuck in a dilemma: Apply Gerard Egan's Skilled Helper Model. Stage 1 (Exploration): Listen actively and help them clarify 'What is going on right now?' without judging. Stage 2 (Understanding): Help them reframe their perspectives and discover 'What do I really want to happen?' Stage 3 (Action Planning): Co-create 1 or 2 small, realistic micro-steps ('How do I get there?') that empower their own agency and self-efficacy.",
+    suggested_resources: [
+      "SAPC Decision-Making & Goal Setting Worksheet",
+      "Confidential Counselor Strategy Session (Room 204)",
+      "Student Empowerment Action Tracker"
+    ],
+    author_name: "Ms. Maria Theresa Cruz, RGC",
+    author_role: "Head Guidance Counselor (Source: Gerard Egan)",
+    is_active: true,
+    priority_weight: 4,
+    created_at: "2026-03-01T08:00:00.000Z",
+    updated_at: "2026-09-30T10:00:00.000Z"
+  },
+  {
+    id: "kb-rogers-001",
+    category: "counseling_faq",
+    title: "Carl Rogers' Person-Centered Unconditional Positive Regard",
+    keywords: ["nahihiya ako", "feeling ko bobo ako", "wala akong kwenta", "worthless", "judged", "hinuhusgahan", "tanggapin", "unconditional regard"],
+    content: "Under Carl Rogers' Person-Centered Counseling Theory: Every student possesses inherent self-worth and an innate capacity for growth. When students express shame, feelings of stupidity, or fear of judgment, respond with unconditional positive regard. Never scold, dismiss, or moralize. Mirror their feelings back with warmth (*'Naiintindihan ko kung bakit ka nabibigatan, at hindi ka dapat mahiya sa nararamdaman mo'*), establishing an emotionally safe harbor.",
+    suggested_resources: [
+      "SAPC Safe Harbor Emotional Reflection Zone",
+      "Guidance One-on-One Affirmation & Wellness Pod",
+      "Daily Student Compassion Card"
+    ],
+    author_name: "Ms. Maria Theresa Cruz, RGC",
+    author_role: "Head Guidance Counselor (Source: Carl Rogers)",
+    is_active: true,
+    priority_weight: 4,
+    created_at: "2026-03-05T08:00:00.000Z",
+    updated_at: "2026-09-30T10:00:00.000Z"
+  },
+  {
+    id: "kb-sikolohiya-001",
+    category: "counseling_faq",
+    title: "Sikolohiyang Pilipino: Kapwa, Pakikiramdam, Panganay & OFW Family Stress",
+    keywords: ["panganay", "inaasahan", "ofw", "nanay nasa abroad", "tatay nasa abroad", "malayo ang magulang", "family expectation", "pabigat", "hiya", "utang na loob"],
+    content: "Under Sikolohiyang Pilipino (Dr. Virgilio Enriquez): Filipino students often navigate unique familial and cultural pressures such as 'Panganay syndrome' (heavy domestic and financial expectations), parental absence due to OFW employment, and deep 'Hiya' when struggling in school. Counselors must practice 'Pakikiramdam' (attuned shared inner perception), treat the student with 'Kapwa' (shared human identity), and gently relieve excessive guilt while acknowledging their immense family loyalty and strength.",
+    suggested_resources: [
+      "SAPC OFW Children & Panganay Peer Support Group",
+      "Family Guidance & Wellness Consultation Desk",
+      "Guidance Pastoral & Counseling Care Program"
+    ],
+    author_name: "Ms. Maria Theresa Cruz, RGC",
+    author_role: "Head Guidance Counselor (Source: Dr. Virgilio Enriquez)",
+    is_active: true,
+    priority_weight: 5,
+    created_at: "2026-03-10T08:00:00.000Z",
+    updated_at: "2026-09-30T10:00:00.000Z"
+  },
+  {
+    id: "kb-cbt-001",
+    category: "study_tip",
+    title: "CBT Cognitive Reframing: Overcoming Exam Catastrophizing & Imposter Syndrome",
+    keywords: ["katapusan na", "babagsak ako", "lahat sila magaling", "ako lang mahina", "catastrophizing", "overthinking exam", "perfectionism", "takot magkamali"],
+    content: "Based on Cognitive Behavior Therapy (Dr. Judith S. Beck): Students under academic pressure frequently engage in cognitive distortions like All-or-Nothing Thinking ('Kung hindi ako maging honor student, failure ako') and Catastrophizing ('Mababagsak ako at mawawalan ng kinabukasan'). Counselors guide students to identify automatic negative thoughts, test reality gently ('Ano ang pinaka-makatotohanang mangyayari?'), and reframe challenges into workable learning steps.",
+    suggested_resources: [
+      "CBT Thought Record & Cognitive Reframing Guide",
+      "SAPC Stress-Free Exam Preparation Toolkit",
+      "Guidance Relaxation & Mindfulness Corner (Room 204)"
+    ],
+    author_name: "Ms. Maria Theresa Cruz, RGC",
+    author_role: "Head Guidance Counselor (Source: Judith S. Beck)",
+    is_active: true,
+    priority_weight: 4,
+    created_at: "2026-03-15T08:00:00.000Z",
+    updated_at: "2026-09-30T10:00:00.000Z"
+  },
+  {
+    id: "kb-motivational-001",
+    category: "study_tip",
+    title: "Motivational Interviewing: Overcoming Procrastination & Strand Hesitation",
+    keywords: ["tinatamad", "procrastination", "ayaw mag-aral", "walang gana", "hindi ko alam kukunin kong strand", "strand", "abm o stem", "humss", "career choice"],
+    content: "Under Motivational Interviewing (Miller & Rollnick): Avoid arguing, confronting, or lecturing unmotivated students. Instead, roll with resistance and explore ambivalence ('Bahagi sa iyo ang gustong magpahinga, pero may bahagi rin sa iyo na gustong makatapos'). Help students articulate their own core values, life dreams, and intrinsic motivation to choose their Senior High School strand (STEM, ABM, HUMSS, TVL) with confidence.",
+    suggested_resources: [
+      "SAPC Senior High Strand Alignment & Career Assessment",
+      "Goal Exploration & Values Clarification Matrix",
+      "Career Guidance Counselor Consultation (Room 204)"
+    ],
+    author_name: "Ms. Maria Theresa Cruz, RGC",
+    author_role: "Head Guidance Counselor (Source: Miller & Rollnick)",
+    is_active: true,
+    priority_weight: 4,
+    created_at: "2026-03-20T08:00:00.000Z",
+    updated_at: "2026-09-30T10:00:00.000Z"
+  },
+  {
+    id: "kb-deped-child-001",
+    category: "crisis_protocol",
+    title: "DepEd Child Protection Policy (DO 40, s. 2012): Bullying & Peer Conflict",
+    keywords: ["binubully", "inaasar", "pinagkakaisahan", "sinasaktan sa school", "cyberbullying", "tsismis", "bullying", "away sa klase"],
+    content: "Under DepEd Order No. 40, s. 2012 (Child Protection Policy) and RA 10627 (Anti-Bullying Act): Every SAPCian has the right to a school environment free from fear, intimidation, and violence. When a student reports bullying, exclusion, or physical harassment: First, affirm that they are completely safe, believed, and not at fault. Activate confidential Child Protection Committee protocols with the Guidance Office to resolve peer conflicts safely and protect the student from retaliation.",
+    suggested_resources: [
+      "SAPC Child Protection Committee Helpdesk (Room 204)",
+      "Confidential Bullying & Grievance Report Form",
+      "Guidance Peer Mediation & Restorative Justice Circle"
+    ],
+    author_name: "Ms. Maria Theresa Cruz, RGC",
+    author_role: "Head Guidance Counselor (Source: DepEd DO 40)",
+    is_active: true,
+    priority_weight: 5,
+    created_at: "2026-03-25T08:00:00.000Z",
+    updated_at: "2026-09-30T10:00:00.000Z"
   }
 ];
 
