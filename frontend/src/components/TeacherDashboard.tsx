@@ -294,9 +294,20 @@ export const TeacherDashboard: React.FC = () => {
   const [histTargetSection, setHistTargetSection] = useState<string>("Grade 7 - Love");
   const [histActiveSubjectTab, setHistActiveSubjectTab] = useState<string>("ALL");
   const [histActiveQuarterTab, setHistActiveQuarterTab] = useState<"ALL" | "Q1" | "Q2" | "Q3" | "Q4">("ALL");
+  const [scoreDisplayMode, setScoreDisplayMode] = useState<"raw_points" | "percentage">("raw_points");
   const [histSearch, setHistSearch] = useState<string>("");
   const [histFileName, setHistFileName] = useState<string>("Grade7_Love_SY2025-2026_Master_Historical_ClassRecord.csv");
   const [histCommitSuccess, setHistCommitSuccess] = useState<boolean>(false);
+
+  // Zoom-in Deep-Dive Modal State for specific student & subject
+  const [selectedHistoricalScoreDetail, setSelectedHistoricalScoreDetail] = useState<{
+    student: any;
+    subjectCode: string;
+    subjectName: string;
+    initialQuarter?: "Q1" | "Q2" | "Q3" | "Q4";
+  } | null>(null);
+  const [detailActiveQuarter, setDetailActiveQuarter] = useState<"Q1" | "Q2" | "Q3" | "Q4">("Q1");
+  const [isEditingModalScores, setIsEditingModalScores] = useState<boolean>(false);
 
   // Derive Grade Level & Strand for Historical Ingestion
   const histGradeLevel = useMemo(() => {
@@ -324,7 +335,7 @@ export const TeacherDashboard: React.FC = () => {
     return list.length > 0 ? list : getActiveCurriculum().filter(s => s.grade_level === histGradeLevel && s.is_active);
   }, [histGradeLevel, histStrand]);
 
-  // Generate deterministic realistic historical multi-subject data
+  // Generate deterministic realistic historical multi-subject data with raw scores & item breakdown
   const generateHistoricalData = React.useCallback((section: string, sy: string) => {
     const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
     const secStudents = all.filter(s => matchSection(s.section_name, section));
@@ -344,6 +355,57 @@ export const TeacherDashboard: React.FC = () => {
       { code: "JHS-TLE7", name: "Technology & Livelihood Educ 7", category: "Core" as const, weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 }
     ];
 
+    const makeQuarterItemBreakdown = (wPct: number, pPct: number, qPct: number, sub: any) => {
+      const wwMax = 50;
+      const ptMax = 50;
+      const qeMax = 30; // 30-point quarterly exam as per teacher request
+
+      const wwRaw = Math.min(wwMax, Math.max(25, Math.round((wPct / 100) * wwMax)));
+      const ptRaw = Math.min(ptMax, Math.max(25, Math.round((pPct / 100) * ptMax)));
+      const qeRaw = Math.min(qeMax, Math.max(15, Math.round((qPct / 100) * qeMax)));
+
+      const computedWWPct = Math.round((wwRaw / wwMax) * 1000) / 10;
+      const computedPTPct = Math.round((ptRaw / ptMax) * 1000) / 10;
+      const computedQEPct = Math.round((qeRaw / qeMax) * 1000) / 10;
+
+      const final = Math.round((computedWWPct * sub.weight_ww + computedPTPct * sub.weight_pt + computedQEPct * sub.weight_qa) * 10) / 10;
+
+      // Sub-items
+      const quiz1 = Math.min(15, Math.max(8, Math.round((computedWWPct / 100) * 15)));
+      const quiz2 = Math.min(15, Math.max(8, Math.round((computedWWPct / 100) * 15)));
+      const test1 = Math.max(0, wwRaw - (quiz1 + quiz2));
+
+      const pt1 = Math.min(20, Math.max(10, Math.round((computedPTPct / 100) * 20)));
+      const pt2 = Math.max(0, ptRaw - pt1);
+
+      return {
+        wwRaw,
+        wwMax,
+        ww: computedWWPct,
+        ptRaw,
+        ptMax,
+        pt: computedPTPct,
+        qeRaw,
+        qeMax,
+        qe: computedQEPct,
+        final,
+        items: {
+          ww: [
+            { name: "Written Work #1 (Quiz 1: Fundamentals)", score: quiz1, max: 15 },
+            { name: "Written Work #2 (Quiz 2: Concept Analysis)", score: quiz2, max: 15 },
+            { name: "Written Work #3 (Summative Chapter Exam)", score: test1, max: 20 }
+          ],
+          pt: [
+            { name: "Performance Task #1 (Group Practical Lab / Activity)", score: pt1, max: 20 },
+            { name: "Performance Task #2 (Individual Project & Portfolio)", score: pt2, max: 30 }
+          ],
+          qe: [
+            { name: "Quarterly Periodical Examination", score: qeRaw, max: 30 }
+          ]
+        }
+      };
+    };
+
     return targetList.map((st, idx) => {
       const studentSeed = ((st.id || idx + 1) * 19) % 29;
       const baseScore = 78 + (studentSeed % 18); // 78 to 95 baseline
@@ -357,24 +419,25 @@ export const TeacherDashboard: React.FC = () => {
         const w1 = Math.min(100, Math.max(68, baseScore + subOffset - 1));
         const p1 = Math.min(100, Math.max(70, baseScore + subOffset + 2));
         const q1 = Math.min(100, Math.max(65, baseScore + subOffset - 2));
-        const q1Final = Math.round((w1 * sub.weight_ww + p1 * sub.weight_pt + q1 * sub.weight_qa) * 10) / 10;
 
         const w2 = Math.min(100, Math.max(68, w1 + ((sIdx % 3) - 1)));
         const p2 = Math.min(100, Math.max(70, p1 + ((sIdx % 2) ? 1 : 0)));
         const q2 = Math.min(100, Math.max(65, q1 + ((sIdx % 3) - 1)));
-        const q2Final = Math.round((w2 * sub.weight_ww + p2 * sub.weight_pt + q2 * sub.weight_qa) * 10) / 10;
 
         const w3 = Math.min(100, Math.max(68, w2 + 1));
         const p3 = Math.min(100, Math.max(70, p2 + 1));
         const q3 = Math.min(100, Math.max(65, q2 + 1));
-        const q3Final = Math.round((w3 * sub.weight_ww + p3 * sub.weight_pt + q3 * sub.weight_qa) * 10) / 10;
 
         const w4 = Math.min(100, Math.max(68, w3 + 1));
         const p4 = Math.min(100, Math.max(70, p3 + 1));
         const q4 = Math.min(100, Math.max(65, q3 + 1));
-        const q4Final = Math.round((w4 * sub.weight_ww + p4 * sub.weight_pt + q4 * sub.weight_qa) * 10) / 10;
 
-        const finalRating = Math.round(((q1Final + q2Final + q3Final + q4Final) / 4) * 10) / 10;
+        const q1Data = makeQuarterItemBreakdown(w1, p1, q1, sub);
+        const q2Data = makeQuarterItemBreakdown(w2, p2, q2, sub);
+        const q3Data = makeQuarterItemBreakdown(w3, p3, q3, sub);
+        const q4Data = makeQuarterItemBreakdown(w4, p4, q4, sub);
+
+        const finalRating = Math.round(((q1Data.final + q2Data.final + q3Data.final + q4Data.final) / 4) * 10) / 10;
         const passed = finalRating >= (sub.passing_threshold || 75.0);
         if (!passed) failingCount++;
         totalSum += finalRating;
@@ -386,10 +449,10 @@ export const TeacherDashboard: React.FC = () => {
           weight_ww: sub.weight_ww,
           weight_pt: sub.weight_pt,
           weight_qa: sub.weight_qa,
-          q1: { ww: w1, pt: p1, qe: q1, final: q1Final },
-          q2: { ww: w2, pt: p2, qe: q2, final: q2Final },
-          q3: { ww: w3, pt: p3, qe: q3, final: q3Final },
-          q4: { ww: w4, pt: p4, qe: q4, final: q4Final },
+          q1: q1Data,
+          q2: q2Data,
+          q3: q3Data,
+          q4: q4Data,
           finalRating,
           passed
         };
@@ -2343,9 +2406,9 @@ export const TeacherDashboard: React.FC = () => {
 
           {/* Filtering & View Tabs Bar */}
           <div className="space-y-3 pt-2">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
               {/* Search Box */}
-              <div className="relative w-full md:w-80">
+              <div className="relative w-full xl:w-72">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
@@ -2356,29 +2419,61 @@ export const TeacherDashboard: React.FC = () => {
                 />
               </div>
 
-              {/* Quarter Switcher Tabs */}
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto shrink-0 text-xs font-bold">
-                <button
-                  type="button"
-                  onClick={() => setHistActiveQuarterTab("ALL")}
-                  className={`px-3 py-1.5 rounded-lg transition ${
-                    histActiveQuarterTab === "ALL" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  All-Year Summary (Q1-Q4)
-                </button>
-                {(["Q1", "Q2", "Q3", "Q4"] as const).map(q => (
+              {/* View & Format Controls */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Score Format Toggle */}
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold shrink-0 border border-slate-200">
+                  <span className="text-[10px] text-slate-500 uppercase px-1.5 font-black">Display:</span>
                   <button
-                    key={q}
                     type="button"
-                    onClick={() => setHistActiveQuarterTab(q)}
+                    onClick={() => setScoreDisplayMode("raw_points")}
+                    className={`px-2.5 py-1.5 rounded-lg transition text-xs ${
+                      scoreDisplayMode === "raw_points" 
+                        ? "bg-white text-slate-900 shadow-xs font-extrabold" 
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    title="View actual raw item scores e.g. 29/30, 48/50"
+                  >
+                    Raw Points (e.g. 29/30)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScoreDisplayMode("percentage")}
+                    className={`px-2.5 py-1.5 rounded-lg transition text-xs ${
+                      scoreDisplayMode === "percentage" 
+                        ? "bg-white text-slate-900 shadow-xs font-extrabold" 
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    title="View percentage out of 100%"
+                  >
+                    Percentage (%)
+                  </button>
+                </div>
+
+                {/* Quarter Switcher Tabs */}
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto shrink-0 text-xs font-bold border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setHistActiveQuarterTab("ALL")}
                     className={`px-3 py-1.5 rounded-lg transition ${
-                      histActiveQuarterTab === q ? "bg-[#8B0014] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                      histActiveQuarterTab === "ALL" ? "bg-white text-slate-900 shadow-xs font-extrabold" : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
-                    {q} Breakdown
+                    All-Year Summary (Q1-Q4)
                   </button>
-                ))}
+                  {(["Q1", "Q2", "Q3", "Q4"] as const).map(q => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => setHistActiveQuarterTab(q)}
+                      className={`px-2.5 py-1.5 rounded-lg transition ${
+                        histActiveQuarterTab === q ? "bg-[#8B0014] text-white shadow-xs font-extrabold" : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -2458,24 +2553,48 @@ export const TeacherDashboard: React.FC = () => {
                         </tr>
                         <tr className="text-[10px] text-slate-600 bg-slate-50">
                           {/* Q1 Subheaders */}
-                          <th className="py-1.5 px-1.5 text-center bg-blue-50/30">WW ({Math.round(currentSub.weight_ww * 100)}%)</th>
-                          <th className="py-1.5 px-1.5 text-center bg-blue-50/30">PT ({Math.round(currentSub.weight_pt * 100)}%)</th>
-                          <th className="py-1.5 px-1.5 text-center bg-blue-50/30">QE ({Math.round(currentSub.weight_qa * 100)}%)</th>
+                          <th className="py-1.5 px-1.5 text-center bg-blue-50/30">
+                            {scoreDisplayMode === "raw_points" ? "WW (/50)" : `WW (${Math.round(currentSub.weight_ww * 100)}%)`}
+                          </th>
+                          <th className="py-1.5 px-1.5 text-center bg-blue-50/30">
+                            {scoreDisplayMode === "raw_points" ? "PT (/50)" : `PT (${Math.round(currentSub.weight_pt * 100)}%)`}
+                          </th>
+                          <th className="py-1.5 px-1.5 text-center bg-blue-50/30">
+                            {scoreDisplayMode === "raw_points" ? "QE (/30)" : `QE (${Math.round(currentSub.weight_qa * 100)}%)`}
+                          </th>
                           <th className="py-1.5 px-1.5 text-center bg-blue-100 text-blue-900 font-extrabold border-r border-blue-200">Q1 Grade</th>
                           {/* Q2 Subheaders */}
-                          <th className="py-1.5 px-1.5 text-center bg-emerald-50/30">WW ({Math.round(currentSub.weight_ww * 100)}%)</th>
-                          <th className="py-1.5 px-1.5 text-center bg-emerald-50/30">PT ({Math.round(currentSub.weight_pt * 100)}%)</th>
-                          <th className="py-1.5 px-1.5 text-center bg-emerald-50/30">QE ({Math.round(currentSub.weight_qa * 100)}%)</th>
+                          <th className="py-1.5 px-1.5 text-center bg-emerald-50/30">
+                            {scoreDisplayMode === "raw_points" ? "WW (/50)" : `WW (${Math.round(currentSub.weight_ww * 100)}%)`}
+                          </th>
+                          <th className="py-1.5 px-1.5 text-center bg-emerald-50/30">
+                            {scoreDisplayMode === "raw_points" ? "PT (/50)" : `PT (${Math.round(currentSub.weight_pt * 100)}%)`}
+                          </th>
+                          <th className="py-1.5 px-1.5 text-center bg-emerald-50/30">
+                            {scoreDisplayMode === "raw_points" ? "QE (/30)" : `QE (${Math.round(currentSub.weight_qa * 100)}%)`}
+                          </th>
                           <th className="py-1.5 px-1.5 text-center bg-emerald-100 text-emerald-900 font-extrabold border-r border-emerald-200">Q2 Grade</th>
                           {/* Q3 Subheaders */}
-                          <th className="py-1.5 px-1.5 text-center bg-amber-50/30">WW ({Math.round(currentSub.weight_ww * 100)}%)</th>
-                          <th className="py-1.5 px-1.5 text-center bg-amber-50/30">PT ({Math.round(currentSub.weight_pt * 100)}%)</th>
-                          <th className="py-1.5 px-1.5 text-center bg-amber-50/30">QE ({Math.round(currentSub.weight_qa * 100)}%)</th>
+                          <th className="py-1.5 px-1.5 text-center bg-amber-50/30">
+                            {scoreDisplayMode === "raw_points" ? "WW (/50)" : `WW (${Math.round(currentSub.weight_ww * 100)}%)`}
+                          </th>
+                          <th className="py-1.5 px-1.5 text-center bg-amber-50/30">
+                            {scoreDisplayMode === "raw_points" ? "PT (/50)" : `PT (${Math.round(currentSub.weight_pt * 100)}%)`}
+                          </th>
+                          <th className="py-1.5 px-1.5 text-center bg-amber-50/30">
+                            {scoreDisplayMode === "raw_points" ? "QE (/30)" : `QE (${Math.round(currentSub.weight_qa * 100)}%)`}
+                          </th>
                           <th className="py-1.5 px-1.5 text-center bg-amber-100 text-amber-900 font-extrabold border-r border-amber-200">Q3 Grade</th>
                           {/* Q4 Subheaders */}
-                          <th className="py-1.5 px-1.5 text-center bg-purple-50/30">WW ({Math.round(currentSub.weight_ww * 100)}%)</th>
-                          <th className="py-1.5 px-1.5 text-center bg-purple-50/30">PT ({Math.round(currentSub.weight_pt * 100)}%)</th>
-                          <th className="py-1.5 px-1.5 text-center bg-purple-50/30">QE ({Math.round(currentSub.weight_qa * 100)}%)</th>
+                          <th className="py-1.5 px-1.5 text-center bg-purple-50/30">
+                            {scoreDisplayMode === "raw_points" ? "WW (/50)" : `WW (${Math.round(currentSub.weight_ww * 100)}%)`}
+                          </th>
+                          <th className="py-1.5 px-1.5 text-center bg-purple-50/30">
+                            {scoreDisplayMode === "raw_points" ? "PT (/50)" : `PT (${Math.round(currentSub.weight_pt * 100)}%)`}
+                          </th>
+                          <th className="py-1.5 px-1.5 text-center bg-purple-50/30">
+                            {scoreDisplayMode === "raw_points" ? "QE (/30)" : `QE (${Math.round(currentSub.weight_qa * 100)}%)`}
+                          </th>
                           <th className="py-1.5 px-1.5 text-center bg-purple-100 text-purple-900 font-extrabold border-r border-purple-200">Q4 Grade</th>
                         </tr>
                       </>
@@ -2501,20 +2620,35 @@ export const TeacherDashboard: React.FC = () => {
                           <td className="py-2.5 px-3.5 font-bold text-slate-900 whitespace-nowrap">{row.name}</td>
                           {histAvailableSubjects.map(sub => {
                             const sData = row.subjects[sub.code];
+                            const quarterObj = sData?.[histActiveQuarterTab.toLowerCase()] || sData?.q1;
                             const score = histActiveQuarterTab === "ALL"
                               ? (sData?.finalRating ?? 85.0)
-                              : (sData?.[histActiveQuarterTab.toLowerCase()]?.final ?? 85.0);
+                              : (quarterObj?.final ?? 85.0);
                             const isPassing = score >= (sub.passing_threshold || 75.0);
 
                             return (
                               <td key={sub.code} className="py-2.5 px-2 text-center font-bold">
-                                <span className={`px-2 py-0.5 rounded-md ${
-                                  isPassing 
-                                    ? score >= 90 ? "bg-emerald-50 text-emerald-800 font-black" : "text-slate-800"
-                                    : "bg-red-50 text-red-700 font-black"
-                                }`}>
-                                  {score}
-                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedHistoricalScoreDetail({
+                                      student: row,
+                                      subjectCode: sub.code,
+                                      subjectName: sub.name,
+                                      initialQuarter: histActiveQuarterTab === "ALL" ? "Q1" : histActiveQuarterTab
+                                    });
+                                    setDetailActiveQuarter(histActiveQuarterTab === "ALL" ? "Q1" : histActiveQuarterTab);
+                                  }}
+                                  className={`group px-2.5 py-1 rounded-xl transition border flex items-center justify-center gap-1 mx-auto cursor-pointer shadow-2xs hover:scale-105 active:scale-95 ${
+                                    isPassing 
+                                      ? score >= 90 ? "bg-emerald-50/80 text-emerald-900 border-emerald-300 hover:bg-emerald-100" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-slate-100"
+                                      : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 font-black"
+                                  }`}
+                                  title={`Click to zoom in and inspect numbers behind ${row.name}'s ${sub.name} grade`}
+                                >
+                                  <span>{score}</span>
+                                  <Eye className="h-3 w-3 opacity-40 group-hover:opacity-100 text-[#8B0014] transition" />
+                                </button>
                               </td>
                             );
                           })}
@@ -2537,12 +2671,24 @@ export const TeacherDashboard: React.FC = () => {
                     } else {
                       /* SINGLE SUBJECT DEEP-DIVE ROW */
                       const subData = row.subjects[histActiveSubjectTab] || {
-                        q1: { ww: 85, pt: 88, qe: 84, final: 86.0 },
-                        q2: { ww: 86, pt: 89, qe: 85, final: 87.0 },
-                        q3: { ww: 87, pt: 90, qe: 86, final: 88.0 },
-                        q4: { ww: 88, pt: 91, qe: 87, final: 89.0 },
-                        finalRating: 87.5,
+                        q1: { wwRaw: 43, wwMax: 50, ww: 86, ptRaw: 45, ptMax: 50, pt: 90, qeRaw: 26, qeMax: 30, qe: 86.7, final: 87.0 },
+                        q2: { wwRaw: 44, wwMax: 50, ww: 88, ptRaw: 46, ptMax: 50, pt: 92, qeRaw: 27, qeMax: 30, qe: 90.0, final: 89.0 },
+                        q3: { wwRaw: 45, wwMax: 50, ww: 90, ptRaw: 47, ptMax: 50, pt: 94, qeRaw: 28, qeMax: 30, qe: 93.3, final: 91.0 },
+                        q4: { wwRaw: 46, wwMax: 50, ww: 92, ptRaw: 48, ptMax: 50, pt: 96, qeRaw: 29, qeMax: 30, qe: 96.7, final: 93.0 },
+                        finalRating: 90.0,
                         passed: true
+                      };
+
+                      const renderScoreCell = (raw: number, max: number, pct: number) => {
+                        if (scoreDisplayMode === "raw_points") {
+                          return (
+                            <div className="flex flex-col items-center">
+                              <span className="font-extrabold text-slate-900">{raw}/{max}</span>
+                              <span className="text-[9px] text-slate-400 font-mono">({pct}%)</span>
+                            </div>
+                          );
+                        }
+                        return <span className="font-bold text-slate-800">{pct}%</span>;
                       };
 
                       return (
@@ -2551,32 +2697,140 @@ export const TeacherDashboard: React.FC = () => {
                           <td className="py-2.5 px-3.5 font-bold text-slate-900 whitespace-nowrap">{row.name}</td>
                           
                           {/* Q1 Scores */}
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q1.ww}</td>
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q1.pt}</td>
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q1.qe}</td>
-                          <td className="py-2.5 px-1.5 text-center font-bold text-blue-900 bg-blue-50/50 border-r border-blue-200">{subData.q1.final}</td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q1.wwRaw, subData.q1.wwMax || 50, subData.q1.ww)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q1.ptRaw, subData.q1.ptMax || 50, subData.q1.pt)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q1.qeRaw, subData.q1.qeMax || 30, subData.q1.qe)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center font-bold text-blue-900 bg-blue-50/50 border-r border-blue-200">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedHistoricalScoreDetail({
+                                  student: row,
+                                  subjectCode: histActiveSubjectTab,
+                                  subjectName: histAvailableSubjects.find(s => s.code === histActiveSubjectTab)?.name || "Subject",
+                                  initialQuarter: "Q1"
+                                });
+                                setDetailActiveQuarter("Q1");
+                              }}
+                              className="px-2 py-0.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-950 font-black cursor-pointer transition shadow-2xs"
+                              title="Zoom in on Q1 numbers"
+                            >
+                              {subData.q1.final}
+                            </button>
+                          </td>
 
                           {/* Q2 Scores */}
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q2.ww}</td>
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q2.pt}</td>
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q2.qe}</td>
-                          <td className="py-2.5 px-1.5 text-center font-bold text-emerald-900 bg-emerald-50/50 border-r border-emerald-200">{subData.q2.final}</td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q2.wwRaw, subData.q2.wwMax || 50, subData.q2.ww)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q2.ptRaw, subData.q2.ptMax || 50, subData.q2.pt)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q2.qeRaw, subData.q2.qeMax || 30, subData.q2.qe)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center font-bold text-emerald-900 bg-emerald-50/50 border-r border-emerald-200">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedHistoricalScoreDetail({
+                                  student: row,
+                                  subjectCode: histActiveSubjectTab,
+                                  subjectName: histAvailableSubjects.find(s => s.code === histActiveSubjectTab)?.name || "Subject",
+                                  initialQuarter: "Q2"
+                                });
+                                setDetailActiveQuarter("Q2");
+                              }}
+                              className="px-2 py-0.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-950 font-black cursor-pointer transition shadow-2xs"
+                              title="Zoom in on Q2 numbers"
+                            >
+                              {subData.q2.final}
+                            </button>
+                          </td>
 
                           {/* Q3 Scores */}
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q3.ww}</td>
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q3.pt}</td>
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q3.qe}</td>
-                          <td className="py-2.5 px-1.5 text-center font-bold text-amber-900 bg-amber-50/50 border-r border-amber-200">{subData.q3.final}</td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q3.wwRaw, subData.q3.wwMax || 50, subData.q3.ww)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q3.ptRaw, subData.q3.ptMax || 50, subData.q3.pt)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q3.qeRaw, subData.q3.qeMax || 30, subData.q3.qe)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center font-bold text-amber-900 bg-amber-50/50 border-r border-amber-200">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedHistoricalScoreDetail({
+                                  student: row,
+                                  subjectCode: histActiveSubjectTab,
+                                  subjectName: histAvailableSubjects.find(s => s.code === histActiveSubjectTab)?.name || "Subject",
+                                  initialQuarter: "Q3"
+                                });
+                                setDetailActiveQuarter("Q3");
+                              }}
+                              className="px-2 py-0.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-950 font-black cursor-pointer transition shadow-2xs"
+                              title="Zoom in on Q3 numbers"
+                            >
+                              {subData.q3.final}
+                            </button>
+                          </td>
 
                           {/* Q4 Scores */}
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q4.ww}</td>
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q4.pt}</td>
-                          <td className="py-2.5 px-1.5 text-center text-slate-700">{subData.q4.qe}</td>
-                          <td className="py-2.5 px-1.5 text-center font-bold text-purple-900 bg-purple-50/50 border-r border-purple-200">{subData.q4.final}</td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q4.wwRaw, subData.q4.wwMax || 50, subData.q4.ww)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q4.ptRaw, subData.q4.ptMax || 50, subData.q4.pt)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center text-slate-700">
+                            {renderScoreCell(subData.q4.qeRaw, subData.q4.qeMax || 30, subData.q4.qe)}
+                          </td>
+                          <td className="py-2.5 px-1.5 text-center font-bold text-purple-900 bg-purple-50/50 border-r border-purple-200">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedHistoricalScoreDetail({
+                                  student: row,
+                                  subjectCode: histActiveSubjectTab,
+                                  subjectName: histAvailableSubjects.find(s => s.code === histActiveSubjectTab)?.name || "Subject",
+                                  initialQuarter: "Q4"
+                                });
+                                setDetailActiveQuarter("Q4");
+                              }}
+                              className="px-2 py-0.5 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-950 font-black cursor-pointer transition shadow-2xs"
+                              title="Zoom in on Q4 numbers"
+                            >
+                              {subData.q4.final}
+                            </button>
+                          </td>
 
                           {/* Subject Final & Status */}
                           <td className="py-2.5 px-3 text-center font-black text-[#8B0014] text-sm">
-                            {subData.finalRating}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedHistoricalScoreDetail({
+                                  student: row,
+                                  subjectCode: histActiveSubjectTab,
+                                  subjectName: histAvailableSubjects.find(s => s.code === histActiveSubjectTab)?.name || "Subject",
+                                  initialQuarter: "Q1"
+                                });
+                                setDetailActiveQuarter("Q1");
+                              }}
+                              className="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-[#8B0014] border border-rose-200 transition font-black cursor-pointer inline-flex items-center gap-1"
+                              title="Inspect full-year assessment numbers"
+                            >
+                              <span>{subData.finalRating}</span>
+                              <Eye className="h-3 w-3" />
+                            </button>
                           </td>
                           <td className="py-2.5 px-3 text-center">
                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
@@ -4790,6 +5044,322 @@ export const TeacherDashboard: React.FC = () => {
         onClose={() => setInspectingBatch(null)}
         batch={inspectingBatch}
       />
+
+      {/* Historical Score Breakdown & Deep-Dive Modal */}
+      {selectedHistoricalScoreDetail && (() => {
+        const student = selectedHistoricalScoreDetail.student;
+        const subjCode = selectedHistoricalScoreDetail.subjectCode;
+        const subjName = selectedHistoricalScoreDetail.subjectName;
+        const subData = student.subjects?.[subjCode] || {
+          code: subjCode,
+          name: subjName,
+          category: "Core",
+          weight_ww: 0.40,
+          weight_pt: 0.40,
+          weight_qa: 0.20,
+          q1: { wwRaw: 43, wwMax: 50, ww: 86, ptRaw: 45, ptMax: 50, pt: 90, qeRaw: 26, qeMax: 30, qe: 86.7, final: 87.0 },
+          q2: { wwRaw: 44, wwMax: 50, ww: 88, ptRaw: 46, ptMax: 50, pt: 92, qeRaw: 27, qeMax: 30, qe: 90.0, final: 89.0 },
+          q3: { wwRaw: 45, wwMax: 50, ww: 90, ptRaw: 47, ptMax: 50, pt: 94, qeRaw: 28, qeMax: 30, qe: 93.3, final: 91.0 },
+          q4: { wwRaw: 46, wwMax: 50, ww: 92, ptRaw: 48, ptMax: 50, pt: 96, qeRaw: 29, qeMax: 30, qe: 96.7, final: 93.0 },
+          finalRating: 90.0,
+          passed: true
+        };
+
+        const activeQKey = detailActiveQuarter.toLowerCase() as "q1" | "q2" | "q3" | "q4";
+        const qData = subData[activeQKey] || subData.q1;
+
+        // Weights
+        const wwWeight = subData.weight_ww ?? 0.40;
+        const ptWeight = subData.weight_pt ?? 0.40;
+        const qeWeight = subData.weight_qa ?? 0.20;
+
+        // Weighted scores
+        const wwWeighted = (qData.ww * wwWeight).toFixed(2);
+        const ptWeighted = (qData.pt * ptWeight).toFixed(2);
+        const qeWeighted = (qData.qe * qeWeight).toFixed(2);
+        const initialGrade = (parseFloat(wwWeighted) + parseFloat(ptWeighted) + parseFloat(qeWeighted)).toFixed(2);
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto space-y-5 p-5 sm:p-8">
+              {/* Top Banner Header */}
+              <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#8B0014]/10 text-[#8B0014] border border-[#8B0014]/20 flex items-center gap-1">
+                      <FileSpreadsheet className="h-3.5 w-3.5" />
+                      DepEd Digital Score Analysis
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                      {student.section} • {student.schoolYear}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      {subData.passed ? "Passing Standing" : "Needs Remedial"}
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <span>{student.name}</span>
+                    <span className="text-xs font-mono font-bold text-slate-400">({student.lrn})</span>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 font-bold">
+                    Subject: <span className="text-[#8B0014]">{subjName}</span> • Formula: Written Work {Math.round(wwWeight * 100)}% + Performance Task {Math.round(ptWeight * 100)}% + Quarterly Exam {Math.round(qeWeight * 100)}%
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedHistoricalScoreDetail(null)}
+                  className="p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer shrink-0"
+                >
+                  <ChevronRight className="h-5 w-5 rotate-90 sm:rotate-0" />
+                  <span className="sr-only">Close</span>
+                </button>
+              </div>
+
+              {/* Quarter Switcher & Overview Strip */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-2xs border border-slate-200 font-extrabold text-xs">
+                  {(["Q1", "Q2", "Q3", "Q4"] as const).map(q => {
+                    const qScore = subData[q.toLowerCase() as "q1" | "q2" | "q3" | "q4"]?.final ?? 85.0;
+                    return (
+                      <button
+                        key={q}
+                        type="button"
+                        onClick={() => setDetailActiveQuarter(q)}
+                        className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
+                          detailActiveQuarter === q 
+                            ? "bg-[#8B0014] text-white shadow-xs" 
+                            : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        <span>{q}</span>
+                        <span className={`text-[10px] px-1 rounded ${detailActiveQuarter === q ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"}`}>
+                          {qScore}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Annual Final Rating Badge */}
+                <div className="flex items-center gap-2 self-end sm:self-auto text-xs font-bold">
+                  <span className="text-slate-500">Annual Subject Rating:</span>
+                  <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-[#8B0014] to-[#6D0010] text-white font-black text-sm shadow-xs">
+                    {subData.finalRating} / 100
+                  </span>
+                </div>
+              </div>
+
+              {/* Granular Assessment Breakdown Cards (WW, PT, QE) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 1. Written Work (WW) */}
+                <div className="bg-blue-50/40 border border-blue-200/90 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2 border-b border-blue-200/80 pb-2">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-900 block">
+                        Written Works (WW)
+                      </span>
+                      <strong className="text-xs font-bold text-blue-950">Quizzes &amp; Summative Tests</strong>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-900">
+                      {Math.round(wwWeight * 100)}% Weight
+                    </span>
+                  </div>
+
+                  {/* Sub-items */}
+                  <div className="space-y-2 text-xs">
+                    {(qData.items?.ww || [
+                      { name: "Quiz 1 (Fundamentals)", score: Math.round(qData.wwRaw * 0.3), max: 15 },
+                      { name: "Quiz 2 (Problem Analysis)", score: Math.round(qData.wwRaw * 0.3), max: 15 },
+                      { name: "Unit Summative Exam", score: Math.round(qData.wwRaw * 0.4), max: 20 }
+                    ]).map((item: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-white border border-blue-100">
+                        <span className="font-bold text-slate-700">{item.name}</span>
+                        <span className="font-mono font-black text-blue-950">
+                          {item.score} <span className="text-slate-400 font-normal">/ {item.max}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Component Summary */}
+                  <div className="p-2.5 rounded-xl bg-blue-100/70 text-blue-950 font-bold text-xs flex items-center justify-between">
+                    <div>
+                      <span className="block text-[10px] text-blue-800">Total WW Raw Score:</span>
+                      <strong className="text-sm font-black text-blue-950">{qData.wwRaw} / {qData.wwMax || 50} ({qData.ww}%)</strong>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[10px] text-blue-800">Weighted WW:</span>
+                      <strong className="text-sm font-black text-blue-950">{wwWeighted}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Performance Task (PT) */}
+                <div className="bg-emerald-50/40 border border-emerald-200/90 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2 border-b border-emerald-200/80 pb-2">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-900 block">
+                        Performance Tasks (PT)
+                      </span>
+                      <strong className="text-xs font-bold text-emerald-950">Lab, Projects &amp; Activities</strong>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-900">
+                      {Math.round(ptWeight * 100)}% Weight
+                    </span>
+                  </div>
+
+                  {/* Sub-items */}
+                  <div className="space-y-2 text-xs">
+                    {(qData.items?.pt || [
+                      { name: "Group Activity / Lab", score: Math.round(qData.ptRaw * 0.4), max: 20 },
+                      { name: "Individual Portfolio Project", score: Math.round(qData.ptRaw * 0.6), max: 30 }
+                    ]).map((item: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-white border border-emerald-100">
+                        <span className="font-bold text-slate-700">{item.name}</span>
+                        <span className="font-mono font-black text-emerald-950">
+                          {item.score} <span className="text-slate-400 font-normal">/ {item.max}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Component Summary */}
+                  <div className="p-2.5 rounded-xl bg-emerald-100/70 text-emerald-950 font-bold text-xs flex items-center justify-between">
+                    <div>
+                      <span className="block text-[10px] text-emerald-800">Total PT Raw Score:</span>
+                      <strong className="text-sm font-black text-emerald-950">{qData.ptRaw} / {qData.ptMax || 50} ({qData.pt}%)</strong>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[10px] text-emerald-800">Weighted PT:</span>
+                      <strong className="text-sm font-black text-emerald-950">{ptWeighted}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Quarterly Exam (QE) */}
+                <div className="bg-purple-50/40 border border-purple-200/90 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2 border-b border-purple-200/80 pb-2">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-900 block">
+                        Quarterly Assessment (QE)
+                      </span>
+                      <strong className="text-xs font-bold text-purple-950">Periodical Examination</strong>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-900">
+                      {Math.round(qeWeight * 100)}% Weight
+                    </span>
+                  </div>
+
+                  {/* Sub-items */}
+                  <div className="space-y-2 text-xs">
+                    {(qData.items?.qe || [
+                      { name: `${detailActiveQuarter} Periodical Exam`, score: qData.qeRaw, max: 30 }
+                    ]).map((item: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-white border border-purple-100">
+                        <span className="font-bold text-slate-700">{item.name}</span>
+                        <span className="font-mono font-black text-purple-950">
+                          {item.score} <span className="text-slate-400 font-normal">/ {item.max}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Component Summary */}
+                  <div className="p-2.5 rounded-xl bg-purple-100/70 text-purple-950 font-bold text-xs flex items-center justify-between">
+                    <div>
+                      <span className="block text-[10px] text-purple-800">Exam Raw Score:</span>
+                      <strong className="text-sm font-black text-purple-950">{qData.qeRaw} / {qData.qeMax || 30} ({qData.qe}%)</strong>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[10px] text-purple-800">Weighted QE:</span>
+                      <strong className="text-sm font-black text-purple-950">{qeWeighted}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transmutation & Mathematical Summary Banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-[#5A000D] to-[#8B0014] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs text-rose-200">
+                    <Sparkles className="h-4 w-4 text-amber-300" />
+                    <span className="font-bold">DepEd DO 8, s. 2015 Transmutation Summary for {detailActiveQuarter}</span>
+                  </div>
+                  <div className="text-xs text-slate-200 font-mono">
+                    Initial Grade = {wwWeighted} (WW) + {ptWeighted} (PT) + {qeWeighted} (QE) = <strong className="text-white text-sm">{initialGrade}</strong>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 self-end sm:self-auto">
+                  <div className="text-right">
+                    <span className="block text-[10px] text-rose-200 font-bold uppercase">Quarter Grade:</span>
+                    <strong className="text-2xl font-black text-amber-300 leading-none">{qData.final}</strong>
+                  </div>
+                  <span className={`px-3 py-1 rounded-xl text-xs font-black ${
+                    qData.final >= 75.0 ? "bg-emerald-500/30 text-emerald-200 border border-emerald-400/40" : "bg-red-500/30 text-red-200 border border-red-400/40"
+                  }`}>
+                    {qData.final >= 75.0 ? "Passed" : "Remedial Required"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Full Academic Year Progress Strip */}
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <span className="text-xs font-black text-slate-800 uppercase tracking-wide">
+                  Complete 4-Quarter Progress Curve ({student.schoolYear})
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                  {(["Q1", "Q2", "Q3", "Q4"] as const).map(q => {
+                    const qObj = subData[q.toLowerCase() as "q1" | "q2" | "q3" | "q4"] || subData.q1;
+                    return (
+                      <div 
+                        key={q} 
+                        onClick={() => setDetailActiveQuarter(q)}
+                        className={`p-3 rounded-xl border transition cursor-pointer ${
+                          detailActiveQuarter === q 
+                            ? "bg-rose-50/80 border-[#8B0014] ring-1 ring-[#8B0014]" 
+                            : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-bold">
+                          <span className="text-slate-700">{q} Grade</span>
+                          <strong className="text-[#8B0014] text-sm">{qObj.final}</strong>
+                        </div>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">
+                          WW: {qObj.wwRaw}/{qObj.wwMax || 50} • PT: {qObj.ptRaw}/{qObj.ptMax || 50} • QE: {qObj.qeRaw}/{qObj.qeMax || 30}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-between items-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    showToast(`Exported ${student.name} - ${subjName} Form 137 Breakdown.`);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export Subject SF9 Slip</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedHistoricalScoreDetail(null)}
+                  className="px-6 py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs shadow-md transition cursor-pointer"
+                >
+                  Close Score Analysis
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
