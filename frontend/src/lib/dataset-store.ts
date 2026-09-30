@@ -3458,4 +3458,129 @@ export function subscribeToParentRecords(callback: (records: ParentRecord[]) => 
   }
 }
 
+// UNIFIED STUDENT COMMENDATION & POSITIVE KUDOS STORE
+export interface StudentCommendation {
+  id: string;
+  student_id: number;
+  student_name: string;
+  student_lrn?: string;
+  section: string;
+  sender_name: string;
+  sender_role: "Teacher" | "Counselor" | "Principal";
+  badge_type: "Academic Excellence" | "Leadership & Service" | "Perseverance & Turnaround" | "Kindness & Peer Support" | "Exemplary Attendance";
+  title: string;
+  message: string;
+  created_at: string;
+  notify_parent_sms?: boolean;
+}
+
+const COMMENDATIONS_KEY = "sapc_student_commendations";
+
+export const DEFAULT_COMMENDATIONS: StudentCommendation[] = [
+  {
+    id: "kudos-1",
+    student_id: 1,
+    student_name: "Juan Dela Cruz",
+    student_lrn: "108543120001",
+    section: "Grade 7 - Love",
+    sender_name: "Mr. Mark Ramos, LPT",
+    sender_role: "Teacher",
+    badge_type: "Perseverance & Turnaround",
+    title: "Remarkable Math Turnaround & Active Participation",
+    message: "Juan showed exceptional dedication this week by attending the Learning Commons tutoring circle and achieving an 88% on his Unit Quiz! Keep up the inspiring momentum.",
+    created_at: "2026-09-28T09:30:00.000Z",
+    notify_parent_sms: true
+  },
+  {
+    id: "kudos-2",
+    student_id: 2,
+    student_name: "Maria Santos",
+    student_lrn: "108543120002",
+    section: "Grade 7 - Love",
+    sender_name: "Ms. Maria Theresa Cruz, RGC",
+    sender_role: "Counselor",
+    badge_type: "Kindness & Peer Support",
+    title: "Exemplary Peer Support & Empathy",
+    message: "Recognized for voluntarily assisting classmates during group study and fostering a warm, collaborative environment.",
+    created_at: "2026-09-29T14:15:00.000Z",
+    notify_parent_sms: true
+  }
+];
+
+export function getActiveCommendations(studentId?: number): StudentCommendation[] {
+  if (typeof window === "undefined") return studentId ? DEFAULT_COMMENDATIONS.filter(c => c.student_id === studentId) : DEFAULT_COMMENDATIONS;
+  try {
+    const raw = localStorage.getItem(COMMENDATIONS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return studentId ? parsed.filter((c: StudentCommendation) => c.student_id === studentId) : parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Failed reading commendations:", e);
+  }
+  return studentId ? DEFAULT_COMMENDATIONS.filter(c => c.student_id === studentId) : DEFAULT_COMMENDATIONS;
+}
+
+export function saveActiveCommendations(commendations: StudentCommendation[], syncCloud: boolean = true): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(COMMENDATIONS_KEY, JSON.stringify(commendations));
+      window.dispatchEvent(new CustomEvent("sapc:commendations-updated", { detail: commendations }));
+    } catch (e) {
+      console.warn("Failed saving commendations locally:", e);
+    }
+  }
+  if (syncCloud && db && auth?.currentUser) {
+    commendations.forEach(async (c) => {
+      try {
+        const docRef = doc(db, "student_commendations", c.id);
+        await setDoc(docRef, c, { merge: true });
+      } catch (err) {
+        console.warn("Failed syncing commendation to Firestore:", err);
+      }
+    });
+  }
+}
+
+export function addStudentCommendation(data: Omit<StudentCommendation, "id" | "created_at">): StudentCommendation {
+  const current = getActiveCommendations();
+  const newCommendation: StudentCommendation = {
+    ...data,
+    id: `kudos-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    created_at: new Date().toISOString()
+  };
+  const updated = [newCommendation, ...current];
+  saveActiveCommendations(updated, true);
+
+  // Auto-dispatch in-app notification for Parent & Student
+  addAppNotification({
+    title: `🌟 New Commendation: ${newCommendation.title}`,
+    message: `${newCommendation.sender_name} awarded ${newCommendation.student_name} with ${newCommendation.badge_type}!`,
+    body: newCommendation.message,
+    targetRole: "student",
+    audience: "student",
+    type: "system",
+    read: false,
+    student_id: newCommendation.student_id,
+    student_name: newCommendation.student_name
+  });
+
+  addAppNotification({
+    title: `🌟 Proud Parent Moment: Commendation for ${newCommendation.student_name}`,
+    message: `${newCommendation.sender_name} issued a positive recognition card: ${newCommendation.title}`,
+    body: newCommendation.message,
+    targetRole: "parent",
+    audience: "parent",
+    type: "system",
+    read: false,
+    student_id: newCommendation.student_id,
+    student_name: newCommendation.student_name
+  });
+
+  return newCommendation;
+}
+
+
 

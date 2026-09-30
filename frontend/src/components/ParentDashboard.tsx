@@ -17,7 +17,9 @@ import {
   ChevronRight, 
   PhoneCall, 
   GraduationCap, 
-  Sparkles, 
+  Megaphone,
+  Trophy,
+  Star,
   FileText, 
   Bell, 
   HeartPulse, 
@@ -46,6 +48,8 @@ import {
   scheduleCounselingSession, 
   addAppNotification, 
   getActiveParentRecords,
+  getActiveCommendations,
+  StudentCommendation,
   AppNotification, 
   InterventionCarePlan 
 } from "@/lib/dataset-store";
@@ -572,7 +576,7 @@ export const ParentDashboard: React.FC = () => {
     { id: "messages", label: "Direct Teacher Chat", icon: MessageSquare, badge: "Threaded", category: "connect" },
     { id: "notifications", label: "Parent Inbox", icon: Bell, badge: unreadParentNotifsCount > 0 ? `${unreadParentNotifsCount} New` : undefined, category: "connect" },
     { id: "resources", label: "Parenting & Health Guides", icon: FileText, category: "connect" },
-    { id: "announcements", label: "School Events & Memos", icon: Sparkles, category: "connect" }
+    { id: "announcements", label: "School Events & Memos", icon: Megaphone, category: "connect" }
   ];
 
   const visibleTabs = selectedNavCategory === "all"
@@ -1311,6 +1315,84 @@ export const ParentDashboard: React.FC = () => {
               ))}
             </div>
           </div>
+
+          {/* Institutional Kudos & Faculty Commendations */}
+          {(() => {
+            const childCommendations = getActiveCommendations().filter(
+              c => c.student_id === currentChild.id || c.student_name?.toLowerCase().includes(currentChild.first_name.toLowerCase())
+            );
+
+            return (
+              <div className="bg-white border border-amber-200/90 rounded-3xl p-6 sm:p-7 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-100 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-2xl bg-amber-500 text-slate-950 font-black shadow-xs">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                        Teacher Praise &amp; Student Commendations
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Positive reinforcement and character recognition cards awarded to {currentChild.first_name}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-950 border border-amber-300 self-start sm:self-auto">
+                    {childCommendations.length} {childCommendations.length === 1 ? "Commendation" : "Commendations"} Received
+                  </span>
+                </div>
+
+                {childCommendations.length === 0 ? (
+                  <div className="p-5 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-xs text-slate-500 space-y-1.5">
+                    <Trophy className="h-6 w-6 text-amber-500 mx-auto" />
+                    <p className="font-bold text-slate-700">No commendation cards recorded yet this quarter.</p>
+                    <p className="text-slate-400">Subject teachers and guidance counselors issue commendations for milestone turnaround, peer kindness, and academic growth.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {childCommendations.map((comm) => (
+                      <div key={comm.id} className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2.5 shadow-2xs">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl" role="img" aria-label="badge">
+                              {comm.badge_type === "Academic Excellence" ? "🥇" :
+                               comm.badge_type === "Perseverance & Turnaround" ? "🚀" :
+                               comm.badge_type === "Kindness & Peer Support" ? "🤝" :
+                               comm.badge_type === "Leadership & Service" ? "⭐" : "🌟"}
+                            </span>
+                            <div>
+                              <strong className="text-xs font-bold text-slate-900 block">{comm.title || comm.badge_type}</strong>
+                              <span className="text-[10px] text-slate-500">
+                                Awarded by <span className="font-bold text-slate-700">{comm.sender_name}</span> ({comm.sender_role})
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
+                            {comm.created_at ? new Date(comm.created_at).toLocaleDateString() : "Recent"}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-slate-800 leading-relaxed italic bg-white p-2.5 rounded-xl border border-amber-100">
+                          &quot;{comm.message}&quot;
+                        </p>
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-amber-200/50">
+                          <span className="font-bold text-amber-900">{comm.badge_type}</span>
+                          {comm.notify_parent_sms && (
+                            <span className="inline-flex items-center gap-1 font-bold text-emerald-700">
+                              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                              Delivered via Parent SMS &amp; Portal
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -2343,7 +2425,7 @@ export const ParentDashboard: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-4">
               <h3 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-amber-500" />
+                <Megaphone className="h-6 w-6 text-amber-500" />
                 School-Wide &amp; Grade-Level Announcements
               </h3>
             </div>

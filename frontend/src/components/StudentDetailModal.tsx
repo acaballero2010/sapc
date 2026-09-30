@@ -25,7 +25,9 @@ import {
   Square,
   Target,
   UserCheck,
-  Sparkles,
+  Star,
+  HeartHandshake,
+  Trophy,
   Smile,
   Flame,
   BatteryCharging
@@ -35,10 +37,11 @@ import { useAuth } from "@/lib/auth-context";
 import { RiskBadge } from "./RiskBadge";
 import { DomainRadarChart } from "./DomainRadarChart";
 import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
-import { SAPC_500_STUDENTS } from "@/data/students500";
-import { getActiveStudentDataset } from "@/lib/dataset-store";
+import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+import { getActiveStudentDataset, getActiveCommendations, StudentCommendation } from "@/lib/dataset-store";
 import { analyzeMoodTelemetry } from "@/lib/mood-telemetry";
 import { SUBJECT_REGISTRY, calculateSubjectFailurePrediction } from "@/lib/subject-prediction";
+import { StudentCommendationModal } from "./StudentCommendationModal";
 
 interface StudentDetailModalProps {
   studentId: number | null;
@@ -75,6 +78,28 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [dictationTranscript, setDictationTranscript] = useState("");
   const [isSummarizing, setIsSummarizing] = useState(false);
+
+  // Kudos & Student Commendation Modal States
+  const [isCommendationOpen, setIsCommendationOpen] = useState(false);
+  const [studentCommendations, setStudentCommendations] = useState<StudentCommendation[]>([]);
+  const [fullStudentRecord, setFullStudentRecord] = useState<StudentRecord | null>(null);
+
+  useEffect(() => {
+    const handleCommendationsUpdate = () => {
+      if (studentId) {
+        const comms = getActiveCommendations().filter(
+          (c) => c.student_id === studentId || (student && c.student_name?.toLowerCase().includes(student.first_name.toLowerCase()))
+        );
+        setStudentCommendations(comms);
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("sapc_commendations_updated", handleCommendationsUpdate);
+      return () => {
+        window.removeEventListener("sapc_commendations_updated", handleCommendationsUpdate);
+      };
+    }
+  }, [studentId, student]);
 
   const toggleRecording = () => {
     if (isRecording) {
@@ -213,6 +238,12 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           }
         }
         setStudentCarePlans(localPlans);
+
+        setFullStudentRecord(found);
+        const comms = getActiveCommendations().filter(
+          (c) => c.student_id === found.id || c.student_name?.toLowerCase().includes(found.first_name.toLowerCase())
+        );
+        setStudentCommendations(comms);
 
         const mockStudent = {
           id: found.id,
@@ -506,6 +537,18 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 <span className="sm:hidden">Care Plan</span>
               </button>
             )}
+            {fullStudentRecord && (
+              <button
+                type="button"
+                onClick={() => setIsCommendationOpen(true)}
+                className="px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 flex items-center gap-1.5 transition shadow-xs whitespace-nowrap cursor-pointer"
+                title="Award Kudos & Commendation"
+              >
+                <Award className="h-3.5 w-3.5 text-slate-950" />
+                <span className="hidden sm:inline">Award Kudos</span>
+                <span className="sm:hidden">Kudos</span>
+              </button>
+            )}
             <button
               onClick={onClose}
               className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition"
@@ -573,7 +616,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           ) : activeTab === "subject_risk" ? (
             <div className="space-y-6">
               <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-3 text-xs text-amber-950 dark:text-amber-200">
-                <Sparkles className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <Target className="h-5 w-5 text-[#8B0014] shrink-0 mt-0.5" />
                 <div>
                   <strong className="block font-black text-slate-900 dark:text-white text-sm mb-0.5">
                     Early Academic Warning Engine — Subject Breakdown
@@ -1005,7 +1048,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
                 {studentCarePlans.length === 0 ? (
                   <div className="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-slate-500 text-xs space-y-2">
-                    <Sparkles className="h-6 w-6 text-amber-500 mx-auto" />
+                    <ShieldCheck className="h-6 w-6 text-[#8B0014] mx-auto" />
                     <p className="font-semibold text-slate-700">No care plan recorded yet for {student?.first_name}.</p>
                     <p className="text-slate-400 max-w-md mx-auto">
                       Click &quot;+ Create Care Plan&quot; above to select a protocol template (Academic, Mental Health, Financial, Family, Clinic) and assign tasks.
@@ -1209,7 +1252,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
                     {/* Explanation Banner */}
                     <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-start gap-2.5">
-                      <Sparkles className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <HeartPulse className="h-4 w-4 text-[#8B0014] shrink-0 mt-0.5" />
                       <div className="space-y-0.5">
                         <p className="font-semibold text-slate-900">{telemetryResult.explanation}</p>
                         {telemetryResult.disengagement_reason && (
@@ -1220,6 +1263,91 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                   </div>
                 );
               })()}
+
+              {/* Institutional Kudos & Student Commendations */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                          Institutional Kudos &amp; Commendations
+                        </h4>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-900 border border-amber-300">
+                          {studentCommendations.length} Awarded
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        Positive reinforcement recognitions dispatched to student portal &amp; parent SMS/app.
+                      </p>
+                    </div>
+                  </div>
+
+                  {fullStudentRecord && (
+                    <button
+                      type="button"
+                      onClick={() => setIsCommendationOpen(true)}
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition shadow-xs self-start sm:self-auto cursor-pointer"
+                    >
+                      <Award className="h-3.5 w-3.5 text-slate-950" />
+                      <span>+ Award Kudos</span>
+                    </button>
+                  )}
+                </div>
+
+                {studentCommendations.length === 0 ? (
+                  <div className="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-slate-500 text-xs space-y-2">
+                    <Trophy className="h-6 w-6 text-amber-500 mx-auto" />
+                    <p className="font-semibold text-slate-700">No commendations recorded yet for {student?.first_name}.</p>
+                    <p className="text-slate-400 max-w-md mx-auto">
+                      Reinforce positive behavior, turnaround effort, academic milestones, or peer kindness by clicking &quot;+ Award Kudos&quot; above.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {studentCommendations.map((comm) => (
+                      <div key={comm.id} className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-2.5 shadow-2xs relative overflow-hidden">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl" role="img" aria-label="badge">
+                              {comm.badge_type === "Academic Excellence" ? "🥇" :
+                               comm.badge_type === "Perseverance & Turnaround" ? "🚀" :
+                               comm.badge_type === "Kindness & Peer Support" ? "🤝" :
+                               comm.badge_type === "Leadership & Service" ? "⭐" : "🌟"}
+                            </span>
+                            <div>
+                              <span className="font-bold text-slate-900 text-xs block">{comm.title || comm.badge_type}</span>
+                              <span className="text-[10px] text-slate-500">
+                                Awarded by <strong className="text-slate-700">{comm.sender_name}</strong> ({comm.sender_role})
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
+                            {comm.created_at ? new Date(comm.created_at).toLocaleDateString() : "Recent"}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-slate-800 leading-relaxed italic bg-white/70 p-2.5 rounded-xl border border-amber-100">
+                          &quot;{comm.message}&quot;
+                        </p>
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-amber-200/50">
+                          <span className="font-medium text-slate-600">{comm.badge_type}</span>
+                          {comm.notify_parent_sms && (
+                            <span className="inline-flex items-center gap-1 font-bold text-emerald-700">
+                              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                              Parent Notified via SMS
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* SASS Academic History */}
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
@@ -1489,6 +1617,25 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Positive Reinforcement Praise & Kudos Award Modal */}
+      {fullStudentRecord && (
+        <StudentCommendationModal
+          isOpen={isCommendationOpen}
+          onClose={() => setIsCommendationOpen(false)}
+          student={fullStudentRecord}
+          senderName={user?.full_name || "Guidance Faculty"}
+          senderRole={user?.role === "guidance_counselor" ? "Counselor" : "Teacher"}
+          onSuccess={() => {
+            if (studentId) {
+              const comms = getActiveCommendations().filter(
+                (c) => c.student_id === studentId || (student && c.student_name?.toLowerCase().includes(student.first_name.toLowerCase()))
+              );
+              setStudentCommendations(comms);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

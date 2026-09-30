@@ -22,7 +22,10 @@ import {
   LineChart as LucideLineChart, 
   CheckSquare, 
   Square, 
-  Sparkles, 
+  Award,
+  Trophy,
+  Compass,
+  Target,
   Info, 
   Shield, 
   Edit3, 
@@ -34,7 +37,9 @@ import {
   getActiveStudentDataset, 
   updateStudentRecord, 
   scheduleCounselingSession, 
-  addAppNotification 
+  addAppNotification,
+  getActiveCommendations,
+  StudentCommendation
 } from "@/lib/dataset-store";
 import { useAuth } from "@/lib/auth-context";
 import { fetchWithAuth } from "@/lib/api";
@@ -538,7 +543,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
     { id: "family_assessment", label: "Family (17 Fields)", icon: Users },
     { id: "financial_assessment", label: "Financial Aid & Stress", icon: DollarSign },
     { id: "interventions", label: "Assigned Interventions", icon: CheckSquare },
-    { id: "recommendations", label: "Recommendations", icon: Sparkles },
+    { id: "recommendations", label: "Recommendations", icon: Compass },
     { id: "trends", label: "Trends & Anomalies", icon: LucideLineChart },
     { id: "forecast", label: "Predictive Forecast", icon: TrendingUp },
     { id: "notifications", label: "Notifications", icon: Bell },
@@ -814,6 +819,82 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
               </div>
             </div>
           </div>
+
+          {/* Institutional Kudos & Faculty Commendations */}
+          {(() => {
+            const studentCommendations = getActiveCommendations().filter(
+              c => c.student_id === (student?.id || 1) || c.student_name?.toLowerCase().includes(displayName.toLowerCase())
+            );
+
+            return (
+              <div className="p-5 sm:p-6 rounded-3xl bg-amber-50/60 border border-amber-200/90 space-y-4">
+                <div className="flex items-center justify-between gap-2 border-b border-amber-200/60 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-2xl bg-amber-500 text-slate-950 font-black shadow-xs">
+                      <Award className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm sm:text-base font-black text-slate-900">
+                        My Earned Kudos &amp; Commendation Badges
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Positive recognitions and excellence cards awarded by your teachers and guidance counselor
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-200 text-amber-950 border border-amber-300">
+                    {studentCommendations.length} Earned
+                  </span>
+                </div>
+
+                {studentCommendations.length === 0 ? (
+                  <div className="p-5 text-center rounded-2xl bg-white/70 border border-dashed border-amber-200 text-xs text-slate-500 space-y-1.5">
+                    <Trophy className="h-6 w-6 text-amber-500 mx-auto" />
+                    <p className="font-bold text-slate-700">No commendation cards recorded yet this semester.</p>
+                    <p className="text-slate-400">Keep up your academic focus, peer kindness, and regular attendance!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {studentCommendations.map((comm) => (
+                      <div key={comm.id} className="p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs space-y-2.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl" role="img" aria-label="badge">
+                              {comm.badge_type === "Academic Excellence" ? "🥇" :
+                               comm.badge_type === "Perseverance & Turnaround" ? "🚀" :
+                               comm.badge_type === "Kindness & Peer Support" ? "🤝" :
+                               comm.badge_type === "Leadership & Service" ? "⭐" : "🌟"}
+                            </span>
+                            <div>
+                              <strong className="text-xs font-bold text-slate-900 block">{comm.title || comm.badge_type}</strong>
+                              <span className="text-[10px] text-slate-500">
+                                Awarded by <span className="font-bold text-slate-700">{comm.sender_name}</span> ({comm.sender_role})
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            {comm.created_at ? new Date(comm.created_at).toLocaleDateString() : "Recent"}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-slate-700 italic bg-amber-50/50 p-2.5 rounded-xl border border-amber-100/80">
+                          &quot;{comm.message}&quot;
+                        </p>
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100">
+                          <span className="font-bold text-amber-900">{comm.badge_type}</span>
+                          <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                            Official SAPC Recognition
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-950 leading-relaxed flex items-start gap-3">
             <Info className="h-5 w-5 text-[#D97706] shrink-0 mt-0.5" />
