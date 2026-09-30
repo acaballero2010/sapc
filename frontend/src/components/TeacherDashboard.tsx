@@ -167,6 +167,15 @@ export const TeacherDashboard: React.FC = () => {
     return Array.from(sSet);
   }, [user]);
 
+  const allAssignedStudentsCount = useMemo(() => {
+    const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
+    return all.filter(s => 
+      matchSection(s.section_name, "Grade 7 - Love") ||
+      (user?.section && matchSection(s.section_name, user.section)) ||
+      (user?.full_name && s.adviser_name && s.adviser_name.toLowerCase().includes(user.full_name.toLowerCase()))
+    ).length;
+  }, [user]);
+
   const filterAdvisory = React.useCallback((all: StudentRecord[]) => {
     if (selectedSectionFilter !== "all") {
       return all.filter(s => matchSection(s.section_name, selectedSectionFilter));
@@ -184,6 +193,12 @@ export const TeacherDashboard: React.FC = () => {
     const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
     return filterAdvisory(all);
   });
+
+  // Immediate reactivity when section filter changes
+  useEffect(() => {
+    const all = typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
+    setStudents(filterAdvisory(all));
+  }, [selectedSectionFilter, filterAdvisory]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -1107,11 +1122,12 @@ export const TeacherDashboard: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", "SAPC_Grade11_STEM_Student_Credentials.csv");
+    const secTag = selectedSectionFilter === "all" ? "All_Assigned" : selectedSectionFilter;
+    link.setAttribute("download", `SAPC_${secTag.replace(/[^a-zA-Z0-9]/g, "_")}_Student_Credentials.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast("Generated and downloaded student login credentials CSV.");
+    showToast(`Generated and downloaded student login credentials CSV for ${students.length} students.`);
   };
 
   const handleExportClassRecord = () => {
@@ -1222,7 +1238,28 @@ export const TeacherDashboard: React.FC = () => {
               <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-300" />
               Class Adviser Portal
             </span>
-            <span className="text-[11px] sm:text-xs text-rose-200 font-semibold">• {teacherSection}</span>
+            
+            {/* Top Banner Section Selector */}
+            <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-xs border border-white/20 rounded-xl px-2.5 py-1 text-xs text-white">
+              <span className="text-[11px] font-bold text-rose-200">Section:</span>
+              <select
+                value={selectedSectionFilter}
+                onChange={(e) => setSelectedSectionFilter(e.target.value)}
+                className="bg-transparent font-bold text-white focus:outline-none cursor-pointer [&>option]:text-slate-900"
+              >
+                <option value="all">
+                  All Assigned Students ({allAssignedStudentsCount})
+                </option>
+                {availableAdvisorySections.map((sec) => {
+                  const secCount = typeof window !== "undefined" ? getActiveStudentDataset().filter(s => matchSection(s.section_name, sec)).length : 0;
+                  return (
+                    <option key={sec} value={sec}>
+                      {sec} ({secCount})
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
           </div>
           <h1 className="text-xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
             Welcome, {user?.full_name || "Prof. Ernesto Bautista"}!
@@ -1283,14 +1320,16 @@ export const TeacherDashboard: React.FC = () => {
           <div className="flex items-center justify-between gap-1.5">
             <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider">Class Size</span>
             <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
-              {students[0]?.strand || "JHS"}
+              {selectedSectionFilter === "all" ? "All Sections" : (students[0]?.strand || "JHS")}
             </span>
           </div>
           <div className="my-2 flex items-baseline gap-1.5 flex-wrap">
             <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-none">{classSize}</span>
             <span className="text-xs sm:text-sm font-bold text-slate-500">Students</span>
           </div>
-          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">100% Enrolled &amp; Active</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
+            {selectedSectionFilter === "all" ? `${allAssignedStudentsCount} Total Students Assigned` : `${teacherSection} Active`}
+          </span>
         </div>
 
         {/* Average Risk Score */}
@@ -2999,16 +3038,42 @@ export const TeacherDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
               <h3 className="text-lg sm:text-xl font-black text-slate-900">DepEd Digital Class Record (Form 137)</h3>
-              <p className="text-xs text-slate-500">Official composite grades, attendance rates, and conduct for {teacherSection}</p>
+              <p className="text-xs text-slate-500">
+                Official composite grades, attendance rates, and conduct for {selectedSectionFilter === "all" ? `All Assigned Sections (${students.length} Students)` : `${teacherSection} (${students.length} Students)`}
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={handleExportClassRecord}
-              className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition"
-            >
-              <Download className="h-4 w-4" />
-              <span>Export &amp; Print Form 137</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Section Filter Dropdown */}
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs">
+                <span className="text-[11px] font-bold text-slate-500">Section:</span>
+                <select
+                  value={selectedSectionFilter}
+                  onChange={(e) => setSelectedSectionFilter(e.target.value)}
+                  className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">
+                    All Assigned Students ({allAssignedStudentsCount})
+                  </option>
+                  {availableAdvisorySections.map((sec) => {
+                    const secCount = typeof window !== "undefined" ? getActiveStudentDataset().filter(s => matchSection(s.section_name, sec)).length : 0;
+                    return (
+                      <option key={sec} value={sec}>
+                        {sec} ({secCount})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleExportClassRecord}
+                className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
+              >
+                <Download className="h-4 w-4" />
+                <span>Export &amp; Print Form 137</span>
+              </button>
+            </div>
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-slate-200">
@@ -3018,8 +3083,8 @@ export const TeacherDashboard: React.FC = () => {
               const strandVal = firstStudent?.strand || (gradeNum <= 10 ? "JHS" : "STEM");
               const activeCurriculumList = getCurriculumForGrade(gradeNum as any, strandVal, undefined, true);
               const displaySubjects = activeCurriculumList.length > 0 
-                ? activeCurriculumList.slice(0, 6) 
-                : getActiveCurriculum().filter(s => s.grade_level === gradeNum && s.is_active).slice(0, 6);
+                ? activeCurriculumList 
+                : getActiveCurriculum().filter(s => s.grade_level === gradeNum && s.is_active);
 
               return (
                 <table className="min-w-full text-left text-xs">
@@ -3155,7 +3220,7 @@ export const TeacherDashboard: React.FC = () => {
                 onChange={e => setAttendanceSectionFilter(e.target.value)}
                 className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#8B0014] cursor-pointer"
               >
-                <option value="all">All Sections</option>
+                <option value="all">All Assigned Sections ({students.length})</option>
                 {Array.from(new Set(students.map(s => s.section_name))).filter(Boolean).sort().map(sec => (
                   <option key={sec} value={sec}>{sec}</option>
                 ))}
@@ -3201,7 +3266,7 @@ export const TeacherDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {filteredAttendanceStudents.slice(0, 15).map((s, idx) => {
+                {filteredAttendanceStudents.map((s, idx) => {
                   let pCount = 0;
                   let aCount = 0;
                   let eCount = 0;
@@ -3335,16 +3400,42 @@ export const TeacherDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
               <h3 className="text-lg sm:text-xl font-black text-slate-900">Generate Student Portal Credentials</h3>
-              <p className="text-xs text-slate-500">Batch export credentials with usernames and initial passwords for distribution</p>
+              <p className="text-xs text-slate-500">
+                Batch export credentials with usernames and initial passwords for {selectedSectionFilter === "all" ? `All Assigned Sections (${students.length} Students)` : `${teacherSection} (${students.length} Students)`}
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={handleExportCredentialsCsv}
-              className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download Credentials CSV</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Section Filter Dropdown */}
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs">
+                <span className="text-[11px] font-bold text-slate-500">Section:</span>
+                <select
+                  value={selectedSectionFilter}
+                  onChange={(e) => setSelectedSectionFilter(e.target.value)}
+                  className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">
+                    All Assigned Students ({allAssignedStudentsCount})
+                  </option>
+                  {availableAdvisorySections.map((sec) => {
+                    const secCount = typeof window !== "undefined" ? getActiveStudentDataset().filter(s => matchSection(s.section_name, sec)).length : 0;
+                    return (
+                      <option key={sec} value={sec}>
+                        {sec} ({secCount})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleExportCredentialsCsv}
+                className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download Credentials CSV ({students.length})</span>
+              </button>
+            </div>
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-slate-200">
@@ -3353,15 +3444,17 @@ export const TeacherDashboard: React.FC = () => {
                 <tr>
                   <th className="py-2.5 px-3">LRN</th>
                   <th className="py-2.5 px-3">Student Name</th>
+                  <th className="py-2.5 px-3">Section</th>
                   <th className="py-2.5 px-3">Username / Email</th>
                   <th className="py-2.5 px-3">Initial Temp Password</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium font-mono">
-                {students.slice(0, 10).map((s, idx) => (
+                {students.map((s, idx) => (
                   <tr key={`credential-row-${s.lrn || s.id || idx}`} className="hover:bg-slate-50">
                     <td className="py-2.5 px-3 font-bold text-slate-800">{s.lrn}</td>
                     <td className="py-2.5 px-3 font-sans font-bold text-slate-900">{s.full_name}</td>
+                    <td className="py-2.5 px-3 font-sans text-slate-600">{s.section_name || "Grade 7 - Love"}</td>
                     <td className="py-2.5 px-3 text-slate-600">{s.email}</td>
                     <td className="py-2.5 px-3 font-bold text-[#8B0014]">SAPC2026!{s.lrn.slice(-4)}</td>
                   </tr>
