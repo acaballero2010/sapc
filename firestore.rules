@@ -37,27 +37,50 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return hasRole(["admin"]);
+      return isAuthenticated() && (
+        userRole() == "admin" ||
+        (request.auth.token.email != null && (
+          request.auth.token.email == "admin@sapc.edu.ph" ||
+          request.auth.token.email.matches(".*admin.*")
+        ))
+      );
     }
 
     function isGuidanceCounselor() {
-      return hasRole(["guidance_counselor"]);
+      return isAuthenticated() && (
+        userRole() == "guidance_counselor" ||
+        (request.auth.token.email != null && (
+          request.auth.token.email == "counselor@sapc.edu.ph" ||
+          request.auth.token.email.matches(".*counselor.*")
+        ))
+      );
     }
 
     function isTeacher() {
-      return hasRole(["teacher"]);
+      return isAuthenticated() && (
+        userRole() == "teacher" ||
+        (request.auth.token.email != null && request.auth.token.email.matches(".*teacher.*"))
+      );
     }
 
     function isParent() {
-      return hasRole(["parent"]);
+      return isAuthenticated() && (
+        userRole() == "parent" ||
+        (request.auth.token.email != null && request.auth.token.email.matches(".*parent.*"))
+      );
     }
 
     function isStudent() {
-      return hasRole(["student"]);
+      return isAuthenticated() && (
+        userRole() == "student" ||
+        (request.auth.token.email != null && request.auth.token.email.matches(".*student.*"))
+      );
     }
 
     function isStaff() {
-      return hasRole(["admin", "guidance_counselor", "teacher"]);
+      return isAdmin() || isGuidanceCounselor() || isTeacher() || (
+        isAuthenticated() && request.auth.token.email != null && request.auth.token.email.matches(".*@sapc\\.edu\\.ph")
+      );
     }
 
     // -------------------------------------------------------------------------

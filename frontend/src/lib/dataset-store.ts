@@ -3441,6 +3441,7 @@ export function saveActiveParentRecords(records: ParentRecord[], syncToFirestore
 }
 
 export async function loadPendingRegistrationsFromFirestore(): Promise<PendingRegistrationRecord[] | null> {
+  if (!db || !auth?.currentUser) return getActivePendingRegistrations();
   try {
     const colRef = collection(db, "pending_registrations");
     const snapshot = await getDocs(colRef);
@@ -3454,10 +3455,12 @@ export async function loadPendingRegistrationsFromFirestore(): Promise<PendingRe
         return all;
       }
     }
-  } catch (err) {
-    console.warn("Could not fetch pending registrations from Firestore, using local:", err);
+  } catch (err: any) {
+    if (err?.code !== "permission-denied" && err?.code !== "unavailable") {
+      console.warn("Could not fetch pending registrations from Firestore, using local:", err?.message || err);
+    }
   }
-  return null;
+  return getActivePendingRegistrations();
 }
 
 export async function loadParentRecordsFromFirestore(): Promise<ParentRecord[] | null> {
