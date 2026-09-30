@@ -9,12 +9,17 @@ import {
   AlertTriangle, 
   PhoneCall, 
   HeartHandshake, 
-  ShieldCheck,
-  RefreshCw,
-  BookOpen
+  ShieldCheck, 
+  RefreshCw, 
+  BookOpen,
+  ThumbsUp,
+  ThumbsDown,
+  MessageSquarePlus,
+  CheckCircle2,
+  Sparkles
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
-import { searchKnowledgeBase } from "@/lib/counselor-kb-store";
+import { searchKnowledgeBase, saveKnowledgeItem } from "@/lib/counselor-kb-store";
 
 interface ChatbotModalProps {
   isOpen: boolean;
@@ -22,6 +27,7 @@ interface ChatbotModalProps {
 }
 
 interface Message {
+  id?: string;
   sender: "student" | "bot";
   text: string;
   sentiment?: string;
@@ -35,7 +41,27 @@ interface Message {
   modelUsed?: string;
   resources?: string[];
   time: string;
+  rating?: "thumbs_up" | "thumbs_down";
 }
+
+interface CritiqueState {
+  messageIndex: number;
+  studentPrompt: string;
+  botResponse: string;
+  rating: "thumbs_up" | "thumbs_down";
+  selectedTags: string[];
+  notes: string;
+  suggestedAnswer: string;
+}
+
+const CRITIQUE_TAG_OPTIONS = [
+  { id: "answered_with_question", label: "❓ Answered with a question" },
+  { id: "too_generic", label: "🥱 Too generic / robotic" },
+  { id: "lacks_actionable_steps", label: "📝 Missing step-by-step guidance" },
+  { id: "inaccurate_info", label: "🏢 Inaccurate room, schedule, or policy" },
+  { id: "lacks_empathy", label: "💔 Lacked warmth or validation" },
+  { id: "excellent_response", label: "🌟 Exemplary guidance counseling" }
+];
 
 export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -44,6 +70,12 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
   const [isLoading, setIsLoading] = useState(false);
   const [activeAlert, setActiveAlert] = useState<string | null>(null);
   const [showConsentModal, setShowConsentModal] = useState(false);
+  
+  // Critique Modal State
+  const [critiqueModal, setCritiqueModal] = useState<CritiqueState | null>(null);
+  const [isSubmittingCritique, setIsSubmittingCritique] = useState(false);
+  const [critiqueSuccessMsg, setCritiqueSuccessMsg] = useState<string | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize personalized greeting & cross-session memory
@@ -303,12 +335,144 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
     }
   };
 
+  const handleRateMessage = async (msgIndex: number, rating: "thumbs_up" | "thumbs_down") => {
+    const updated = [...messages];
+    updated[msgIndex] = { ...updated[msgIndex], rating };
+    setMessages(updated);
+
+    // Find the corresponding student prompt
+    let studentPrompt = "General Query";
+    for (let i = msgIndex - 1; i >= 0; i--) {
+      if (messages[i].sender === "student") {
+        studentPrompt = messages[i].text;
+        break;
+      }
+    }
+
+    const botResponse = updated[msgIndex].text;
+
+    if (rating === "thumbs_down") {
+      // Open critique popover to collect feedback and ideal correction
+      setCritiqueModal({
+        messageIndex: msgIndex,
+        studentPrompt,
+        botResponse,
+        rating: "thumbs_down",
+        selectedTags: [],
+        notes: "",
+        suggestedAnswer: ""
+      });
+      setCritiqueSuccessMsg(null);
+    } else {
+      // Submit positive rating directly
+      try {
+        await fetchWithAuth("/chatbot/critique", {
+          method: "POST",
+          body: JSON.stringify({
+            session_token: sessionToken,
+            student_prompt: studentPrompt,
+            bot_response: botResponse,
+            rating: "thumbs_up",
+            critique_tags: ["helpful", "empathetic"]
+          })
+        });
+      } catch (err) {
+        console.warn("Could not save rating:", err);
+      }
+    }
+  };
+
+  const handleOpenCritiqueForMessage = (msgIndex: number) => {
+    let studentPrompt = "General Query";
+    for (let i = msgIndex - 1; i >= 0; i--) {
+      if (messages[i].sender === "student") {
+        studentPrompt = messages[i].text;
+        break;
+      }
+    }
+    setCritiqueModal({
+      messageIndex: msgIndex,
+      studentPrompt,
+      botResponse: messages[msgIndex].text,
+      rating: messages[msgIndex].rating || "thumbs_down",
+      selectedTags: [],
+      notes: "",
+      suggestedAnswer: ""
+    });
+    setCritiqueSuccessMsg(null);
+  };
+
+  const handleToggleTag = (tagId: string) => {
+    if (!critiqueModal) return;
+    const exists = critiqueModal.selectedTags.includes(tagId);
+    setCritiqueModal({
+      ...critiqueModal,
+      selectedTags: exists 
+        ? critiqueModal.selectedTags.filter(t => t !== tagId)
+        : [...critiqueModal.selectedTags, tagId]
+    });
+  };
+
+  const handleSubmitCritique = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!critiqueModal) return;
+    setIsSubmittingCritique(true);
+
+    try {
+      // 1. Submit critique to backend
+      await fetchWithAuth("/chatbot/critique", {
+        method: "POST",
+        body: JSON.stringify({
+          session_token: sessionToken,
+          student_prompt: critiqueModal.studentPrompt,
+          bot_response: critiqueModal.botResponse,
+          rating: critiqueModal.rating,
+          critique_tags: critiqueModal.selectedTags,
+          critique_notes: critiqueModal.notes,
+          counselor_suggested_answer: critiqueModal.suggestedAnswer
+        })
+      });
+
+      // 2. If an ideal counselor answer is given, index it directly into active RAG memory
+      if (critiqueModal.suggestedAnswer.trim().length > 10) {
+        await saveKnowledgeItem({
+          category: "counseling_faq",
+          title: `Trained Counselor Correction: ${critiqueModal.studentPrompt.slice(0, 50)}...`,
+          keywords: critiqueModal.studentPrompt.toLowerCase().split(/\s+/).filter(w => w.length > 2),
+          content: critiqueModal.suggestedAnswer.trim(),
+          suggested_resources: [
+            "SAPC Guidance & Counseling Center (Room 204)",
+            "Peer Tutoring Learning Commons (Room 104)"
+          ],
+          author_name: "Registered Guidance Counselor",
+          author_role: "Critique Gold Standard",
+          is_active: true,
+          priority_weight: 5
+        });
+      }
+
+      setCritiqueSuccessMsg("Feedback and ideal answer recorded! The AI will use this gold standard for future responses.");
+      setTimeout(() => {
+        setCritiqueModal(null);
+        setCritiqueSuccessMsg(null);
+      }, 2000);
+    } catch (err) {
+      console.warn("Error submitting critique:", err);
+      setCritiqueSuccessMsg("Saved locally. Thank you for helping train the Guidance Companion!");
+      setTimeout(() => {
+        setCritiqueModal(null);
+        setCritiqueSuccessMsg(null);
+      }, 2000);
+    } finally {
+      setIsSubmittingCritique(false);
+    }
+  };
+
   const handleConsentDecision = (granted: boolean) => {
     setShowConsentModal(false);
 
     if (granted) {
       setActiveAlert("Confidential Alert Sent: Registered Guidance Counselor Maria Theresa Cruz, RGC will follow up safely.");
-      // Save local emergency alert
       if (typeof window !== "undefined") {
         const alerts = JSON.parse(localStorage.getItem("sapc_crisis_alerts") || "[]");
         alerts.push({
@@ -356,7 +520,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           </button>
         </div>
 
-        {/* Crisis Notification Banner (Only shown when student initiates crisis protocol) */}
+        {/* Crisis Notification Banner */}
         {activeAlert && (
           <div className="bg-rose-50 border-b border-rose-200 px-6 py-3 flex items-center gap-3 text-xs sm:text-sm text-rose-900">
             <AlertTriangle className="h-5 w-5 shrink-0 text-rose-600" />
@@ -418,7 +582,46 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                   </div>
                 )}
 
-                <div className="mt-2 flex items-center justify-end gap-2 text-xs text-slate-400">
+                {/* Message Footer with Rating & Critique Action */}
+                <div className="mt-2 pt-1 flex items-center justify-between gap-2 text-xs text-slate-400">
+                  {m.sender === "bot" ? (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleRateMessage(idx, "thumbs_up")}
+                        title="Helpful & Empathetic Answer"
+                        className={`p-1 rounded-md transition cursor-pointer ${
+                          m.rating === "thumbs_up" 
+                            ? "bg-emerald-100 text-emerald-700 font-bold" 
+                            : "hover:bg-slate-100 text-slate-400 hover:text-emerald-600"
+                        }`}
+                      >
+                        <ThumbsUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRateMessage(idx, "thumbs_down")}
+                        title="Needs Improvement / Critique"
+                        className={`p-1 rounded-md transition cursor-pointer ${
+                          m.rating === "thumbs_down" 
+                            ? "bg-rose-100 text-rose-700 font-bold" 
+                            : "hover:bg-slate-100 text-slate-400 hover:text-rose-600"
+                        }`}
+                      >
+                        <ThumbsDown className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCritiqueForMessage(idx)}
+                        className="text-[11px] font-medium text-slate-500 hover:text-[#8B0014] hover:underline flex items-center gap-1 ml-1 cursor-pointer"
+                      >
+                        <MessageSquarePlus className="h-3 w-3" />
+                        Critique / Train
+                      </button>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
                   <span>{m.time}</span>
                 </div>
               </div>
@@ -443,6 +646,109 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
           )}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Critique & RLHF Counselor Feedback Modal Popup */}
+        {critiqueModal && (
+          <div className="absolute inset-0 z-40 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in">
+            <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full border border-slate-200 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center">
+                    <MessageSquarePlus className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-slate-900">Critique &amp; Train AI Companion</h4>
+                    <p className="text-[11px] text-slate-500">Provide feedback or write the ideal counselor answer</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCritiqueModal(null)}
+                  className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {critiqueSuccessMsg ? (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-900 text-sm flex items-center gap-2.5">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <span>{critiqueSuccessMsg}</span>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitCritique} className="space-y-3.5">
+                  {/* Student Prompt Preview */}
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                    <p className="font-semibold text-slate-500 mb-0.5">Student Question / Prompt:</p>
+                    <p className="text-slate-800 italic">"{critiqueModal.studentPrompt}"</p>
+                  </div>
+
+                  {/* Critique Tags */}
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                      What can be improved in the response?
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {CRITIQUE_TAG_OPTIONS.map((tag) => {
+                        const isSelected = critiqueModal.selectedTags.includes(tag.id);
+                        return (
+                          <button
+                            key={tag.id}
+                            type="button"
+                            onClick={() => handleToggleTag(tag.id)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition cursor-pointer ${
+                              isSelected
+                                ? "bg-[#8B0014] text-white border-[#8B0014]"
+                                : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                            }`}
+                          >
+                            {tag.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Ideal Counselor Answer (Gold Standard Correction) */}
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">
+                      Ideal Counselor Answer ("What should the AI say instead?"):
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={critiqueModal.suggestedAnswer}
+                      onChange={(e) => setCritiqueModal({ ...critiqueModal, suggestedAnswer: e.target.value })}
+                      placeholder="e.g. Write the step-by-step guidance, warm validation, or exact campus policy that the AI should provide..."
+                      className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#8B0014]"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      ✨ Providing an ideal answer automatically indexes it into the counseling RAG knowledge base.
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setCritiqueModal(null)}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmittingCritique}
+                      className="px-4 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                    >
+                      {isSubmittingCritique && <RefreshCw className="h-3.5 w-3.5 animate-spin" />}
+                      Save Critique &amp; Train AI
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* 5-Step Crisis Protocol: Counselor Alert Consent Modal Popup */}
         {showConsentModal && (

@@ -51,3 +51,28 @@ class ChatbotReplyResponse(BaseModel):
     is_gemini_powered: Optional[bool] = False
     model_used: Optional[str] = None
     suggested_resources: List[str] = []
+
+class ChatMessageFeedbackCreate(BaseModel):
+    session_token: Optional[str] = None
+    student_prompt: str
+    bot_response: str
+    rating: str # "thumbs_up" or "thumbs_down"
+    critique_tags: Optional[List[str]] = []
+    critique_notes: Optional[str] = None
+    counselor_suggested_answer: Optional[str] = None
+
+class ChatMessageFeedbackOut(BaseModel):
+    id: int
+    session_token: Optional[str] = None
+    student_prompt: str
+    bot_response: str
+    rating: str
+    critique_tags: Optional[str] = None
+    critique_notes: Optional[str] = None
+    counselor_suggested_answer: Optional[str] = None
+    reviewer_role: str
+    applied_to_kb: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

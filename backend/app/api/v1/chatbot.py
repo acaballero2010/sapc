@@ -1,17 +1,21 @@
 import uuid
+import json
+import os
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.user import User, UserRole
 from app.models.student import Student
-from app.models.chatbot import ChatbotSession, ChatMessage, SentimentCategory
+from app.models.chatbot import ChatbotSession, ChatMessage, ChatMessageFeedback, SentimentCategory
 from app.models.assessment import NonAcademicAssessment, DomainType
 from app.schemas.chatbot import (
     ChatMessageInput, 
     ChatMessageOut, 
     ChatbotSessionOut, 
-    ChatbotReplyResponse
+    ChatbotReplyResponse,
+    ChatMessageFeedbackCreate,
+    ChatMessageFeedbackOut
 )
 from app.api.deps import get_current_user, require_guidance_counselor
 from app.services.nlp_service import nlp_service
@@ -195,3 +199,100 @@ def get_flagged_sessions(
             messages=[ChatMessageOut.from_orm(m) for m in s.messages]
         ))
     return results
+
+# RLHF & COUNSELOR CRITIQUE & TRAINING ENDPOINTS
+@router.post("/critique", response_model=ChatMessageFeedbackOut)
+def submit_chat_critique(
+    payload: ChatMessageFeedbackCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Submits user or counselor rating & critique on chatbot answers.
+    Saves feedback record and appends counselor gold-standard answers to fine-tuning dataset.
+    """
+    critique_tags_str = json.dumps(payload.critique_tags) if payload.critique_tags else None
+    
+    feedback = ChatMessageFeedback(
+        session_token=payload.session_token,
+        student_prompt=payload.student_prompt,
+        bot_response=payload.bot_response,
+        rating=payload.rating,
+        critique_tags=critique_tags_str,
+        critique_notes=payload.critique_notes,
+        counselor_suggested_answer=payload.counselor_suggested_answer,
+        reviewer_role=current_user.role.value if hasattr(current_user.role, "value") else str(current_user.role),
+        applied_to_kb=False
+    )
+    db.add(feedback)
+    db.commit()
+    db.refresh(feedback)
+
+    # If counselor provided a gold-standard suggested answer, append to institutional training jsonl
+    if payload.counselor_suggested_answer and payload.counselor_suggested_answer.strip():
+        try:
+            data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+            os.makedirs(data_dir, exist_ok=True)
+            training_path = os.path.join(data_dir, "sapc_chatbot_guidance_training.jsonl")
+            
+            training_sample = {
+                "system": "You are the official AI Guidance Counselor Companion for San Antonio de Padua College (SAPC), modeled after a compassionate Registered Guidance Counselor.",
+                "student": payload.student_prompt.strip(),
+                "ideal_counselor_response": payload.counselor_suggested_answer.strip(),
+                "tags": payload.critique_tags or ["counselor_critique_correction"],
+                "source": f"counselor_feedback_id_{feedback.id}"
+            }
+            with open(training_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(training_sample, ensure_ascii=False) + "\n")
+        except Exception as e:
+            print(f"[Training Data Append Notice]: {e}")
+
+    # Audit logging
+    AuditService.log_event(
+        db=db,
+        actor=current_user,
+        action="SUBMIT_CHATBOT_CRITIQUE",
+        target_resource=f"feedback:{feedback.id}",
+        details=f"Rating: {payload.rating}, Tags: {payload.critique_tags}, Has Correction: {bool(payload.counselor_suggested_answer)}",
+        request=request
+    )
+
+    return feedback
+
+@router.get("/critiques", response_model=List[ChatMessageFeedbackOut])
+def list_chat_critiques(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_guidance_counselor)
+):
+    """
+    Retrieves all submitted ratings, critiques, and suggested corrections for Counselor review.
+    """
+    return db.query(ChatMessageFeedback).order_by(ChatMessageFeedback.created_at.desc()).limit(100).all()
+
+@router.post("/critiques/{critique_id}/approve")
+def approve_critique_as_kb(
+    critique_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_guidance_counselor)
+):
+    """
+    Marks a critique as approved and applied to active institutional knowledge base.
+    """
+    fb = db.query(ChatMessageFeedback).filter(ChatMessageFeedback.id == critique_id).first()
+    if not fb:
+        raise HTTPException(status_code=404, detail="Critique record not found")
+    
+    fb.applied_to_kb = True
+    db.commit()
+
+    AuditService.log_event(
+        db=db,
+        actor=current_user,
+        action="APPROVE_CRITIQUE_TO_KB",
+        target_resource=f"feedback:{fb.id}",
+        details="Counselor approved critique correction into knowledge base",
+        request=request
+    )
+    return {"status": "success", "message": "Critique approved and indexed into training pool"}

@@ -52,3 +52,25 @@ class ChatMessage(Base):
 
     # Relationships
     session = relationship("ChatbotSession", back_populates="messages")
+
+class ChatMessageFeedback(Base):
+    """
+    RLHF & Counselor-in-the-Loop Feedback & Critique Model:
+    Stores rating, specific critiques, and gold-standard counselor answers.
+    """
+    __tablename__ = "chat_message_feedbacks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_token = Column(String(100), nullable=True, index=True)
+    student_prompt = Column(Text, nullable=False)
+    bot_response = Column(Text, nullable=False)
+    
+    rating = Column(String(20), nullable=False) # "thumbs_up" or "thumbs_down"
+    critique_tags = Column(Text, nullable=True) # JSON or comma-separated tags
+    critique_notes = Column(Text, nullable=True) # Detailed explanation
+    counselor_suggested_answer = Column(Text, nullable=True) # Gold standard correction
+    
+    reviewer_role = Column(String(50), default="student") # "student", "guidance_counselor", "admin"
+    applied_to_kb = Column(Boolean, default=False)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
