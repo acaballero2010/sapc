@@ -39,6 +39,7 @@ import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { getActiveStudentDataset, getActiveCommendations, StudentCommendation } from "@/lib/dataset-store";
 import { analyzeMoodTelemetry } from "@/lib/mood-telemetry";
 import { SUBJECT_REGISTRY, calculateSubjectFailurePrediction } from "@/lib/subject-prediction";
+import { getActiveCurriculum, getCurriculumForGrade } from "@/lib/curriculum-store";
 import { StudentCommendationModal } from "./StudentCommendationModal";
 
 interface StudentDetailModalProps {
@@ -627,7 +628,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
               {/* Subject Breakdown Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {SUBJECT_REGISTRY.filter(s => s.strand === (student?.strand || "STEM") || s.strand === "JHS").map((subj) => {
+                {(() => {
+                  const studentGrade = Number(student?.grade_level || 10) as any;
+                  const studentStrand = student?.strand || "JHS";
+                  const activeGradeSubjs = getCurriculumForGrade(studentGrade, studentStrand, undefined, true);
+                  const displaySubjs = activeGradeSubjs.length > 0 
+                    ? activeGradeSubjs 
+                    : getActiveCurriculum().filter(s => s.is_active).slice(0, 8);
+
+                  return displaySubjs.map((subj) => {
                   const studentFullObj = {
                     id: student?.id || 1,
                     full_name: `${student?.first_name} ${student?.last_name}`,
@@ -736,7 +745,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                       </div>
                     </div>
                   );
-                })}
+                });
+              })()}
               </div>
             </div>
           ) : activeTab === "simulator" ? (

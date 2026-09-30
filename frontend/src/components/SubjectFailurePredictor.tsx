@@ -18,6 +18,8 @@ import { getActiveStudentDataset } from "@/lib/dataset-store";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { 
   SUBJECT_REGISTRY, 
+  getActiveSubjectRegistry,
+  SubjectMetadata,
   StudentSubjectPrediction, 
   calculateSubjectFailurePrediction, 
   simulateRemediationOutcome 
@@ -34,10 +36,22 @@ export function SubjectFailurePredictor({
   teacherSection,
   isTeacherView = false
 }: SubjectFailurePredictorProps = {}) {
+  const [subjectRegistry, setSubjectRegistry] = useState<SubjectMetadata[]>(() => {
+    return typeof window !== "undefined" ? getActiveSubjectRegistry() : SUBJECT_REGISTRY;
+  });
+
   const [students, setStudents] = useState<StudentRecord[]>(() => {
     if (scopedStudents && scopedStudents.length > 0) return scopedStudents;
     return typeof window !== "undefined" ? getActiveStudentDataset() : SAPC_500_STUDENTS;
   });
+
+  React.useEffect(() => {
+    const handleCurriculumUpdate = () => {
+      setSubjectRegistry(getActiveSubjectRegistry());
+    };
+    window.addEventListener("sapc:curriculum-updated", handleCurriculumUpdate);
+    return () => window.removeEventListener("sapc:curriculum-updated", handleCurriculumUpdate);
+  }, []);
 
   React.useEffect(() => {
     if (scopedStudents && scopedStudents.length > 0) {
@@ -54,18 +68,22 @@ export function SubjectFailurePredictor({
   // Determine initial strand and subject based on scoped student grade level
   const initialStrand = useMemo(() => {
     if (scopedStudents && scopedStudents.length > 0 && scopedStudents[0].grade_level) {
-      return `Grade ${scopedStudents[0].grade_level}`;
+      const gl = scopedStudents[0].grade_level;
+      if (gl >= 11) {
+        return scopedStudents[0].strand || `Grade ${gl}`;
+      }
+      return `Grade ${gl}`;
     }
     return "Grade 10";
   }, [scopedStudents]);
 
   const initialSubjectCode = useMemo(() => {
-    if (initialStrand === "Grade 10") return "JHS-MATH10";
-    if (initialStrand === "Grade 9") return "JHS-MATH9";
-    if (initialStrand === "Grade 8") return "JHS-MATH8";
-    if (initialStrand === "Grade 7") return "JHS-MATH7";
-    return "JHS-MATH10";
-  }, [initialStrand]);
+    const available = subjectRegistry.filter(s => 
+      s.is_active !== false && (s.strand === initialStrand || s.strand === "ALL" || (initialStrand === "JHS" && s.category === "Core"))
+    );
+    if (available.length > 0) return available[0].code;
+    return subjectRegistry[0]?.code || "JHS-MATH10";
+  }, [initialStrand, subjectRegistry]);
   
   // Selection states
   const [selectedStrand, setSelectedStrand] = useState<string>(initialStrand);
@@ -88,15 +106,26 @@ export function SubjectFailurePredictor({
   const [examImprovement, setExamImprovement] = useState<number>(5);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
 
-  // Available subjects for selected grade level
+  // Available active subjects for selected grade level / strand
   const strandSubjects = useMemo(() => {
-    return SUBJECT_REGISTRY.filter(s => s.strand === selectedStrand || (selectedStrand === "JHS" && s.category === "Core"));
-  }, [selectedStrand]);
+    const activeOnly = subjectRegistry.filter(s => s.is_active !== false);
+    const matched = activeOnly.filter(s => {
+      if (selectedStrand === "ALL") return true;
+      if (selectedStrand === "JHS") return s.grade_level && s.grade_level <= 10;
+      if (s.strand === selectedStrand) return true;
+      if (s.strand === "ALL") return true;
+      return false;
+    });
+    return matched.length > 0 ? matched : activeOnly;
+  }, [selectedStrand, subjectRegistry]);
 
   // Current active subject metadata
   const currentSubjectMeta = useMemo(() => {
-    return SUBJECT_REGISTRY.find(s => s.code === selectedSubjectCode) || strandSubjects[0] || SUBJECT_REGISTRY[0];
-  }, [selectedSubjectCode, strandSubjects]);
+    return strandSubjects.find(s => s.code === selectedSubjectCode) || 
+      subjectRegistry.find(s => s.code === selectedSubjectCode) || 
+      strandSubjects[0] || 
+      subjectRegistry[0];
+  }, [selectedSubjectCode, strandSubjects, subjectRegistry]);
 
   // Available unique sections in dataset
   const availableSections = useMemo(() => {
@@ -106,6 +135,7 @@ export function SubjectFailurePredictor({
 
   // Compute predictions for scoped students
   const predictions = useMemo(() => {
+    if (!currentSubjectMeta) return [];
     return students.map(st => calculateSubjectFailurePrediction(st, currentSubjectMeta.code));
   }, [students, currentSubjectMeta]);
 
@@ -327,7 +357,11 @@ export function SubjectFailurePredictor({
               <option value="Grade 8">📘 Grade 8 (Junior High)</option>
               <option value="Grade 9">📗 Grade 9 (Junior High)</option>
               <option value="Grade 10">🎓 Grade 10 (Junior High)</option>
-              <option value="JHS">📚 All Junior High School Subjects</option>
+              <option value="STEM">🔬 Grade 11-12 STEM Strand</option>
+              <option value="ABM">💼 Grade 11-12 ABM Strand</option>
+              <option value="HUMSS">⚖️ Grade 11-12 HUMSS Strand</option>
+              <option value="TVL">💻 Grade 11-12 TVL Track</option>
+              <option value="ALL">🌐 All High School Subjects</option>
             </select>
           </div>
 

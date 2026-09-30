@@ -50,6 +50,7 @@ import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
 import { FacultyImportModal } from "./FacultyImportModal";
 import { StudentDetailModal } from "./StudentDetailModal";
 import { ImportDiffModal } from "./ImportDiffModal";
+import { CurriculumManagementHub } from "./CurriculumManagementHub";
 import { 
   getActiveStudentDataset, 
   computeCohortAggregates, 
@@ -159,6 +160,7 @@ export type AdminTabType =
   | "parents"
   | "pending_registrations"
   | "quarter_management"
+  | "curriculum"
   | "interventions"
   | "intervention_suggestions"
   | "reports"
@@ -861,10 +863,10 @@ Issued Date     : ${new Date().toLocaleDateString()}
     }
   };
 
-  // Categories for 18 Tabs
+  // Categories for 19 Tabs
   const CATEGORIES = useMemo(() => [
-    { id: "all", label: "All Master Controls (18)" },
-    { id: "governance", label: "System & Platform Config (5)", tabIds: ["dashboard", "platform_settings", "quarter_management", "knowledge_base", "notifications"] },
+    { id: "all", label: "All Master Controls (19)" },
+    { id: "governance", label: "System & Platform Config (6)", tabIds: ["dashboard", "curriculum", "platform_settings", "quarter_management", "knowledge_base", "notifications"] },
     { id: "ingestion", label: "Master Ingestion & Rollback (5)", tabIds: ["import_wizard", "import_history", "revert_import", "verify_assessments", "export_import_history"] },
     { id: "students", label: "Student Master Registry (2)", tabIds: ["students", "create_student"] },
     { id: "users", label: "Campus Accounts & Security (5)", tabIds: ["teachers", "create_user", "parents", "pending_registrations", "export_credentials"] },
@@ -873,6 +875,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
 
   const TAB_ITEMS: Array<{ id: AdminTabType; label: string; icon: any; badge?: string; category: string }> = [
     { id: "dashboard", label: "System Command Center", icon: Activity, badge: "Master", category: "governance" },
+    { id: "curriculum", label: "Curriculum & Subjects", icon: BookOpen, badge: "DepEd K-12", category: "governance" },
     { id: "platform_settings", label: "Platform & Campus Logo", icon: Building, badge: "Admin Only", category: "governance" },
     { id: "quarter_management", label: "Quarter Management", icon: Calendar, badge: "Q2 Active", category: "governance" },
     { id: "import_wizard", label: "Master Import Wizard", icon: Layers, badge: "DepEd SASS", category: "ingestion" },
@@ -1311,6 +1314,15 @@ Issued Date     : ${new Date().toLocaleDateString()}
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <button
+              onClick={() => handleTabChange("curriculum")}
+              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-2"
+              title="Configure Pre-defined DepEd Curriculum & Subject Offerings"
+            >
+              <BookOpen className="h-4 w-4 text-emerald-200" />
+              <span>Curriculum &amp; Subjects</span>
+            </button>
+
+            <button
               onClick={() => setIsKnowledgeHubOpen(true)}
               className="px-4 py-2.5 rounded-2xl bg-purple-600/85 hover:bg-purple-600 text-white border border-purple-400/40 font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-2"
               title="Train and personalize the AI Counselor Knowledge Base"
@@ -1693,6 +1705,18 @@ Issued Date     : ${new Date().toLocaleDateString()}
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* CURRICULUM & SUBJECT MANAGEMENT HUB */}
+      {/* ========================================================= */}
+      {activeTab === "curriculum" && (
+        <div id="curriculum-view" className="animate-in fade-in duration-200 scroll-mt-24">
+          <CurriculumManagementHub 
+            userRole="System Administrator"
+            userName="Administrator"
+          />
         </div>
       )}
 

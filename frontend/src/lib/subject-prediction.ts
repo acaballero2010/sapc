@@ -1,66 +1,54 @@
-// Subject-Level Student Failure Prediction Engine (Early Academic Warning Model)
-// Calibrated with DepEd SHS/JHS grading standards (DO 8, s. 2015) & AHP cross-domain multipliers.
+import { 
+  getActiveCurriculum, 
+  DEFAULT_CURRICULUM_REGISTRY, 
+  CurriculumSubject 
+} from "./curriculum-store";
 
 export interface SubjectMetadata {
   code: string;
   name: string;
   grade_level?: number;
-  strand: "Grade 7" | "Grade 8" | "Grade 9" | "Grade 10" | "JHS" | "STEM" | "ABM" | "HUMSS" | "TVL";
-  category: "Core" | "Applied" | "Specialized" | "JHS";
+  strand: "Grade 7" | "Grade 8" | "Grade 9" | "Grade 10" | "JHS" | "STEM" | "ABM" | "HUMSS" | "TVL" | "GAS" | "ALL" | string;
+  category: "Core" | "Applied" | "Specialized" | "Elective" | "JHS" | string;
   weight_ww: number; // Written work weight
   weight_pt: number; // Performance task weight
   weight_qa: number; // Quarterly assessment weight
   passing_threshold: number;
+  is_active?: boolean;
 }
 
-export const SUBJECT_REGISTRY: SubjectMetadata[] = [
-  // Grade 7 Subjects
-  { code: "JHS-MATH7", name: "Mathematics 7 (Elementary Algebra & Geometry)", grade_level: 7, strand: "Grade 7", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-SCI7", name: "Science 7 (Integrated General Science)", grade_level: 7, strand: "Grade 7", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ENG7", name: "English 7 (Philippine Literature & Grammar)", grade_level: 7, strand: "Grade 7", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-FIL7", name: "Filipino 7 (Ibong Adarna at Panitikang Luzon)", grade_level: 7, strand: "Grade 7", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-AP7", name: "Araling Panlipunan 7 (Araling Asyano)", grade_level: 7, strand: "Grade 7", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-TLE7", name: "TLE 7 (Exploratory ICT & Home Economics)", grade_level: 7, strand: "Grade 7", category: "Core", weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-MAPEH7", name: "MAPEH 7 (Music, Arts, PE & Health)", grade_level: 7, strand: "Grade 7", category: "Core", weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ESP7", name: "Edukasyon sa Pagpapakatao 7 (EsP)", grade_level: 7, strand: "Grade 7", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
+/**
+ * Returns dynamic active subjects or mapped fallback
+ */
+export function getActiveSubjectRegistry(): SubjectMetadata[] {
+  const curriculum = getActiveCurriculum();
+  return curriculum.map(s => ({
+    code: s.code,
+    name: s.name,
+    grade_level: s.grade_level,
+    strand: s.strand === "JHS" ? `Grade ${s.grade_level}` : s.strand,
+    category: s.category,
+    weight_ww: s.weight_ww,
+    weight_pt: s.weight_pt,
+    weight_qa: s.weight_qa,
+    passing_threshold: s.passing_threshold,
+    is_active: s.is_active
+  }));
+}
 
-  // Grade 8 Subjects
-  { code: "JHS-MATH8", name: "Mathematics 8 (Linear Equations & Geometry)", grade_level: 8, strand: "Grade 8", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-SCI8", name: "Science 8 (Biology, Chemistry & Physics)", grade_level: 8, strand: "Grade 8", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ENG8", name: "English 8 (Afro-Asian Literature)", grade_level: 8, strand: "Grade 8", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-FIL8", name: "Filipino 8 (Florante at Laura)", grade_level: 8, strand: "Grade 8", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-AP8", name: "Araling Panlipunan 8 (Kasaysayan ng Daigdig)", grade_level: 8, strand: "Grade 8", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-TLE8", name: "TLE 8 (Junior Computer Hardware & Programming)", grade_level: 8, strand: "Grade 8", category: "Core", weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-MAPEH8", name: "MAPEH 8 (Music, Arts, PE & Health)", grade_level: 8, strand: "Grade 8", category: "Core", weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ESP8", name: "Edukasyon sa Pagpapakatao 8 (EsP)", grade_level: 8, strand: "Grade 8", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
+export const SUBJECT_REGISTRY: SubjectMetadata[] = DEFAULT_CURRICULUM_REGISTRY.map(s => ({
+  code: s.code,
+  name: s.name,
+  grade_level: s.grade_level,
+  strand: s.strand === "JHS" ? `Grade ${s.grade_level}` : s.strand,
+  category: s.category,
+  weight_ww: s.weight_ww,
+  weight_pt: s.weight_pt,
+  weight_qa: s.weight_qa,
+  passing_threshold: s.passing_threshold,
+  is_active: s.is_active
+}));
 
-  // Grade 9 Subjects
-  { code: "JHS-MATH9", name: "Mathematics 9 (Quadratic Functions & Trigonometry)", grade_level: 9, strand: "Grade 9", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-SCI9", name: "Science 9 (Living Things & Electricity)", grade_level: 9, strand: "Grade 9", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ENG9", name: "English 9 (Anglo-American Literature)", grade_level: 9, strand: "Grade 9", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-FIL9", name: "Filipino 9 (Noli Me Tangere)", grade_level: 9, strand: "Grade 9", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-AP9", name: "Araling Panlipunan 9 (Ekonomiks)", grade_level: 9, strand: "Grade 9", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-TLE9", name: "TLE 9 (Technical Drafting & Web Design)", grade_level: 9, strand: "Grade 9", category: "Core", weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-MAPEH9", name: "MAPEH 9 (Music, Arts, PE & Health)", grade_level: 9, strand: "Grade 9", category: "Core", weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ESP9", name: "Edukasyon sa Pagpapakatao 9 (EsP)", grade_level: 9, strand: "Grade 9", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-
-  // Grade 10 Subjects
-  { code: "JHS-MATH10", name: "Mathematics 10 (Polynomials, Sequences & Probability)", grade_level: 10, strand: "Grade 10", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-SCI10", name: "Science 10 (Earth & Space, Heredity & Electromagnetism)", grade_level: 10, strand: "Grade 10", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ENG10", name: "English 10 (World Literature & Persuasive Writing)", grade_level: 10, strand: "Grade 10", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-FIL10", name: "Filipino 10 (El Filibusterismo)", grade_level: 10, strand: "Grade 10", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-AP10", name: "Araling Panlipunan 10 (Mga Kontemporaryong Isyu)", grade_level: 10, strand: "Grade 10", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-TLE10", name: "TLE 10 (Computer Systems Servicing & Coding)", grade_level: 10, strand: "Grade 10", category: "Core", weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-MAPEH10", name: "MAPEH 10 (Music, Arts, PE & Health)", grade_level: 10, strand: "Grade 10", category: "Core", weight_ww: 0.20, weight_pt: 0.60, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ESP10", name: "Edukasyon sa Pagpapakatao 10 (EsP)", grade_level: 10, strand: "Grade 10", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-
-  // General JHS Fallback Aliases
-  { code: "JHS-MATH", name: "Mathematics (Grade 7-10 General)", strand: "JHS", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-SCI", name: "Science (Grade 7-10 General)", strand: "JHS", category: "Core", weight_ww: 0.40, weight_pt: 0.40, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-ENG", name: "English (Grade 7-10 General)", strand: "JHS", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "JHS-AP", name: "Araling Panlipunan (Grade 7-10 General)", strand: "JHS", category: "Core", weight_ww: 0.30, weight_pt: 0.50, weight_qa: 0.20, passing_threshold: 75.0 },
-  { code: "STEM-CALC", name: "Pre-Calculus / Basic Algebra", strand: "STEM", category: "Specialized", weight_ww: 0.25, weight_pt: 0.45, weight_qa: 0.30, passing_threshold: 75.0 },
-];
 
 export interface StudentSubjectPrediction {
   student_id: number;
@@ -127,7 +115,8 @@ export function calculateSubjectFailurePrediction(
   },
   subjectCode: string
 ): StudentSubjectPrediction {
-  const subj = SUBJECT_REGISTRY.find(s => s.code === subjectCode) || SUBJECT_REGISTRY[0];
+  const registry = getActiveSubjectRegistry();
+  const subj = registry.find(s => s.code === subjectCode) || SUBJECT_REGISTRY.find(s => s.code === subjectCode) || registry[0] || SUBJECT_REGISTRY[0];
 
   // Check if real per-subject formative records exist for this student
   const realSubjectRecord = student.subject_grades?.[subjectCode];

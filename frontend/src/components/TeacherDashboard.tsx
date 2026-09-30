@@ -59,11 +59,13 @@ import { SubjectFailurePredictor } from "./SubjectFailurePredictor";
 import { DepEdFormModal } from "./DepEdFormModal";
 import { BatchInterventionModal } from "./BatchInterventionModal";
 import { ImportDiffModal } from "./ImportDiffModal";
+import { CurriculumManagementHub } from "./CurriculumManagementHub";
 
 export type TeacherTabType = 
   | "dashboard"
   | "students"
   | "subject_predictor"
+  | "curriculum"
   | "student_profile"
   | "student_progress"
   | "at_risk"
@@ -748,7 +750,7 @@ export const TeacherDashboard: React.FC = () => {
       const hash = window.location.hash.replace("#", "");
 
       const validTabs: TeacherTabType[] = [
-        "dashboard", "students", "subject_predictor", "student_profile", "student_progress", "at_risk",
+        "dashboard", "students", "subject_predictor", "curriculum", "student_profile", "student_progress", "at_risk",
         "import_wizard", "import_students", "import_grades", "import_attendance",
         "import_history", "revert_import", "csv_editor", "interventions",
         "suggestions", "log_progress", "complete_intervention", "class_record",
@@ -761,6 +763,7 @@ export const TeacherDashboard: React.FC = () => {
         if (hash === "advisory-overview") setActiveTab("dashboard");
         else if (hash === "roster") setActiveTab("students");
         else if (hash === "subject-predictor-view" || hash === "predictor") setActiveTab("subject_predictor");
+        else if (hash === "curriculum-view" || hash === "curriculum") setActiveTab("curriculum");
         else if (hash === "at-risk-view") setActiveTab("at_risk");
         else if (hash === "uploader" || hash === "import-wizard-view") setActiveTab("import_wizard");
         else if (hash === "interventions-view") setActiveTab("interventions");
@@ -1117,8 +1120,8 @@ export const TeacherDashboard: React.FC = () => {
 
   // Navigation Categories
   const CATEGORIES = useMemo(() => [
-    { id: "all", label: "All Modules (22)" },
-    { id: "overview", label: "Advisory & Prediction (6)", tabIds: ["dashboard", "students", "subject_predictor", "at_risk", "student_profile", "student_progress"] },
+    { id: "all", label: "All Modules (23)" },
+    { id: "overview", label: "Advisory & Curriculum (7)", tabIds: ["dashboard", "students", "curriculum", "subject_predictor", "at_risk", "student_profile", "student_progress"] },
     { id: "import", label: "CSV Ingestion Hub (7)", tabIds: ["import_wizard", "import_students", "import_grades", "import_attendance", "import_history", "revert_import", "csv_editor"] },
     { id: "care", label: "Interventions & Care (4)", tabIds: ["interventions", "suggestions", "log_progress", "complete_intervention"] },
     { id: "records", label: "DepEd Records & Messages (5)", tabIds: ["class_record", "attendance_record", "notifications", "export_credentials", "messages"] }
@@ -1128,7 +1131,8 @@ export const TeacherDashboard: React.FC = () => {
   const TAB_ITEMS: Array<{ id: TeacherTabType; label: string; icon: any; badge?: string; category: string }> = [
     { id: "dashboard", label: "Class Overview", icon: BarChart3, badge: "Health", category: "overview" },
     { id: "students", label: "Advisory Roster", icon: Users, badge: `${students.length}`, category: "overview" },
-    { id: "subject_predictor", label: "Subject Failure Predictor", icon: BookOpen, badge: "Early Warning", category: "overview" },
+    { id: "curriculum", label: "Curriculum & Subjects", icon: BookOpen, badge: "DepEd K-12", category: "overview" },
+    { id: "subject_predictor", label: "Subject Failure Predictor", icon: AlertTriangle, badge: "Early Warning", category: "overview" },
     { id: "at_risk", label: "At-Risk Priority Focus", icon: AlertTriangle, badge: `${atRiskCount}`, category: "overview" },
     { id: "student_profile", label: "Student Profile", icon: Eye, category: "overview" },
     { id: "student_progress", label: "Longitudinal Progress", icon: TrendingUp, category: "overview" },
@@ -2260,6 +2264,18 @@ export const TeacherDashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* CURRICULUM & SUBJECT MANAGEMENT HUB */}
+      {/* ========================================================================= */}
+      {activeTab === "curriculum" && (
+        <div id="curriculum-view" className="animate-in fade-in duration-200 scroll-mt-24">
+          <CurriculumManagementHub 
+            userRole="Class Adviser / Teacher"
+            userName={user?.full_name || "Faculty Member"}
+          />
         </div>
       )}
 
