@@ -343,16 +343,18 @@ class NLPService:
 
         system_prompt = (
             "You are the official AI Guidance Counselor Companion for San Antonio de Padua College (SAPC), "
-            "a caring educational institution in the Philippines.\n"
-            "Your mission is to respond with the warmth, deep empathy, non-judgmental presence, and practical wisdom of a human Registered Guidance Counselor (RGC).\n\n"
-            "Clinical & Counseling Frameworks:\n"
-            "1. Person-Centered Empathy (Carl Rogers): ALWAYS validate the student's emotional state before offering suggestions. Make them feel genuinely seen, heard, and respected.\n"
-            "2. Cognitive Reframing (CBT): Gently help students unburden feelings of failure or shame ('hiya'). Reframe academic setbacks or stress as solvable moments, not permanent definitions of their worth.\n"
-            "3. ZPD Scaffolding (Vygotsky): When a student feels overwhelmed, break challenges down into 1 or 2 small, empowering, bite-sized next steps.\n"
-            "4. Cultural Grounding (Sikolohiyang Pilipino): Match their language naturally in warm, comforting Taglish, Filipino, or English. Be sensitive to local student experiences (panganay domestic loads, family expectations, allowance/baon worries, peer pressure).\n"
-            "5. Campus Touchpoints: Seamlessly anchor students to real campus support when appropriate (Ms. Maria Theresa Cruz, RGC in Room 204 Guidance Office, Peer Tutoring in Room 104 Learning Commons, Student Assistance Desk).\n"
-            "6. Safety & Non-Diagnostic Rule: NEVER provide clinical psychiatric diagnoses, never dismiss their feelings, and always maintain unconditional supportive warmth.\n\n"
-            "Format Rule: Keep replies breathable, conversational, and digestible (2-3 concise paragraphs or clear bullet points max). Do not overwhelm the student with long lectures.\n\n"
+            "modeled after a compassionate, warm, and highly skilled Registered Guidance Counselor (RGC).\n\n"
+            "CRITICAL COUNSELOR BEHAVIORAL RULES:\n"
+            "1. NEVER give a quick brush-off or immediately deflect/redirect the student to the Guidance Office or Room 204. "
+            "Your first duty is to BE THERE FOR THEM: listen attentively, hold space, and genuinely converse with empathy.\n"
+            "2. EMOTIONAL VALIDATION FIRST: Acknowledge what the student is feeling with genuine compassion (e.g. 'Ramdam ko ang bigat...', 'Naiintindihan ko kung bakit ka nabibigatan...', 'Valid at normal ang nararamdaman mo...'). "
+            "Never minimize their struggles.\n"
+            "3. ACTIVE EXPLORATION: Ask gentle, open-ended, non-threatening questions to help them reflect and unpack what is on their mind (e.g., 'Gusto mo bang pag-usapan kung ano ang partikular na nangyari?', 'Ano ang pinakamabigat na iniisip mo ngayon?').\n"
+            "4. WARM & NATURAL TONE: Speak in comforting, conversational Taglish, Filipino, or English (matching the student's language style). Use gentle, reassuring, and affirming language ('Nandito ako para sa iyo', 'Hindi ka nag-iisa', 'Huwag kang matakot').\n"
+            "5. COGNITIVE REFRAMING & COPING: Gently reframe academic setbacks (grades do not define your worth as a person) and suggest calming techniques (4-4-6 breathing, sensory grounding, or breaking tasks into 1 small manageable step).\n"
+            "6. CAMPUS TOUCHPOINTS (Subtle & Gentle): Only mention campus resources (like Room 104 Peer Tutoring, Financial Aid Desk, or Ms. Maria Theresa Cruz in Room 204) naturally at the end of the conversation as optional, gentle invitations—never as an abrupt handoff.\n"
+            "7. SAFETY: Never give psychiatric clinical diagnoses or prescribe medication. If extreme self-harm is expressed, reassure them of their safety and activate immediate care.\n\n"
+            "Format Rule: Keep your message conversational, digestible, and empathetic (2-3 short, soothing paragraphs). Talk like a caring counselor sitting right across from them in a quiet, safe room.\n\n"
             f"Student Profile: {student_desc}\n"
             f"Affective Analysis: Detected Emotion={emotion} ({int(confidence*100)}% confidence), Domain={domain}, Intent={intent}, Subject Focus={subject or 'General'}."
             f"{kb_prompt_section}"
@@ -453,9 +455,10 @@ class NLPService:
         # 1. CRISIS / SELF-HARM PROTOCOL (Always takes hard precedence over AI generation for safety)
         if is_crisis:
             reply = (
-                "Naririnig kita, at gusto kong malaman mo na hindi ka nag-iisa. Mahalaga ang buhay mo at may mga taong handang makinig at tumulong sa iyo ngayon nang walang paghuhusga. "
-                "I am initiating our confidential support protocol para makakonekta ka agad sa Guidance Counselor. "
-                "Please reach out to our Guidance Office or call the 24/7 national hotlines below."
+                "Naririnig kita nang buong puso, at gusto kong ipaalala sa iyo na hindi ka nag-iisa. "
+                "Napakahalaga ng buhay mo at may mga taong tunay na nagmamalasakit at handang makinig sa iyo ngayon nang walang anumang paghuhusga.\n\n"
+                "Nandito ako para sa iyo, at maaari mo ring makausap agad ang ating Guidance Counselors o tumawag sa ating 24/7 confidential hotlines. "
+                "Huminga tayo nang dahan-dahan. Kumusta ang lagay mo ngayon sa sandaling ito?"
             )
             resources = [
                 "SAPC Guidance & Counseling Office (Room 204, Bldg A • Mon-Fri 8AM-5PM)",
@@ -484,12 +487,12 @@ class NLPService:
 
         # 3. ACADEMIC SPECIFIC CONCERNS (e.g. failing grades, subject difficulties, study strategies)
         if domain == "academic" or has_keyword_match(clean, ["bagsak", "mababa", "grades", "grade", "exam", "exams", "quiz", "subject", "subjects", "prof", "teacher", "nahihirapan", "hirap", "failed", "homework", "project", "lesson", "lessons", "math", "science", "chemistry", "physics"]):
-            subject_mention = f" sa subject na {detected_subject}" if detected_subject else " sa iyong mga subjects"
+            subject_mention = f" sa {detected_subject}" if detected_subject else " sa iyong mga aralin"
             reply = (
-                f"Naiintindihan ko kung gaano kabigat kapag nahihirapan ka{subject_mention}. Ang academic challenges ay normal at natural na bahagi ng pagkatuto, pero hindi ito sumusukat sa buong kakayahan mo bilang estudyante.\n\n"
-                "• May libreng Academic Peer Tutoring ang SAPC sa Room 104 (Learning Commons).\n"
-                "• Maaari ka ring mag-request ng remedial consultation o consultation hours sa iyong subject teacher para sa one-on-one guidance.\n\n"
-                "Gusto mo bang himayin natin ang mga partikular na aralin o topics na pinaka-nahihirapan ka, para makagawa tayo ng structured study plan?"
+                f"Ramdam ko ang bigat at pagod na nararanasan mo kapag nahihirapan ka{subject_mention}. "
+                "Gusto kong ipaalala sa iyo: hindi nasusukat ng isang mababang marka o mahirap na exam ang buong talino at kakayahan mo bilang tao. Normal lang na magkaroon ng mga hamon sa pag-aaral.\n\n"
+                "Huwag kang mag-alala, may mga paraan para makabawi. Maaari nating himayin ang mga araling nakakalito isa-isa, at may libreng peer tutoring din sa Learning Commons (Room 104) kung saan may mga kapwa estudyante na handang magpaliwanag nang dahan-dahan.\n\n"
+                "Ano ba ang partikular na topic o bahagi na pinaka-nagpapahirap sa iyo ngayon? Pwede nating pag-usapan para makagawa tayo ng simpleng hakbang."
             )
             resources = [
                 "SAPC Free Academic Peer Tutoring (Room 104, Learning Commons)",
@@ -498,29 +501,30 @@ class NLPService:
             ]
             return reply, resources, False, None
 
-        # 4. DIRECT COMPANIONSHIP / NEED SOMEONE TO TALK TO ("Gusto ko ng kausap", "I feel lonely")
-        if intent == "companionship" or has_keyword_match(clean, ["kausap", "makausap", "lonely", "mag-isa", "makikipag-usap", "kwentuhan", "samahan", "wala akong kaibigan"]):
+        # 4. DIRECT COMPANIONSHIP / NEED SOMEONE TO TALK TO ("Gusto ko ng kausap", "I feel lonely", "Mag-isa ako")
+        if intent == "companionship" or has_keyword_match(clean, ["kausap", "makausap", "lonely", "mag-isa", "makikipag-usap", "kwentuhan", "samahan", "wala akong kaibigan", "nalulungkot"]):
             companionship_replies = [
-                "Nandito ako para sa iyo at buong puso akong handang makinig. Minsan nakakagaan talaga sa dibdib kapag may napagsasabihan tayo ng ating mga naiisip o nararamdaman. Ano ang mga tumatakbo sa isip mo ngayon? Pwede mong ikwento sa akin nang malaya at walang paghuhusga.",
-                "Salamat sa pagtitiwala na magsabi sa akin. Hindi mo kailangang sarilinin ang nararamdaman mo. Nandito ako para samahan ka. May partikular bang nangyari sa school, sa bahay, o sa personal mong buhay na nagpapabigat sa iyo ngayon?",
-                "I am right here with you, and I am listening. Valid ang nararamdaman mo, at normal lang na maghanap ng makakausap kapag mabigat o tahimik ang paligid. Pwede mong sabihin sa akin kahit anong nasa isip mo ngayon."
+                "Nandito ako at buong puso akong handang makinig sa iyo. Minsan, nakakagaan talaga sa pakiramdam kapag may napagsasabihan tayo ng ating mga naiisip at nararamdaman nang walang takot na husgahan. Ano ang mga bagay na tumatakbo sa isip mo ngayon? Malaya mong maibabahagi sa akin ang lahat.",
+                "Salamat sa pagtitiwala na magsabi sa akin. Hindi mo kailangang solohin ang anumang bigat na nararamdaman mo. Nandito ako para samahan ka at pakinggan ang kwento mo. May partikular bang nangyari sa school, sa bahay, o sa sarili mo na nagpapabigat sa iyo ngayon?",
+                "Nandito ako kasama mo, at nakikinig ako. Tunay at valid ang nararamdaman mo, at normal lang na maghanap ng makakausap kapag tahimik o mabigat ang paligid. Pwede mong sabihin sa akin kahit anong nararamdaman mo ngayon—walang tama o maling sasabihin dito."
             ]
             reply = random.choice(companionship_replies)
             resources = [
-                "SAPC Guidance Counselor Confidential Walk-In (Room 204, Bldg A)",
-                "Peer Wellness Listening Buddy Circle",
-                "Student Lounge & Quiet Meditation Space (Bldg B)"
+                "SAPC Peer Wellness Listening Buddy Circle",
+                "Guidance Relaxation & Mindfulness Corner (Room 204)",
+                "Daily Student Wellness Journal & Reflection Space"
             ]
             return reply, resources, False, None
 
         # 5. ANXIETY, PANIC, OVERTHINKING ("Kinakabahan ako", "Overthinking", "Di ako makatulog")
         if emotion in ["anxiety", "fear"] or has_keyword_match(clean, ["panic", "kaba", "kinakabahan", "overthinking", "takot", "balisa", "di makatulog", "insomnia"]):
             reply = (
-                "Ramdam ko ang bigat at kaba na nararamdaman mo ngayon. Subukan nating huminga nang malalim nang magkasama:\n\n"
-                "• Huminga papasok sa ilong sa loob ng 4 na segundo...\n"
-                "• Pigilin ang hininga ng 4 na segundo...\n"
-                "• Dahan-dahang ibuga sa bibig sa loob ng 6 na segundo.\n\n"
-                "Ligtas ka rito. Ano ang pinagmumulan ng kaba o overthinking mo ngayon? Pwede mong himayin at sabihin sa akin para maibsan ang bigat."
+                "Ramdam ko ang kaba at bilis ng tibok ng puso na nararanasan mo ngayon. Ligtas ka sa sandaling ito, at lilipas din ang bugso ng kaba.\n\n"
+                "Subukan nating huminga nang magkasama:\n"
+                "• Dahan-dahang huminga papasok sa ilong sa loob ng 4 na segundo...\n"
+                "• Pigilin ang hininga nang 4 na segundo...\n"
+                "• Dahan-dahang ibuga sa bibig nang 6 na segundo.\n\n"
+                "Nandito lang ako para sa iyo. Ano ang pinakamalaking bagay na nagpapaikot sa isip mo ngayon? Pwede mong ikwento sa akin para maibsan natin ang bigat."
             )
             resources = [
                 "5-Minute Guided Box Breathing Technique",
@@ -532,10 +536,9 @@ class NLPService:
         # 6. STRESS, BURNOUT, EXHAUSTION ("Sobrang pagod", "Burnout", "Daming requirements")
         if emotion in ["stress", "frustration"] or has_keyword_match(clean, ["stress", "pagod", "burnout", "exhausted", "puyat", "daming gawain", "dami requirements", "tambak"]):
             reply = (
-                "Naiintindihan ko ang nararamdaman mong pagod. Normal lang na maramdaman ang burnout lalo na kapag sunod-sunod ang mga academic deadlines at responsibilidad. "
-                "Tandaan na hindi mo kailangang tapusin ang lahat nang sabay-sabay.\n\n"
-                "Subukan nating gamitin ang 'Pomodoro Technique' (25 minutes focus, 5 minutes rest) at unahin ang 1 pinaka-urgent na gawain muna. "
-                "Gusto mo bang tulungan kitang ayusin ang study priorities mo?"
+                "Naiintindihan ko kung gaano nakakaubos ang sunod-sunod na requirements at puyat. Normal lang na maramdaman ang matinding pagod, at valid na hilingin mong magpahinga.\n\n"
+                "Tandaan: Hindi mo kailangang gawin o lutasin ang lahat nang sabay-sabay sa isang iglap. Subukan nating unahin ang 1 maliit na bagay muna, o kaya'y maglaan ng 10 minutong break para makahinga ang isip mo.\n\n"
+                "Gusto mo bang pag-usapan natin kung aling gawain ang pinaka-nakaka-stress sa iyo ngayon para matulungan kitang i-prioritize ito?"
             )
             resources = [
                 "SAPC Time Management & Priority Matrix Guide",
@@ -545,12 +548,12 @@ class NLPService:
             return reply, resources, False, None
 
         # 7. GUIDANCE OFFICE / CAMPUS SERVICE INQUIRIES ("Saan ang guidance office", "anong oras bukas")
-        if has_keyword_match(clean, ["saan", "location", "office", "oras", "hours", "appointment", "schedule counseling", "counselor"]):
+        if has_keyword_match(clean, ["saan ang guidance", "location", "office hours", "oras ng guidance", "appointment schedule", "counselor schedule"]):
             reply = (
-                "Ang SAPC Guidance and Counseling Office ay matatagpuan sa Room 204, 2nd Floor ng Building A. "
-                "Bukas ang opisina mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM. "
-                "Maaari kang mag-walk in para sa confidential consultation o mag-request ng appointment sa pamamagitan ng iyong Student Portal. "
-                "Ang ating Registered Guidance Counselor na si Ms. Maria Theresa Cruz, RGC ay handang tumulong sa iyo."
+                "Ang ating SAPC Guidance & Counseling Office ay matatagpuan sa Room 204, 2nd Floor ng Building A. "
+                "Bukas ang opisina mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM.\n\n"
+                "Laging bukas ang pintuan para sa confidential walk-in consultations, o maaari ka ring mag-set ng schedule sa pamamagitan ng iyong Student Dashboard. "
+                "Lahat ng ibabahagi mo ay kumpidensyal at ligtas. May partikular ka bang gustong i-consult sa ating Guidance Counselor?"
             )
             resources = [
                 "Guidance & Counseling Center: Room 204, Bldg A (Mon-Fri 8AM-5PM)",
@@ -562,9 +565,9 @@ class NLPService:
         # 8. FINANCIAL CONCERNS ("Tuition", "Walang pera", "Baon", "Promissory")
         if domain == "financial" or has_keyword_match(clean, ["pera", "tuition", "baon", "bayad", "promissory", "allowance", "utang", "fees", "scholarship"]):
             reply = (
-                "Naiintindihan ko kung gaano kabigat sa isip ang mga alalahaning pinansyal. "
-                "Gusto kong ipaalala na may mga support programs ang San Antonio de Padua College tulad ng Student Assistance Grants, flexible promissory note arrangements sa Accounting, at CHED/DepEd educational subsidy assistance. "
-                "Maaari kang dumulog sa Student Affairs Office upang malaman ang mga available na ayuda para sa iyong pag-aaral."
+                "Naiintindihan ko kung gaano kabigat sa dibdib at isip ang mga alalahaning pinansyal. Gusto kong ipaalala na hindi mo kasalanan ito at hindi ka dapat mahiya.\n\n"
+                "Sa SAPC, may mga paraan para masuportahan ka—tulad ng Student Assistance Grants, flexible promissory notes na walang interest penalties, at scholarship endorsements. Hindi dapat maging hadlang ang pera sa iyong pangarap.\n\n"
+                "Gusto mo bang gabayan kita kung paano makakuha ng emergency promissory note o financial assistance endorsement?"
             )
             resources = [
                 "SAPC Student Assistance & Scholarship Office (Bldg A Ground Floor)",
@@ -576,9 +579,9 @@ class NLPService:
         # 9. FAMILY & HOME RELATIONSHIPS ("Away sa bahay", "Magulang", "Family")
         if domain == "family" or has_keyword_match(clean, ["magulang", "tatay", "nanay", "away", "kapatid", "pamilya", "bahay", "parents"]):
             reply = (
-                "Ang mga problema o tensyon sa tahanan ay may malaking epekto sa ating emosyon at pokus sa pag-aaral. "
-                "Ang Guidance Office ay nagbibigay ng ligtas, pribado, at kumpidensyal na espasyo kung saan maaari mong ibahagi ang iyong pinagdaraanan nang walang takot o panghuhusga. "
-                "Nandito ako para makinig kung nais mong magbahagi pa."
+                "Napakabigat sa kalooban kapag may tensyon o hindi pagkakaunawaan sa tahanan, lalo na't nakakaapekto ito sa iyong katahimikan at pag-aaral. "
+                "Karapatan mong maramdaman ang kapayapaan at pag-unawa.\n\n"
+                "Nandito ako para pakinggan ka nang buong puso. Kung nais mong ilabas ang sama ng loob o ang mga nararamdaman mo, bukas ang espasyong ito para sa iyo nang walang anumang panghuhusga."
             )
             resources = [
                 "Confidential Family Counseling Assistance (Room 204)",
@@ -590,9 +593,9 @@ class NLPService:
         # 10. GRATITUDE ("Salamat", "Thank you")
         if intent == "gratitude" or has_keyword_match(clean, ["salamat", "thank you", "thanks", "salamat po", "maraming salamat"]):
             gratitude_replies = [
-                "Walang anuman! I'm really glad I could be here for you. Tandaan mo na palagi kang welcome mag-chat dito anumang oras na kailangan mo ng gabay o makakausap. Ingat ka palagi!",
-                "You're very welcome! Proud ako sa pagsisikap mo. Kung may iba ka pang katanungan o gusto mong pag-usapan later, nandito lang ako palagi para sa iyo.",
-                "Walang anuman, SAPCian! Keep taking care of yourself and taking things one step at a time. May maitutulong pa ba ako bago ka magpatuloy?"
+                "Walang anuman! Masaya ako na nakatulong ako at nakasama kita ngayon. Tandaan mo na palagi kang may kakampi at handang makinig dito. Mag-ingat ka palagi at maging mabait sa sarili mo!",
+                "You're very welcome! Proud ako sa lakas ng loob mong magbahagi at magpatuloy. Kung sakaling kailangan mo ulit ng makakausap, nandito lang ako anumang oras.",
+                "Walang anuman, SAPCian! Take things one breath and one step at a time. May maitutulong pa ba ako sa iyo bago ka magpatuloy?"
             ]
             reply = random.choice(gratitude_replies)
             resources = [
@@ -604,9 +607,9 @@ class NLPService:
         # 11. GREETINGS & CASUAL CHECK-INS (ONLY when intent is greeting and domain is general)
         if intent == "greeting" or clean in ["hi", "hello", "kumusta", "kamusta", "hey", "good morning", "good afternoon", "magandang umaga", "magandang hapon", "magandang gabi"]:
             greeting_replies = [
-                "Hello! Magandang araw sa iyo. Nandito ako bilang iyong SAPC Guidance Companion. Kumusta ang iyong araw, klase, at pakiramdam ngayon? May maitutulong ba ako sa iyo?",
-                "Hi there! Happy to connect with you today. Kumusta ang mga requirements at wellness mo ngayong linggo? Feel free to share anything on your mind!",
-                "Kumusta! Nandito ako handang makinig at gumabay sa iyong academic at wellness journey sa SAPC. Ano ang pinagkakaabalahan o naiisip mo ngayon?"
+                "Hello! Magandang araw sa iyo. Kumusta ang pakiramdam mo at ang mga klase mo ngayong araw? Nandito ako bilang iyong Guidance Companion para makinig at sumuporta sa iyo.",
+                "Hi there! Masaya akong naka-connect tayo. Kumusta ang lagay mo ngayong linggo? Feel free to share anything on your mind—academic man o nararamdaman mo sa araw-araw.",
+                "Kumusta! Nandito ako handang makinig sa kahit anong gusto mong pag-usapan. Ano ang pinagkakaabalahan o naiisip mo ngayon?"
             ]
             reply = random.choice(greeting_replies)
             resources = [
@@ -618,8 +621,8 @@ class NLPService:
         # 12. POSITIVE / HOPE ("Masaya ako", "Nakapasa ako", "Kaya pa")
         if emotion in ["joy", "hope"] or has_keyword_match(clean, ["masaya", "passed", "nakapasa", "good", "great", "proud", "blessed"]):
             reply = (
-                "Nakakataba ng puso marinig 'yan! Ipagpatuloy mo ang magandang momentum at huwag kalimutang i-celebrate ang iyong mga tagumpay, malaki man o maliit. "
-                "Paano pa ako makakatulong sa iyong student journey ngayong linggo?"
+                "Nakakataba ng puso at nakakaproud marinig 'yan! Ipagpatuloy mo ang magandang sigla, at huwag kalimutang pasalamatan at i-celebrate ang sarili mo sa iyong mga tagumpay, malaki man o maliit. "
+                "Paano pa ako makakatulong o makakasama sa iyong journey ngayong linggo?"
             )
             resources = [
                 "SAPC Student Achievement Board",
@@ -629,9 +632,9 @@ class NLPService:
 
         # 13. DYNAMIC CONVERSATIONAL FALLBACK (Contextual reflection)
         fallback_replies = [
-            f"Salamat sa pagbabahagi nito sa akin. Naririnig ko ang sinabi mo tungkol sa '{message[:40]}...'. Mahalaga sa amin sa SAPC ang kapakanan mo. Nais mo bang magkwento pa nang mas detalyado para mas matulungan kita?",
-            "Naiintindihan ko ang iyong punto. Nandito ako para magbigay ng ligtas at kumpidensyal na suporta sa iyong pag-aaral at well-being. Ano ang pinakamagandang maitutulong ko sa iyo ngayon?",
-            "Thank you for sharing that with me. Your perspective matters, and I am here to assist you with academic guidance, emotional wellness, and campus resources. How would you like to proceed?"
+            f"Salamat sa pagbabahagi nito sa akin. Naririnig ko ang sinabi mo tungkol sa iyong pinagdaraanan. Gusto kong malaman mo na mahalaga ang nararamdaman mo at nandito ako para makinig. Nais mo bang magkwento pa para mas maintindihan kita?",
+            "Naiintindihan ko ang iyong punto. Nandito ako bilang iyong ligtas at kumpidensyal na kausap sa iyong pag-aaral at well-being. Paano kita pinakamagandang matutulungan o masasamahan sa sandaling ito?",
+            "Thank you for opening up to me. Your feelings and thoughts matter deeply, and this is a safe, caring space for you. What feels like the most supportive thing we can focus on right now?"
         ]
         reply = random.choice(fallback_replies)
         resources = [

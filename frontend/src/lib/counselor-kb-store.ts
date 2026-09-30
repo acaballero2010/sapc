@@ -42,11 +42,29 @@ const LOCAL_STORAGE_KEY = "sapc_counselor_kb_v1";
 
 export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
   {
+    id: "kb-wellness-001",
+    category: "counseling_faq",
+    title: "Empathy, Emotional Unburdening & Safe Space Guidelines",
+    keywords: ["kausap", "makausap", "lonely", "mag-isa", "lungkot", "malungkot", "nalulungkot", "iyak", "holding space", "confidential space"],
+    content: "When students express feelings of loneliness, sadness, or need someone to listen, the primary objective is to provide unconditional positive regard, deep empathy, and non-judgmental holding space. Always acknowledge their feelings first, validate that their emotions are completely normal and safe to share, and gently encourage them to express what weighs heavily on their mind without rushing to give clinical or administrative solutions.",
+    suggested_resources: [
+      "SAPC Peer Wellness Listening Buddy Circle",
+      "Guidance Relaxation & Mindfulness Corner (Room 204)",
+      "Daily Student Wellness Journal & Safe Reflection Space"
+    ],
+    author_name: "Ms. Maria Theresa Cruz, RGC",
+    author_role: "Head Guidance Counselor",
+    is_active: true,
+    priority_weight: 4,
+    created_at: "2026-01-15T08:00:00.000Z",
+    updated_at: "2026-09-30T10:30:00.000Z"
+  },
+  {
     id: "kb-acad-001",
     category: "academic_policy",
-    title: "SAPC Remedial Program & Grade Recovery Policy (DepEd DO 8, s. 2015)",
-    keywords: ["bagsak", "remedial", "grade recovery", "failing grade", "remedials", "mababa ang grade", "summer class", "failed subject"],
-    content: "Under DepEd Order No. 8, s. 2015 and SAPC Institutional Academic Policy, students receiving a quarterly grade below 75.0 in any subject are entitled to free remedial classes and intervention sessions. Remedials are conducted every Wednesday and Friday, 3:30 PM - 5:00 PM at Building B Room 104 (Learning Commons). Completion of remedial tasks enables grade recomputation up to a passing mark of 75-80.",
+    title: "Empathetic Academic Support & SAPC Grade Recovery Policy",
+    keywords: ["bagsak", "remedial", "grade recovery", "failing grade", "remedials", "mababa ang grade", "summer class", "failed subject", "nahihirapan sa klase"],
+    content: "Academic setbacks can cause significant shame (hiya) and anxiety. Counselors must first unburden the student by affirming that grades do not define their self-worth. In SAPC, students with grades below 75.0 are supported with free remedial and consultation sessions every Wednesday and Friday (3:30 PM - 5:00 PM, Room 104 Learning Commons) allowing grade recomputation under DepEd DO 8, s. 2015. Always encourage the student that setbacks are growth opportunities.",
     suggested_resources: [
       "SAPC Remedial Consultation Desk (Room 104 Learning Commons)",
       "Form 137 / Grade Recomputation Request Form",
@@ -57,14 +75,14 @@ export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
     is_active: true,
     priority_weight: 4,
     created_at: "2026-01-15T08:00:00.000Z",
-    updated_at: "2026-09-01T10:30:00.000Z"
+    updated_at: "2026-09-30T10:30:00.000Z"
   },
   {
     id: "kb-counsel-001",
     category: "counseling_faq",
-    title: "Guidance Office Walk-In & Confidentiality Protocols",
-    keywords: ["guidance office", "counselor", "consultation", "kausap", "confidential", "room 204", "appointment", "schedule"],
-    content: "The SAPC Guidance & Counseling Office is located at Room 204, 2nd Floor, Building A. Office hours are Monday to Friday, 8:00 AM to 5:00 PM. All counseling sessions are strictly confidential under Republic Act No. 9258 (Guidance and Counseling Act of 2004) and RA 10173 (Data Privacy Act). No counseling notes are shared with parents or teachers without the student's explicit, informed consent, except in immediate life-safety emergencies.",
+    title: "Guidance Office Location, Office Hours & Confidentiality Policy",
+    keywords: ["saan ang guidance", "location ng guidance", "guidance office hours", "appointment schedule", "room 204 location", "oras ng guidance"],
+    content: "The SAPC Guidance & Counseling Office is located at Room 204, 2nd Floor, Building A. Office hours are Monday to Friday, 8:00 AM to 5:00 PM. Sessions are strictly confidential under RA 9258 and RA 10173. No notes are shared without explicit consent.",
     suggested_resources: [
       "SAPC Guidance Office: Room 204, Building A (Mon-Fri 8AM-5PM)",
       "Confidential Counselor Email: guidance@sapc.edu.ph",
@@ -73,16 +91,16 @@ export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
     author_name: "Ms. Maria Theresa Cruz, RGC",
     author_role: "Head Guidance Counselor",
     is_active: true,
-    priority_weight: 5,
+    priority_weight: 3,
     created_at: "2026-01-15T08:00:00.000Z",
-    updated_at: "2026-09-01T10:30:00.000Z"
+    updated_at: "2026-09-30T10:30:00.000Z"
   },
   {
     id: "kb-crisis-001",
     category: "crisis_protocol",
     title: "5-Step Crisis De-escalation & 24/7 Mental Health Hotlines",
     keywords: ["suicide", "self harm", "mamatay", "ayaw ko na", "di ko na kaya", "suko na", "cutting", "nasasaktan", "hopeless", "end my life"],
-    content: "IMMEDIATE EMERGENCY SAFETY PROTOCOL: 1. Validate immediate safety without judgment. 2. Connect with licensed professional. 3. Activate institutional child protection support (DepEd DO 40, s. 2012). National Hotlines: National Center for Mental Health (NCMH) 24/7 Crisis Hotline: 1553 (Toll-Free landline) or 0917-899-USAP (8727); Hopeline Philippines: (02) 8804-4673 / 0917-558-4673; Philippine Red Cross 24/7 Helpline: 143.",
+    content: "IMMEDIATE EMERGENCY SAFETY PROTOCOL: 1. Validate immediate safety with deep warmth and zero judgment. 2. Connect with licensed professional. 3. Activate institutional child protection support (DepEd DO 40, s. 2012). National Hotlines: National Center for Mental Health (NCMH) 24/7 Crisis Hotline: 1553 (Toll-Free landline) or 0917-899-USAP (8727); Hopeline Philippines: (02) 8804-4673 / 0917-558-4673; Philippine Red Cross 24/7 Helpline: 143.",
     suggested_resources: [
       "National Center for Mental Health (NCMH) 24/7 Crisis Hotline: 1553 (Toll-Free)",
       "Hopeline Philippines: 0917-558-4673 / (02) 8804-4673",
@@ -94,7 +112,7 @@ export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
     is_active: true,
     priority_weight: 5,
     created_at: "2026-01-15T08:00:00.000Z",
-    updated_at: "2026-09-01T10:30:00.000Z"
+    updated_at: "2026-09-30T10:30:00.000Z"
   },
   {
     id: "kb-resource-001",
@@ -117,9 +135,9 @@ export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
   {
     id: "kb-study-001",
     category: "study_tip",
-    title: "5-4-3-2-1 Grounding & Pomodoro Exam Stress Recovery",
-    keywords: ["anxiety", "panic", "overthinking", "kaba", "kinakabahan", "di makatulog", "exam stress", "pomodoro", "grounding", "box breathing"],
-    content: "When experiencing sudden academic anxiety or panic before an exam: 1. Practice 4-4-6 Box Breathing (Inhale 4s, Hold 4s, Exhale 6s). 2. Use the 5-4-3-2-1 Sensory Grounding method: Notice 5 things you can see, 4 things you can feel, 3 sounds you can hear, 2 things you can smell, and 1 positive affirmation ('I am safe, this moment will pass'). For study fatigue, apply the 25/5 Pomodoro rhythm: 25 minutes focused single-tasking, followed by 5 minutes away from screens.",
+    title: "Empathetic Anxiety De-escalation: 5-4-3-2-1 Grounding & Box Breathing",
+    keywords: ["anxiety", "panic", "overthinking", "kaba", "kinakabahan", "di makatulog", "exam stress", "pomodoro", "grounding", "box breathing", "takot"],
+    content: "When students experience anxiety or overthinking: First, offer calming presence and validate their courage to speak up. Invite them into gentle 4-4-6 Box Breathing (Inhale 4s, Hold 4s, Exhale 6s) or the 5-4-3-2-1 Grounding technique. Reassure them that panic passes and they are safe right now in this moment.",
     suggested_resources: [
       "SAPC Mindfulness Corner & Quiet Zone (Room 204)",
       "Guided 5-Minute Box Breathing Audio Card",
@@ -130,14 +148,14 @@ export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
     is_active: true,
     priority_weight: 4,
     created_at: "2026-02-01T11:00:00.000Z",
-    updated_at: "2026-09-10T16:00:00.000Z"
+    updated_at: "2026-09-30T16:00:00.000Z"
   },
   {
     id: "kb-fin-001",
     category: "financial_aid",
-    title: "SAPC Institutional Scholarship, 4Ps & Emergency Student Aid",
-    keywords: ["scholarship", "tuition", "promissory note", "4ps", "financial", "allowance", "baon", "walang pera", "utang", "discount"],
-    content: "Students facing financial hardships can apply for SAPC Emergency Student Assistance, Tuition Installment Plans, or 4Ps Academic Grant validation at the Financial Aid Desk (Admin Building, Ground Floor). Emergency Promissory Notes for exam permits can be endorsed by the Guidance Counselor or Section Adviser with zero interest penalties. Application window opens 2 weeks before quarterly examinations.",
+    title: "Compassionate Financial Guidance: Scholarships, 4Ps & Emergency Aid",
+    keywords: ["scholarship", "tuition", "promissory note", "4ps", "financial", "allowance", "baon", "walang pera", "utang", "discount", "pambayad"],
+    content: "Financial worries cause deep emotional stress for students and their families. Always validate the student's resilience and unburden feelings of guilt. Guide them towards SAPC Emergency Student Assistance, Tuition Installment Plans, and zero-interest Promissory Note endorsements so financial challenges never prevent them from continuing their education.",
     suggested_resources: [
       "Financial Aid & Scholarships Office (Admin Bldg, Ground Floor)",
       "Guidance Endorsement for Emergency Exam Promissory Note",
@@ -148,7 +166,7 @@ export const DEFAULT_KNOWLEDGE_BASE: CounselorKnowledgeItem[] = [
     is_active: true,
     priority_weight: 4,
     created_at: "2026-02-10T10:00:00.000Z",
-    updated_at: "2026-09-12T09:00:00.000Z"
+    updated_at: "2026-09-30T09:00:00.000Z"
   }
 ];
 

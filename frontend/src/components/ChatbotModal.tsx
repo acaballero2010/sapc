@@ -158,26 +158,116 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
         localStorage.setItem("sapc_last_chat_topic", textToSend.slice(0, 40) + "...");
       }
     } catch {
-      // Fallback dynamic offline response using matched institutional knowledge
-      let fallbackText = "Naririnig kita at nandito ako para sa iyo. Ligtas ang espasyong ito para sa iyong nararamdaman. Huwag mag-atubiling lumapit sa Guidance Office sa Room 204.";
+      // Empathetic Counselor-Grounded Offline Fallback Dialogue
+      const cleanLower = textToSend.toLowerCase();
+      let fallbackText = "Nandito ako para makinig sa iyo nang buong puso. Valid ang anumang nararamdaman mo ngayon, at ligtas ang espasyong ito para sa iyong mga saloobin. Nais mo bang magkwento pa kung ano ang tumatakbo sa isip mo?";
       let fallbackResources = [
-        "SAPC Guidance & Counseling Office (Room 204, Bldg A • Mon-Fri 8AM-5PM)",
-        "National Center for Mental Health (NCMH) Hotline: 1553 (24/7 Toll-Free)",
-        "Hopeline Philippines: 0917-558-4673"
+        "SAPC Peer Wellness Listening Buddy Circle",
+        "Guidance Relaxation & Mindfulness Corner (Room 204)",
+        "Daily Student Wellness Journal & Safe Reflection Space"
       ];
 
-      if (matchedKB.length > 0) {
+      // 1. Crisis / Severe Distress
+      if (
+        cleanLower.includes("mamatay") || 
+        cleanLower.includes("suicide") || 
+        cleanLower.includes("ayaw ko na mabuhay") || 
+        cleanLower.includes("gusto ko nang mawala") || 
+        cleanLower.includes("di ko na kaya")
+      ) {
+        fallbackText = "Naririnig kita nang buong puso, at gusto kong ipaalala sa iyo na hindi ka nag-iisa. Napakahalaga ng buhay mo at may mga taong tunay na nagmamalasakit at handang makinig sa iyo nang walang anumang paghuhusga. Nandito ako kasama mo sa sandaling ito. Huminga tayo nang dahan-dahan.";
+        fallbackResources = [
+          "SAPC Guidance & Counseling Office (Room 204, Bldg A • Mon-Fri 8AM-5PM)",
+          "National Center for Mental Health (NCMH) 24/7 Crisis Hotline: 1553 (Toll-Free)",
+          "Hopeline Philippines: 0917-558-4673 / (02) 8804-4673",
+          "Philippine Red Cross 24/7 Helpline: 143"
+        ];
+      }
+      // 2. Loneliness / Need someone to talk to
+      else if (
+        cleanLower.includes("kausap") || 
+        cleanLower.includes("makausap") || 
+        cleanLower.includes("lonely") || 
+        cleanLower.includes("mag-isa") || 
+        cleanLower.includes("nalulungkot") ||
+        cleanLower.includes("walang kaibigan")
+      ) {
+        fallbackText = "Nandito ako at buong puso akong handang makinig sa iyo. Minsan, nakakagaan talaga sa pakiramdam kapag may napagsasabihan tayo ng ating mga naiisip nang walang takot na husgahan. Hindi mo kailangang solohin ang nararamdaman mo. Ano ang mga bagay na nagpapabigat sa iyo ngayon? Pwede mong ikwento sa akin.";
+        fallbackResources = [
+          "SAPC Peer Wellness Listening Buddy Circle",
+          "Guidance Relaxation & Mindfulness Corner (Room 204)",
+          "Student Lounge & Reflection Space"
+        ];
+      }
+      // 3. Academic difficulties & Failing grades
+      else if (
+        cleanLower.includes("bagsak") || 
+        cleanLower.includes("nahihirapan") || 
+        cleanLower.includes("grade") || 
+        cleanLower.includes("grades") || 
+        cleanLower.includes("exam") || 
+        cleanLower.includes("subject") ||
+        cleanLower.includes("mababa")
+      ) {
+        fallbackText = "Ramdam ko ang bigat at kaba na nararamdaman mo tungkol sa iyong pag-aaral. Gusto kong ipaalala sa iyo: hindi nasusukat ng isang mahirap na exam o mababang marka ang buong galing at halaga mo bilang tao. Normal lang na magkaroon ng mga hamon sa school.\n\nMay mga paraan para makabawi—tulad ng libreng peer tutoring sa Learning Commons (Room 104) at consultation sa iyong guro. Ano ba ang partikular na aralin na pinaka-nakakalito sa iyo ngayon? Pwede nating pag-usapan.";
+        fallbackResources = [
+          "SAPC Free Academic Peer Tutoring (Room 104, Learning Commons)",
+          "Subject Teacher Consultation & Remedial Program",
+          "Form 137 / Grade Recovery Roadmap"
+        ];
+      }
+      // 4. Anxiety, Panic, Overthinking
+      else if (
+        cleanLower.includes("kaba") || 
+        cleanLower.includes("kinakabahan") || 
+        cleanLower.includes("panic") || 
+        cleanLower.includes("overthinking") || 
+        cleanLower.includes("takot") || 
+        cleanLower.includes("di makatulog")
+      ) {
+        fallbackText = "Ramdam ko ang kaba at overthinking na nararanasan mo ngayon. Ligtas ka sa sandaling ito, at lilipas din ang bugso ng kaba.\n\nSubukan nating huminga nang dahan-dahan:\n• Huminga papasok sa ilong (4 seconds)...\n• Pigilin sandali (4 seconds)...\n• Dahan-dahang ibuga sa bibig (6 seconds).\n\nNandito lang ako. Ano ang pinakamalaking bagay na nagpapaikot sa isip mo ngayon?";
+        fallbackResources = [
+          "5-Minute Guided Box Breathing Technique",
+          "SAPC Peer Wellness Support Circle",
+          "Guidance Relaxation & Mindfulness Corner (Room 204)"
+        ];
+      }
+      // 5. Stress, Burnout & Heavy workload
+      else if (
+        cleanLower.includes("stress") || 
+        cleanLower.includes("pagod") || 
+        cleanLower.includes("burnout") || 
+        cleanLower.includes("daming gawain") || 
+        cleanLower.includes("tambak")
+      ) {
+        fallbackText = "Naiintindihan ko kung gaano nakakapagod ang sunod-sunod na requirements at puyat. Valid ang nararamdaman mong pagod, at mahalagang bigyan mo rin ang sarili mo ng sandaling pahinga.\n\nTandaan: Hindi mo kailangang tapusin ang lahat nang sabay-sabay. Subukan nating pumili ng isang maliit na gawain muna para gumaan ang pakiramdam mo. Gusto mo bang tulungan kitang ayusin ang priorities mo?";
+        fallbackResources = [
+          "SAPC Time Management & Priority Matrix Guide",
+          "5-Minute Rest & Hydration Break Reminder",
+          "Guidance Peer Study Support"
+        ];
+      }
+      // 6. Financial difficulties
+      else if (
+        cleanLower.includes("pera") || 
+        cleanLower.includes("tuition") || 
+        cleanLower.includes("baon") || 
+        cleanLower.includes("promissory") || 
+        cleanLower.includes("scholarship")
+      ) {
+        fallbackText = "Naiintindihan ko kung gaano kabigat sa dibdib ang mga alalahaning pinansyal. Gusto kong ipaalala na hindi mo dapat ikahiya ito. Sa SAPC, may Student Assistance Grants at zero-interest Promissory Note support para tuloy-tuloy ang iyong pag-aaral nang walang hadlang. Gusto mo bang malaman ang mga hakbang para makakuha ng guidance endorsement?";
+        fallbackResources = [
+          "SAPC Student Assistance & Scholarship Office (Bldg A Ground Floor)",
+          "Guidance Endorsement for Emergency Exam Promissory Note",
+          "Accounting Office Promissory Support"
+        ];
+      }
+      // 7. Matched Knowledge Base Context (Weaved naturally into counseling response)
+      else if (matchedKB.length > 0) {
         const top = matchedKB[0];
-        fallbackText = `Naririnig kita at naiintindihan ko ang iyong sitwasyon. Ayon sa ating institutional guidelines para sa ${top.title}:\n\n${top.content}\n\nNandito ang ating Guidance Office para gabayan ka hakbang-hakbang.`;
+        fallbackText = `Salamat sa pagtitiwala na magtanong tungkol dito. Bilang iyong Guidance Companion, naririnig ko ang iyong alalahanin.\n\n${top.content}\n\nNandito ako para samahan ka sa bawat hakbang. May partikular ka bang tanong o nais linawin tungkol dito?`;
         if (top.suggested_resources && top.suggested_resources.length > 0) {
           fallbackResources = top.suggested_resources;
-        }
-      } else {
-        const cleanLower = textToSend.toLowerCase();
-        if (cleanLower.includes("kausap") || cleanLower.includes("lonely") || cleanLower.includes("mag-isa")) {
-          fallbackText = "Nandito ako at handang makinig sa iyo nang buong puso. Ano ang mga naiisip o nararamdaman mo ngayon? Pwede mong ikwento sa akin nang malaya.";
-        } else if (cleanLower.includes("bagsak") || cleanLower.includes("nahihirapan") || cleanLower.includes("subject")) {
-          fallbackText = "Normal na magkaroon ng hamon sa academic journey. May libreng peer tutoring ang SAPC sa Room 104 Learning Commons. Gusto mo bang pag-usapan ang review plan?";
         }
       }
 
