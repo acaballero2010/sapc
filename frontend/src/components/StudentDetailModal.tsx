@@ -25,8 +25,6 @@ import {
   Square,
   Target,
   UserCheck,
-  Star,
-  HeartHandshake,
   Trophy,
   Smile,
   Flame,

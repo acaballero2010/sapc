@@ -25,7 +25,6 @@ import {
   Award,
   Trophy,
   Compass,
-  Target,
   Info, 
   Shield, 
   Edit3, 
@@ -38,8 +37,7 @@ import {
   updateStudentRecord, 
   scheduleCounselingSession, 
   addAppNotification,
-  getActiveCommendations,
-  StudentCommendation
+  getActiveCommendations
 } from "@/lib/dataset-store";
 import { useAuth } from "@/lib/auth-context";
 import { fetchWithAuth } from "@/lib/api";

@@ -19,7 +19,6 @@ import {
   GraduationCap, 
   Megaphone,
   Trophy,
-  Star,
   FileText, 
   Bell, 
   HeartPulse, 
@@ -49,7 +48,6 @@ import {
   addAppNotification, 
   getActiveParentRecords,
   getActiveCommendations,
-  StudentCommendation,
   AppNotification, 
   InterventionCarePlan 
 } from "@/lib/dataset-store";

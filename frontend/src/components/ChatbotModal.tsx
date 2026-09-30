@@ -15,8 +15,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   MessageSquarePlus,
-  CheckCircle2,
-  Sparkles
+  CheckCircle2
 } from "lucide-react";
 import { fetchWithAuth } from "@/lib/api";
 import { searchKnowledgeBase, saveKnowledgeItem } from "@/lib/counselor-kb-store";
@@ -680,7 +679,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                   {/* Student Prompt Preview */}
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
                     <p className="font-semibold text-slate-500 mb-0.5">Student Question / Prompt:</p>
-                    <p className="text-slate-800 italic">"{critiqueModal.studentPrompt}"</p>
+                    <p className="text-slate-800 italic">&quot;{critiqueModal.studentPrompt}&quot;</p>
                   </div>
 
                   {/* Critique Tags */}
@@ -712,7 +711,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                   {/* Ideal Counselor Answer (Gold Standard Correction) */}
                   <div>
                     <label className="text-xs font-bold text-slate-700 block mb-1">
-                      Ideal Counselor Answer ("What should the AI say instead?"):
+                      Ideal Counselor Answer (&quot;What should the AI say instead?&quot;):
                     </label>
                     <textarea
                       rows={4}
@@ -722,7 +721,7 @@ export const ChatbotModal: React.FC<ChatbotModalProps> = ({ isOpen, onClose }) =
                       className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-[#8B0014]"
                     />
                     <p className="text-[10px] text-slate-400 mt-1">
-                      ✨ Providing an ideal answer automatically indexes it into the counseling RAG knowledge base.
+                      Providing an ideal answer automatically indexes it into the counseling RAG knowledge base.
                     </p>
                   </div>
 

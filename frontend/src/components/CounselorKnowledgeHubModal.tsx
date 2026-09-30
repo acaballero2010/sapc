@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   X, 
   BookOpen, 
@@ -127,19 +127,7 @@ export const CounselorKnowledgeHubModal: React.FC<CounselorKnowledgeHubModalProp
   const [critiques, setCritiques] = useState<ChatCritiqueItem[]>([]);
   const [isLoadingCritiques, setIsLoadingCritiques] = useState(false);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const initial = getStoredKnowledgeBase();
-    setItems(initial);
-    loadKnowledgeBaseFromFirestore().then((cloudItems) => {
-      if (cloudItems && cloudItems.length > 0) {
-        setItems(cloudItems);
-      }
-    });
-    fetchCritiques();
-  }, [isOpen]);
-
-  const fetchCritiques = async () => {
+  const fetchCritiques = useCallback(async () => {
     setIsLoadingCritiques(true);
     try {
       const res = await fetchWithAuth("/chatbot/critiques");
@@ -151,7 +139,19 @@ export const CounselorKnowledgeHubModal: React.FC<CounselorKnowledgeHubModalProp
     } finally {
       setIsLoadingCritiques(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const initial = getStoredKnowledgeBase();
+    setItems(initial);
+    loadKnowledgeBaseFromFirestore().then((cloudItems) => {
+      if (cloudItems && cloudItems.length > 0) {
+        setItems(cloudItems);
+      }
+    });
+    fetchCritiques();
+  }, [isOpen, fetchCritiques]);
 
   if (!isOpen) return null;
 
@@ -727,7 +727,7 @@ export const CounselorKnowledgeHubModal: React.FC<CounselorKnowledgeHubModalProp
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                           <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                             <p className="font-bold text-slate-500 mb-1">Student Asked:</p>
-                            <p className="text-slate-900 dark:text-white italic">"{c.student_prompt}"</p>
+                            <p className="text-slate-900 dark:text-white italic">&quot;{c.student_prompt}&quot;</p>
                           </div>
                           <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                             <p className="font-bold text-slate-500 mb-1">AI Responded:</p>

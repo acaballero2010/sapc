@@ -6,11 +6,7 @@ import {
   Award, 
   CheckCircle2, 
   Send, 
-  HeartHandshake, 
-  Star,
   PhoneCall,
-  GraduationCap,
-  ShieldCheck,
   RefreshCw
 } from "lucide-react";
 import { StudentRecord } from "@/data/students500";
@@ -223,7 +219,7 @@ export const StudentCommendationModal: React.FC<StudentCommendationModalProps> =
                   <PhoneCall className="h-4 w-4 text-amber-700" />
                   <div>
                     <p className="text-xs font-bold text-amber-950">SMS &amp; In-App Alert to Parent</p>
-                    <p className="text-[10px] text-amber-800">Directly celebrate this win with the student's family</p>
+                    <p className="text-[10px] text-amber-800">Directly celebrate this win with the student&apos;s family</p>
                   </div>
                 </div>
                 <input

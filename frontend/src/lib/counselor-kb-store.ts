@@ -404,7 +404,7 @@ export function subscribeToKnowledgeBase(
       }
       onUpdate(getStoredKnowledgeBase());
     });
-  } catch (err) {
+  } catch {
     onUpdate(getStoredKnowledgeBase());
     return () => {};
   }

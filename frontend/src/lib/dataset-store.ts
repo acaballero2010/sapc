@@ -731,7 +731,7 @@ export function subscribeToStudentDataset(
     );
 
     return unsubscribe;
-  } catch (e: any) {
+  } catch {
     onUpdate(applyRoleScope(getActiveStudentDataset()));
     return () => {};
   }
@@ -2774,7 +2774,7 @@ export function subscribeToFacultyRecords(callback: (records: FacultyRecord[]) =
       }
       callback(getActiveFacultyRecords());
     });
-  } catch (err) {
+  } catch {
     callback(getActiveFacultyRecords());
     return () => {};
   }
