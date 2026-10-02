@@ -93,33 +93,53 @@ export const ParentDashboard: React.FC = () => {
   }, []);
 
   // Pre-linked children dynamically derived from active student database and parent profile
+  const isDemoParent = !user?.email || user.email.toLowerCase() === "parent@sapc.edu.ph";
+
   const LINKED_CHILDREN = useMemo(() => {
-    const defaultIds = [1, 2, 4];
     const customStudentIds: number[] = [];
 
-    if (user?.student_id) {
-      customStudentIds.push(user.student_id);
-    }
     if (user?.lrn) {
-      const match = studentDataset.find(s => s.lrn === user.lrn);
+      const match = studentDataset.find(s => String(s.lrn).trim() === String(user.lrn).trim());
       if (match && !customStudentIds.includes(match.id)) {
         customStudentIds.push(match.id);
       }
+    }
+
+    if (user?.linked_lrns && Array.isArray(user.linked_lrns)) {
+      user.linked_lrns.forEach(l => {
+        const match = studentDataset.find(s => String(s.lrn).trim() === String(l).trim());
+        if (match && !customStudentIds.includes(match.id)) {
+          customStudentIds.push(match.id);
+        }
+      });
     }
 
     if (user?.email) {
       const allParents = getActiveParentRecords();
       const parentRec = allParents.find(p => p.email?.toLowerCase() === user.email?.toLowerCase());
       if (parentRec?.linkedLRN) {
-        const match = studentDataset.find(s => s.lrn === parentRec.linkedLRN);
+        const match = studentDataset.find(s => String(s.lrn).trim() === String(parentRec.linkedLRN).trim());
         if (match && !customStudentIds.includes(match.id)) {
           customStudentIds.push(match.id);
         }
       }
+      const extraList: string[] = (parentRec as any)?.linkedLRNs || [];
+      extraList.forEach(l => {
+        const match = studentDataset.find(s => String(s.lrn).trim() === String(l).trim());
+        if (match && !customStudentIds.includes(match.id)) {
+          customStudentIds.push(match.id);
+        }
+      });
     }
 
-    const mergedIds = Array.from(new Set([...customStudentIds, ...defaultIds]));
-    return mergedIds.map(id => {
+    // Only the default institutional demo account gets sample learners [1, 2, 4]
+    const finalIds = customStudentIds.length > 0 
+      ? customStudentIds 
+      : isDemoParent 
+        ? [1, 2, 4] 
+        : [];
+
+    return finalIds.map(id => {
       const s = studentDataset.find(st => st.id === id) || studentDataset[0];
       const initials = s ? `${s.first_name?.[0] || ""}${s.last_name?.[0] || ""}` : "ST";
       return {
@@ -136,7 +156,14 @@ export const ParentDashboard: React.FC = () => {
         risk_tier: s.latest_risk_tier || "low"
       };
     });
-  }, [studentDataset, user]);
+  }, [studentDataset, user, isDemoParent]);
+
+  // Synchronize selected child when linked children change
+  useEffect(() => {
+    if (LINKED_CHILDREN.length > 0 && !LINKED_CHILDREN.some(c => c.id === selectedStudentId)) {
+      setSelectedStudentId(LINKED_CHILDREN[0].id);
+    }
+  }, [LINKED_CHILDREN, selectedStudentId]);
 
   const currentChild = useMemo(() => {
     return studentDataset.find(s => s.id === selectedStudentId) || studentDataset[0] || SAPC_500_STUDENTS[0];

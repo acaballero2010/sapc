@@ -1,0 +1,196 @@
+{
+  "users": [
+    {
+      "localId": "fac_sapc_coun_001",
+      "email": "counselor@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Maria Theresa Cruz, RGC",
+      "passwordHash": "Xv09mf+lNHlFy5bODPyZTVXXahDtcCM2quRPeRnbmKI=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_coun_002",
+      "email": "elena.ramos@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Dr. Elena Ramos, RGC",
+      "passwordHash": "Xv09mf+lNHlFy5bODPyZTVXXahDtcCM2quRPeRnbmKI=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_coun_003",
+      "email": "francis.tolentino@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mr. Francis M. Tolentino, RGC",
+      "passwordHash": "Xv09mf+lNHlFy5bODPyZTVXXahDtcCM2quRPeRnbmKI=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_coun_004",
+      "email": "kristine.valdez@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Ms. Kristine Mae Valdez, RGC",
+      "passwordHash": "Xv09mf+lNHlFy5bODPyZTVXXahDtcCM2quRPeRnbmKI=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_001",
+      "email": "teacher@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Prof. Ernesto Bautista, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_002",
+      "email": "elena.bautista@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Ms. Elena Bautista, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_003",
+      "email": "carlos.dizon@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mr. Carlos Dizon, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_004",
+      "email": "mariatheresa.cruz@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Ms. Maria Theresa Cruz, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_005",
+      "email": "roberto.santos@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mr. Roberto Santos, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_006",
+      "email": "teresa.santos@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mrs. Teresa Santos, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_007",
+      "email": "mark.reyes@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mr. Mark Anthony Reyes, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_008",
+      "email": "jessica.alcantara@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Ms. Jessica Alcantara, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_009",
+      "email": "annalyn.cruz@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Prof. Annalyn Cruz, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_010",
+      "email": "sarah.mendoza@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Ms. Sarah Jane Mendoza, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_011",
+      "email": "paul.valdez@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Engr. Paul Valdez",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_012",
+      "email": "carlo.villanueva@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mr. Carlo Dominic Villanueva, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_013",
+      "email": "rolando.castillo@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mr. Rolando Castillo, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_014",
+      "email": "cristina.morales@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mrs. Cristina Morales, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_015",
+      "email": "eduardo.ramos@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mr. Eduardo Ramos, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_016",
+      "email": "rowena.perez@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mrs. Rowena Perez, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_017",
+      "email": "maria.gomez@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Dr. Maria Gomez, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_018",
+      "email": "carlos.cruz@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Mr. Carlos Cruz, LPT",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_fac_019",
+      "email": "mark.morales@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Coach Mark Morales",
+      "passwordHash": "zeOD7ujuekQArfehX3FvF5ouuXZGs34InrjW0E5mNBY=",
+      "salt": ""
+    },
+    {
+      "localId": "fac_sapc_adm_001",
+      "email": "admin@sapc.edu.ph",
+      "emailVerified": true,
+      "displayName": "Dr. Remedios Santos, Ed.D.",
+      "passwordHash": "JAvlGPq9JyTdtvBO6x2llnRI1+gxwIyPqCKAn3THIKk=",
+      "salt": ""
+    }
+  ]
+}

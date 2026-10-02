@@ -3,7 +3,7 @@
 // Supports dynamic active/inactive toggles per quarter/semester, custom subjects, and Firestore persistence.
 
 import { db, auth } from "@/lib/firebase";
-import { collection, doc, writeBatch, getDocs, setDoc, deleteDoc, onSnapshot, Unsubscribe } from "firebase/firestore";
+import { collection, doc, writeBatch, getDocs, deleteDoc, onSnapshot, Unsubscribe } from "firebase/firestore";
 
 export type GradeLevel = 7 | 8 | 9 | 10 | 11 | 12;
 export type AcademicQuarter = "Q1" | "Q2" | "Q3" | "Q4";

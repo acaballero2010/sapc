@@ -1,7 +1,6 @@
 import { 
   getActiveCurriculum, 
-  DEFAULT_CURRICULUM_REGISTRY, 
-  CurriculumSubject 
+  DEFAULT_CURRICULUM_REGISTRY 
 } from "./curriculum-store";
 
 export interface SubjectMetadata {

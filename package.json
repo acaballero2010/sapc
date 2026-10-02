@@ -13,10 +13,12 @@
     "typescript": "npm --prefix frontend run typecheck",
     "typecheck": "npm --prefix frontend run typecheck",
     "test:backend": "cd backend && .\\venv\\Scripts\\python -m pytest -v",
-    "set-claims": "node scripts/set-custom-claims.mjs"
+    "set-claims": "node scripts/set-custom-claims.mjs",
+    "upload:csv": "node scripts/upload-csv-to-firebase.mjs"
   },
   "workspaces": [
-    "frontend"
+    "frontend",
+    "functions"
   ],
   "keywords": [
     "decision-support-system",

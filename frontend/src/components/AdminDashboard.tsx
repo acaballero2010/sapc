@@ -27,6 +27,7 @@ import {
   Trash2,
   ShieldAlert,
   Key,
+  KeyRound,
   ChevronLeft,
   ChevronRight,
   BrainCircuit,
@@ -48,6 +49,7 @@ import { InstitutionalReportModal } from "./InstitutionalReportModal";
 import { MultiDomainIngestionHub } from "./MultiDomainIngestionHub";
 import { CounselorKnowledgeHubModal } from "./CounselorKnowledgeHubModal";
 import { FacultyImportModal } from "./FacultyImportModal";
+import { UserProvisioningModal } from "./UserProvisioningModal";
 import { StudentDetailModal } from "./StudentDetailModal";
 import { ImportDiffModal } from "./ImportDiffModal";
 import { CurriculumManagementHub } from "./CurriculumManagementHub";
@@ -173,6 +175,21 @@ export type AdminTabType =
   | "data_integrity"
   | "system_health"
   | "admin_actions";
+
+function generateSuggestedPassword(role: string, identifier?: string): string {
+  const digits = (identifier || "").replace(/\D/g, "");
+  const suffix = digits.slice(-4) || String(1000 + Math.floor(Math.random() * 9000));
+  if (role.includes("counsel")) {
+    return `SAPC@Coun${suffix.slice(-3)}!`;
+  } else if (role.includes("teach") || role.includes("facult")) {
+    return `SAPC@Fac${suffix.slice(-3)}!`;
+  } else if (role === "parent") {
+    return `SAPC@P${suffix}!`;
+  } else if (role === "admin") {
+    return `SAPC@Admin2026!`;
+  }
+  return `SAPC@${suffix}!`;
+}
 
 export const AdminDashboard: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -314,6 +331,7 @@ export const AdminDashboard: React.FC = () => {
   // Faculty & Guidance Counselors Directory (Cloud Firestore collection: faculty_records)
   const [facultyList, setFacultyList] = useState<FacultyRecord[]>(() => getActiveFacultyRecords());
   const [isFacultyImportOpen, setIsFacultyImportOpen] = useState(false);
+  const [isUserProvisioningOpen, setIsUserProvisioningOpen] = useState(false);
   const [facultyRoleFilter, setFacultyRoleFilter] = useState<string>("all");
   const [facultyStatusFilter, setFacultyStatusFilter] = useState<string>("all");
   const [facultySearch, setFacultySearch] = useState<string>("");
@@ -418,10 +436,86 @@ export const AdminDashboard: React.FC = () => {
   const [newParentSection, setNewParentSection] = useState("Grade 11 - St. Augustine (STEM)");
 
   // 13. Bulk Export Credentials State
-  const [credentialRoleFilter, setCredentialRoleFilter] = useState<"all" | "teacher" | "counselor" | "parent" | "student">("all");
+  const [credentialRoleFilter, setCredentialRoleFilter] = useState<"all" | "teacher" | "counselor" | "parent" | "student" | "admin">("all");
   const [credentialSearch, setCredentialSearch] = useState("");
   const [selectedCredentialIds, setSelectedCredentialIds] = useState<Set<string>>(new Set());
   const [isPrintSlipsOpen, setIsPrintSlipsOpen] = useState(false);
+
+  // 14. Admin Account Reset Modal State
+  const [resettingUser, setResettingUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    roleLabel?: string;
+    identifier?: string;
+    initialPassword?: string;
+  } | null>(null);
+  const [resetPasswordInput, setResetPasswordInput] = useState<string>("");
+  const [isResettingPassword, setIsResettingPassword] = useState<boolean>(false);
+  const [resetCompletedInfo, setResetCompletedInfo] = useState<{
+    newPassword: string;
+    email: string;
+    name: string;
+  } | null>(null);
+  const [copiedResetNotice, setCopiedResetNotice] = useState<boolean>(false);
+
+  const handleOpenResetModal = (u: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    roleLabel?: string;
+    identifier?: string;
+    initialPassword?: string;
+  }) => {
+    setResettingUser(u);
+    setResetCompletedInfo(null);
+    setCopiedResetNotice(false);
+    setResetPasswordInput(generateSuggestedPassword(u.role, u.identifier));
+  };
+
+  const handleExecutePasswordReset = async () => {
+    if (!resettingUser) return;
+    setIsResettingPassword(true);
+    try {
+      const res = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: resettingUser.email,
+          role: resettingUser.role,
+          identifier: resettingUser.identifier,
+          newPassword: resetPasswordInput.trim() || undefined,
+          full_name: resettingUser.name
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Failed to reset password in Firebase Auth");
+      }
+
+      const assignedPassword = data.newPassword || resetPasswordInput.trim();
+      setResetCompletedInfo({
+        newPassword: assignedPassword,
+        email: resettingUser.email,
+        name: resettingUser.name
+      });
+
+      if (resettingUser.role === "teacher" || resettingUser.role === "guidance_counselor" || resettingUser.role === "counselor") {
+        setFacultyList(prev => prev.map(f => f.email.toLowerCase() === resettingUser.email.toLowerCase() ? { ...f, initial_password: assignedPassword, initialPassword: assignedPassword } : f));
+      } else if (resettingUser.role === "parent") {
+        setParentRecords(prev => prev.map(p => p.email.toLowerCase() === resettingUser.email.toLowerCase() ? { ...p, initialPassword: assignedPassword, initial_password: assignedPassword } : p));
+      }
+
+      showToast(`Password successfully reset for ${resettingUser.name}!`);
+    } catch (err: any) {
+      alert("Account reset error: " + err.message);
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
 
   // Real-time Firestore Multi-User Sync for Pending & Parents
   useEffect(() => {
@@ -735,23 +829,46 @@ Issued Date     : ${new Date().toLocaleDateString()}
       });
     });
 
-    // 4. Students (First 50 sample for bulk credential generator)
-    students.slice(0, 50).forEach(s => {
+    // 4. All Students (Full 503 Cohort Records for Master Credentials Export)
+    students.forEach((s, idx) => {
+      const lrnStr = String(s.lrn || "").trim();
+      const last4 = lrnStr.slice(-4) || String(s.id || idx + 1).padStart(4, "0");
+      const uniqueId = `STU-${lrnStr || `${s.id || idx + 1}`}`;
       list.push({
-        id: `STU-${s.id}`,
-        name: `${s.first_name} ${s.last_name}`,
-        email: s.email || `student.${s.lrn}@sapc.edu.ph`,
+        id: uniqueId,
+        name: s.full_name || `${s.first_name} ${s.last_name}`,
+        email: s.email || `student.${lrnStr}@sapc.edu.ph`,
         role: "student",
-        roleLabel: `Student (${s.strand || 'SHS'})`,
-        identifier: s.lrn,
+        roleLabel: `Student (JHS - Grade ${s.grade_level})`,
+        identifier: lrnStr,
         sectionOrDept: s.section_name || `Grade ${s.grade_level}`,
-        initialPassword: `sapc${s.lrn.slice(-4)}`,
+        initialPassword: `SAPC@${last4}!`,
         status: "Active"
       });
     });
 
-    return list;
+    // Deduplicate to guarantee completely unique React keys
+    const seenIds = new Set<string>();
+    return list.filter(item => {
+      if (seenIds.has(item.id)) return false;
+      seenIds.add(item.id);
+      return true;
+    });
   }, [facultyList, parentRecords, students]);
+
+  const credentialCounts = useMemo(() => {
+    const students = allCredentialUsers.filter(u => u.role === "student").length;
+    const parents = allCredentialUsers.filter(u => u.role === "parent").length;
+    const faculty = allCredentialUsers.filter(u => u.role === "teacher" || u.role === "counselor").length;
+    const admins = allCredentialUsers.filter(u => u.role === "admin").length;
+    return {
+      all: allCredentialUsers.length,
+      students,
+      parents,
+      faculty,
+      admins
+    };
+  }, [allCredentialUsers]);
 
   const filteredCredentialUsers = useMemo(() => {
     let result = allCredentialUsers;
@@ -765,7 +882,11 @@ Issued Date     : ${new Date().toLocaleDateString()}
       );
     }
     if (credentialRoleFilter !== "all") {
-      result = result.filter(u => u.role === credentialRoleFilter);
+      if (credentialRoleFilter === "teacher") {
+        result = result.filter(u => u.role === "teacher" || u.role === "counselor");
+      } else {
+        result = result.filter(u => u.role === credentialRoleFilter);
+      }
     }
     return result;
   }, [allCredentialUsers, credentialSearch, credentialRoleFilter]);
@@ -869,7 +990,7 @@ Issued Date     : ${new Date().toLocaleDateString()}
     { id: "governance", label: "System & Platform Config (6)", tabIds: ["dashboard", "curriculum", "platform_settings", "quarter_management", "knowledge_base", "notifications"] },
     { id: "ingestion", label: "Master Ingestion & Rollback (5)", tabIds: ["import_wizard", "import_history", "revert_import", "verify_assessments", "export_import_history"] },
     { id: "students", label: "Student Master Registry (2)", tabIds: ["students", "create_student"] },
-    { id: "users", label: "Campus Accounts & Security (5)", tabIds: ["teachers", "create_user", "parents", "pending_registrations", "export_credentials"] },
+    { id: "users", label: "Campus Accounts & Security (5)", tabIds: ["export_credentials", "teachers", "parents", "create_user", "pending_registrations"] },
     { id: "compliance", label: "Institutional Compliance (1)", tabIds: ["reports"] }
   ], []);
 
@@ -883,15 +1004,15 @@ Issued Date     : ${new Date().toLocaleDateString()}
     { id: "revert_import", label: "Rollback & Revert Engine", icon: RotateCcw, badge: "Emergency", category: "ingestion" },
     { id: "students", label: "Master Student Registry", icon: BookOpen, badge: `${cohortStats.total || 500}`, category: "students" },
     { id: "create_student", label: "Create Single Student", icon: UserPlus, category: "students" },
+    { id: "export_credentials", label: "All Users Directory & Passwords", icon: Users, badge: `${allCredentialUsers.length} Users`, category: "users" },
     { id: "teachers", label: "Faculty & Counselors Roster", icon: GraduationCap, badge: `${facultyList.length} Active`, category: "users" },
-    { id: "create_user", label: "Create Campus Account", icon: Key, category: "users" },
     { id: "parents", label: "Parent Accounts & Links", icon: Users, badge: `${parentRecords.length} Active`, category: "users" },
+    { id: "create_user", label: "Create Campus Account", icon: Key, category: "users" },
     { id: "pending_registrations", label: "Pending Registrations", icon: UserCheck, badge: `${pendingRegistrations.length} Due`, category: "users" },
     { id: "reports", label: "DepEd / CHED Reports", icon: Award, category: "compliance" },
     { id: "notifications", label: "Broadcast Announcements", icon: Bell, category: "governance" },
     { id: "knowledge_base", label: "Knowledge Base & FAQs", icon: HelpCircle, category: "governance" },
     { id: "verify_assessments", label: "Verify Submitted Screeners", icon: Activity, category: "ingestion" },
-    { id: "export_credentials", label: "Bulk Export Credentials", icon: Download, category: "users" },
     { id: "export_import_history", label: "Export Ingestion Logs", icon: FileSpreadsheet, category: "ingestion" }
   ];
 
@@ -1313,6 +1434,15 @@ Issued Date     : ${new Date().toLocaleDateString()}
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setIsUserProvisioningOpen(true)}
+              className="px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2"
+              title="Bulk Provision Student, Faculty, Counselor, and Parent accounts into Firebase Auth via CSV"
+            >
+              <Key className="h-4 w-4 text-[#8B0014]" />
+              <span>Bulk Provision Users (CSV)</span>
+            </button>
+
             <button
               onClick={() => handleTabChange("curriculum")}
               className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center gap-2"
@@ -2386,6 +2516,23 @@ Issued Date     : ${new Date().toLocaleDateString()}
 
                               <button
                                 type="button"
+                                onClick={() => handleOpenResetModal({
+                                  id: `STU-${s.id}`,
+                                  name: s.full_name || `${s.first_name} ${s.last_name}`,
+                                  email: s.email || `student.${s.lrn}@sapc.edu.ph`,
+                                  role: "student",
+                                  roleLabel: `Student (Grade ${s.grade_level})`,
+                                  identifier: String(s.lrn),
+                                  initialPassword: `SAPC@${String(s.lrn).slice(-4)}!`
+                                })}
+                                className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 transition cursor-pointer"
+                                title="Reset Student Password"
+                              >
+                                <KeyRound className="h-3.5 w-3.5" />
+                              </button>
+
+                              <button
+                                type="button"
                                 onClick={() => handleDeleteStudentAction(s.id, `${s.first_name} ${s.last_name}`)}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                                 title="Delete student record"
@@ -2921,6 +3068,22 @@ Issued Date     : ${new Date().toLocaleDateString()}
                             {/* Actions */}
                             <td className="p-3 text-right">
                               <div className="inline-flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenResetModal({
+                                    id: f.id,
+                                    name: f.name,
+                                    email: f.email,
+                                    role: f.role,
+                                    roleLabel: f.role === "guidance_counselor" ? "Guidance Counselor" : "Faculty",
+                                    identifier: f.employee_id || f.id,
+                                    initialPassword: f.initial_password || (f as any).initialPassword || "SAPC@2026!"
+                                  })}
+                                  title="Reset Account Password"
+                                  className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 transition cursor-pointer"
+                                >
+                                  <KeyRound className="h-3.5 w-3.5" />
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => copyFacultySlip(f)}
@@ -3476,6 +3639,22 @@ Issued Date     : ${new Date().toLocaleDateString()}
                           {/* Actions */}
                           <td className="p-3 text-right">
                             <div className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenResetModal({
+                                  id: p.id,
+                                  name: p.name,
+                                  email: p.email,
+                                  role: "parent",
+                                  roleLabel: `Parent (${p.relationship || "Guardian"})`,
+                                  identifier: p.linkedLRN || p.id,
+                                  initialPassword: p.initialPassword || (p as any).initial_password || "SAPC@2026!"
+                                })}
+                                title="Reset Parent Account Password"
+                                className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 transition cursor-pointer"
+                              >
+                                <KeyRound className="h-3.5 w-3.5" />
+                              </button>
                               <button
                                 type="button"
                                 onClick={() => copyParentSlip(p)}
@@ -4078,6 +4257,15 @@ Issued Date     : ${new Date().toLocaleDateString()}
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href="/sapc_503_student_credentials.csv"
+                  download="sapc_503_student_credentials.csv"
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                  title="Direct download of pre-generated credentials for all 503 students"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download 503 Students CSV</span>
+                </a>
                 <button
                   type="button"
                   onClick={handleExportSelectedCredentialsCSV}
@@ -4119,30 +4307,14 @@ Issued Date     : ${new Date().toLocaleDateString()}
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+                <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-xl gap-0.5">
                   <button
                     onClick={() => setCredentialRoleFilter("all")}
                     className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
                       credentialRoleFilter === "all" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
-                    All ({allCredentialUsers.length})
-                  </button>
-                  <button
-                    onClick={() => setCredentialRoleFilter("teacher")}
-                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
-                      credentialRoleFilter === "teacher" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    Faculty ({facultyList.filter(f => f.role === "teacher").length})
-                  </button>
-                  <button
-                    onClick={() => setCredentialRoleFilter("parent")}
-                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
-                      credentialRoleFilter === "parent" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    Parents ({parentRecords.length})
+                    All ({credentialCounts.all})
                   </button>
                   <button
                     onClick={() => setCredentialRoleFilter("student")}
@@ -4150,7 +4322,31 @@ Issued Date     : ${new Date().toLocaleDateString()}
                       credentialRoleFilter === "student" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
-                    Students (50)
+                    Students ({credentialCounts.students})
+                  </button>
+                  <button
+                    onClick={() => setCredentialRoleFilter("parent")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                      credentialRoleFilter === "parent" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Parents ({credentialCounts.parents})
+                  </button>
+                  <button
+                    onClick={() => setCredentialRoleFilter("teacher")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                      credentialRoleFilter === "teacher" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Faculty &amp; Counselors ({credentialCounts.faculty})
+                  </button>
+                  <button
+                    onClick={() => setCredentialRoleFilter("admin")}
+                    className={`px-3 py-1 rounded-lg font-bold transition text-[11px] cursor-pointer ${
+                      credentialRoleFilter === "admin" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Admins ({credentialCounts.admins})
                   </button>
                 </div>
               </div>
@@ -4262,17 +4458,28 @@ Issued Date     : ${new Date().toLocaleDateString()}
 
                           {/* Quick Action */}
                           <td className="p-3 text-right">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const slip = `SAPC CREDENTIALS: ${u.name} | Email: ${u.email} | Password: ${u.initialPassword} | Role: ${u.roleLabel}`;
-                                navigator.clipboard.writeText(slip);
-                                showToast(`Copied credential slip for ${u.name}!`);
-                              }}
-                              className="px-2.5 py-1 bg-slate-100 hover:bg-[#8B0014] text-slate-600 hover:text-white rounded-lg font-bold text-[10px] transition cursor-pointer"
-                            >
-                              Copy Slip
-                            </button>
+                            <div className="inline-flex items-center gap-1.5 justify-end">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenResetModal(u)}
+                                className="px-2.5 py-1 bg-amber-50 hover:bg-amber-600 text-amber-900 hover:text-white border border-amber-200 rounded-lg font-bold text-[10px] transition flex items-center gap-1 cursor-pointer"
+                                title="Reset account password in Firebase Auth"
+                              >
+                                <KeyRound className="h-3 w-3" />
+                                <span>Reset</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const slip = `SAPC CREDENTIALS: ${u.name} | Email: ${u.email} | Password: ${u.initialPassword} | Role: ${u.roleLabel}`;
+                                  navigator.clipboard.writeText(slip);
+                                  showToast(`Copied credential slip for ${u.name}!`);
+                                }}
+                                className="px-2.5 py-1 bg-slate-100 hover:bg-[#8B0014] text-slate-600 hover:text-white rounded-lg font-bold text-[10px] transition cursor-pointer"
+                              >
+                                Copy Slip
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -4881,6 +5088,17 @@ Issued Date     : ${new Date().toLocaleDateString()}
         }}
       />
 
+      <UserProvisioningModal
+        isOpen={isUserProvisioningOpen}
+        onClose={() => setIsUserProvisioningOpen(false)}
+        onSuccess={(count) => {
+          setStudents(getActiveStudentDataset());
+          setFacultyList(getActiveFacultyRecords());
+          setParentRecords(getActiveParentRecords());
+          showToast(`Bulk Provisioning Complete: Synced ${count} accounts with Firebase Auth and Cloud Firestore.`);
+        }}
+      />
+
       <StudentDetailModal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
@@ -4893,6 +5111,178 @@ Issued Date     : ${new Date().toLocaleDateString()}
         onClose={() => setInspectingBatch(null)}
         batch={inspectingBatch}
       />
+
+      {/* ========================================================= */}
+      {/* ACCOUNT PASSWORD RESET MODAL */}
+      {/* ========================================================= */}
+      {resettingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <KeyRound className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="font-black text-slate-900 dark:text-white text-base">
+                    Account Security &amp; Password Reset
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Administrator Credential Override • Firebase Auth
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setResettingUser(null);
+                  setResetCompletedInfo(null);
+                }}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* User Profile Card */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-black text-slate-900 dark:text-white text-sm">
+                  {resettingUser.name}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] uppercase ${
+                  resettingUser.role === "admin" ? "bg-rose-100 text-rose-900" :
+                  resettingUser.role.includes("counsel") ? "bg-purple-100 text-purple-900" :
+                  resettingUser.role === "parent" ? "bg-amber-100 text-amber-900" :
+                  resettingUser.role === "student" ? "bg-emerald-100 text-emerald-900" :
+                  "bg-blue-100 text-blue-900"
+                }`}>
+                  {resettingUser.roleLabel || resettingUser.role}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-slate-600 dark:text-slate-300 font-mono text-[11px]">
+                <div>Email: <strong className="text-slate-800 dark:text-slate-100">{resettingUser.email}</strong></div>
+                {resettingUser.identifier && (
+                  <div>ID / LRN: <strong className="text-slate-800 dark:text-slate-100">{resettingUser.identifier}</strong></div>
+                )}
+              </div>
+            </div>
+
+            {!resetCompletedInfo ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    New Temporary Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={resetPasswordInput}
+                      onChange={(e) => setResetPasswordInput(e.target.value)}
+                      placeholder="e.g. SAPC@Fac008!"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl font-mono text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#8B0014]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetPasswordInput(generateSuggestedPassword(resettingUser.role, resettingUser.identifier));
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-[10px] font-bold bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 cursor-pointer"
+                    >
+                      Regenerate
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Password must be at least 8 characters and include uppercase, lowercase, numbers, and symbols.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-200">
+                  <ShieldAlert className="h-4 w-4 shrink-0 text-amber-600" />
+                  <span>
+                    Resetting will instantly synchronize Firebase Auth and Firestore. The user will be required to change this temporary password upon login.
+                  </span>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setResettingUser(null)}
+                    className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isResettingPassword || !resetPasswordInput.trim()}
+                    onClick={handleExecutePasswordReset}
+                    className="flex items-center gap-2 px-5 py-2 rounded-xl bg-[#8B0014] hover:bg-[#6D0010] text-white text-xs font-bold shadow-md transition disabled:opacity-50 cursor-pointer"
+                  >
+                    {isResettingPassword ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        <span>Updating Firebase Auth...</span>
+                      </>
+                    ) : (
+                      <>
+                        <KeyRound className="h-4 w-4" />
+                        <span>Confirm Password Reset</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4 py-2 text-center">
+                <div className="inline-flex p-3 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600">
+                  <CheckCircle2 className="h-8 w-8" />
+                </div>
+                <div>
+                  <h5 className="font-black text-slate-900 dark:text-white text-sm">
+                    Credentials Reset Successfully!
+                  </h5>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Account is live in Firebase Auth and synchronized across SAPC databases.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-slate-100 dark:bg-slate-900 rounded-xl font-mono text-xs text-left space-y-1">
+                  <div>User: <strong className="text-slate-900 dark:text-white">{resetCompletedInfo.name}</strong></div>
+                  <div>Email: <strong className="text-slate-900 dark:text-white">{resetCompletedInfo.email}</strong></div>
+                  <div>New Password: <strong className="text-emerald-700 dark:text-emerald-400">{resetCompletedInfo.newPassword}</strong></div>
+                </div>
+
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const notice = `SAPC Institutional Login Credentials Reset\n----------------------------------------\nName: ${resetCompletedInfo.name}\nEmail: ${resetCompletedInfo.email}\nTemporary Password: ${resetCompletedInfo.newPassword}\nPortal Link: ${window.location.origin}/login\n----------------------------------------\nPlease sign in and update your password under Profile > Security Settings.`;
+                      navigator.clipboard.writeText(notice);
+                      setCopiedResetNotice(true);
+                      setTimeout(() => setCopiedResetNotice(false), 2500);
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold transition shadow-xs cursor-pointer"
+                  >
+                    {copiedResetNotice ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 text-amber-400" />}
+                    <span>{copiedResetNotice ? "Copied to Clipboard!" : "Copy Reset Slip"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResettingUser(null);
+                      setResetCompletedInfo(null);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold hover:bg-slate-300 cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

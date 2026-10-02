@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   Bot, 
   BookOpen, 
@@ -30,14 +30,21 @@ import {
   Edit3, 
   ChevronDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Key,
+  Copy,
+  Check,
+  ExternalLink,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { 
   getActiveStudentDataset, 
   updateStudentRecord, 
   scheduleCounselingSession, 
   addAppNotification,
-  getActiveCommendations
+  getActiveCommendations,
+  getActiveParentRecords
 } from "@/lib/dataset-store";
 import { useAuth } from "@/lib/auth-context";
 import { fetchWithAuth } from "@/lib/api";
@@ -69,7 +76,7 @@ type TabType =
   | "privacy";
 
 export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }) => {
-  const { user } = useAuth();
+  const { user, switchRole } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
   // Default first tab is Student Profile
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -270,21 +277,30 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
       try {
         const studentsList = (typeof window !== "undefined" ? getActiveStudentDataset() : []) || (await fetchWithAuth("/students").catch(() => null));
         if (studentsList && studentsList.length > 0) {
-          const s = studentsList.find((st: any) => 
+          const matched = studentsList.find((st: any) => 
             (user?.student_id && st.id === user.student_id) ||
+            (user?.lrn && String(st.lrn).trim() === String(user.lrn).trim()) ||
             (user?.email && st.email?.toLowerCase() === user.email.toLowerCase()) ||
             (user?.full_name && `${st.first_name} ${st.last_name}`.toLowerCase() === user.full_name.toLowerCase())
-          ) || studentsList[0] || {
-            id: user?.student_id || 1,
-            first_name: user?.full_name ? user.full_name.split(" ")[0] : "Erika",
-            last_name: user?.full_name && user.full_name.split(" ").length > 1 ? user.full_name.split(" ").slice(1).join(" ") : "Bautista",
-            full_name: user?.full_name || "Erika Bautista",
-            lrn: "109238470001",
-            grade_level: 7,
+          );
+
+          const isDemoJoshua = user?.email?.toLowerCase() === "student@sapc.edu.ph";
+
+          const s = matched || (isDemoJoshua ? studentsList[0] : null) || {
+            id: user?.student_id || Date.now(),
+            first_name: user?.full_name ? user.full_name.split(" ")[0] : "Student",
+            last_name: user?.full_name && user.full_name.split(" ").length > 1 ? user.full_name.split(" ").slice(1).join(" ") : "",
+            full_name: user?.full_name || "Enrolled Student",
+            lrn: user?.lrn || "109238479999",
+            grade_level: user?.grade_level ? parseInt(String(user.grade_level), 10) : 7,
             strand: "JHS",
-            section_name: "Grade 7 - St. Anthony",
-            adviser_name: "Ms. Elena Bautista, LPT",
-            email: user?.email || "student@sapc.edu.ph"
+            section_name: user?.section || "Grade 7 - Love",
+            adviser_name: "Adviser",
+            email: user?.email || "",
+            latest_risk_score: 18.0,
+            latest_risk_tier: "low",
+            domain_scores: { academic: 15, family: 15, health: 15, mental_health: 15, financial: 15 },
+            sass_metrics: { gpa: 85.0, days_absent: 0, attendance_rate_pct: 100, failing_subjects_count: 0, incomplete_requirements_count: 0 }
           };
           setStudent(s);
 
@@ -294,24 +310,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
           ]);
 
           setRiskData(rRes || {
-            composite_risk_score: s.latest_risk_score || 24.5,
+            composite_risk_score: s.latest_risk_score || 20.0,
             risk_tier: s.latest_risk_tier || "low",
             academic_score: s.domain_scores?.academic || 18.0,
-            family_score: s.domain_scores?.family || 14.0,
-            health_score: s.domain_scores?.health || 12.0,
+            family_score: s.domain_scores?.family || 15.0,
+            health_score: s.domain_scores?.health || 15.0,
             mental_health_score: s.domain_scores?.mental_health || 15.0,
-            financial_score: s.domain_scores?.financial || 10.0
+            financial_score: s.domain_scores?.financial || 15.0
           });
           
           setAcademicRecords(aRes && aRes.length > 0 ? aRes : [
             {
-              id: 1,
+              id: s.id,
               school_year: "2025-2026",
               semester: "1st Semester",
               quarter: "Q1",
-              gpa: s.sass_metrics?.gpa || 88.5,
-              attendance_rate: 96.5,
-              absences_count: s.sass_metrics?.days_absent || 1,
+              gpa: s.sass_metrics?.gpa || 88.0,
+              attendance_rate: s.sass_metrics?.attendance_rate_pct || 98.0,
+              absences_count: s.sass_metrics?.days_absent || 0,
               incomplete_subjects_count: s.sass_metrics?.incomplete_requirements_count || 0
             }
           ]);
@@ -327,7 +343,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
 
     const handleDatasetSync = () => {
       const active = getActiveStudentDataset();
-      const current = active.find(st => st.id === (student?.id || user?.student_id || 1));
+      const current = active.find(st => 
+        (student?.id && st.id === student.id) ||
+        (user?.student_id && st.id === user.student_id) ||
+        (user?.lrn && String(st.lrn).trim() === String(user.lrn).trim())
+      );
       if (current) {
         setStudent(current);
         setRiskData({
@@ -344,22 +364,73 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
 
     window.addEventListener("sapc:dataset-updated", handleDatasetSync);
     return () => window.removeEventListener("sapc:dataset-updated", handleDatasetSync);
-  }, [user?.student_id, user?.email, user?.full_name, student?.id]);
+  }, [user?.student_id, user?.lrn, user?.email, user?.full_name, user?.grade_level, user?.section, student?.id]);
+
+  // Isolate per-student personal assessment and task states so newly registered students do not inherit Joshua's records
+  useEffect(() => {
+    if (!student?.id) return;
+    const isDemoJoshua = student?.email?.toLowerCase() === "student@sapc.edu.ph";
+
+    const savedTasks = typeof window !== "undefined" ? localStorage.getItem(`sapc_tasks_${student.id}`) : null;
+    if (savedTasks) {
+      try { setInterventionTasks(JSON.parse(savedTasks)); } catch {}
+    } else if (!isDemoJoshua) {
+      setInterventionTasks([
+        { id: "task-1", text: "Complete Student Profile and Initial Diagnostic Assessment", completed: false, dueDate: "End of Week" },
+        { id: "task-2", text: "Consult with assigned Section Adviser", completed: false, dueDate: "Next Week" }
+      ]);
+    }
+
+    if (!isDemoJoshua) {
+      setCurrentStreak(1);
+      setPhq9Scores({});
+      setGad7Scores({});
+      setHealthForm({
+        chronicConditions: [],
+        mealFrequency: "3 Regular Meals",
+        skipsBreakfast: "Never",
+        waterIntake: "1.5 - 2.0 Liters",
+        sleepHours: 8,
+        sleepQuality: 4,
+        daytimeFatigue: "Never",
+        exerciseDays: 3
+      });
+      setFamilyForm({
+        householdSize: 4,
+        isEldest: false,
+        ofwStatus: "Both Parents in the Philippines",
+        maritalStatus: "Married",
+        livingArrangement: "Living with Both Parents",
+        primaryCaregiver: "Both Parents",
+        fatherEducation: "College Graduate",
+        motherEducation: "College Graduate",
+        guardianResponsiveness: "Always Responsive",
+        ptaAttendance: "Regular Attendance",
+        familyConflictLevel: 1,
+        is4Ps: false,
+        caregivingBurdenHours: 0,
+        internetAccessAtHome: "High-Speed Fiber",
+        studySpaceQuietness: "Quiet",
+        siblingsInSchool: 1,
+        familySupportIndex: 5
+      });
+      setFinancialForm({
+        incomeBracket: "₱20,000 - ₱40,000",
+        is4Ps: false,
+        breadwinnerOccupation: "Employed",
+        financialStressLevel: 1,
+        primaryStressor: "None",
+        dailyAllowanceAdequacy: "Sufficient",
+        isWorkingStudent: false,
+        weeklyWorkHours: 0,
+        scholarshipType: "None",
+        tuitionInstallmentStatus: "Current / Up to Date"
+      });
+    }
+  }, [student?.id, student?.email]);
 
 
 
-  if (!isMounted) {
-    return (
-      <div className="space-y-4 sm:space-y-6 pb-12 font-sans animate-pulse px-2 sm:px-0">
-        <div className="h-40 sm:h-44 rounded-3xl bg-slate-200" />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 sm:h-28 rounded-2xl bg-slate-200" />
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   const domainScores = {
     academic: riskData?.academic_score || 18.0,
@@ -370,11 +441,39 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
   };
 
   const displayName = user?.full_name || (student ? (student.full_name || `${student.first_name} ${student.last_name}`) : "Student");
-  const displayLrn = student?.lrn || "109482719283";
-  const displaySection = student?.section_name || "Grade 11 - STEM (St. Augustine)";
-  const displayAdviser = student?.adviser_name || "Mr. Roberto Santos, LPT";
+  const displayLrn = student?.lrn || user?.lrn || "109482719283";
+  const displaySection = student?.section_name || user?.section || (student?.grade_level ? `Grade ${student.grade_level} - St. Anthony` : "Grade 7 - St. Anthony");
+  const displayAdviser = student?.adviser_name || "Ms. Elena Bautista, LPT";
   const displayGpa = academicRecords[0]?.gpa ? academicRecords[0].gpa.toFixed(1) : "88.5";
   const displayAttendance = academicRecords[0]?.attendance_rate ? `${academicRecords[0].attendance_rate}%` : "96.5%";
+
+  // Dynamically resolve linked parent record for the logged-in student
+  const studentLrnStr = String(displayLrn).trim();
+  const linkedParent = useMemo(() => {
+    const allParents = typeof window !== "undefined" ? getActiveParentRecords() : [];
+    if (!studentLrnStr && !displayName) return null;
+    return allParents.find(p => 
+      (studentLrnStr && (String(p.linkedLRN).trim() === studentLrnStr || p.linkedLRNs?.some(l => String(l).trim() === studentLrnStr))) ||
+      (displayName && p.linkedStudentName?.toLowerCase() === displayName.toLowerCase())
+    );
+  }, [studentLrnStr, displayName]);
+
+  const guardianDisplayName = linkedParent?.name || user?.guardian_name || (student?.last_name ? `Mrs. Elena ${student.last_name}` : "Mrs. Elena Dimaculangan");
+  const guardianRelationship = linkedParent?.relationship || "Mother";
+  const guardianContact = linkedParent?.phone || user?.guardian_contact || "+63 917 555 0192";
+  const parentLoginEmail = linkedParent?.email || (studentLrnStr ? `parent.${studentLrnStr}@parent.sapc.edu.ph` : "parent@sapc.edu.ph");
+  const parentTempPass = linkedParent?.initialPassword || (studentLrnStr ? `SAPC@P${studentLrnStr.slice(-4)}!` : "SAPC@P5612!");
+
+  const [showParentPassword, setShowParentPassword] = useState(false);
+  const [copiedParentCreds, setCopiedParentCreds] = useState(false);
+
+  const handleCopyParentCredentials = () => {
+    if (typeof window === "undefined") return;
+    const text = `SAPC Parent Portal Login Credentials\nStudent: ${displayName} (LRN: ${displayLrn})\nParent/Guardian: ${guardianDisplayName} (${guardianRelationship})\nPortal Email: ${parentLoginEmail}\nTemporary Password: ${parentTempPass}\nLogin Link: ${window.location.origin}/login`;
+    navigator.clipboard.writeText(text);
+    setCopiedParentCreds(true);
+    setTimeout(() => setCopiedParentCreds(false), 3000);
+  };
 
   // Detailed Subjects & Components for Grades Page
   const SUBJECTS_BREAKDOWN = [
@@ -547,6 +646,19 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "privacy", label: "Privacy Consents", icon: Lock }
   ];
+
+  if (!isMounted) {
+    return (
+      <div className="space-y-4 sm:space-y-6 pb-12 font-sans animate-pulse px-2 sm:px-0">
+        <div className="h-40 sm:h-44 rounded-3xl bg-slate-200" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-24 sm:h-28 rounded-2xl bg-slate-200" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-16 font-sans w-full max-w-full overflow-hidden px-1 sm:px-0">
@@ -791,18 +903,23 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
             </div>
 
             {/* Emergency Contact & Guardian Card */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-              <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-blue-600" /> Parent / Guardian &amp; Emergency Contact
-              </span>
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="h-4 w-4 text-blue-600" /> Parent / Guardian &amp; Emergency Contact
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <CheckCircle2 className="h-3 w-3" /> Account Active
+                </span>
+              </div>
               <div className="space-y-2">
                 <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
                   <span className="text-slate-500 font-medium">Primary Guardian:</span>
-                  <strong className="text-slate-900">Mrs. Teresa Dimaculangan (Mother)</strong>
+                  <strong className="text-slate-900">{guardianDisplayName} ({guardianRelationship})</strong>
                 </div>
                 <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
                   <span className="text-slate-500 font-medium">Emergency Mobile:</span>
-                  <strong className="text-slate-900 font-mono">+63 917 555 0192</strong>
+                  <strong className="text-slate-900 font-mono">{guardianContact}</strong>
                 </div>
                 <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
                   <span className="text-slate-500 font-medium">Home Residence:</span>
@@ -813,6 +930,66 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onOpenChat }
                   <strong className="text-emerald-700 font-bold flex items-center gap-1">
                     <Shield className="h-3.5 w-3.5" /> RA 10173 Sealed
                   </strong>
+                </div>
+              </div>
+
+              {/* Linked Parent Portal Credentials Section */}
+              <div className="pt-3 border-t border-slate-200/80">
+                <div className="p-3.5 rounded-xl bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-100 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                      <Key className="h-3.5 w-3.5 text-blue-600" /> Linked Parent Portal Login
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyParentCredentials}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-white px-2 py-0.5 rounded-md border border-blue-200 hover:border-blue-300 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      {copiedParentCreds ? (
+                        <>
+                          <Check className="h-3 w-3 text-emerald-600" /> Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3 w-3" /> Copy Login Info
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between items-center text-slate-700 bg-white/70 px-2 py-1 rounded border border-blue-50">
+                      <span className="text-slate-500 font-medium">Portal Email:</span>
+                      <code className="font-mono font-semibold text-slate-900 text-[11px] truncate max-w-[200px]">{parentLoginEmail}</code>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-700 bg-white/70 px-2 py-1 rounded border border-blue-50">
+                      <span className="text-slate-500 font-medium">Initial Password:</span>
+                      <div className="flex items-center gap-1.5">
+                        <code className="font-mono font-semibold text-slate-900 text-[11px]">
+                          {showParentPassword ? parentTempPass : "••••••••"}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => setShowParentPassword(!showParentPassword)}
+                          className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                          title={showParentPassword ? "Hide password" : "Show password"}
+                        >
+                          {showParentPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-1 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Parents can also log in using your LRN: <strong className="font-mono text-slate-700">{displayLrn}</strong></span>
+                    <button
+                      type="button"
+                      onClick={() => switchRole("parent")}
+                      className="inline-flex items-center gap-1 font-bold text-indigo-700 hover:text-indigo-900 underline underline-offset-2 ml-2 cursor-pointer"
+                    >
+                      Open Parent View <ExternalLink className="h-2.5 w-2.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

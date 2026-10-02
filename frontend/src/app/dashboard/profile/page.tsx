@@ -24,6 +24,8 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { useSearchParams } from "next/navigation";
 import { JHS_GRADE_LEVELS, getSectionsForGrade } from "@/lib/dataset-store";
+import { auth } from "@/lib/firebase";
+import { updatePassword } from "firebase/auth";
 
 const AVATAR_PRESETS = [
   { id: "stem", label: "STEM Scholar", emoji: "🔬", bg: "from-blue-600 to-indigo-800" },
@@ -35,7 +37,7 @@ const AVATAR_PRESETS = [
 
 function UserProfileContent() {
   const searchParams = useSearchParams();
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile, linkGoogleAccount, unlinkGoogleAccount } = useAuth();
   
   const [activeTab, setActiveTab] = useState<"profile" | "security" | "privacy">("profile");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,18 +45,19 @@ function UserProfileContent() {
   // Profile Form state
   const [fullName, setFullName] = useState(user?.full_name || "");
   const [email, setEmail] = useState(user?.email || "user@sapc.edu.ph");
-  const [phone, setPhone] = useState("+63 (049) 559-0192");
+  const [phone, setPhone] = useState(user?.phone || "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
-  const [idNumber, setIdNumber] = useState("FAC-2026-JHS-01");
-  const [department, setDepartment] = useState("Junior High School Faculty");
-  const [officeLocation, setOfficeLocation] = useState("Faculty Room, St. Anthony Hall");
+  const [idNumber, setIdNumber] = useState(user?.lrn || user?.employee_id || "");
+  const [department, setDepartment] = useState(user?.department || "");
+  const [officeLocation, setOfficeLocation] = useState(user?.section || "");
   const [gradeLevel, setGradeLevel] = useState<string>(user?.grade_level || JHS_GRADE_LEVELS[0].label);
   const [sectionName, setSectionName] = useState<string>(user?.section || getSectionsForGrade(JHS_GRADE_LEVELS[0].level)[0]);
-  const [bio, setBio] = useState("Licensed educator and decision-support facilitator at San Antonio de Padua College.");
+  const [bio, setBio] = useState(user?.bio || "");
   
   // Student/Parent Specific
-  const [guardianName, setGuardianName] = useState("Mrs. Elena Dimaculangan");
-  const [guardianContact, setGuardianContact] = useState("+63 917 555 0192");
+  const [guardianName, setGuardianName] = useState(user?.guardian_name || "");
+  const [guardianContact, setGuardianContact] = useState(user?.guardian_contact || "");
+  const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
 
   // Security Form state
   const [currentPassword, setCurrentPassword] = useState("");
@@ -86,35 +89,49 @@ function UserProfileContent() {
       if (user.grade_level) setGradeLevel(user.grade_level);
       if (user.section) setSectionName(user.section);
 
+      const isDemoStudent = user.email?.toLowerCase() === "student@sapc.edu.ph";
+      const isDemoParent = user.email?.toLowerCase() === "parent@sapc.edu.ph";
+      const isDemoTeacher = user.email?.toLowerCase() === "teacher@sapc.edu.ph";
+      const isDemoCounselor = user.email?.toLowerCase() === "counselor@sapc.edu.ph";
+      const isDemoAdmin = user.email?.toLowerCase() === "admin@sapc.edu.ph";
+
+      if (user.phone) {
+        setPhone(user.phone);
+      } else if (isDemoStudent || isDemoTeacher || isDemoCounselor) {
+        setPhone("+63 (049) 559-0192");
+      } else {
+        setPhone("");
+      }
+
       if (user.role === "guidance_counselor") {
-        setIdNumber("PRC-RGC-094821");
-        setDepartment("Guidance & Counseling Department");
+        setIdNumber(user.employee_id || (isDemoCounselor ? "PRC-RGC-094821" : ""));
+        setDepartment(user.department || "Guidance & Counseling Department");
         setOfficeLocation("Central Guidance Consultation Room 204");
-        setBio("Registered Guidance Counselor (RGC) specializing in student crisis intervention, AHP behavioral modeling, and academic retention casework.");
+        setBio(user.bio || "Registered Guidance Counselor (RGC) specializing in student crisis intervention, AHP behavioral modeling, and academic retention casework.");
       } else if (user.role === "teacher") {
-        setIdNumber("FAC-2026-JHS-01");
-        setDepartment("Junior High School Faculty");
+        setIdNumber(user.employee_id || (isDemoTeacher ? "FAC-2026-JHS-01" : ""));
+        setDepartment(user.department || "Junior High School Faculty");
         setOfficeLocation(user.section ? `${user.section} (Advisory Class)` : "Faculty Room, St. Anthony Hall");
-        setBio("Junior High School Class Adviser and Faculty focusing on student academic stabilization and early guidance referrals.");
+        setBio(user.bio || "Junior High School Class Adviser and Faculty focusing on student academic stabilization and early guidance referrals.");
       } else if (user.role === "admin") {
-        setIdNumber("ADM-2026-001");
-        setDepartment("Institutional IT & Academic Administration");
+        setIdNumber(user.employee_id || (isDemoAdmin ? "ADM-2026-001" : ""));
+        setDepartment(user.department || "Institutional IT & Academic Administration");
         setOfficeLocation("Administration Building, 2nd Floor");
-        setBio("System Administrator overseeing AHP decision support model weights, user provisioning, and RA 10173 data privacy compliance.");
+        setBio(user.bio || "System Administrator overseeing AHP decision support model weights, user provisioning, and RA 10173 data privacy compliance.");
       } else if (user.role === "student") {
-        setIdNumber(user.lrn || "109482719283");
-        setDepartment("Junior High School Department");
-        setOfficeLocation(user.section || "Grade 7 - Love");
-        setGuardianName("Mrs. Elena Dimaculangan");
-        setGuardianContact("+63 917 555 0192");
-        setBio("Junior High School Student dedicated to academic excellence, leadership, and school community values.");
+        setIdNumber(user.lrn || (isDemoStudent ? "109482719283" : ""));
+        setDepartment(user.department || "Junior High School Department");
+        setOfficeLocation(user.section || (isDemoStudent ? "Grade 7 - Love" : "Grade 7 - St. Anthony"));
+        setGuardianName(user.guardian_name || (isDemoStudent ? "Mrs. Elena Dimaculangan" : ""));
+        setGuardianContact(user.guardian_contact || (isDemoStudent ? "+63 917 555 0192" : ""));
+        setBio(user.bio || "Junior High School Student dedicated to academic excellence, leadership, and school community values.");
       } else if (user.role === "parent") {
-        setIdNumber("PRNT-10948271");
-        setDepartment("Parent-Teacher Community Association (PTCA)");
+        setIdNumber(user.lrn || (isDemoParent ? "PRNT-10948271" : ""));
+        setDepartment(user.department || "Parent-Teacher Community Association (PTCA)");
         setOfficeLocation("Parent Representative, Junior High School");
-        setGuardianName("Mrs. Elena Dimaculangan (Self)");
-        setGuardianContact("+63 917 555 0192");
-        setBio("Guardian of Junior High School student. Participating in student care plans and parent consultations.");
+        setGuardianName(user.guardian_name || (isDemoParent ? "Mrs. Elena Dimaculangan (Self)" : ""));
+        setGuardianContact(user.guardian_contact || (isDemoParent ? "+63 917 555 0192" : ""));
+        setBio(user.bio || "Guardian of Junior High School student. Participating in student care plans and parent consultations.");
       }
     }
   }, [user]);
@@ -186,6 +203,12 @@ function UserProfileContent() {
           avatar_url: avatarUrl || null,
           grade_level: gradeLevel,
           section: sectionName,
+          phone: phone,
+          lrn: idNumber,
+          guardian_name: guardianName,
+          guardian_contact: guardianContact,
+          bio: bio,
+          department: department
         });
       }
       setIsSaving(false);
@@ -197,19 +220,34 @@ function UserProfileContent() {
     }
   };
 
+  // Handle Google SSO Link/Unlink
+  const handleToggleGoogleLink = async () => {
+    setErrorMessage(null);
+    setIsLinkingGoogle(true);
+    try {
+      if (user?.googleLinked) {
+        await unlinkGoogleAccount();
+        setSaveSuccess("Disconnected Google Account.");
+      } else {
+        await linkGoogleAccount();
+        setSaveSuccess("Successfully linked Google Institutional Account for 1-click Sign-In!");
+      }
+      setTimeout(() => setSaveSuccess(null), 4000);
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Failed to update Google SSO connection.");
+    } finally {
+      setIsLinkingGoogle(false);
+    }
+  };
+
   // Handle Password Update
-  const handlePasswordUpdate = (e: React.FormEvent) => {
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setPasswordSuccess(null);
 
-    if (!currentPassword) {
-      setErrorMessage("Please enter your current password.");
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      setErrorMessage("New password must be at least 8 characters long.");
+    if (newPassword.length < 6) {
+      setErrorMessage("New password must be at least 6 characters long.");
       return;
     }
 
@@ -219,14 +257,27 @@ function UserProfileContent() {
     }
 
     setIsSaving(true);
-    setTimeout(() => {
+    try {
+      if (auth.currentUser) {
+        await updatePassword(auth.currentUser, newPassword);
+      }
+      if (updateUserProfile) {
+        await updateUserProfile({ mustChangePassword: false });
+      }
       setIsSaving(false);
       setPasswordSuccess("Your account password has been changed successfully. You can now use your new credentials.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       setTimeout(() => setPasswordSuccess(null), 5000);
-    }, 800);
+    } catch (passErr: any) {
+      setIsSaving(false);
+      if (passErr?.code === "auth/requires-recent-login") {
+        setErrorMessage("For security reasons, changing your password requires recent authentication. Please sign out and sign back in, then try again.");
+      } else {
+        setErrorMessage(passErr?.message || "Failed to update password.");
+      }
+    }
   };
 
   const initials = fullName
@@ -682,6 +733,43 @@ function UserProfileContent() {
                   </li>
                 </ul>
               </div>
+            </div>
+
+            {/* Google Single Sign-On Account Linking */}
+            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                  Google Single Sign-On (SSO)
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Link your institutional or personal Google Account for convenient 1-click passwordless login.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleGoogleLink}
+                disabled={isLinkingGoogle}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition border flex items-center gap-2 shrink-0 ${
+                  user?.googleLinked
+                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100"
+                    : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-300 dark:border-slate-700 hover:bg-slate-50 shadow-xs"
+                }`}
+              >
+                {user?.googleLinked ? (
+                  <>
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Google Account Linked ✓</span>
+                  </>
+                ) : (
+                  <span>{isLinkingGoogle ? "Connecting..." : "Link Google Account →"}</span>
+                )}
+              </button>
             </div>
 
             {/* 2FA Section */}

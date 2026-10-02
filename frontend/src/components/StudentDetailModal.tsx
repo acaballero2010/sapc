@@ -38,7 +38,7 @@ import { AcademicRecoverySimulator } from "./AcademicRecoverySimulator";
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
 import { getActiveStudentDataset, getActiveCommendations, StudentCommendation } from "@/lib/dataset-store";
 import { analyzeMoodTelemetry } from "@/lib/mood-telemetry";
-import { SUBJECT_REGISTRY, calculateSubjectFailurePrediction } from "@/lib/subject-prediction";
+import { calculateSubjectFailurePrediction } from "@/lib/subject-prediction";
 import { getActiveCurriculum, getCurriculumForGrade } from "@/lib/curriculum-store";
 import { StudentCommendationModal } from "./StudentCommendationModal";
 

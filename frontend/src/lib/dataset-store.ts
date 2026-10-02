@@ -1,4 +1,5 @@
 import { SAPC_500_STUDENTS, StudentRecord } from "@/data/students500";
+import { SAPC_503_PARENTS } from "@/data/parents503";
 export type { StudentRecord };
 import { db, auth } from "@/lib/firebase";
 import { 
@@ -257,8 +258,112 @@ export function recalculateAHPForDataset(
   });
 }
 
+export const SEED_STUDENT_RECORDS: StudentRecord[] = [
+  {
+    id: 501,
+    first_name: "Joshua",
+    last_name: "Dimaculangan",
+    full_name: "Joshua Dimaculangan",
+    lrn: "109238475612",
+    grade_level: 7,
+    strand: "JHS",
+    section_name: "Grade 7 - St. Anthony",
+    adviser_name: "Ms. Elena Bautista, LPT",
+    email: "student@sapc.edu.ph",
+    latest_risk_score: 78.4,
+    latest_risk_tier: "high",
+    primary_risk_driver: "Academic Performance & Chronic Absences",
+    domain_scores: {
+      academic: 82.5,
+      mental_health: 74.0,
+      financial: 45.0,
+      family: 38.0,
+      health: 25.0
+    },
+    sass_metrics: {
+      gpa: 73.5,
+      failing_subjects_count: 2,
+      days_absent: 11,
+      attendance_rate_pct: 78.0,
+      incomplete_requirements_count: 1,
+      extracurricular_club: "Arts & Theater Guild",
+      club_participation_level: "Low",
+      hobbies_interests: "Digital Drawing & Sketching"
+    }
+  },
+  {
+    id: 502,
+    first_name: "Angelica",
+    last_name: "Dela Cruz",
+    full_name: "Angelica Dela Cruz",
+    lrn: "109238475613",
+    grade_level: 7,
+    strand: "JHS",
+    section_name: "Grade 7 - St. Anthony",
+    adviser_name: "Ms. Elena Bautista, LPT",
+    email: "angelica@sapc.edu.ph",
+    latest_risk_score: 56.2,
+    latest_risk_tier: "medium",
+    primary_risk_driver: "Financial Strain & Commute Distance",
+    domain_scores: {
+      academic: 35.0,
+      mental_health: 48.0,
+      financial: 72.5,
+      family: 41.0,
+      health: 22.0
+    },
+    sass_metrics: {
+      gpa: 81.0,
+      failing_subjects_count: 0,
+      days_absent: 5,
+      attendance_rate_pct: 88.5,
+      incomplete_requirements_count: 1,
+      extracurricular_club: "Junior Scouting (Girl Scouts)",
+      club_participation_level: "Moderate",
+      hobbies_interests: "Reading & Cooking"
+    }
+  },
+  {
+    id: 503,
+    first_name: "Mark Anthony",
+    last_name: "Reyes",
+    full_name: "Mark Anthony Reyes",
+    lrn: "109238475614",
+    grade_level: 8,
+    strand: "JHS",
+    section_name: "Grade 8 - St. Benedict",
+    adviser_name: "Prof. Ernesto Bautista",
+    email: "mark@sapc.edu.ph",
+    latest_risk_score: 28.5,
+    latest_risk_tier: "low",
+    primary_risk_driver: "On-Track / Active Student Engagement",
+    domain_scores: {
+      academic: 12.0,
+      mental_health: 18.0,
+      financial: 20.0,
+      family: 15.0,
+      health: 10.0
+    },
+    sass_metrics: {
+      gpa: 89.0,
+      failing_subjects_count: 0,
+      days_absent: 1,
+      attendance_rate_pct: 98.2,
+      incomplete_requirements_count: 0,
+      extracurricular_club: "Science & Robotics Club",
+      club_participation_level: "High",
+      hobbies_interests: "Coding & Basketball"
+    }
+  }
+];
+
+export const SAPC_503_STUDENTS: StudentRecord[] = [
+  ...SEED_STUDENT_RECORDS,
+  ...SAPC_500_STUDENTS
+];
+
 export function getActiveStudentDataset(): StudentRecord[] {
-  let dataset = SAPC_500_STUDENTS;
+  let dataset = SAPC_503_STUDENTS;
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -266,15 +371,15 @@ export function getActiveStudentDataset(): StudentRecord[] {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
           // If stored dataset has fewer records than baseline (e.g., partial slice was saved),
-          // preserve any new/modified students and merge with full SAPC_500_STUDENTS baseline.
-          if (parsed.length < SAPC_500_STUDENTS.length) {
+          // preserve any new/modified students and merge with full SAPC_503_STUDENTS baseline.
+          if (parsed.length < SAPC_503_STUDENTS.length) {
             const parsedLrnMap = new Map(parsed.map(s => [String(s.lrn).trim(), s]));
-            const merged = SAPC_500_STUDENTS.map(baselineStudent => {
+            const merged = SAPC_503_STUDENTS.map(baselineStudent => {
               const match = parsedLrnMap.get(String(baselineStudent.lrn).trim());
               return match || baselineStudent;
             });
             // Also include any completely new students created by the user (not in baseline)
-            const baselineLrnSet = new Set(SAPC_500_STUDENTS.map(s => String(s.lrn).trim()));
+            const baselineLrnSet = new Set(SAPC_503_STUDENTS.map(s => String(s.lrn).trim()));
             const newStudents = parsed.filter(s => !baselineLrnSet.has(String(s.lrn).trim()));
             const fullRestored = [...newStudents, ...merged];
             try {
@@ -290,7 +395,29 @@ export function getActiveStudentDataset(): StudentRecord[] {
       console.warn("Could not load custom student dataset from local storage, falling back to baseline:", e);
     }
   }
-  return recalculateAHPForDataset(dataset, getActiveRiskWeights());
+
+  // Deduplicate by LRN and guarantee unique numeric IDs
+  const seenLrns = new Set<string>();
+  const seenIds = new Set<number>();
+  let nextUniqueId = 1;
+  const uniqueStudents: StudentRecord[] = [];
+
+  for (const s of dataset) {
+    const lrnKey = String(s.lrn || "").trim();
+    if (lrnKey && seenLrns.has(lrnKey)) continue;
+    if (lrnKey) seenLrns.add(lrnKey);
+
+    let numId = Number(s.id);
+    if (!numId || seenIds.has(numId)) {
+      while (seenIds.has(nextUniqueId)) nextUniqueId++;
+      s.id = nextUniqueId;
+      numId = nextUniqueId;
+    }
+    seenIds.add(numId);
+    uniqueStudents.push(s);
+  }
+
+  return recalculateAHPForDataset(uniqueStudents, getActiveRiskWeights());
 }
 
 /**
@@ -320,6 +447,12 @@ export function saveStudentDataset(students: StudentRecord[], syncToCloud = true
 export async function syncStudentDatasetToFirestore(students: StudentRecord[]): Promise<{ success: boolean; syncedCount: number; error?: string }> {
   if (!db) {
     return { success: false, syncedCount: 0, error: "Firestore instance not available" };
+  }
+
+  // If user is not yet logged into Firebase Auth, persist locally and defer cloud sync
+  if (!auth?.currentUser) {
+    console.info("[Firestore Sync] Authenticated session pending; student dataset preserved in local storage.");
+    return { success: true, syncedCount: students.length };
   }
 
   try {
@@ -669,10 +802,27 @@ export async function loadStudentDatasetFromFirestore(): Promise<StudentRecord[]
     const snapshot = await getDocs(studentsCol);
 
     if (!snapshot.empty) {
+      const seenLrns = new Set<string>();
+      const seenIds = new Set<number>();
+      let nextId = 1;
       const cloudStudents: StudentRecord[] = [];
+
       snapshot.forEach((d) => {
         const data = d.data() as StudentRecord;
+        const lrn = String(data.lrn || d.id).trim();
+        if (lrn && seenLrns.has(lrn)) return;
+        if (lrn) seenLrns.add(lrn);
         cloudStudents.push(data);
+      });
+
+      cloudStudents.forEach((s) => {
+        let numId = Number(s.id);
+        if (!numId || seenIds.has(numId)) {
+          while (seenIds.has(nextId)) nextId++;
+          s.id = nextId;
+          numId = nextId;
+        }
+        seenIds.add(numId);
       });
 
       // Sort by ID or Grade/Section
@@ -735,10 +885,29 @@ export function subscribeToStudentDataset(
       studentsCol,
       (snapshot) => {
         if (!snapshot.empty) {
+          const seenLrns = new Set<string>();
+          const seenIds = new Set<number>();
+          let nextId = 1;
           const updated: StudentRecord[] = [];
+
           snapshot.forEach((d) => {
-            updated.push(d.data() as StudentRecord);
+            const data = d.data() as StudentRecord;
+            const lrn = String(data.lrn || d.id).trim();
+            if (lrn && seenLrns.has(lrn)) return;
+            if (lrn) seenLrns.add(lrn);
+            updated.push(data);
           });
+
+          updated.forEach((s) => {
+            let numId = Number(s.id);
+            if (!numId || seenIds.has(numId)) {
+              while (seenIds.has(nextId)) nextId++;
+              s.id = nextId;
+              numId = nextId;
+            }
+            seenIds.add(numId);
+          });
+
           updated.sort((a, b) => Number(a.id) - Number(b.id));
           
           if (updated.length > 0) {
@@ -2521,7 +2690,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     grade_level: "All Levels (RGC Head)",
     employee_id: "SAPC-COUN-2020-001",
     prc_license_no: "PRC-RGC-007812",
-    initial_password: "counselor123",
+    initial_password: "SAPC@Coun001!",
     status: "Active",
     phone: "+63 917 333 4455",
     created_at: "2026-08-01T08:00:00.000Z"
@@ -2535,7 +2704,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 10 - St. Augustine",
     grade_level: "Grade 10",
     employee_id: "SAPC-FAC-2020-005",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac005!",
     status: "Active",
     phone: "+63 918 555 6677",
     created_at: "2026-08-01T08:00:00.000Z"
@@ -2549,7 +2718,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 7 - Love",
     grade_level: "Grade 7",
     employee_id: "SAPC-FAC-2023-014",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac014!",
     status: "Active",
     phone: "+63 917 842 1092",
     created_at: "2026-08-15T08:00:00.000Z"
@@ -2563,7 +2732,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 8 - Hope",
     grade_level: "Grade 8",
     employee_id: "SAPC-FAC-2022-089",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac089!",
     status: "Active",
     phone: "+63 918 331 4059",
     created_at: "2026-08-15T08:00:00.000Z"
@@ -2577,7 +2746,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 9 - Chastity",
     grade_level: "Grade 9",
     employee_id: "SAPC-FAC-2024-002",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac002!",
     status: "Active",
     phone: "+63 920 119 2847",
     created_at: "2026-08-15T08:00:00.000Z"
@@ -2592,7 +2761,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     grade_level: "Grades 7-10 (Junior High)",
     employee_id: "SAPC-COUN-2021-008",
     prc_license_no: "PRC-RGC-008924",
-    initial_password: "counselor123",
+    initial_password: "SAPC@Coun008!",
     status: "Active",
     phone: "+63 917 555 8924",
     created_at: "2026-08-10T08:00:00.000Z"
@@ -2607,7 +2776,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     grade_level: "Grades 7-10 (Junior High)",
     employee_id: "SAPC-COUN-2022-019",
     prc_license_no: "PRC-RGC-009102",
-    initial_password: "counselor123",
+    initial_password: "SAPC@Coun019!",
     status: "Active",
     phone: "+63 919 444 3210",
     created_at: "2026-08-10T08:00:00.000Z"
@@ -2621,7 +2790,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 10 - Charity",
     grade_level: "Grade 10",
     employee_id: "SAPC-FAC-2021-045",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac045!",
     status: "Active",
     phone: "+63 922 776 5432",
     created_at: "2026-08-15T08:00:00.000Z"
@@ -2635,7 +2804,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 7 - Integrity",
     grade_level: "Grade 7",
     employee_id: "SAPC-FAC-2024-019",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac019!",
     status: "Active",
     phone: "+63 915 678 1234",
     created_at: "2026-08-18T08:00:00.000Z"
@@ -2649,7 +2818,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 8 - Faith",
     grade_level: "Grade 8",
     employee_id: "SAPC-FAC-2024-033",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac033!",
     status: "Active",
     phone: "+63 917 223 8819",
     created_at: "2026-08-18T08:00:00.000Z"
@@ -2663,7 +2832,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 9 - Prudence",
     grade_level: "Grade 9",
     employee_id: "SAPC-FAC-2024-041",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac041!",
     status: "Active",
     phone: "+63 918 776 1120",
     created_at: "2026-08-18T08:00:00.000Z"
@@ -2677,7 +2846,7 @@ export const DEFAULT_FACULTY_ROSTER: FacultyRecord[] = [
     section: "Grade 10 - Humility",
     grade_level: "Grade 10",
     employee_id: "SAPC-FAC-2024-055",
-    initial_password: "teacher123",
+    initial_password: "SAPC@Fac055!",
     status: "Active",
     phone: "+63 920 445 6678",
     created_at: "2026-08-18T08:00:00.000Z"
@@ -3201,162 +3370,8 @@ export const DEFAULT_PENDING_REGISTRATIONS: PendingRegistrationRecord[] = [
   }
 ];
 
-export const DEFAULT_PARENT_RECORDS: ParentRecord[] = [
-  {
-    id: "PAR-000",
-    name: "Mrs. Teresa Dimaculangan",
-    email: "parent@sapc.edu.ph",
-    phone: "+63 917 555 0192",
-    relationship: "Mother",
-    linkedStudentName: "Joshua Dimaculangan",
-    linkedLRN: "108543120001",
-    linkedLRNs: ["108543120001", "109238475612", "109238475001", "109238470001"],
-    section: "Grade 10 - St. Augustine",
-    gradeLevel: "Grade 10",
-    status: "Active",
-    verifiedAt: "2026-08-15",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent123"
-  },
-  {
-    id: "PAR-001",
-    name: "Mrs. Corazon D. Santos",
-    email: "parent.santos@gmail.com",
-    phone: "+63 917 882 1029",
-    relationship: "Mother",
-    linkedStudentName: "Juan Carlos Santos",
-    linkedLRN: "109238475001",
-    section: "Grade 7 - Love",
-    gradeLevel: "Grade 7",
-    status: "Active",
-    verifiedAt: "2026-08-15",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent2026"
-  },
-  {
-    id: "PAR-002",
-    name: "Engr. Roberto B. Garcia",
-    email: "roberto.garcia@outlook.ph",
-    phone: "+63 922 401 9928",
-    relationship: "Father",
-    linkedStudentName: "Angela Mae Garcia",
-    linkedLRN: "109238475002",
-    section: "Grade 8 - Hope",
-    gradeLevel: "Grade 8",
-    status: "Active",
-    verifiedAt: "2026-08-16",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent2026"
-  },
-  {
-    id: "PAR-003",
-    name: "Mrs. Maritess P. Ramos",
-    email: "maritess.ramos@gmail.com",
-    phone: "+63 915 392 7710",
-    relationship: "Mother",
-    linkedStudentName: "Gabriel Ramos",
-    linkedLRN: "109238475003",
-    section: "Grade 9 - Chastity",
-    gradeLevel: "Grade 9",
-    status: "Active",
-    verifiedAt: "2026-08-18",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent2026"
-  },
-  {
-    id: "PAR-004",
-    name: "Atty. Ferdinand G. De Jesus",
-    email: "ferdinand.dejesus@yahoo.com",
-    phone: "+63 919 726 1144",
-    relationship: "Father",
-    linkedStudentName: "Chloe Nicole De Jesus",
-    linkedLRN: "109238475004",
-    section: "Grade 10 - Charity",
-    gradeLevel: "Grade 10",
-    status: "Active",
-    verifiedAt: "2026-08-20",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent2026"
-  },
-  {
-    id: "PAR-005",
-    name: "Mrs. Jocelyn Mendoza",
-    email: "jocelyn.mendoza@gmail.com",
-    phone: "+63 928 654 3210",
-    relationship: "Mother / OFW Guardian",
-    linkedStudentName: "Mark Anthony Mendoza",
-    linkedLRN: "109238475005",
-    section: "Grade 7 - Integrity",
-    gradeLevel: "Grade 7",
-    status: "Active",
-    verifiedAt: "2026-08-22",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent2026"
-  },
-  {
-    id: "PAR-006",
-    name: "Mr. Renato Bautista",
-    email: "renato.bautista@gmail.com",
-    phone: "+63 917 123 4567",
-    relationship: "Father",
-    linkedStudentName: "Christian Dave Bautista",
-    linkedLRN: "109238475006",
-    section: "Grade 8 - Faith",
-    gradeLevel: "Grade 8",
-    status: "Active",
-    verifiedAt: "2026-08-25",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent2026"
-  },
-  {
-    id: "PAR-007",
-    name: "Mrs. Dolores Alcantara",
-    email: "dolores.alcantara@gmail.com",
-    phone: "+63 920 987 6543",
-    relationship: "Grandmother / Guardian",
-    linkedStudentName: "Patricia Alcantara",
-    linkedLRN: "109238475007",
-    section: "Grade 9 - Prudence",
-    gradeLevel: "Grade 9",
-    status: "Active",
-    verifiedAt: "2026-08-28",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent2026"
-  },
-  {
-    id: "PAR-008",
-    name: "Dr. Manuel Soriano",
-    email: "manuel.soriano@gmail.com",
-    phone: "+63 918 554 4332",
-    relationship: "Father",
-    linkedStudentName: "Ethan Soriano",
-    linkedLRN: "109238475008",
-    section: "Grade 10 - Humility",
-    gradeLevel: "Grade 10",
-    status: "Active",
-    verifiedAt: "2026-09-01",
-    sf9Access: true,
-    attendanceAlerts: true,
-    riskAlerts: true,
-    initialPassword: "parent2026"
-  }
-];
+export const DEFAULT_PARENT_RECORDS: ParentRecord[] = SAPC_503_PARENTS;
+
 
 export function getActivePendingRegistrations(): PendingRegistrationRecord[] {
   if (typeof window !== "undefined") {
@@ -3400,18 +3415,30 @@ export function saveActivePendingRegistrations(records: PendingRegistrationRecor
 }
 
 export function getActiveParentRecords(): ParentRecord[] {
+  let records = SAPC_503_PARENTS;
   if (typeof window !== "undefined") {
     try {
       const stored = localStorage.getItem(PARENTS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (parsed.length < SAPC_503_PARENTS.length) {
+            const parsedMap = new Map(parsed.map((p: any) => [p.email?.toLowerCase(), p]));
+            const merged = SAPC_503_PARENTS.map(base => parsedMap.get(base.email?.toLowerCase()) || base);
+            try {
+              localStorage.setItem(PARENTS_STORAGE_KEY, JSON.stringify(merged));
+            } catch {}
+            records = merged;
+          } else {
+            records = parsed;
+          }
+        }
       }
     } catch {
       // Fallback
     }
   }
-  return DEFAULT_PARENT_RECORDS;
+  return records;
 }
 
 export function saveActiveParentRecords(records: ParentRecord[], syncToFirestore = true): void {
@@ -3470,12 +3497,27 @@ export async function loadParentRecordsFromFirestore(): Promise<ParentRecord[] |
     const snapshot = await getDocs(colRef);
     if (!snapshot.empty) {
       const all: ParentRecord[] = [];
+      const seenEmails = new Set<string>();
       snapshot.forEach(docSnap => {
-        all.push({ ...docSnap.data(), id: docSnap.id } as ParentRecord);
+        const data = docSnap.data() as ParentRecord;
+        const em = (data.email || "").toLowerCase().trim();
+        if (em && !seenEmails.has(em)) {
+          seenEmails.add(em);
+          all.push({ ...data, id: data.id || docSnap.id });
+        }
       });
-      if (all.length > 0) {
-        saveActiveParentRecords(all, false);
-        return all;
+
+      const firestoreMap = new Map(all.map(p => [p.email?.toLowerCase().trim(), p]));
+      const fullList = SAPC_503_PARENTS.map(base => firestoreMap.get(base.email?.toLowerCase().trim()) || base);
+      const baseEmailSet = new Set(SAPC_503_PARENTS.map(b => b.email?.toLowerCase().trim()));
+      all.forEach(p => {
+        const em = p.email?.toLowerCase().trim();
+        if (em && !baseEmailSet.has(em)) fullList.push(p);
+      });
+
+      if (fullList.length > 0) {
+        saveActiveParentRecords(fullList, false);
+        return fullList;
       }
     }
   } catch (err: any) {
@@ -3522,10 +3564,23 @@ export function subscribeToParentRecords(callback: (records: ParentRecord[]) => 
     return onSnapshot(colRef, (snapshot) => {
       if (!snapshot.empty) {
         const records: ParentRecord[] = [];
+        const seenEmails = new Set<string>();
         snapshot.forEach(docSnap => {
-          records.push({ ...docSnap.data(), id: docSnap.id } as ParentRecord);
+          const data = docSnap.data() as ParentRecord;
+          const em = (data.email || "").toLowerCase().trim();
+          if (em && !seenEmails.has(em)) {
+            seenEmails.add(em);
+            records.push({ ...data, id: data.id || docSnap.id });
+          }
         });
-        callback(records);
+        const firestoreMap = new Map(records.map(p => [p.email?.toLowerCase().trim(), p]));
+        const fullList = SAPC_503_PARENTS.map(base => firestoreMap.get(base.email?.toLowerCase().trim()) || base);
+        const baseEmailSet = new Set(SAPC_503_PARENTS.map(b => b.email?.toLowerCase().trim()));
+        records.forEach(p => {
+          const em = p.email?.toLowerCase().trim();
+          if (em && !baseEmailSet.has(em)) fullList.push(p);
+        });
+        callback(fullList);
       }
     }, (error) => {
       if (error?.code !== "permission-denied" && error?.code !== "unavailable") {

@@ -36,6 +36,17 @@ function getFirebaseAdminApp(): App {
   });
 }
 
+export const hasAdminCredentials = (): boolean => {
+  return Boolean(
+    process.env.FIREBASE_SERVICE_ACCOUNT_KEY ||
+    process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+    process.env.K_SERVICE || // Google Cloud Run
+    process.env.FUNCTION_NAME || // Google Cloud Functions
+    process.env.GAE_ENV // Google App Engine
+  );
+};
+
 export const adminApp: App = getFirebaseAdminApp();
 export const adminAuth: Auth = getAuth(adminApp);
 export const adminDb: Firestore = getFirestore(adminApp);
+

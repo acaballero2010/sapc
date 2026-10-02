@@ -61,7 +61,7 @@ import { DepEdFormModal } from "./DepEdFormModal";
 import { BatchInterventionModal } from "./BatchInterventionModal";
 import { ImportDiffModal } from "./ImportDiffModal";
 import { CurriculumManagementHub } from "./CurriculumManagementHub";
-import { getCurriculumForGrade, getActiveCurriculum, AcademicQuarter, CurriculumSubject } from "@/lib/curriculum-store";
+import { getCurriculumForGrade, getActiveCurriculum, AcademicQuarter } from "@/lib/curriculum-store";
 
 export type TeacherTabType = 
   | "dashboard"
@@ -111,6 +111,10 @@ interface MessageThread {
   timestamp: string;
   unread: boolean;
   history: Array<{ sender: string; text: string; time: string; isTeacher: boolean }>;
+}
+
+function generateHistoricalBatchId(): string {
+  return `BATCH-HIST-${Date.now().toString().slice(-6)}`;
 }
 
 // Helper to match section names including virtue/saint aliases
@@ -308,7 +312,6 @@ export const TeacherDashboard: React.FC = () => {
     initialQuarter?: "Q1" | "Q2" | "Q3" | "Q4";
   } | null>(null);
   const [detailActiveQuarter, setDetailActiveQuarter] = useState<"Q1" | "Q2" | "Q3" | "Q4">("Q1");
-  const [isEditingModalScores, setIsEditingModalScores] = useState<boolean>(false);
 
   // Close modal on Escape key press
   useEffect(() => {
@@ -770,7 +773,7 @@ export const TeacherDashboard: React.FC = () => {
     setStudents(filterAdvisory(recalculated));
 
     const newHistory: ImportHistoryItem = {
-      id: `BATCH-HIST-${Date.now().toString().slice(-6)}`,
+      id: generateHistoricalBatchId(),
       type: `DepEd Master Historical: All Subjects (${histSchoolYear})`,
       fileName: histFileName,
       uploadedBy: user?.full_name || "Prof. Ernesto Bautista, LPT",
@@ -1557,9 +1560,10 @@ export const TeacherDashboard: React.FC = () => {
     if (lines.length === 0) return;
 
     const all = getActiveStudentDataset();
+    const maxId = all.reduce((max, s) => Math.max(max, Number(s.id) || 0), 0);
     const newEnrolled: StudentRecord[] = lines.map((line, idx) => {
       const parts = line.split(",").map(p => p.trim());
-      const lrn = parts[0] || `1092384750${String(all.length + idx + 1).padStart(2, "0")}`;
+      const lrn = parts[0] || `1092384750${String(maxId + idx + 1).padStart(2, "0")}`;
       const lastName = parts[1] || "Student";
       const firstName = parts[2] || "New";
       const grade = parseInt(parts[3], 10) || 7;
@@ -1567,7 +1571,7 @@ export const TeacherDashboard: React.FC = () => {
       const email = parts[6] || `student.${lrn.slice(-4)}@sapc.edu.ph`;
 
       return {
-        id: all.length + idx + 1,
+        id: maxId + idx + 1,
         lrn,
         full_name: `${firstName} ${lastName}`,
         first_name: firstName,

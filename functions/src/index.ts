@@ -1,8 +1,16 @@
-import * as admin from "firebase-admin";
+import { initializeApp, getApps } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
-import { onRequest } from "firebase-functions/v2/https";
+import { onRequest, Request } from "firebase-functions/v2/https";
+import { Response } from "express";
 
-admin.initializeApp();
+if (getApps().length === 0) {
+  initializeApp();
+}
+
+const auth = getAuth();
+const db = getFirestore();
 
 const VALID_ROLES = ["admin", "guidance_counselor", "teacher", "parent", "student"];
 
@@ -19,7 +27,7 @@ export const onUserDocWrite = onDocumentWritten("users/{uid}", async (event) => 
   if (!data) {
     console.log(`[Claims Sync] User doc ${uid} deleted. Removing custom claims.`);
     try {
-      await admin.auth().setCustomUserClaims(uid, null);
+      await auth.setCustomUserClaims(uid, null);
     } catch (err: any) {
       console.warn(`[Claims Sync] Failed to clear claims for deleted user ${uid}:`, err.message);
     }
@@ -48,7 +56,7 @@ export const onUserDocWrite = onDocumentWritten("users/{uid}", async (event) => 
   };
 
   try {
-    await admin.auth().setCustomUserClaims(uid, claims);
+    await auth.setCustomUserClaims(uid, claims);
     console.log(`[Claims Sync] Successfully synced custom claims for user ${uid}:`, claims);
   } catch (err: any) {
     console.error(`[Claims Sync] Failed to set custom claims for user ${uid}:`, err.message);
@@ -58,7 +66,7 @@ export const onUserDocWrite = onDocumentWritten("users/{uid}", async (event) => 
 /**
  * HTTPS endpoint to trigger claims synchronization on demand.
  */
-export const syncClaims = onRequest({ cors: true }, async (req, res) => {
+export const syncClaims = onRequest({ cors: true }, async (req: Request, res: Response) => {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;
@@ -72,10 +80,10 @@ export const syncClaims = onRequest({ cors: true }, async (req, res) => {
 
   const idToken = authHeader.split("Bearer ")[1];
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await auth.verifyIdToken(idToken);
     const targetUid = req.body?.uid || decodedToken.uid;
 
-    const userDoc = await admin.firestore().collection("users").doc(targetUid).get();
+    const userDoc = await db.collection("users").doc(targetUid).get();
     const data = userDoc.exists ? (userDoc.data() || {}) : {};
 
     let role = data.role || req.body?.role || "student";
@@ -93,9 +101,10 @@ export const syncClaims = onRequest({ cors: true }, async (req, res) => {
       claims_updated_at: Date.now(),
     };
 
-    await admin.auth().setCustomUserClaims(targetUid, claims);
+    await auth.setCustomUserClaims(targetUid, claims);
     res.json({ success: true, uid: targetUid, claims });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
+

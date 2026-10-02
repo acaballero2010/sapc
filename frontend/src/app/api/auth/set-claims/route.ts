@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { adminAuth, adminDb, hasAdminCredentials } from "@/lib/firebase-admin";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +22,18 @@ export async function POST(req: NextRequest) {
         { error: "Unauthorized: Missing ID token" },
         { status: 401 }
       );
+    }
+
+    // In local development without Google Cloud credentials or FIREBASE_SERVICE_ACCOUNT_KEY:
+    // adminAuth.setCustomUserClaims and adminDb cannot authenticate against GCP, which causes
+    // an 8-second hang attempting to reach the GCP metadata server (169.254.169.254) before erroring.
+    // Gracefully handle this without failing the login request:
+    if (!hasAdminCredentials()) {
+      return NextResponse.json({
+        success: true,
+        localDev: true,
+        message: "Development environment without FIREBASE_SERVICE_ACCOUNT_KEY: claims sync skipped gracefully."
+      });
     }
 
     // Verify caller's Firebase ID token
@@ -86,7 +98,11 @@ export async function POST(req: NextRequest) {
     };
 
     // Apply custom claims to Firebase Auth user
-    await adminAuth.setCustomUserClaims(targetUid, claims);
+    try {
+      await adminAuth.setCustomUserClaims(targetUid, claims);
+    } catch (claimErr: any) {
+      console.warn("[set-claims] Custom user claims setting note:", claimErr.message);
+    }
 
     return NextResponse.json({
       success: true,

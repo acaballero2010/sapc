@@ -234,14 +234,14 @@ export default function LoginPage() {
             <span>Google Institutional Single Sign-On</span>
           </button>
 
-          {/* Registration Link */}
+          {/* Account Activation & Assistance Link */}
           <div className="pt-2 border-t border-slate-100 text-center">
             <Link
               href="/register"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-[#8B0014] transition"
             >
               <GraduationCap className="h-4 w-4 text-[#8B0014]" />
-              <span>New student, parent, or faculty? <strong className="text-[#8B0014] underline">Create Account →</strong></span>
+              <span>First-time user or need account activation? <strong className="text-[#8B0014] underline">View Access Guide →</strong></span>
             </Link>
           </div>
         </div>

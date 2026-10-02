@@ -175,7 +175,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
       const gradeNum = parseInt(studentGradeLevel.replace(/\D/g, ""), 10) || 7;
 
       // 1. Auto-enlist student into dataset roster
-      await addStudentRecord({
+      const studentRec = await addStudentRecord({
         full_name: displayName,
         lrn: cleanLrn,
         email: finalEmail,
@@ -190,11 +190,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           const userCred = await createUserWithEmailAndPassword(auth, finalEmail, finalPass);
           await updateProfile(userCred.user, { displayName: displayName });
           await setDoc(doc(db, "users", userCred.user.uid), {
+            uid: userCred.user.uid,
             lrn: cleanLrn,
+            student_id: studentRec.id,
             email: finalEmail,
             birthDate: studentBirthDate,
             role: "student",
             displayName: displayName,
+            name: displayName,
+            full_name: displayName,
             grade_level: studentGradeLevel,
             section: studentSection,
             roleConfirmed: true,
@@ -227,7 +231,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
             lrn: cleanLrn,
             grade_level: studentGradeLevel,
             section: studentSection,
-            student_id: 1
+            student_id: studentRec.id
           };
           if (existingIdx >= 0) {
             registeredList[existingIdx] = newAcc;
@@ -293,9 +297,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
           const userCred = await createUserWithEmailAndPassword(auth, parentEmail, finalPass);
           await updateProfile(userCred.user, { displayName: displayName });
           await setDoc(doc(db, "users", userCred.user.uid), {
+            uid: userCred.user.uid,
             name: displayName,
+            displayName: displayName,
+            full_name: displayName,
             phone: parentPhone,
-            linkedLrn: parentLrn,
+            lrn: parentLrn || null,
+            linked_lrns: parentLrn ? [parentLrn] : [],
+            primary_lrn: parentLrn || null,
+            student_id: null,
             studentGradeLevel: parentStudentGradeLevel,
             studentSection: parentStudentSection,
             relationship: relationship,
@@ -365,9 +375,10 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
             name: displayName,
             role: "parent",
             lrn: parentLrn,
+            linked_lrns: parentLrn ? [parentLrn] : [],
             grade_level: parentStudentGradeLevel,
             section: parentStudentSection,
-            student_id: 1
+            student_id: null
           };
           if (existingIdx >= 0) {
             registeredList[existingIdx] = newAcc;

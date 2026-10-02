@@ -51,12 +51,12 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
   const [email, setEmail] = useState(user?.email || "user@sapc.edu.ph");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar_url || null);
   const [customLogo, setCustomLogo] = useState<string | null>(() => getActiveCustomLogo());
-  const [lrn, setLrn] = useState("109482719283");
+  const [lrn, setLrn] = useState(user?.lrn || "");
   const [gradeLevel, setGradeLevel] = useState<string>(user?.grade_level || JHS_GRADE_LEVELS[0].label);
-  const [strand, setStrand] = useState("Junior High School Faculty");
+  const [strand, setStrand] = useState(user?.strand || "");
   const [section, setSection] = useState<string>(user?.section || getSectionsForGrade(JHS_GRADE_LEVELS[0].level)[0]);
-  const [guardianName, setGuardianName] = useState("Mrs. Elena Dimaculangan");
-  const [guardianContact, setGuardianContact] = useState("+63 917 555 0192");
+  const [guardianName, setGuardianName] = useState(user?.guardian_name || "");
+  const [guardianContact, setGuardianContact] = useState(user?.guardian_contact || "");
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -75,36 +75,42 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
       if (user.grade_level) setGradeLevel(user.grade_level);
       if (user.section) setSection(user.section);
 
+      const isDemoStudent = user.email?.toLowerCase() === "student@sapc.edu.ph";
+      const isDemoParent = user.email?.toLowerCase() === "parent@sapc.edu.ph";
+      const isDemoTeacher = user.email?.toLowerCase() === "teacher@sapc.edu.ph";
+      const isDemoCounselor = user.email?.toLowerCase() === "counselor@sapc.edu.ph";
+      const isDemoAdmin = user.email?.toLowerCase() === "admin@sapc.edu.ph";
+
       if (user.role === "teacher") {
-        setLrn("FAC-2026-JHS-01");
-        setStrand("Junior High School Faculty");
+        setLrn(user.employee_id || (isDemoTeacher ? "FAC-2026-JHS-01" : ""));
+        setStrand(user.department || "Junior High School Faculty");
         setSection(user.section || "Grade 7 - Love");
         setGuardianName("SAPC Academic Affairs Office");
         setGuardianContact("+63 (049) 559-0192");
       } else if (user.role === "guidance_counselor") {
-        setLrn("PRC-RGC-094821");
-        setStrand("Guidance & Counseling Department");
+        setLrn(user.employee_id || (isDemoCounselor ? "PRC-RGC-094821" : ""));
+        setStrand(user.department || "Guidance & Counseling Department");
         setSection("Central Guidance Office (Room 204)");
         setGuardianName("Dean of Student Affairs");
         setGuardianContact("+63 (049) 559-0193");
       } else if (user.role === "admin") {
-        setLrn("ADM-2026-001");
-        setStrand("Institutional Administration & IT");
+        setLrn(user.employee_id || (isDemoAdmin ? "ADM-2026-001" : ""));
+        setStrand(user.department || "Institutional Administration & IT");
         setSection("SAPC IT & Academic Affairs");
         setGuardianName("Office of the President");
         setGuardianContact("+63 (049) 559-0100");
       } else if (user.role === "student") {
-        setLrn(user.lrn || "109482719283");
+        setLrn(user.lrn || (isDemoStudent ? "109482719283" : ""));
         setStrand("Junior High School Department");
-        setSection(user.section || "Grade 7 - Love");
-        setGuardianName("Mrs. Elena Dimaculangan");
-        setGuardianContact("+63 917 555 0192");
+        setSection(user.section || (isDemoStudent ? "Grade 7 - Love" : "Grade 7 - St. Anthony"));
+        setGuardianName(user.guardian_name || (isDemoStudent ? "Mrs. Elena Dimaculangan" : ""));
+        setGuardianContact(user.guardian_contact || (isDemoStudent ? "+63 917 555 0192" : ""));
       } else if (user.role === "parent") {
-        setLrn("PRNT-10948271");
+        setLrn(user.lrn || (isDemoParent ? "PRNT-10948271" : ""));
         setStrand("Parent-Teacher Community Association (PTCA)");
-        setSection(user.section || "Grade 7 - Love");
-        setGuardianName("Mrs. Elena Dimaculangan (Self)");
-        setGuardianContact("+63 917 555 0192");
+        setSection(user.section || (isDemoParent ? "Grade 7 - Love" : "Grade 7 - St. Anthony"));
+        setGuardianName(user.guardian_name || (isDemoParent ? "Mrs. Elena Dimaculangan (Self)" : ""));
+        setGuardianContact(user.guardian_contact || (isDemoParent ? "+63 917 555 0192" : ""));
       }
     }
   }, [isOpen, user]);
@@ -203,7 +209,10 @@ export const AccountManagementModal: React.FC<AccountManagementModalProps> = ({ 
         full_name: fullName,
         avatar_url: avatarUrl,
         grade_level: gradeLevel,
-        section: section
+        section: section,
+        lrn: lrn,
+        guardian_name: guardianName,
+        guardian_contact: guardianContact
       });
       setIsSaving(false);
       setSaveSuccess(true);

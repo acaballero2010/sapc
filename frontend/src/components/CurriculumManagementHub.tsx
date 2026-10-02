@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { 
   BookOpen, 
-  Layers, 
   CheckCircle2, 
   XCircle, 
   Plus, 
@@ -12,15 +11,10 @@ import {
   RotateCcw, 
   Edit3, 
   Trash2, 
-  Check, 
   X, 
-  Save, 
   ShieldCheck, 
   Sparkles, 
   Info, 
-  Calendar, 
-  Sliders, 
-  FileSpreadsheet,
   AlertCircle
 } from "lucide-react";
 import { 
@@ -31,7 +25,6 @@ import {
   SubjectCategory, 
   AcademicSemester,
   getActiveCurriculum, 
-  saveActiveCurriculum, 
   toggleSubjectActiveStatus, 
   toggleSubjectQuarter, 
   updateSubject, 

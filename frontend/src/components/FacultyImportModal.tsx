@@ -22,31 +22,31 @@ interface FacultyImportModalProps {
 }
 
 const SAMPLE_CSV_TEMPLATE = `full_name,institutional_email,role,department,advisory_section,assigned_grade,employee_id,prc_license_no,initial_password,status,phone
-"Ms. Elena Bautista, LPT",elena.bautista@sapc.edu.ph,teacher,Junior High Department,Grade 7 - St. Anthony,Grade 7,SAPC-FAC-2023-001,,teacher123,Active,+63 917 112 0001
-"Mr. Carlos Dizon, LPT",carlos.dizon@sapc.edu.ph,teacher,Junior High Department,Grade 7 - St. Bernadette,Grade 7,SAPC-FAC-2023-002,,teacher123,Active,+63 917 112 0002
-"Ms. Maria Theresa Cruz, LPT",maria.cruz@sapc.edu.ph,teacher,Junior High Department,Grade 7 - St. Francis,Grade 7,SAPC-FAC-2023-003,,teacher123,Active,+63 917 112 0003
-"Mr. Roberto Santos, LPT",roberto.santos@sapc.edu.ph,teacher,Senior High STEM Department,Grade 11 - St. Augustine (STEM),Grade 11,SAPC-FAC-2023-014,,teacher123,Active,+63 917 842 1092
-"Ms. Katrina Salazar, LPT",katrina.salazar@sapc.edu.ph,teacher,Junior High Department,Grade 8 - St. Dominic,Grade 8,SAPC-FAC-2024-005,,teacher123,Active,+63 917 112 0005
-"Mr. Joseph Morales, LPT",joseph.morales@sapc.edu.ph,teacher,Junior High Department,Grade 8 - St. Benedict,Grade 8,SAPC-FAC-2022-006,,teacher123,Active,+63 917 112 0006
-"Mr. Mark Villanueva, LPT",mark.villanueva@sapc.edu.ph,teacher,Junior High Department,Grade 8 - St. Rita,Grade 8,SAPC-FAC-2024-007,,teacher123,Active,+63 917 112 0007
-"Ms. Angela Reyes, LPT",angela.reyes@sapc.edu.ph,teacher,Junior High Department,Grade 8 - St. Clare,Grade 8,SAPC-FAC-2023-008,,teacher123,Active,+63 917 112 0008
-"Ms. Pamela Rivera, LPT",pamela.rivera@sapc.edu.ph,teacher,Junior High Department,Grade 9 - St. Lorenzo Ruiz,Grade 9,SAPC-FAC-2023-009,,teacher123,Active,+63 917 112 0009
-"Mr. Ronald Ramos, LPT",ronald.ramos@sapc.edu.ph,teacher,Junior High Department,Grade 9 - St. Martin de Porres,Grade 9,SAPC-FAC-2022-010,,teacher123,Active,+63 917 112 0010
-"Mr. Emmanuel Flores, LPT",emmanuel.flores@sapc.edu.ph,teacher,Junior High Department,Grade 9 - St. Pedro Calungsod,Grade 9,SAPC-FAC-2024-011,,teacher123,Active,+63 917 112 0011
-"Ms. Clarisse Ocampo, LPT",clarisse.ocampo@sapc.edu.ph,teacher,Junior High Department,Grade 9 - St. Cecilia,Grade 9,SAPC-FAC-2023-012,,teacher123,Active,+63 917 112 0012
-"Ms. Jennifer Tolentino, LPT",jennifer.tolentino@sapc.edu.ph,teacher,Junior High Department,Grade 10 - St. Vincent de Paul,Grade 10,SAPC-FAC-2021-013,,teacher123,Active,+63 917 112 0013
-"Ms. Veronica Dimaculangan, LPT",veronica.dimaculangan@sapc.edu.ph,teacher,Junior High Department,Grade 10 - St. Augustine,Grade 10,SAPC-FAC-2023-014,,teacher123,Active,+63 917 112 0014
-"Mr. Dennis Castro, LPT",dennis.castro@sapc.edu.ph,teacher,Junior High Department,Grade 10 - St. Ignatius,Grade 10,SAPC-FAC-2022-015,,teacher123,Active,+63 917 112 0015
-"Mrs. Teresa Santos, LPT",teresa.santos@sapc.edu.ph,teacher,Junior High Department,Grade 10 - St. Thomas Aquinas,Grade 10,SAPC-FAC-2022-089,,teacher123,Active,+63 918 331 4059
-"Mrs. Clara Buenaflor, LPT",clara.buenaflor@sapc.edu.ph,teacher,Senior High HUMSS Department,Grade 11 - St. Thomas (HUMSS),Grade 11,SAPC-FAC-2023-016,,teacher123,Active,+63 918 442 5060
-"Mr. Arnold Dizon, LPT",arnold.dizon@sapc.edu.ph,teacher,Senior High ABM Department,Grade 11 - St. Clare (ABM),Grade 11,SAPC-FAC-2024-017,,teacher123,Active,+63 919 553 6071
-"Prof. Annalyn Cruz, LPT",annalyn.cruz@sapc.edu.ph,teacher,Senior High ABM Department,Grade 12 - St. Jude (ABM),Grade 12,SAPC-FAC-2024-002,,teacher123,Active,+63 920 119 2847
-"Engr. Paul Valdez",paul.valdez@sapc.edu.ph,teacher,Senior High STEM Department,Chemistry & Physics Faculty,Grade 11-12,SAPC-FAC-2021-045,,teacher123,Active,+63 922 776 5432
-"Ms. Jessica Alcantara, LPT",jessica.alcantara@sapc.edu.ph,teacher,Senior High HUMSS Department,Grade 11 - San Lorenzo Ruiz (HUMSS),Grade 11,SAPC-FAC-2024-019,,teacher123,Active,+63 915 678 1234
-"Dr. Elena Ramos, RGC",elena.ramos@sapc.edu.ph,guidance_counselor,Guidance & Counseling Center,Guidance Office - Room 204,Grades 11-12,SAPC-COUN-2021-008,PRC-RGC-008924,counselor123,Active,+63 917 555 8924
-"Mr. Francis M. Tolentino, RGC",francis.tolentino@sapc.edu.ph,guidance_counselor,Guidance & Counseling Center,Guidance Office - Room 202,Grades 7-10,SAPC-COUN-2022-019,PRC-RGC-009102,counselor123,Active,+63 919 444 3210
-"Dr. Victor Hernandez, RGC",victor.hernandez@sapc.edu.ph,guidance_counselor,Guidance & Counseling Center,Guidance Office - Room 205,Grades 11-12,SAPC-COUN-2023-025,PRC-RGC-009841,counselor123,Active,+63 918 223 4567
-"Ms. Clarissa Ramos, RGC",clarissa.ramos@sapc.edu.ph,guidance_counselor,Guidance & Counseling Center,Guidance Office - Room 203,Grades 7-10,SAPC-COUN-2024-031,PRC-RGC-009912,counselor123,Active,+63 920 445 6789`;
+"Ms. Elena Bautista, LPT",elena.bautista@sapc.edu.ph,teacher,Junior High Department,Grade 7 - St. Anthony,Grade 7,SAPC-FAC-2023-001,,SAPC@Fac001!,Active,+63 917 112 0001
+"Mr. Carlos Dizon, LPT",carlos.dizon@sapc.edu.ph,teacher,Junior High Department,Grade 7 - St. Bernadette,Grade 7,SAPC-FAC-2023-002,,SAPC@Fac002!,Active,+63 917 112 0002
+"Ms. Maria Theresa Cruz, LPT",maria.cruz@sapc.edu.ph,teacher,Junior High Department,Grade 7 - St. Francis,Grade 7,SAPC-FAC-2023-003,,SAPC@Fac003!,Active,+63 917 112 0003
+"Mr. Roberto Santos, LPT",roberto.santos@sapc.edu.ph,teacher,Senior High STEM Department,Grade 11 - St. Augustine (STEM),Grade 11,SAPC-FAC-2023-014,,SAPC@Fac014!,Active,+63 917 842 1092
+"Ms. Katrina Salazar, LPT",katrina.salazar@sapc.edu.ph,teacher,Junior High Department,Grade 8 - St. Dominic,Grade 8,SAPC-FAC-2024-005,,SAPC@Fac005!,Active,+63 917 112 0005
+"Mr. Joseph Morales, LPT",joseph.morales@sapc.edu.ph,teacher,Junior High Department,Grade 8 - St. Benedict,Grade 8,SAPC-FAC-2022-006,,SAPC@Fac006!,Active,+63 917 112 0006
+"Mr. Mark Villanueva, LPT",mark.villanueva@sapc.edu.ph,teacher,Junior High Department,Grade 8 - St. Rita,Grade 8,SAPC-FAC-2024-007,,SAPC@Fac007!,Active,+63 917 112 0007
+"Ms. Angela Reyes, LPT",angela.reyes@sapc.edu.ph,teacher,Junior High Department,Grade 8 - St. Clare,Grade 8,SAPC-FAC-2023-008,,SAPC@Fac008!,Active,+63 917 112 0008
+"Ms. Pamela Rivera, LPT",pamela.rivera@sapc.edu.ph,teacher,Junior High Department,Grade 9 - St. Lorenzo Ruiz,Grade 9,SAPC-FAC-2023-009,,SAPC@Fac009!,Active,+63 917 112 0009
+"Mr. Ronald Ramos, LPT",ronald.ramos@sapc.edu.ph,teacher,Junior High Department,Grade 9 - St. Martin de Porres,Grade 9,SAPC-FAC-2022-010,,SAPC@Fac010!,Active,+63 917 112 0010
+"Mr. Emmanuel Flores, LPT",emmanuel.flores@sapc.edu.ph,teacher,Junior High Department,Grade 9 - St. Pedro Calungsod,Grade 9,SAPC-FAC-2024-011,,SAPC@Fac011!,Active,+63 917 112 0011
+"Ms. Clarisse Ocampo, LPT",clarisse.ocampo@sapc.edu.ph,teacher,Junior High Department,Grade 9 - St. Cecilia,Grade 9,SAPC-FAC-2023-012,,SAPC@Fac012!,Active,+63 917 112 0012
+"Ms. Jennifer Tolentino, LPT",jennifer.tolentino@sapc.edu.ph,teacher,Junior High Department,Grade 10 - St. Vincent de Paul,Grade 10,SAPC-FAC-2021-013,,SAPC@Fac013!,Active,+63 917 112 0013
+"Ms. Veronica Dimaculangan, LPT",veronica.dimaculangan@sapc.edu.ph,teacher,Junior High Department,Grade 10 - St. Augustine,Grade 10,SAPC-FAC-2023-014,,SAPC@Fac014!,Active,+63 917 112 0014
+"Mr. Dennis Castro, LPT",dennis.castro@sapc.edu.ph,teacher,Junior High Department,Grade 10 - St. Ignatius,Grade 10,SAPC-FAC-2022-015,,SAPC@Fac015!,Active,+63 917 112 0015
+"Mrs. Teresa Santos, LPT",teresa.santos@sapc.edu.ph,teacher,Junior High Department,Grade 10 - St. Thomas Aquinas,Grade 10,SAPC-FAC-2022-089,,SAPC@Fac089!,Active,+63 918 331 4059
+"Mrs. Clara Buenaflor, LPT",clara.buenaflor@sapc.edu.ph,teacher,Senior High HUMSS Department,Grade 11 - St. Thomas (HUMSS),Grade 11,SAPC-FAC-2023-016,,SAPC@Fac016!,Active,+63 918 442 5060
+"Mr. Arnold Dizon, LPT",arnold.dizon@sapc.edu.ph,teacher,Senior High ABM Department,Grade 11 - St. Clare (ABM),Grade 11,SAPC-FAC-2024-017,,SAPC@Fac017!,Active,+63 919 553 6071
+"Prof. Annalyn Cruz, LPT",annalyn.cruz@sapc.edu.ph,teacher,Senior High ABM Department,Grade 12 - St. Jude (ABM),Grade 12,SAPC-FAC-2024-002,,SAPC@Fac002!,Active,+63 920 119 2847
+"Engr. Paul Valdez",paul.valdez@sapc.edu.ph,teacher,Senior High STEM Department,Chemistry & Physics Faculty,Grade 11-12,SAPC-FAC-2021-045,,SAPC@Fac045!,Active,+63 922 776 5432
+"Ms. Jessica Alcantara, LPT",jessica.alcantara@sapc.edu.ph,teacher,Senior High HUMSS Department,Grade 11 - San Lorenzo Ruiz (HUMSS),Grade 11,SAPC-FAC-2024-019,,SAPC@Fac019!,Active,+63 915 678 1234
+"Dr. Elena Ramos, RGC",elena.ramos@sapc.edu.ph,guidance_counselor,Guidance & Counseling Center,Guidance Office - Room 204,Grades 11-12,SAPC-COUN-2021-008,PRC-RGC-008924,SAPC@Coun008!,Active,+63 917 555 8924
+"Mr. Francis M. Tolentino, RGC",francis.tolentino@sapc.edu.ph,guidance_counselor,Guidance & Counseling Center,Guidance Office - Room 202,Grades 7-10,SAPC-COUN-2022-019,PRC-RGC-009102,SAPC@Coun019!,Active,+63 919 444 3210
+"Dr. Victor Hernandez, RGC",victor.hernandez@sapc.edu.ph,guidance_counselor,Guidance & Counseling Center,Guidance Office - Room 205,Grades 11-12,SAPC-COUN-2023-025,PRC-RGC-009841,SAPC@Coun025!,Active,+63 918 223 4567
+"Ms. Clarissa Ramos, RGC",clarissa.ramos@sapc.edu.ph,guidance_counselor,Guidance & Counseling Center,Guidance Office - Room 203,Grades 7-10,SAPC-COUN-2024-031,PRC-RGC-009912,SAPC@Coun031!,Active,+63 920 445 6789`;
 
 export const FacultyImportModal: React.FC<FacultyImportModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [csvContent, setCsvContent] = useState<string>("");
@@ -108,6 +108,23 @@ export const FacultyImportModal: React.FC<FacultyImportModalProps> = ({ isOpen, 
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleLoadOfficialFaculty = async () => {
+    try {
+      setIsProcessing(true);
+      const res = await fetch("/sapc_faculty_credentials.csv");
+      if (!res.ok) throw new Error("Could not load faculty credentials file");
+      const text = await res.text();
+      setFileName("sapc_faculty_credentials.csv");
+      setCsvContent(text);
+      setImportStatus("preview");
+      setImportErrors([]);
+    } catch (e: any) {
+      alert("Failed to load official faculty roster: " + e.message);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,14 +251,35 @@ export const FacultyImportModal: React.FC<FacultyImportModalProps> = ({ isOpen, 
                     Upload accounts with columns: <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">full_name, institutional_email, role, department, advisory_section, employee_id</code>
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleDownloadTemplate}
-                  className="shrink-0 px-3.5 py-2 bg-white border border-amber-300 rounded-xl text-amber-900 font-bold hover:bg-amber-100 transition flex items-center gap-1.5 shadow-2xs"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  <span>Download Sample Template</span>
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <a
+                    href="/sapc_faculty_credentials.csv"
+                    download="sapc_faculty_credentials.csv"
+                    className="px-3.5 py-2 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-200 rounded-xl font-bold hover:bg-purple-100 transition flex items-center gap-1.5 shadow-2xs"
+                    title="Download pre-generated 24 faculty and counselor credentials CSV"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Official 24 Faculty CSV</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleLoadOfficialFaculty}
+                    disabled={isProcessing}
+                    className="px-3.5 py-2 bg-purple-700 text-white rounded-xl font-bold hover:bg-purple-800 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Instantly load official 24 faculty and counselor records into preview"
+                  >
+                    <UploadCloud className="h-3.5 w-3.5" />
+                    <span>Load 24 Roster</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    className="shrink-0 px-3.5 py-2 bg-white border border-amber-300 rounded-xl text-amber-900 font-bold hover:bg-amber-100 transition flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Template</span>
+                  </button>
+                </div>
               </div>
 
               {/* Upload Dropzone */}

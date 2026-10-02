@@ -2,356 +2,56 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { 
-  GraduationCap, 
-  Users, 
   ArrowRight, 
+  ShieldCheck, 
+  Mail, 
+  CheckCircle2, 
+  AlertTriangle,
+  HelpCircle,
   School,
   Lock,
-  Mail,
-  CheckCircle2,
-  Calendar,
-  User,
-  AlertCircle
+  ExternalLink
 } from "lucide-react";
 import { SapcLogo } from "@/components/SapcLogo";
-import { useAuth, syncCustomClaims } from "@/lib/auth-context";
-import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { GoogleRoleSelectionModal } from "@/components/GoogleRoleSelectionModal";
-import { 
-  JHS_GRADE_LEVELS, 
-  getSectionsForGrade, 
-  addStudentRecord, 
-  isLrnAlreadyRegistered,
-  isEmailAlreadyRegistered,
-  getActivePendingRegistrations, 
-  saveActivePendingRegistrations, 
-  getActiveParentRecords, 
-  saveActiveParentRecords, 
-  PendingRegistrationRecord, 
-  ParentRecord 
-} from "@/lib/dataset-store";
-
-type RegistrationRole = "student" | "parent";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const LRN_REGEX = /^\d{12}$/;
-
-const TABS: Array<{
-  id: RegistrationRole;
-  label: string;
-  icon: React.ReactNode;
-  activeColor: string;
-  badge: string;
-  desc: string;
-}> = [
-  {
-    id: "student",
-    label: "Student",
-    icon: <GraduationCap className="h-5 w-5 text-[#8B0014]" />,
-    activeColor: "text-[#8B0014] border-[#8B0014] bg-rose-50/70 shadow-sm",
-    badge: "Student Account Claim",
-    desc: "Verify your SAPC 12-digit Learner Reference Number (LRN) and date of birth to activate your personal 5-domain academic & wellness radar."
-  },
-  {
-    id: "parent",
-    label: "Parent / Guardian",
-    icon: <Users className="h-5 w-5 text-blue-700" />,
-    activeColor: "text-blue-800 border-blue-600 bg-blue-50/70 shadow-sm",
-    badge: "Parent & Family Linkage",
-    desc: "Register your parent account and link your child's LRN to receive automated quarterly grade notifications, attendance alerts, and counseling consultation notes."
-  }
-];
+import { auth } from "@/lib/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const { switchRole, loginWithGoogle, updateUserProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<RegistrationRole>("student");
-  const [step, setStep] = useState<"form" | "success">("form");
+  const [claimEmail, setClaimEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGoogleRoleModalOpen, setIsGoogleRoleModalOpen] = useState(false);
-  const [googleUserName, setGoogleUserName] = useState("SAPC Member");
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Student form state
-  const [studentName, setStudentName] = useState("");
-  const [lrn, setLrn] = useState("");
-  const [studentGradeLevel, setStudentGradeLevel] = useState<number>(7);
-  const [studentSection, setStudentSection] = useState<string>("Grade 7 - Love");
-  const [studentEmail, setStudentEmail] = useState("");
-  const [studentPassword, setStudentPassword] = useState("");
-  const [studentBirthDate, setStudentBirthDate] = useState("");
-
-  // Parent form state
-  const [parentName, setParentName] = useState("");
-  const [parentEmail, setParentEmail] = useState("");
-  const [parentPhone, setParentPhone] = useState("");
-  const [childLrn, setChildLrn] = useState("");
-  const [childGradeLevel, setChildGradeLevel] = useState<number>(7);
-  const [childSection, setChildSection] = useState<string>("Grade 7 - Love");
-  const [parentRelation, setParentRelation] = useState("Mother");
-  const [parentPassword, setParentPassword] = useState("");
-
-  // Field error messages
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const validateStudentForm = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!studentName.trim() || studentName.trim().length < 2) {
-      errors.studentName = "Please enter student's full name (at least 2 characters).";
-    }
-
-    const cleanLrn = lrn.trim();
-    if (!cleanLrn) {
-      errors.lrn = "DepEd Learner Reference Number (LRN) is required.";
-    } else if (!LRN_REGEX.test(cleanLrn)) {
-      errors.lrn = `LRN must be exactly 12 digits (entered ${cleanLrn.length} digits).`;
-    } else {
-      const lrnCheck = isLrnAlreadyRegistered(cleanLrn);
-      if (lrnCheck.exists) {
-        errors.lrn = `LRN "${cleanLrn}" is already registered (${lrnCheck.student?.full_name || "Existing Student"}). Please sign in instead.`;
-      }
-    }
-
-    if (!studentBirthDate) {
-      errors.studentBirthDate = "Date of birth is required for identity verification.";
-    }
-
-    const cleanEmail = studentEmail.trim();
-    if (!cleanEmail) {
-      errors.studentEmail = "Institutional or personal email address is required.";
-    } else if (!EMAIL_REGEX.test(cleanEmail)) {
-      errors.studentEmail = "Please enter a valid email format (e.g. name@student.sapc.edu.ph or user@gmail.com).";
-    } else if (isEmailAlreadyRegistered(cleanEmail)) {
-      errors.studentEmail = `Email "${cleanEmail}" is already registered. Please sign in instead.`;
-    }
-
-    if (!studentPassword || studentPassword.length < 6) {
-      errors.studentPassword = "Password must be at least 6 characters long.";
-    }
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const validateParentForm = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!parentName.trim() || parentName.trim().length < 2) {
-      errors.parentName = "Please enter parent/guardian full name.";
-    }
-
-    const cleanChildLrn = childLrn.trim();
-    if (!cleanChildLrn) {
-      errors.childLrn = "Child's 12-digit LRN is required to link records.";
-    } else if (!LRN_REGEX.test(cleanChildLrn)) {
-      errors.childLrn = `Child's LRN must be exactly 12 digits (entered ${cleanChildLrn.length} digits).`;
-    }
-
-    const cleanPhone = parentPhone.trim();
-    if (!cleanPhone || cleanPhone.replace(/\D/g, "").length < 7) {
-      errors.parentPhone = "Please enter a valid contact phone number.";
-    }
-
-    const cleanEmail = parentEmail.trim();
-    if (!cleanEmail) {
-      errors.parentEmail = "Parent email address is required.";
-    } else if (!EMAIL_REGEX.test(cleanEmail)) {
-      errors.parentEmail = "Please enter a valid email format (e.g. parent@gmail.com).";
-    } else if (isEmailAlreadyRegistered(cleanEmail)) {
-      errors.parentEmail = `Email "${cleanEmail}" is already registered. Please sign in instead.`;
-    }
-
-    if (!parentPassword || parentPassword.length < 6) {
-      errors.parentPassword = "Password must be at least 6 characters long.";
-    }
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleClaimAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(null);
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
-    if (activeTab === "student") {
-      if (!validateStudentForm()) {
-        setSubmitError("Please correct the errors in the form before submitting.");
-        return;
-      }
-    } else {
-      if (!validateParentForm()) {
-        setSubmitError("Please correct the errors in the form before submitting.");
-        return;
-      }
+    const email = claimEmail.trim().toLowerCase();
+    if (!email || !email.includes("@")) {
+      setErrorMessage("Please enter a valid institutional or personal email address.");
+      return;
     }
 
     setIsSubmitting(true);
-
     try {
-      const emailToUse = activeTab === "student"
-        ? studentEmail.trim()
-        : parentEmail.trim();
-      const passToUse = activeTab === "student" ? studentPassword : parentPassword;
-      const nameToUse = activeTab === "student" ? studentName.trim() : parentName.trim();
-      const roleToUse: RegistrationRole = activeTab;
-
-      if (auth && db) {
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, emailToUse, passToUse);
-          const user = userCredential.user;
-          await updateProfile(user, { displayName: nameToUse });
-
-          await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            email: emailToUse,
-            name: nameToUse,
-            displayName: nameToUse,
-            role: roleToUse,
-            roleConfirmed: true,
-            createdAt: serverTimestamp(),
-            verified: roleToUse !== "parent",
-            verification_status: roleToUse === "parent" ? "pending_school_approval" : "active",
-            linkageStatus: roleToUse === "parent" ? "pending_adviser_validation" : "verified",
-            metadata: {
-              lrn: activeTab === "student" ? lrn.trim() : null,
-              birthDate: activeTab === "student" ? studentBirthDate : null,
-              childLrn: activeTab === "parent" ? childLrn.trim() : null,
-              relationship: activeTab === "parent" ? parentRelation : null,
-              phone: activeTab === "parent" ? parentPhone.trim() : null
-            }
-          });
-          await syncCustomClaims(user, roleToUse);
-        } catch (fbErr: any) {
-          console.warn("Firebase registration note:", fbErr.message);
-          if (fbErr?.code === "auth/email-already-in-use") {
-            setSubmitError(`Email "${emailToUse}" is already registered in Firebase Auth. Please sign in instead.`);
-            setIsSubmitting(false);
-            return;
-          }
-        }
-      }
-
-      if (activeTab === "student") {
-        await addStudentRecord({
-          full_name: nameToUse,
-          lrn: lrn.trim(),
-          email: emailToUse,
-          grade_level: studentGradeLevel,
-          section_name: studentSection,
-          strand: "JHS"
-        });
-      } else if (activeTab === "parent") {
-        const currentPending = getActivePendingRegistrations();
-        const pendingRec: PendingRegistrationRecord = {
-          id: `REG-${Date.now().toString().slice(-4)}`,
-          name: nameToUse,
-          email: emailToUse,
-          phone: parentPhone.trim(),
-          role: "parent",
-          relationship: parentRelation,
-          linkedStudent: childLrn.trim() ? `Learner ${childLrn.trim()}` : "Enrolled Learner",
-          linkedLRN: childLrn.trim() || "109238475001",
-          section: childSection,
-          verificationDoc: "Self-Registered via Portal (Online Registration)",
-          date: new Date().toISOString().split("T")[0],
-          status: "Approved",
-          notes: `Linked to Grade ${childGradeLevel} (${childSection})`
-        };
-        saveActivePendingRegistrations([pendingRec, ...currentPending], true);
-
-        const currentParents = getActiveParentRecords();
-        const newParent: ParentRecord = {
-          id: `PAR-${Date.now().toString().slice(-4)}`,
-          name: nameToUse,
-          email: emailToUse,
-          phone: parentPhone.trim(),
-          relationship: parentRelation,
-          linkedStudentName: childLrn.trim() ? `Learner ${childLrn.trim()}` : "Enrolled Learner",
-          linkedLRN: childLrn.trim() || "109238475001",
-          section: childSection,
-          gradeLevel: `Grade ${childGradeLevel}`,
-          status: "Active",
-          verifiedAt: new Date().toISOString().split("T")[0],
-          sf9Access: true,
-          attendanceAlerts: true,
-          riskAlerts: true,
-          initialPassword: passToUse
-        };
-        saveActiveParentRecords([newParent, ...currentParents], true);
-      }
-
-      updateUserProfile({
-        full_name: nameToUse,
-        email: emailToUse,
-        role: roleToUse,
-        section: activeTab === "student" ? studentSection : childSection
-      });
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("sapc_custom_profile", JSON.stringify({
-          id: 1,
-          email: emailToUse,
-          full_name: nameToUse,
-          role: roleToUse,
-          section: activeTab === "student" ? studentSection : childSection,
-          student_id: activeTab === "student" ? 1 : null
-        }));
-
-        try {
-          const raw = localStorage.getItem("sapc_registered_accounts");
-          const registeredList = raw ? JSON.parse(raw) : [];
-          const existingIdx = registeredList.findIndex((acc: any) => acc.email?.toLowerCase() === emailToUse.toLowerCase());
-          const newAcc = {
-            email: emailToUse.toLowerCase(),
-            password: passToUse,
-            name: nameToUse,
-            role: roleToUse,
-            section: activeTab === "student" ? studentSection : childSection,
-            lrn: activeTab === "student" ? lrn : childLrn,
-            student_id: activeTab === "student" ? 1 : null
-          };
-          if (existingIdx >= 0) {
-            registeredList[existingIdx] = newAcc;
-          } else {
-            registeredList.push(newAcc);
-          }
-          localStorage.setItem("sapc_registered_accounts", JSON.stringify(registeredList));
-        } catch {}
-      }
-
-      await switchRole(roleToUse);
-      setIsSubmitting(false);
-      setStep("success");
+      await sendPasswordResetEmail(auth, email);
+      setSuccessMessage(
+        `Account claim link dispatched! An activation and password setup email has been sent to ${email}. Please check your inbox (or spam folder) to set your permanent password.`
+      );
+      setClaimEmail("");
     } catch (err: any) {
-      console.error("Registration error:", err);
-      setSubmitError(err?.message || "Registration failed. Please try again.");
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleFinish = () => {
-    if (activeTab === "parent") router.push("/dashboard/parent");
-    else router.push("/dashboard/student");
-  };
-
-  const handleGoogleRegister = async () => {
-    setIsSubmitting(true);
-    try {
-      const res = await loginWithGoogle(activeTab);
-      if (res && res.isNewUser) {
-        setGoogleUserName(res.user.full_name || "SAPC Member");
-        setIsGoogleRoleModalOpen(true);
+      const code = err?.code || "";
+      if (code === "auth/user-not-found") {
+        setErrorMessage(
+          `The email "${email}" has not been pre-provisioned by the SAPC Registrar yet. Please verify your email with your Class Adviser or Campus Administrator.`
+        );
       } else {
-        handleFinish();
+        setErrorMessage(
+          err?.message || "Failed to dispatch activation email. Please contact the SAPC Registrar."
+        );
       }
-    } catch (err) {
-      console.warn("Google registration fallback:", err);
-      handleFinish();
     } finally {
       setIsSubmitting(false);
     }
@@ -359,7 +59,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-[#2D0005] to-[#120003] flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-sans text-slate-100">
-      {/* Top Header Bar */}
+      {/* Top Header */}
       <div className="max-w-6xl w-full mx-auto flex items-center justify-between py-2">
         <Link 
           href="/"
@@ -379,689 +79,162 @@ export default function RegisterPage() {
           </div>
         </Link>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="text-xs sm:text-sm font-bold text-white hover:text-amber-300 transition"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/"
-            className="text-xs sm:text-sm font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 transition"
-          >
-            ← Overview
-          </Link>
-        </div>
+        <Link
+          href="/login"
+          className="text-xs sm:text-sm font-bold text-amber-300 hover:text-amber-200 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 transition"
+        >
+          <span>Sign In to Portal →</span>
+        </Link>
       </div>
 
-      {/* Main Registration Card */}
-      <div className="max-w-2xl w-full mx-auto my-8">
-        <div className="bg-white text-slate-900 rounded-3xl p-6 sm:p-9 shadow-2xl border border-slate-200/90 relative overflow-hidden">
-          {/* Top Institutional Accent Strip */}
-          <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-amber-400 via-[#8B0014] to-amber-400" />
-
-          {/* Header */}
-          <div className="flex items-center justify-between pb-5 border-b border-slate-100">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
-                  Institutional Onboarding
-                </span>
-                <span className="text-xs text-slate-400 font-semibold">• SASS Integration</span>
+      {/* Main Content Area */}
+      <div className="max-w-2xl w-full mx-auto my-6 sm:my-8 space-y-6">
+        {/* Policy Announcement Card */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/20 text-slate-800 space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-[#8B0014]/10 border border-[#8B0014]/20 text-[#8B0014] flex items-center justify-center">
+                <School className="h-6 w-6" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                Create Account
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
-                San Antonio de Padua College Student, Parent & Faculty Portal
-              </p>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  Account Onboarding &amp; Activation
+                </h1>
+                <p className="text-xs text-slate-500 font-medium">
+                  Official Institutional Registrar Protocol • RA 10173 Sealed
+                </p>
+              </div>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-              🔒 RA 10173 Protected
+            <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+              <ShieldCheck className="h-3 w-3" />
+              <span>DepEd Verified</span>
             </span>
           </div>
 
-          {step === "form" && (
-            <div className="mt-6 space-y-6">
-              {/* Role Selection Tabs - Industry standard clean persona selection */}
-              <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                  Select your self-service account type:
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {TABS.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setActiveTab(t.id)}
-                      className={`p-4 rounded-2xl border text-left transition flex items-start gap-3.5 cursor-pointer ${
-                        activeTab === t.id
-                          ? `${t.activeColor} border-2 ring-2 ring-[#8B0014]/10`
-                          : "border-slate-200 hover:border-slate-300 bg-slate-50/70 text-slate-700 hover:bg-slate-50"
-                      }`}
-                    >
-                      <div className="p-2 rounded-xl bg-white shadow-2xs shrink-0 border border-slate-100">
-                        {t.icon}
-                      </div>
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-sm text-slate-900">{t.label}</span>
-                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-200/80 text-slate-700">
-                            {t.badge}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-500 leading-snug line-clamp-2">
-                          {t.desc}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Institutional Staff Notice (For Faculty, Counselors, Directorate) */}
-              <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-xs text-amber-900 flex items-start gap-2.5">
-                <School className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
-                <div className="space-y-0.5">
-                  <span className="font-extrabold block text-slate-900">Are you a Faculty Member, Counselor, or Administrator?</span>
-                  <p className="text-slate-600 leading-relaxed">
-                    Institutional staff accounts are pre-provisioned by the SAPC Registrar. Please use your official <strong>@sapc.edu.ph Google SSO</strong> or {" "}
-                    <Link href="/login" className="font-bold text-[#8B0014] hover:underline">
-                      Sign In here →
-                    </Link>
-                  </p>
-                </div>
-              </div>
-
-              {/* Google Fast Sign Up Button */}
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={handleGoogleRegister}
-                className="w-full py-3 px-4 rounded-xl border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 transition shadow-xs cursor-pointer"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                </svg>
-                <span>Continue with Institutional Google SSO</span>
-              </button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase font-extrabold text-slate-500">
-                  <span className="bg-white px-3 tracking-wider">or register with credentials</span>
-                </div>
-              </div>
-
-              {/* Dynamic Registration Form */}
-              <form onSubmit={handleFormSubmit} className="space-y-4" noValidate>
-                {activeTab === "student" && (
-                  <>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Student Full Name *
-                      </label>
-                      <div className="relative">
-                        <User className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.studentName ? "text-rose-500" : "text-slate-400"}`} />
-                        <input
-                          type="text"
-                          required
-                          value={studentName}
-                          onChange={(e) => {
-                            setStudentName(e.target.value);
-                            if (fieldErrors.studentName) {
-                              setFieldErrors(prev => { const n = { ...prev }; delete n.studentName; return n; });
-                            }
-                          }}
-                          placeholder="e.g. Juan Carlos Dela Cruz"
-                          className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition font-medium ${
-                            fieldErrors.studentName
-                              ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                              : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                          }`}
-                        />
-                      </div>
-                      {fieldErrors.studentName && (
-                        <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                          {fieldErrors.studentName}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                            DepEd Learner Reference Number (LRN) *
-                          </label>
-                          <span className="text-[11px] font-mono font-bold text-slate-400">
-                            {lrn.length}/12
-                          </span>
-                        </div>
-                        <input
-                          type="text"
-                          required
-                          maxLength={12}
-                          value={lrn}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, "");
-                            setLrn(val);
-                            if (fieldErrors.lrn) {
-                              setFieldErrors(prev => { const n = { ...prev }; delete n.lrn; return n; });
-                            }
-                          }}
-                          onBlur={() => {
-                            if (lrn.trim().length === 12) {
-                              const check = isLrnAlreadyRegistered(lrn.trim());
-                              if (check.exists) {
-                                setFieldErrors(prev => ({
-                                  ...prev,
-                                  lrn: `LRN "${lrn.trim()}" is already registered (${check.student?.full_name || "Existing Student"}).`
-                                }));
-                              }
-                            }
-                          }}
-                          placeholder="e.g. 109238475612"
-                          className={`w-full rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none transition font-medium ${
-                            fieldErrors.lrn
-                              ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                              : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                          }`}
-                        />
-                        {fieldErrors.lrn ? (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.lrn}
-                          </p>
-                        ) : (
-                          <p className="text-[11px] text-slate-500 mt-1">Must be exactly 12 digits issued by DepEd.</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Date of Birth (Identity Verification) *
-                        </label>
-                        <div className="relative">
-                          <Calendar className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.studentBirthDate ? "text-rose-500" : "text-slate-400"}`} />
-                          <input
-                            type="date"
-                            required
-                            value={studentBirthDate}
-                            onChange={(e) => {
-                              setStudentBirthDate(e.target.value);
-                              if (fieldErrors.studentBirthDate) {
-                                setFieldErrors(prev => { const n = { ...prev }; delete n.studentBirthDate; return n; });
-                              }
-                            }}
-                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
-                              fieldErrors.studentBirthDate
-                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                            }`}
-                          />
-                        </div>
-                        {fieldErrors.studentBirthDate && (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.studentBirthDate}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* JHS Grade Level & Section Dropdowns for Student */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Junior High Grade Level *
-                        </label>
-                        <select
-                          value={studentGradeLevel}
-                          onChange={(e) => {
-                            const lvl = Number(e.target.value);
-                            setStudentGradeLevel(lvl);
-                            const available = getSectionsForGrade(lvl);
-                            if (available.length > 0) setStudentSection(available[0]);
-                          }}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        >
-                          {JHS_GRADE_LEVELS.map((g) => (
-                            <option key={g.level} value={g.level}>
-                              {g.label} (Junior High)
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Assigned Section *
-                        </label>
-                        <select
-                          value={studentSection}
-                          onChange={(e) => setStudentSection(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        >
-                          {getSectionsForGrade(studentGradeLevel).map((sec) => (
-                            <option key={sec} value={sec}>
-                              {sec}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          SAPC Institutional or Personal Email *
-                        </label>
-                        <div className="relative">
-                          <Mail className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.studentEmail ? "text-rose-500" : "text-slate-400"}`} />
-                          <input
-                            type="email"
-                            required
-                            value={studentEmail}
-                            onChange={(e) => {
-                              setStudentEmail(e.target.value);
-                              if (fieldErrors.studentEmail) {
-                                setFieldErrors(prev => { const n = { ...prev }; delete n.studentEmail; return n; });
-                              }
-                            }}
-                            onBlur={() => {
-                              const cleanEmail = studentEmail.trim();
-                              if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
-                                setFieldErrors(prev => ({
-                                  ...prev,
-                                  studentEmail: "Invalid format. Email must include '@' and domain (e.g. student@sapc.edu.ph)."
-                                }));
-                              } else if (cleanEmail && isEmailAlreadyRegistered(cleanEmail)) {
-                                setFieldErrors(prev => ({
-                                  ...prev,
-                                  studentEmail: `Email "${cleanEmail}" is already registered. Please sign in instead.`
-                                }));
-                              }
-                            }}
-                            placeholder="e.g. student@sapc.edu.ph"
-                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
-                              fieldErrors.studentEmail
-                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                            }`}
-                          />
-                        </div>
-                        {fieldErrors.studentEmail ? (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.studentEmail}
-                          </p>
-                        ) : (
-                          <p className="text-[11px] text-slate-500 mt-1">Provide your @sapc.edu.ph or personal email.</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Create Password *
-                        </label>
-                        <div className="relative">
-                          <Lock className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.studentPassword ? "text-rose-500" : "text-slate-400"}`} />
-                          <input
-                            type="password"
-                            required
-                            value={studentPassword}
-                            onChange={(e) => {
-                              setStudentPassword(e.target.value);
-                              if (fieldErrors.studentPassword) {
-                                setFieldErrors(prev => { const n = { ...prev }; delete n.studentPassword; return n; });
-                              }
-                            }}
-                            placeholder="At least 6 characters"
-                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
-                              fieldErrors.studentPassword
-                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                            }`}
-                          />
-                        </div>
-                        {fieldErrors.studentPassword && (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.studentPassword}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {activeTab === "parent" && (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Parent / Guardian Full Name *
-                        </label>
-                        <div className="relative">
-                          <User className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.parentName ? "text-rose-500" : "text-slate-400"}`} />
-                          <input
-                            type="text"
-                            required
-                            value={parentName}
-                            onChange={(e) => {
-                              setParentName(e.target.value);
-                              if (fieldErrors.parentName) {
-                                setFieldErrors(prev => { const n = { ...prev }; delete n.parentName; return n; });
-                              }
-                            }}
-                            placeholder="Mrs. Elena Dimaculangan"
-                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition font-medium ${
-                              fieldErrors.parentName
-                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                            }`}
-                          />
-                        </div>
-                        {fieldErrors.parentName && (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.parentName}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Relationship to Student *
-                        </label>
-                        <select
-                          value={parentRelation}
-                          onChange={(e) => setParentRelation(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-medium focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        >
-                          <option value="Mother">Mother</option>
-                          <option value="Father">Father</option>
-                          <option value="Legal Guardian">Legal Guardian</option>
-                          <option value="Grandparent">Grandparent</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Linked Child Grade Level & Section */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Child&apos;s Grade Level *
-                        </label>
-                        <select
-                          value={childGradeLevel}
-                          onChange={(e) => {
-                            const lvl = Number(e.target.value);
-                            setChildGradeLevel(lvl);
-                            const available = getSectionsForGrade(lvl);
-                            if (available.length > 0) setChildSection(available[0]);
-                          }}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        >
-                          {JHS_GRADE_LEVELS.map((g) => (
-                            <option key={g.level} value={g.level}>
-                              {g.label} (Junior High)
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Child&apos;s Section *
-                        </label>
-                        <select
-                          value={childSection}
-                          onChange={(e) => setChildSection(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:bg-white focus:border-[#8B0014] transition"
-                        >
-                          {getSectionsForGrade(childGradeLevel).map((sec) => (
-                            <option key={sec} value={sec}>
-                              {sec}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                            Child&apos;s 12-Digit LRN to Link *
-                          </label>
-                          <span className="text-[11px] font-mono font-bold text-slate-400">
-                            {childLrn.length}/12
-                          </span>
-                        </div>
-                        <input
-                          type="text"
-                          required
-                          maxLength={12}
-                          value={childLrn}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, "");
-                            setChildLrn(val);
-                            if (fieldErrors.childLrn) {
-                              setFieldErrors(prev => { const n = { ...prev }; delete n.childLrn; return n; });
-                            }
-                          }}
-                          placeholder="e.g. 109238475001"
-                          className={`w-full rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none transition font-medium ${
-                            fieldErrors.childLrn
-                              ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                              : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                          }`}
-                        />
-                        {fieldErrors.childLrn ? (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.childLrn}
-                          </p>
-                        ) : (
-                          <p className="text-[11px] text-slate-500 mt-1">Must be student&apos;s exact 12-digit DepEd LRN.</p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Contact Mobile Number *
-                        </label>
-                        <input
-                          type="tel"
-                          required
-                          value={parentPhone}
-                          onChange={(e) => {
-                            setParentPhone(e.target.value);
-                            if (fieldErrors.parentPhone) {
-                              setFieldErrors(prev => { const n = { ...prev }; delete n.parentPhone; return n; });
-                            }
-                          }}
-                          placeholder="+63 9XX XXX XXXX"
-                          className={`w-full rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none transition font-medium ${
-                            fieldErrors.parentPhone
-                              ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                              : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                          }`}
-                        />
-                        {fieldErrors.parentPhone && (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.parentPhone}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Parent Email Address *
-                        </label>
-                        <div className="relative">
-                          <Mail className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.parentEmail ? "text-rose-500" : "text-slate-400"}`} />
-                          <input
-                            type="email"
-                            required
-                            value={parentEmail}
-                            onChange={(e) => {
-                              setParentEmail(e.target.value);
-                              if (fieldErrors.parentEmail) {
-                                setFieldErrors(prev => { const n = { ...prev }; delete n.parentEmail; return n; });
-                              }
-                            }}
-                            onBlur={() => {
-                              const cleanEmail = parentEmail.trim();
-                              if (cleanEmail && !EMAIL_REGEX.test(cleanEmail)) {
-                                setFieldErrors(prev => ({
-                                  ...prev,
-                                  parentEmail: "Invalid format. Enter a valid email address (e.g. parent@gmail.com)."
-                                }));
-                              } else if (cleanEmail && isEmailAlreadyRegistered(cleanEmail)) {
-                                setFieldErrors(prev => ({
-                                  ...prev,
-                                  parentEmail: `Email "${cleanEmail}" is already registered. Please sign in instead.`
-                                }));
-                              }
-                            }}
-                            placeholder="elena.dimaculangan@gmail.com"
-                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
-                              fieldErrors.parentEmail
-                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                            }`}
-                          />
-                        </div>
-                        {fieldErrors.parentEmail && (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.parentEmail}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Create Password *
-                        </label>
-                        <div className="relative">
-                          <Lock className={`h-4 w-4 absolute left-3.5 top-3.5 ${fieldErrors.parentPassword ? "text-rose-500" : "text-slate-400"}`} />
-                          <input
-                            type="password"
-                            required
-                            value={parentPassword}
-                            onChange={(e) => {
-                              setParentPassword(e.target.value);
-                              if (fieldErrors.parentPassword) {
-                                setFieldErrors(prev => { const n = { ...prev }; delete n.parentPassword; return n; });
-                              }
-                            }}
-                            placeholder="At least 6 characters"
-                            className={`w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none transition ${
-                              fieldErrors.parentPassword
-                                ? "bg-rose-50 border-2 border-rose-500 focus:border-rose-600 focus:bg-white"
-                                : "bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#8B0014]"
-                            }`}
-                          />
-                        </div>
-                        {fieldErrors.parentPassword && (
-                          <p className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            {fieldErrors.parentPassword}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {submitError && (
-                  <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-[#8B0014] font-medium flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
-                    <span>{submitError}</span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-xl font-black text-sm bg-[#8B0014] hover:bg-[#700010] text-white shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 mt-4"
-                >
-                  <span>
-                    {isSubmitting
-                      ? (activeTab === "student" ? "Enlisting Student Profile..." : "Registering Parent Account...")
-                      : (activeTab === "student" ? "Create Student Account →" : "Create Parent Account →")}
-                  </span>
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition" />
-                </button>
-              </form>
+          {/* Institutional Policy Notice */}
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm leading-relaxed space-y-2">
+            <div className="flex items-center gap-2 font-bold text-amber-950">
+              <Lock className="h-4 w-4 text-[#8B0014] shrink-0" />
+              <span>Direct Self-Registration is Closed</span>
             </div>
-          )}
+            <p className="text-amber-900/90 text-xs">
+              To guarantee student data privacy, prevent duplicate records, and ensure DepEd SF-9 accuracy, all student, parent, faculty, and counselor accounts are <strong>pre-provisioned exclusively by the SAPC Registrar &amp; Campus IT</strong>.
+            </p>
+          </div>
 
-          {/* STEP 2: SUCCESS */}
-          {step === "success" && (
-            <div className="mt-6 text-center space-y-6 py-4">
-              <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 border-2 border-emerald-300 flex items-center justify-center text-emerald-600">
-                <CheckCircle2 className="h-8 w-8" />
-              </div>
-
-              <div>
-                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase border ${activeTab === "parent" ? "bg-amber-100 text-amber-900 border-amber-300" : "bg-emerald-100 text-emerald-900 border-emerald-300"}`}>
-                  {activeTab === "parent" ? "Awaiting School Approval" : "Verification Successful"}
-                </span>
-                <h2 className="text-2xl font-black text-slate-900 mt-2">
-                  {activeTab === "parent" ? "Parent Account Registered" : "Account Initialized & Linked"}
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-md mx-auto">
-                  {activeTab === "parent"
-                    ? "In compliance with DepEd DO 40, s. 2012 and RA 10173, your child's class adviser and school registrar will verify your parental linkage before granting full access to grades and psychological evaluations."
-                    : "Your San Antonio de Padua College institutional profile has been verified and registered in the Decision Support System."}
+          {/* 3-Step Access Protocol */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">
+              How to Access Your Pre-Created Account:
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="inline-flex h-6 w-6 rounded-full bg-[#8B0014] text-white items-center justify-center font-black text-xs">1</span>
+                <p className="font-bold text-slate-900">Check Your Credentials</p>
+                <p className="text-slate-500 text-[11px] leading-snug">
+                  Locate your official credential slip issued by your Class Adviser or Admissions Office.
                 </p>
               </div>
 
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="inline-flex h-6 w-6 rounded-full bg-[#8B0014] text-white items-center justify-center font-black text-xs">2</span>
+                <p className="font-bold text-slate-900">Sign In to Portal</p>
+                <p className="text-slate-500 text-[11px] leading-snug">
+                  Login using your email or 12-digit DepEd LRN and your issued temporary password.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <span className="inline-flex h-6 w-6 rounded-full bg-[#8B0014] text-white items-center justify-center font-black text-xs">3</span>
+                <p className="font-bold text-slate-900">Link Google SSO</p>
+                <p className="text-slate-500 text-[11px] leading-snug">
+                  Change your password and optionally link your Google Account for 1-click logins.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Account Claim / Password Reset Form */}
+          <div className="pt-4 border-t border-slate-100 space-y-3">
+            <div>
+              <h3 className="text-sm font-black text-slate-900">First-time login or forgot temporary password?</h3>
+              <p className="text-xs text-slate-500">
+                Enter the email address registered with the SAPC Registrar to receive an instant account activation link.
+              </p>
+            </div>
+
+            {successMessage && (
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>{successMessage}</span>
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+                <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleClaimAccount} className="flex flex-col sm:flex-row gap-2.5">
+              <div className="relative flex-1">
+                <Mail className="h-4 w-4 absolute left-3.5 top-3.5 text-slate-400" />
+                <input
+                  type="email"
+                  required
+                  value={claimEmail}
+                  onChange={(e) => setClaimEmail(e.target.value)}
+                  placeholder="e.g. kalyepos26@gmail.com or name@sapc.edu.ph"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#8B0014] transition font-medium"
+                />
+              </div>
               <button
-                type="button"
-                onClick={handleFinish}
-                className="w-full py-4 rounded-xl font-black text-sm bg-[#8B0014] hover:bg-[#700010] text-white shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+                type="submit"
+                disabled={isSubmitting}
+                className="px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#8B0014] hover:bg-[#700010] text-white shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
               >
-                <span>Launch {TABS.find(t => t.id === activeTab)?.label} Portal</span>
+                <span>{isSubmitting ? "Dispatching..." : "Send Activation Link"}</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
-            </div>
-          )}
+            </form>
+          </div>
 
-          {/* Login Link */}
-          <div className="mt-6 pt-4 border-t border-slate-100 text-center">
+          {/* Primary Action Button */}
+          <div className="pt-2 text-center">
             <Link
               href="/login"
-              className="text-xs font-bold text-slate-600 hover:text-[#8B0014] transition"
+              className="w-full py-3.5 rounded-xl font-black text-sm bg-slate-900 hover:bg-slate-800 text-white shadow-md transition flex items-center justify-center gap-2 group"
             >
-              Already have an account? <strong className="text-[#8B0014] underline">Sign in to Decision Portal →</strong>
+              <span>Already Have Temporary Credentials? Sign In Here</span>
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition" />
             </Link>
           </div>
         </div>
+
+        {/* Registrar Helpdesk Contact */}
+        <div className="p-4 rounded-2xl bg-white/10 border border-white/10 text-rose-100/90 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div className="flex items-center gap-2.5">
+            <HelpCircle className="h-5 w-5 text-amber-300 shrink-0" />
+            <div>
+              <p className="font-bold text-white">Need registrar assistance with account provisioning?</p>
+              <p className="text-[11px] text-rose-200/80">Campus Admissions Office • St. Anthony Hall, 1st Floor</p>
+            </div>
+          </div>
+          <a
+            href="mailto:registrar@sapc.edu.ph"
+            className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/20 text-white font-bold text-xs transition inline-flex items-center gap-1.5"
+          >
+            <span>Contact Registrar</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer Note */}
       <div className="max-w-xl mx-auto text-center text-xs text-rose-200/60 pb-2">
         San Antonio de Padua College • Multi-Factor Decision Support System • RA 10173 Data Privacy Sealed
       </div>
-
-      {/* Google Role Selector Modal */}
-      <GoogleRoleSelectionModal
-        isOpen={isGoogleRoleModalOpen}
-        userName={googleUserName}
-        onClose={() => setIsGoogleRoleModalOpen(false)}
-      />
     </div>
   );
 }
